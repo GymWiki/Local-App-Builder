@@ -4,13 +4,15 @@ import { deleteProject, type Project } from "../lib/api";
 interface Props {
   projects: Project[];
   selectedId: number | null;
+  accountsActive: boolean;
+  onAccounts: () => void;
   onSelect: (id: number) => void;
   onNew: () => void;
   onDeleted: (id: number) => void | Promise<void>;
   onError: (msg: string) => void;
 }
 
-export default function Sidebar({ projects, selectedId, onSelect, onNew, onDeleted, onError }: Props) {
+export default function Sidebar({ projects, selectedId, accountsActive, onSelect, onNew, onAccounts, onDeleted, onError }: Props) {
   const { t } = useTranslation();
 
   async function remove(p: Project) {
@@ -58,6 +60,15 @@ export default function Sidebar({ projects, selectedId, onSelect, onNew, onDelet
           </li>
         ))}
       </ul>
+      <div className="border-t border-zinc-800 p-3">
+        <button
+          onClick={onAccounts}
+          aria-current={accountsActive}
+          className={`w-full rounded px-3 py-2 text-left text-sm ${accountsActive ? "bg-zinc-800" : "hover:bg-zinc-800/60"}`}
+        >
+          {t("accounts.titel")}
+        </button>
+      </div>
     </aside>
   );
 }

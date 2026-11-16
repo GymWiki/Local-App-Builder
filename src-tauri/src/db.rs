@@ -4,7 +4,10 @@ use std::path::Path;
 
 /// Migraties in volgorde. De index + 1 is de schemaversie (PRAGMA user_version).
 /// Nooit een bestaande migratie wijzigen; voeg een nieuwe toe.
-const MIGRATIONS: &[&str] = &[include_str!("../migrations/0001_init.sql")];
+const MIGRATIONS: &[&str] = &[
+    include_str!("../migrations/0001_init.sql"),
+    include_str!("../migrations/0002_fase2.sql"),
+];
 
 pub fn open(path: &Path) -> Result<Connection> {
     let conn = Connection::open(path)?;
@@ -55,7 +58,10 @@ mod tests {
     #[test]
     fn migraties_maken_alle_tabellen() {
         let conn = open_in_memory().unwrap();
-        assert_eq!(tables(&conn), vec!["ai_accounts", "projects", "settings"]);
+        assert_eq!(
+            tables(&conn),
+            vec!["ai_accounts", "mcp_calls", "projects", "settings"]
+        );
         assert_eq!(schema_version(&conn).unwrap(), MIGRATIONS.len());
     }
 

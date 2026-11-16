@@ -16,5 +16,11 @@ Lokale desktop-app (Tauri 2 + React/TypeScript/Vite + Tailwind, Rust-backend, SQ
 
 ## Commando's
 - `npm run tauri dev` — dev-build
-- `npm run build && npm run lint && npm test` — frontend
+- `npm run check` — alles: lint, tests (frontend + mcp-server), build, clippy, cargo test
 - `cd src-tauri && cargo clippy --all-targets -- -D warnings && cargo test` — backend
+
+## Beveiligingsregels (fase 2)
+- MCP-server luistert alleen op `127.0.0.1`; auth vóór alles; token nooit loggen, nooit in config of DB (alleen via omgevingsvariabele).
+- MCP-tools raken alleen bestanden binnen de projectmap (`mcp-server/src/paths.ts`, incl. symlink-controle).
+- Configbestanden van gebruikers: alleen onze `studio`-entry toevoegen; bij twijfel weigeren en niets schrijven.
+- CLI-gedrag alleen uit geverifieerde bronnen: zie `docs/cli-notes.md`.

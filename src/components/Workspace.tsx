@@ -1,11 +1,21 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { Project } from "../lib/api";
+import type { Account, McpInfo, Project } from "../lib/api";
+import TerminalPanel, { type Session } from "./TerminalPanel";
 
 const TABS = ["terminal", "preview", "publiceren"] as const;
 type Tab = (typeof TABS)[number];
 
-export default function Workspace({ project }: { project: Project | null }) {
+interface Props {
+  project: Project | null;
+  accounts?: Account[];
+  sessions?: Session[];
+  mcp?: McpInfo | null;
+  onSessionsChange?: (updater: (prev: Session[]) => Session[]) => void;
+  onError?: (msg: string) => void;
+}
+
+export default function Workspace({ project, accounts = [], sessions = [], mcp = null, onSessionsChange, onError }: Props) {
   const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>("terminal");
 
@@ -26,9 +36,31 @@ export default function Workspace({ project }: { project: Project | null }) {
           </button>
         ))}
       </div>
-      <div role="tabpanel" className="flex flex-1 items-center justify-center text-zinc-500">
-        {project ? t("tabs.binnenkort") : t("tabs.geenProject")}
-      </div>
+      {!project ? (
+        <div role="tabpanel" className="flex flex-1 items-center justify-center text-zinc-500">
+          {t("tabs.geenProject")}
+        </div>
+      ) : (
+        <>
+          {/* Blijft gemount (verborgen) zodat lopende terminals hun scrollback houden. */}
+          <div role="tabpanel" className={`min-h-0 flex-1 flex-col ${tab === "terminal" ? "flex" : "hidden"}`}>
+            <TerminalPanel
+              key={project.id}
+              project={project}
+              accounts={accounts}
+              sessions={sessions}
+              mcp={mcp}
+              onSessionsChange={onSessionsChange ?? (() => undefined)}
+              onError={onError ?? (() => undefined)}
+            />
+          </div>
+          {tab !== "terminal" && (
+            <div role="tabpanel" className="flex flex-1 items-center justify-center text-zinc-500">
+              {t("tabs.binnenkort")}
+            </div>
+          )}
+        </>
+      )}
     </section>
   );
 }

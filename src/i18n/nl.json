@@ -1,5 +1,7 @@
 {
-  "app": { "naam": "Studio" },
+  "app": {
+    "naam": "Studio"
+  },
   "sidebar": {
     "projecten": "Projecten",
     "nieuwProject": "Nieuw project",
@@ -20,7 +22,9 @@
     "pad": "Map",
     "template": "Template",
     "aangemaakt": "Aangemaakt",
-    "geenSelectie": "Geen project geselecteerd."
+    "geenSelectie": "Geen project geselecteerd.",
+    "standaardAccount": "Standaardaccount",
+    "sluit": "Project sluiten (stopt terminals en MCP)"
   },
   "nieuw": {
     "titel": "Nieuw project",
@@ -33,5 +37,59 @@
     "maak": "Project aanmaken",
     "bezig": "Bezig…"
   },
-  "fout": { "algemeen": "Er ging iets mis: {{bericht}}" }
+  "fout": {
+    "algemeen": "Er ging iets mis: {{bericht}}"
+  },
+  "provider": {
+    "claude": "Claude",
+    "gemini": "Gemini",
+    "codex": "Codex"
+  },
+  "terminal": {
+    "shell": "Terminal",
+    "nieuweShell": "Nieuwe terminal",
+    "wissel": "Wissel van AI",
+    "sluitTab": "Tab sluiten",
+    "systeemstandaard": "systeemstandaard",
+    "geenAi": "Geen AI actief",
+    "actiefAccount": "Account: {{naam}}",
+    "leeg": "Start een AI of open een terminal om te beginnen.",
+    "beeindigd": "[proces beëindigd, code {{code}}]",
+    "codexUitgeschakeld": "Codex is nog niet beschikbaar: de documentatie kon niet worden geverifieerd (zie docs/cli-notes.md)."
+  },
+  "mcp": {
+    "uit": "MCP: uit",
+    "starting": "MCP: starten…",
+    "running": "MCP: gereed, wacht op AI",
+    "connected": "MCP: verbonden",
+    "unavailable": "MCP: niet beschikbaar"
+  },
+  "cli": {
+    "nietGevonden": "{{naam}} is niet geïnstalleerd",
+    "uitleg": "Installeer de CLI met een van onderstaande commando's in een gewone terminal.",
+    "herstart": "Is hij net geïnstalleerd? Klik dan op ‘Opnieuw controleren’. Lukt het niet, start Studio dan opnieuw.",
+    "opnieuw": "Opnieuw controleren",
+    "docs": "Officiële installatiedocs",
+    "nogSteedsNiet": "Nog steeds niet gevonden."
+  },
+  "wissel": {
+    "titel": "Wissel van AI",
+    "uitleg": "De huidige sessie wordt gesloten. De nieuwe AI start vers en krijgt PROJECT.md als overdracht.",
+    "tip": "Tip: vraag de huidige AI eerst om PROJECT.md bij te werken, anders gaat context verloren."
+  },
+  "accounts": {
+    "titel": "AI-accounts",
+    "privacy": "Studio bewaart nooit wachtwoorden of tokens. Je logt zelf in via de CLI; die bewaart de login in de profielmap van dit account.",
+    "provider": "Provider",
+    "label": "Label",
+    "labelVoorbeeld": "bijv. Werk of Privé",
+    "toevoegen": "Account toevoegen",
+    "nogNiet": "nog niet beschikbaar",
+    "leeg": "Nog geen accounts. Zonder account gebruikt Studio de standaardlogin van de CLI.",
+    "inloggen": "Inloggen",
+    "inloggenBij": "Inloggen bij {{provider}} · {{label}}",
+    "inlogUitleg": "Log in via de terminal hieronder. Sluit dit venster als je klaar bent.",
+    "klaar": "Klaar",
+    "bevestigVerwijder": "Account “{{label}}” uit de lijst verwijderen? De profielmap met de login blijft staan op:\\n{{pad}}"
+  }
 }

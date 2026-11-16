@@ -12,7 +12,10 @@ pub struct Project {
     pub pad: String,
     pub template: String,
     pub created_at: String,
+    pub default_account_id: Option<i64>,
 }
+
+const COLS: &str = "id, naam, pad, template, created_at, default_account_id";
 
 fn row_to_project(r: &rusqlite::Row) -> rusqlite::Result<Project> {
     Ok(Project {
@@ -21,16 +24,43 @@ fn row_to_project(r: &rusqlite::Row) -> rusqlite::Result<Project> {
         pad: r.get(2)?,
         template: r.get(3)?,
         created_at: r.get(4)?,
+        default_account_id: r.get(5)?,
     })
 }
 
 pub fn list(conn: &Connection) -> Result<Vec<Project>> {
-    let mut stmt =
-        conn.prepare("SELECT id, naam, pad, template, created_at FROM projects ORDER BY id DESC")?;
+    let mut stmt = conn.prepare(&format!("SELECT {COLS} FROM projects ORDER BY id DESC"))?;
     let rows = stmt
         .query_map([], row_to_project)?
         .collect::<rusqlite::Result<Vec<_>>>()?;
     Ok(rows)
+}
+
+pub fn get(conn: &Connection, id: i64) -> Result<Project> {
+    conn.query_row(
+        &format!("SELECT {COLS} FROM projects WHERE id = ?1"),
+        params![id],
+        row_to_project,
+    )
+    .map_err(|e| match e {
+        rusqlite::Error::QueryReturnedNoRows => AppError::NotFound,
+        e => e.into(),
+    })
+}
+
+pub fn set_default_account(
+    conn: &Connection,
+    project_id: i64,
+    account_id: Option<i64>,
+) -> Result<()> {
+    if conn.execute(
+        "UPDATE projects SET default_account_id = ?1 WHERE id = ?2",
+        params![account_id, project_id],
+    )? == 0
+    {
+        return Err(AppError::NotFound);
+    }
+    Ok(())
 }
 
 /// Verwijdert ALLEEN de regel uit de database. Bestanden op schijf blijven altijd staan.
@@ -145,11 +175,7 @@ pub fn create(
             params![naam, pad, template],
         )?;
         let id = conn.last_insert_rowid();
-        Ok(conn.query_row(
-            "SELECT id, naam, pad, template, created_at FROM projects WHERE id = ?1",
-            params![id],
-            row_to_project,
-        )?)
+        get(conn, id)
     })();
 
     if result.is_err() {
