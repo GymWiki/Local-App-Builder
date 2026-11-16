@@ -1,0 +1,37 @@
+{
+  "app": { "naam": "Studio" },
+  "sidebar": {
+    "projecten": "Projecten",
+    "nieuwProject": "Nieuw project",
+    "leeg": "Nog geen projecten. Maak je eerste project aan.",
+    "verwijder": "Verwijderen uit lijst",
+    "bevestigVerwijder": "“{{naam}}” uit de lijst verwijderen? De bestanden op je computer blijven staan."
+  },
+  "tabs": {
+    "terminal": "Terminal",
+    "preview": "Preview",
+    "publiceren": "Publiceren",
+    "binnenkort": "Komt in een latere fase.",
+    "geenProject": "Kies of maak een project om te beginnen."
+  },
+  "info": {
+    "titel": "Projectinfo",
+    "naam": "Naam",
+    "pad": "Map",
+    "template": "Template",
+    "aangemaakt": "Aangemaakt",
+    "geenSelectie": "Geen project geselecteerd."
+  },
+  "nieuw": {
+    "titel": "Nieuw project",
+    "naam": "Projectnaam",
+    "map": "Locatie",
+    "kiesMap": "Map kiezen…",
+    "geenMap": "Nog geen map gekozen",
+    "resultaat": "Er wordt een map “{{naam}}” aangemaakt in de gekozen locatie.",
+    "annuleer": "Annuleren",
+    "maak": "Project aanmaken",
+    "bezig": "Bezig…"
+  },
+  "fout": { "algemeen": "Er ging iets mis: {{bericht}}" }
+}
