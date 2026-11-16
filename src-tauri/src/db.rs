@@ -7,6 +7,7 @@ use std::path::Path;
 const MIGRATIONS: &[&str] = &[
     include_str!("../migrations/0001_init.sql"),
     include_str!("../migrations/0002_fase2.sql"),
+    include_str!("../migrations/0003_fase3.sql"),
 ];
 
 pub fn open(path: &Path) -> Result<Connection> {
@@ -36,6 +37,24 @@ pub fn migrate(conn: &mut Connection) -> Result<()> {
     Ok(())
 }
 
+pub fn get_setting(conn: &Connection, key: &str) -> Result<Option<String>> {
+    match conn.query_row("SELECT value FROM settings WHERE key = ?1", [key], |r| {
+        r.get(0)
+    }) {
+        Ok(v) => Ok(Some(v)),
+        Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+        Err(e) => Err(e.into()),
+    }
+}
+
+pub fn set_setting(conn: &Connection, key: &str, value: &str) -> Result<()> {
+    conn.execute(
+        "INSERT INTO settings (key, value) VALUES (?1, ?2) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+        [key, value],
+    )?;
+    Ok(())
+}
+
 #[cfg(test)]
 pub fn schema_version(conn: &Connection) -> Result<usize> {
     Ok(conn.query_row("PRAGMA user_version", [], |r| r.get(0))?)
@@ -60,9 +79,24 @@ mod tests {
         let conn = open_in_memory().unwrap();
         assert_eq!(
             tables(&conn),
-            vec!["ai_accounts", "mcp_calls", "projects", "settings"]
+            vec![
+                "ai_accounts",
+                "check_runs",
+                "mcp_calls",
+                "projects",
+                "settings"
+            ]
         );
         assert_eq!(schema_version(&conn).unwrap(), MIGRATIONS.len());
+    }
+
+    #[test]
+    fn instellingen_lezen_en_overschrijven() {
+        let conn = open_in_memory().unwrap();
+        assert_eq!(get_setting(&conn, "k").unwrap(), None);
+        set_setting(&conn, "k", "a").unwrap();
+        set_setting(&conn, "k", "b").unwrap();
+        assert_eq!(get_setting(&conn, "k").unwrap().as_deref(), Some("b"));
     }
 
     #[test]

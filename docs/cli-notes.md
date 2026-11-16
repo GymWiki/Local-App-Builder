@@ -22,6 +22,11 @@ Bronnen: code.claude.com/docs/en/{mcp,env-vars,cli-reference,setup}.md
 
 **Installatie** (setup.md): macOS/Linux `curl -fsSL https://claude.ai/install.sh | bash`; Windows PowerShell `irm https://claude.ai/install.ps1 | iex`; ook `brew install --cask claude-code` en `winget install Anthropic.ClaudeCode`.
 
+**MCP-timeouts en afbeeldingen (fase 3)**
+- Per serverentry in `.mcp.json` verhoogt `timeout` (ms) de limiet; voor HTTP/SSE-servers geldt standaard 60 s per verzoek en pas boven 60000 stijgt die (env-vars.md, `MCP_TOOL_TIMEOUT`; mcp.md). Wij zetten `"timeout": 900000` zodat `run_checks` niet wordt afgekapt.
+- MCP-tools mogen PNG/JPEG/GIF/WebP teruggeven; Claude ziet ze inline (mcp.md). Afbeeldingen vallen onder `MAX_MCP_OUTPUT_TOKENS` (standaard 25000); daarom leveren we screenshots als JPEG (kwaliteit 70).
+- Projectservers uit `.mcp.json` vragen goedkeuring bij eerste gebruik (zie boven).
+
 ## Gemini CLI (`gemini`)
 Bronnen: github.com/google-gemini/gemini-cli `docs/reference/configuration.md`, `docs/tools/mcp-server.md`, `docs/cli/session-management.md`, `docs/cli/cli-reference.md`, README.
 
@@ -38,7 +43,12 @@ Bronnen: github.com/google-gemini/gemini-cli `docs/reference/configuration.md`, 
 - `gemini --resume` / `-r` (laatste), `-r "latest"`, `-r <index|id>`; lijst met `--list-sessions`.
 - Startprompt + interactief: `gemini -i "tekst"` (`-p` is niet-interactief en dus niet geschikt).
 
+**MCP-timeout/afbeeldingen (fase 3)**: per server `timeout` in ms (standaard 600000); MCP-resultaten mogen tekst, afbeeldingen en audio bevatten (`docs/tools/mcp-server.md`). Wij zetten `timeout: 900000`. Niet in de praktijk geprobeerd of Gemini onze JPEG-resultaten correct toont.
+
 **Installatie** (README): `npm install -g @google/gemini-cli`, of `brew install gemini-cli`.
+
+## Vaste werkwijze-bestanden
+Claude Code leest `CLAUDE.md`, Gemini CLI `GEMINI.md` en Codex `AGENTS.md` als projectinstructies. Dat Claude `CLAUDE.md` leest staat in de Claude-docs; voor `GEMINI.md` (standaard contextbestand, `~/.gemini/GEMINI.md` is in configuration.md genoemd) en `AGENTS.md` is dit niet apart gecontroleerd voor fase 3 (Codex blijft onverifieerd). De inhoud is bij alle drie gelijk, binnen een door Studio beheerd blok.
 
 ## Codex CLI (`codex`) — NIET GEVERIFIEERD
 `developers.openai.com`/`learn.chatgpt.com` waren niet bereikbaar vanuit deze omgeving, en de GitHub-docs verwijzen alleen daarheen. Het uitvoeren van de CLI voor `--help` werd niet toegestaan. Daarom is Codex in de UI **uitgeschakeld** en schrijven we er geen config voor. Te verifiëren voordat dit aan gaat:

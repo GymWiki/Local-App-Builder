@@ -7,6 +7,8 @@ use std::path::{Path, PathBuf};
 pub const SERVER_NAME: &str = "studio";
 const URL_REF: &str = "${STUDIO_MCP_URL}";
 const AUTH_REF: &str = "Bearer ${STUDIO_MCP_TOKEN}";
+/// run_checks kan minuten duren; zonder dit kapt Claude HTTP-verzoeken na 60 s af en gebruikt Gemini 10 min (bron: docs/cli-notes.md).
+const TIMEOUT_MS: u64 = 900_000;
 
 #[derive(Debug, PartialEq)]
 pub enum Outcome {
@@ -28,9 +30,11 @@ pub fn config_path(provider: Provider, project_dir: &Path) -> PathBuf {
 pub fn entry(provider: Provider) -> Value {
     match provider {
         Provider::Claude => {
-            json!({ "type": "http", "url": URL_REF, "headers": { "Authorization": AUTH_REF } })
+            json!({ "type": "http", "url": URL_REF, "headers": { "Authorization": AUTH_REF }, "timeout": TIMEOUT_MS })
         }
-        Provider::Gemini => json!({ "httpUrl": URL_REF, "headers": { "Authorization": AUTH_REF } }),
+        Provider::Gemini => {
+            json!({ "httpUrl": URL_REF, "headers": { "Authorization": AUTH_REF }, "timeout": TIMEOUT_MS })
+        }
     }
 }
 
@@ -225,6 +229,13 @@ mod tests {
         let v = read(&f);
         assert_eq!(v["mcpServers"]["studio"], entry(Provider::Claude));
         assert_eq!(v["mcpServers"]["b"]["command"], "x");
+    }
+
+    #[test]
+    fn entry_heeft_een_ruime_timeout_voor_lange_checks() {
+        for p in [Provider::Claude, Provider::Gemini] {
+            assert_eq!(entry(p)["timeout"], 900_000);
+        }
     }
 
     #[test]

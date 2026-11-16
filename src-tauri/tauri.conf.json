@@ -34,7 +34,8 @@
       "icons/icon.ico"
     ],
     "resources": {
-      "../mcp-server/dist/index.mjs": "mcp-server/index.mjs"
+      "../mcp-server/dist/index.mjs": "mcp-server/index.mjs",
+      "../mcp-server/node_modules/playwright-core": "mcp-server/node_modules/playwright-core"
     }
   }
 }

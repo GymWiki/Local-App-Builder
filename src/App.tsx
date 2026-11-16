@@ -9,7 +9,9 @@ import {
   ptyClose,
   setDefaultAccount,
   type Account,
+  type DevStatus,
   type McpInfo,
+  runtime,
   type Project,
 } from "./lib/api";
 import Sidebar from "./components/Sidebar";
@@ -29,6 +31,8 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [sessions, setSessions] = useState<Record<number, Session[]>>({});
   const [mcp, setMcp] = useState<Record<number, McpInfo | null>>({});
+  const [dev, setDev] = useState<Record<number, DevStatus | null>>({});
+  const [tick, setTick] = useState<Record<number, number>>({});
 
   const fail = useCallback((e: unknown) => setError(t("fout.algemeen", { bericht: String(e) })), [t]);
 
@@ -70,6 +74,18 @@ export default function App() {
     return () => void un.then((f) => f());
   }, []);
 
+  useEffect(() => {
+    const un = listen<{ project_id: number; payload: { event: string } & Partial<DevStatus> }>("runtime-event", (e) => {
+      const { project_id: id, payload } = e.payload;
+      if (payload.event === "dev") {
+        setDev((m) => ({ ...m, [id]: payload as DevStatus }));
+      } else {
+        setTick((m) => ({ ...m, [id]: (m[id] ?? 0) + 1 }));
+      }
+    });
+    return () => void un.then((f) => f());
+  }, []);
+
   // Een project "openen" = selecteren + zijn MCP-server starten.
   async function select(id: number) {
     setSelectedId(id);
@@ -77,6 +93,11 @@ export default function App() {
     try {
       const info = await openProject(id);
       setMcp((m) => ({ ...m, [id]: info }));
+      if (info.state === "running" || info.state === "connected") {
+        runtime<DevStatus>(id, "dev.status")
+          .then((d) => setDev((m) => ({ ...m, [id]: d })))
+          .catch(() => undefined);
+      }
     } catch (e) {
       fail(e);
     }
@@ -88,6 +109,7 @@ export default function App() {
     await closeProject(id).catch(() => undefined);
     setSessions((s) => ({ ...s, [id]: [] }));
     setMcp((m) => ({ ...m, [id]: null }));
+    setDev((m) => ({ ...m, [id]: null }));
     if (selectedId === id) setSelectedId(null);
   }
 
@@ -122,6 +144,7 @@ export default function App() {
             accounts={accounts}
             sessions={selected ? (sessions[selected.id] ?? []) : []}
             mcp={selected ? (mcp[selected.id] ?? null) : null}
+            dev={selected ? (dev[selected.id] ?? null) : null}
             onSessionsChange={(fn) => selected && setSessions((s) => ({ ...s, [selected.id]: fn(s[selected.id] ?? []) }))}
             onError={setError}
           />
@@ -140,6 +163,9 @@ export default function App() {
           }
         }}
         onClose={() => selected && void close(selected.id)}
+        mcp={selected ? (mcp[selected.id] ?? null) : null}
+        tick={selected ? (tick[selected.id] ?? 0) : 0}
+        onError={setError}
       />
       {dialogOpen && (
         <NewProjectDialog

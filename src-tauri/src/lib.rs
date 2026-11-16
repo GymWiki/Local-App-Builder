@@ -3,6 +3,7 @@ mod cli;
 mod commands;
 mod db;
 mod error;
+mod instructions;
 mod mcp;
 mod mcp_config;
 mod projects;
@@ -71,6 +72,27 @@ pub fn run() {
                         let _ = mcp::log_call(&conn, project_id, &tool, ok, ms, &summary);
                     }
                 }
+                McpEvent::Runtime {
+                    project_id,
+                    payload,
+                } => {
+                    if payload["event"] == "checks" {
+                        let db = handle.state::<commands::Db>();
+                        let conn = db.conn();
+                        if let Ok(conn) = conn {
+                            let _ = mcp::record_checks(
+                                &conn,
+                                project_id,
+                                payload["ok"].as_bool().unwrap_or(false),
+                                &payload["steps"].to_string(),
+                            );
+                        }
+                    }
+                    let _ = handle.emit(
+                        "runtime-event",
+                        serde_json::json!({ "project_id": project_id, "payload": payload }),
+                    );
+                }
             });
             app.manage(McpManager::new(mcp::new_token(), mcp_script(app), sink));
             Ok(())
@@ -87,6 +109,9 @@ pub fn run() {
             commands::open_project,
             commands::close_project,
             commands::mcp_status,
+            commands::runtime_call,
+            commands::trust_studio_config,
+            commands::last_checks,
             commands::start_shell,
             commands::start_ai,
             commands::start_login,

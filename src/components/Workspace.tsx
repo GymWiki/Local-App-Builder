@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { Account, McpInfo, Project } from "../lib/api";
+import type { Account, DevStatus, McpInfo, Project } from "../lib/api";
+import PreviewPanel from "./PreviewPanel";
 import TerminalPanel, { type Session } from "./TerminalPanel";
 
 const TABS = ["terminal", "preview", "publiceren"] as const;
@@ -11,11 +12,12 @@ interface Props {
   accounts?: Account[];
   sessions?: Session[];
   mcp?: McpInfo | null;
+  dev?: DevStatus | null;
   onSessionsChange?: (updater: (prev: Session[]) => Session[]) => void;
   onError?: (msg: string) => void;
 }
 
-export default function Workspace({ project, accounts = [], sessions = [], mcp = null, onSessionsChange, onError }: Props) {
+export default function Workspace({ project, accounts = [], sessions = [], mcp = null, dev = null, onSessionsChange, onError }: Props) {
   const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>("terminal");
 
@@ -54,7 +56,10 @@ export default function Workspace({ project, accounts = [], sessions = [], mcp =
               onError={onError ?? (() => undefined)}
             />
           </div>
-          {tab !== "terminal" && (
+          <div role="tabpanel" className={`min-h-0 flex-1 flex-col ${tab === "preview" ? "flex" : "hidden"}`}>
+            <PreviewPanel project={project} mcp={mcp} dev={dev} visible={tab === "preview"} onError={onError ?? (() => undefined)} />
+          </div>
+          {tab === "publiceren" && (
             <div role="tabpanel" className="flex flex-1 items-center justify-center text-zinc-500">
               {t("tabs.binnenkort")}
             </div>

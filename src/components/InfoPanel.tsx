@@ -1,14 +1,18 @@
 import { useTranslation } from "react-i18next";
-import type { Account, Project } from "../lib/api";
+import type { Account, McpInfo, Project } from "../lib/api";
+import ActivityPanel from "./ActivityPanel";
 
 interface Props {
   project: Project | null;
   accounts: Account[];
   onDefaultAccount: (accountId: number | null) => void | Promise<void>;
   onClose: () => void;
+  mcp?: McpInfo | null;
+  tick?: number;
+  onError?: (msg: string) => void;
 }
 
-export default function InfoPanel({ project, accounts, onDefaultAccount, onClose }: Props) {
+export default function InfoPanel({ project, accounts, onDefaultAccount, onClose, mcp = null, tick = 0, onError }: Props) {
   const { t } = useTranslation();
   const rows: [string, string][] = project
     ? [
@@ -20,7 +24,7 @@ export default function InfoPanel({ project, accounts, onDefaultAccount, onClose
     : [];
 
   return (
-    <aside className="w-72 shrink-0 border-l border-zinc-800 bg-zinc-900 p-4">
+    <aside className="w-72 shrink-0 overflow-y-auto border-l border-zinc-800 bg-zinc-900 p-4">
       <h2 className="mb-3 text-xs uppercase tracking-wide text-zinc-500">{t("info.titel")}</h2>
       {project ? (
         <div className="space-y-5">
@@ -47,6 +51,7 @@ export default function InfoPanel({ project, accounts, onDefaultAccount, onClose
               ))}
             </select>
           </label>
+          <ActivityPanel project={project} mcp={mcp} tick={tick} onError={onError ?? (() => undefined)} />
           <button onClick={onClose} className="w-full rounded border border-zinc-700 px-3 py-2 text-sm hover:bg-zinc-800">
             {t("info.sluit")}
           </button>

@@ -1,6 +1,7 @@
 use crate::accounts::{self, Account};
 use crate::cli::{self, CliStatus};
 use crate::error::{AppError, Result};
+use crate::instructions;
 use crate::mcp::{self, McpInfo, McpManager};
 use crate::mcp_config;
 use crate::projects::{self, Project};
@@ -8,8 +9,10 @@ use crate::provider::Provider;
 use crate::terminal::{Snapshot, SpawnSpec, TerminalManager};
 use rusqlite::Connection;
 use serde::Serialize;
+use serde_json::{json, Value};
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, MutexGuard};
+use std::time::Duration;
 use tauri::State;
 
 pub struct Db(pub Mutex<Connection>);
@@ -46,7 +49,7 @@ pub fn create_project(
 }
 
 /// Verwijdert alleen uit de lijst; bestanden op schijf blijven staan.
-#[tauri::command]
+#[tauri::command(async)]
 pub fn delete_project(
     db: State<Db>,
     mcp: State<McpManager>,
@@ -94,13 +97,34 @@ pub fn cli_status(provider: String) -> Result<CliStatus> {
 
 // ---------- MCP ----------
 
-#[tauri::command]
-pub fn open_project(db: State<Db>, mcp: State<McpManager>, id: i64) -> Result<McpInfo> {
-    let p = projects::get(&*db.conn()?, id)?;
-    Ok(mcp.start(p.id, &p.naam, Path::new(&p.pad)))
+fn trust_key(project_id: i64) -> String {
+    format!("studio_trust:{project_id}")
 }
 
-#[tauri::command]
+#[tauri::command(async)]
+pub fn open_project(db: State<Db>, mcp: State<McpManager>, id: i64) -> Result<McpInfo> {
+    let (p, trusted) = {
+        let c = db.conn()?;
+        (
+            projects::get(&c, id)?,
+            crate::db::get_setting(&c, &trust_key(id))?,
+        )
+    };
+    // Vaste werkwijze (CLAUDE.md / GEMINI.md / AGENTS.md) bijwerken; mislukken mag het openen niet blokkeren.
+    let _ = instructions::ensure(Path::new(&p.pad));
+    let info = mcp.start(p.id, &p.naam, Path::new(&p.pad));
+    if info.is_up() {
+        let _ = mcp.call(
+            p.id,
+            "trust.set",
+            json!({ "hash": trusted }),
+            Duration::from_secs(5),
+        );
+    }
+    Ok(info)
+}
+
+#[tauri::command(async)]
 pub fn close_project(mcp: State<McpManager>, id: i64) {
     mcp.stop(id);
 }
@@ -108,6 +132,66 @@ pub fn close_project(mcp: State<McpManager>, id: i64) {
 #[tauri::command]
 pub fn mcp_status(mcp: State<McpManager>, id: i64) -> Option<McpInfo> {
     mcp.info(id)
+}
+
+fn timeout_for(cmd: &str) -> Duration {
+    match cmd {
+        "checks.run" => Duration::from_secs(60 * 60),
+        "dev.start" | "dev.restart" | "dev.stop" => Duration::from_secs(30),
+        _ => Duration::from_secs(60),
+    }
+}
+
+/// Brug naar de runtime van het project (dev-server, checks, git). Alleen commando's die de runtime zelf kent worden uitgevoerd.
+#[tauri::command(async)]
+pub fn runtime_call(
+    mcp: State<McpManager>,
+    project_id: i64,
+    cmd: String,
+    args: Option<Value>,
+) -> Result<Value> {
+    if cmd == "trust.set" {
+        return Err(AppError::Invalid(
+            "Gebruik trust_studio_config om te vertrouwen.".into(),
+        ));
+    }
+    mcp.call(
+        project_id,
+        &cmd,
+        args.unwrap_or_else(|| json!({})),
+        timeout_for(&cmd),
+    )
+}
+
+/// De gebruiker keurt de huidige inhoud van studio.json goed. Verandert het bestand daarna, dan vervalt dit.
+#[tauri::command(async)]
+pub fn trust_studio_config(db: State<Db>, mcp: State<McpManager>, project_id: i64) -> Result<()> {
+    let cfg = mcp.call(project_id, "config.get", json!({}), Duration::from_secs(10))?;
+    let hash = cfg["hash"]
+        .as_str()
+        .ok_or_else(|| AppError::Invalid("studio.json ontbreekt of is niet leesbaar.".into()))?;
+    if cfg["config"].is_null() {
+        return Err(AppError::Invalid(
+            "studio.json is ongeldig; herstel het eerst.".into(),
+        ));
+    }
+    crate::db::set_setting(&*db.conn()?, &trust_key(project_id), hash)?;
+    mcp.call(
+        project_id,
+        "trust.set",
+        json!({ "hash": hash }),
+        Duration::from_secs(5),
+    )?;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn last_checks(
+    db: State<Db>,
+    project_id: i64,
+    limit: Option<i64>,
+) -> Result<Vec<mcp::CheckRun>> {
+    mcp::last_checks(&*db.conn()?, project_id, limit.unwrap_or(5))
 }
 
 // ---------- terminal ----------
@@ -175,7 +259,7 @@ pub fn start_shell(
 }
 
 /// Start een AI-CLI in het project. `handover`: geef PROJECT.md als overdracht mee. `resume`: hervat de laatste sessie van dit account.
-#[tauri::command]
+#[tauri::command(async)]
 #[allow(clippy::too_many_arguments)]
 pub fn start_ai(
     db: State<Db>,

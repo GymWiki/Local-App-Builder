@@ -1,6 +1,6 @@
-# Studio — fase 2
+# Studio — fase 3
 
-Lokale desktop-app om apps te maken met je eigen AI-CLI's. Fase 1: projecten en SQLite. Fase 2: ingebouwde terminal, lokale MCP-server en AI-accounts.
+Lokale desktop-app om apps te maken met je eigen AI-CLI's. Fase 1: projecten en SQLite. Fase 2: terminal, lokale MCP-server, AI-accounts. Fase 3: de feedbackloop (preview, checks, screenshots, checkpoints).
 
 ## Vereisten
 - Node.js 20+ (ook nodig tijdens gebruik: de MCP-server draait op Node), Rust (stable), `git` in je PATH
@@ -32,14 +32,26 @@ De database (`studio.db`) staat in de app-datamap van het besturingssysteem (`nl
 - Bronnen en verificatie: `docs/cli-notes.md`.
 - Claude vraagt bij de eerste start om goedkeuring van de projectserver uit `.mcp.json`; dat is bedoeld gedrag.
 
+## Fase 3: de feedbackloop
+Zet in de projectmap een `studio.json` (de Preview-tab maakt een voorbeeld aan):
+```json
+{ "dev": "npm run dev", "build": "npm run build", "lint": "npm run lint", "test": "npm test",
+  "previewUrl": "http://localhost:5173", "timeoutSec": 300 }
+```
+- **Goedkeuring**: commando's uit `studio.json` draaien pas nadat jij het bestand in de Preview-tab hebt goedgekeurd (hash van de inhoud). Wijzigt het bestand, dan vervalt dat. Dit geldt ook voor de AI via `run_checks`.
+- **Preview-tab**: start/stopt/herstart het dev-commando, toont status (draait/starten/stoppen/fout), logs en de preview in een iframe. `previewUrl` mag alleen naar localhost/127.0.0.1.
+- **MCP-tools**: `run_checks`, `get_preview_screenshot` (desktop/mobiel, JPEG), `get_console_errors`, `get_dev_logs`, `git_checkpoint`, `git_list_checkpoints` (plus de drie van fase 2). Alle processen hebben een time-out en draaien in een eigen procesgroep; bij sluiten worden ze (met kindprocessen) gestopt.
+- **Screenshots/console-fouten** komen van een onzichtbare browser (Playwright, gebruikt je eigen Chrome of Edge). Die ziet dus wat een nieuwe bezoeker ziet, niet wat jij zelf in de preview aanklikt.
+- **Checkpoints**: `git add -A` + commit, zonder `.env`, sleutels en dergelijke. "Terug naar vorige versie" zet het project terug als nieuwe commit, nadat niet-opgeslagen werk automatisch als back-upcheckpoint is vastgelegd: er gaat niets verloren.
+- **Werkwijze voor de AI**: `skills/control-loop/instructions.md` wordt als gemarkeerd blok in `CLAUDE.md`, `GEMINI.md` en `AGENTS.md` gezet (eigen tekst in die bestanden blijft staan).
+- De zijbalk toont de laatste check-resultaten en de tijdlijn.
+
 ## Bewust niet gedaan
-- Codex staat uitgeschakeld: de documentatie was niet bereikbaar en niets is uit het geheugen aangenomen (zie `docs/cli-notes.md`)
-- Terminal-uitvoer wordt alleen in het geheugen bewaard (niet over app-herstarts heen)
-- "Wissel van AI" vraagt de oude AI niet automatisch om PROJECT.md bij te werken; de UI geeft er een tip over. Sessies hervatten over accounts heen kan niet (alleen `resume` binnen hetzelfde account via de backend, nog zonder knop)
-- Node.js wordt niet meegeleverd; zonder Node.js is MCP "niet beschikbaar" en start de CLI gewoon zonder
-- Config wordt herschreven als pretty JSON (2 spaties): inhoud blijft behouden, opmaak niet; bestanden met opmerkingen worden geweigerd
-- Het MCP-token staat in de omgeving van de AI-sessie, dus de AI kan het zelf lezen (de server is wel alleen lokaal en beperkt tot het project)
-- Windows (`.cmd`-shims via `cmd.exe`, ConPTY) en macOS zijn niet getest; alleen Linux
-- De gebundelde app (resource `mcp-server/index.mjs`) is niet gebouwd of getest, alleen `tauri dev`
-- Geen UI-test met een echte CLI (er zijn geen CLI's ingelogd in deze omgeving): geautomatiseerd getest zijn PTY, MCP-auth, padvalidatie, config-schrijven, accounts en de installatie-check
-- Fase 1-lijst blijft gelden: geen templates, geen externe koppelingen, alleen Nederlands
+- Geen MCP-tool om de dev-server te starten: dat doet de gebruiker in de Preview-tab (vertrouwensgrens). De AI krijgt een duidelijke melding als de preview niet draait.
+- Console-fouten uit het iframe zelf worden niet opgevangen (cross-origin); alleen die van de onzichtbare browser. Geen eigen Tauri-subwebview.
+- Zonder Node.js werkt niets uit fase 3 (de runtime leeft in het Node-proces). Zonder Chrome/Edge geen screenshots (duidelijke melding).
+- Als het Node-proces met geweld wordt gedood (SIGKILL/crash van de app), kan een dev-server blijven doorlopen; bij normaal sluiten of wegvallen van de app stopt alles.
+- De gebundelde app (inclusief `playwright-core` als resource) is niet gebouwd of getest; alleen `tauri dev` en de tests.
+- Windows/macOS niet getest (procesgroepen vs. `taskkill`, `.cmd`-shims).
+- Codex nog steeds uitgeschakeld (zie `docs/cli-notes.md`); of Gemini/Claude screenshots goed tonen is niet met een echte CLI geprobeerd.
+- Fase 1/2-beperkingen gelden nog: geen templates, geen externe koppelingen, alleen Nederlands, terminaluitvoer niet bewaard over herstarts.

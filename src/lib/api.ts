@@ -102,3 +102,65 @@ export async function kiesMap(): Promise<string | null> {
   const result = await open({ directory: true, multiple: false });
   return typeof result === "string" ? result : null;
 }
+
+// fase 3: runtime (dev-server, checks, git)
+export type DevState = "stopped" | "starting" | "running" | "stopping" | "error";
+
+export interface DevStatus {
+  state: DevState;
+  pid: number | null;
+  url: string | null;
+  exitCode: number | null;
+  error: string | null;
+}
+
+export interface StudioConfig {
+  dev?: string;
+  build?: string;
+  lint?: string;
+  test?: string;
+  previewUrl?: string;
+  timeoutSec?: number;
+}
+
+export interface ConfigInfo {
+  exists: boolean;
+  config: StudioConfig | null;
+  hash: string | null;
+  error?: string;
+  trusted: boolean;
+}
+
+export interface Checkpoint {
+  hash: string;
+  short: string;
+  date: string;
+  message: string;
+}
+
+export interface StepResult {
+  name: "lint" | "build" | "test";
+  command?: string;
+  status: "passed" | "failed" | "timeout" | "skipped";
+  exitCode: number | null;
+  durationMs: number;
+  output: string[];
+}
+
+export interface CheckRun {
+  id: number;
+  ok: boolean;
+  steps: StepResult[];
+  created_at: string;
+}
+
+export interface RestoreResult {
+  safety?: string;
+  hash: string;
+  unchanged: boolean;
+}
+
+export const runtime = <T>(projectId: number, cmd: string, args: Record<string, unknown> = {}) =>
+  invoke<T>("runtime_call", { projectId, cmd, args });
+export const trustStudioConfig = (projectId: number) => invoke<void>("trust_studio_config", { projectId });
+export const lastChecks = (projectId: number, limit = 3) => invoke<CheckRun[]>("last_checks", { projectId, limit });

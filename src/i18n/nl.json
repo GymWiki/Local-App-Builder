@@ -91,5 +91,54 @@
     "inlogUitleg": "Log in via de terminal hieronder. Sluit dit venster als je klaar bent.",
     "klaar": "Klaar",
     "bevestigVerwijder": "Account “{{label}}” uit de lijst verwijderen? De profielmap met de login blijft staan op:\\n{{pad}}"
+  },
+  "preview": {
+    "geenRuntime": "De projectruntime draait niet. Open het project (en installeer Node.js) om de preview, checks en tijdlijn te gebruiken.",
+    "status": {
+      "running": "Draait",
+      "starting": "Starten…",
+      "stopping": "Stoppen…",
+      "error": "Fout",
+      "stopped": "Gestopt"
+    },
+    "start": "Start",
+    "stop": "Stop",
+    "herstart": "Herstart",
+    "ververs": "Vernieuwen",
+    "geenConfig": "Dit project heeft nog geen studio.json. Daarin staan de commando's voor preview, lint, build en test, bijvoorbeeld:",
+    "maakConfig": "Voorbeeld-studio.json aanmaken",
+    "configFout": "studio.json is ongeldig: {{fout}}",
+    "vertrouwTitel": "studio.json goedkeuren",
+    "vertrouwUitleg": "Studio voert onderstaande commando's op jouw computer uit (ook wanneer de AI ze via run_checks aanroept). Controleer ze en keur ze alleen goed als je ze herkent. Wijzigt het bestand, dan vraagt Studio opnieuw om goedkeuring.",
+    "vertrouwStart": "Vertrouwen en starten",
+    "vertrouw": "Vertrouwen",
+    "wachten": "Wachten tot de preview bereikbaar is…",
+    "nietActief": "De preview draait niet. Klik op Start.",
+    "logs": "Logs van het dev-proces",
+    "geenLogs": "Nog geen uitvoer."
+  },
+  "activiteit": {
+    "checks": "Laatste checks",
+    "geslaagd": "Alles geslaagd",
+    "mislukt": "Mislukt",
+    "nogGeenChecks": "Nog geen checks gedraaid. De AI doet dat via run_checks.",
+    "stap": {
+      "passed": "geslaagd",
+      "failed": "mislukt",
+      "timeout": "time-out",
+      "skipped": "overgeslagen"
+    },
+    "tijdlijn": "Tijdlijn",
+    "nogGeenCheckpoints": "Nog geen checkpoints.",
+    "terug": "Terug naar vorige versie",
+    "zetTerug": "Terugzetten",
+    "bevestig": "Terugzetten naar “{{bericht}}” ({{datum}})?",
+    "uitleg1": "Niet-opgeslagen wijzigingen worden eerst automatisch bewaard als checkpoint.",
+    "uitleg2": "Het terugzetten wordt zelf een nieuw checkpoint; je geschiedenis blijft intact.",
+    "uitleg3": "Je kunt altijd terug naar de huidige versie via de tijdlijn.",
+    "bevestigKnop": "Ja, terugzetten",
+    "teruggezet": "Teruggezet.",
+    "teruggezetMetBackup": "Teruggezet. Je laatste wijzigingen staan veilig in een back-upcheckpoint.",
+    "alGelijk": "Het project staat al in die versie."
   }
 }

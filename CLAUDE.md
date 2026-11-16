@@ -24,3 +24,9 @@ Lokale desktop-app (Tauri 2 + React/TypeScript/Vite + Tailwind, Rust-backend, SQ
 - MCP-tools raken alleen bestanden binnen de projectmap (`mcp-server/src/paths.ts`, incl. symlink-controle).
 - Configbestanden van gebruikers: alleen onze `studio`-entry toevoegen; bij twijfel weigeren en niets schrijven.
 - CLI-gedrag alleen uit geverifieerde bronnen: zie `docs/cli-notes.md`.
+
+## Fase 3-regels
+- Commando's uit `studio.json` alleen uitvoeren na goedkeuring van exact die bestandsinhoud (hash); `previewUrl` alleen loopback.
+- Elk proces heeft een time-out en een eigen procesgroep; ruim altijd de hele boom op (`mcp-server/src/proc.ts`).
+- `git_checkpoint` neemt nooit geheimen mee; terugzetten is altijd een nieuwe commit na een automatische back-up. Nooit `reset --hard`/force.
+- Wijzig `skills/control-loop/instructions.md` voor de werkwijze van de AI; Studio kopieert dat naar CLAUDE.md/GEMINI.md/AGENTS.md (blokmarkering respecteren).

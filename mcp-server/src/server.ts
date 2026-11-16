@@ -4,6 +4,7 @@ import type { AddressInfo } from "node:net";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { registerTools, type CallRecord } from "./tools.js";
+import { Runtime } from "./runtime.js";
 
 export interface StartOptions {
   projectDir: string;
@@ -11,11 +12,14 @@ export interface StartOptions {
   token: string;
   onToolCall?: (r: CallRecord) => void;
   onClient?: () => void;
+  /** Gedeelde runtime (dev-server, checks, git). Zonder opgave maakt de server er zelf een. */
+  runtime?: Runtime;
   /** Alleen voor tests; standaard 0 = willekeurige poort. */
   port?: number;
 }
 
 export interface Running {
+  runtime: Runtime;
   port: number;
   host: string;
   close: () => Promise<void>;
@@ -50,7 +54,9 @@ async function readBody(req: IncomingMessage): Promise<unknown> {
 
 export async function startServer(opts: StartOptions): Promise<Running> {
   if (opts.token.length < 16) throw new Error("Token te kort.");
-  const ctx = { projectDir: opts.projectDir, projectName: opts.projectName };
+  const ownsRuntime = !opts.runtime;
+  const runtime = opts.runtime ?? new Runtime({ projectDir: opts.projectDir, projectName: opts.projectName });
+  const ctx = { projectDir: opts.projectDir, projectName: opts.projectName, runtime };
   let allowedHosts: Set<string> = new Set();
 
   const http: Server = createServer(async (req, res) => {
@@ -89,12 +95,15 @@ export async function startServer(opts: StartOptions): Promise<Running> {
   allowedHosts = new Set([`127.0.0.1:${port}`, `localhost:${port}`]);
 
   return {
+    runtime,
     port,
     host: HOST,
-    close: () =>
-      new Promise<void>((resolve) => {
+    close: async () => {
+      await new Promise<void>((resolve) => {
         http.close(() => resolve());
         http.closeAllConnections();
-      }),
+      });
+      if (ownsRuntime) await runtime.close();
+    },
   };
 }

@@ -69,10 +69,10 @@ describe("auth en netwerk", () => {
 });
 
 describe("tools", () => {
-  it("toont precies drie tools", async () => {
+  it("toont de drie notitie-tools (plus de fase 3-tools)", async () => {
     const c = await client();
     const { tools } = await c.listTools();
-    expect(tools.map((t) => t.name).sort()).toEqual(["project_status", "read_project_notes", "update_project_notes"]);
+    expect(tools.map((t) => t.name)).toEqual(expect.arrayContaining(["project_status", "read_project_notes", "update_project_notes"]));
     await c.close();
   });
 

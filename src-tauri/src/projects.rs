@@ -169,6 +169,7 @@ pub fn create(
     let result = (|| {
         git_init(&dir)?;
         fs::write(dir.join("PROJECT.md"), project_md(naam))?;
+        crate::instructions::ensure(&dir)?;
         let pad = dir.to_string_lossy().to_string();
         conn.execute(
             "INSERT INTO projects (naam, pad, template) VALUES (?1, ?2, ?3)",
@@ -208,6 +209,14 @@ mod tests {
             "Status",
         ] {
             assert!(md.contains(&format!("## {kop}\n")), "kop {kop} ontbreekt");
+        }
+        for f in crate::instructions::FILES {
+            assert!(
+                fs::read_to_string(dir.join(f))
+                    .unwrap()
+                    .contains("run_checks"),
+                "{f}"
+            );
         }
         assert_eq!(list(&conn).unwrap(), vec![p]);
     }
