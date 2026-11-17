@@ -1,6 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { chatSend, kitApply, kitList, kitScripts, runtime, type KitApplyOutcome, type KitCard, type KitList } from "../../lib/api";
+import { toast } from "sonner";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Skeleton } from "@/components/ui/skeleton";
+import { chatSend, kitApply, kitList, kitScripts, runtime, type KitApplyOutcome, type KitCard, type KitList } from "@/lib/api";
 
 interface Props {
   projectId: number;
@@ -20,7 +29,6 @@ export default function KitPicker({ projectId, firstRun = false, onApplied, onEr
   const [phase, setPhase] = useState<Phase>({ kind: "pick" });
   const [basis, setBasis] = useState(false);
   const [scriptsAsked, setScriptsAsked] = useState<string[] | null>(null);
-  const [note, setNote] = useState<string | null>(null);
   const [restored, setRestored] = useState(false);
 
   const fail = useCallback((e: unknown) => onError(t("fout.algemeen", { bericht: String(e) })), [onError, t]);
@@ -44,7 +52,7 @@ export default function KitPicker({ projectId, firstRun = false, onApplied, onEr
       if (out.ok) {
         if (mode === "basis") {
           await chatSend(projectId, t("uiterlijk.eigen.kitPrompt", { naam: card.naam }));
-          setNote(t("uiterlijk.eigen.verstuurd"));
+          toast.success(t("uiterlijk.eigen.verstuurd"));
         }
         onApplied();
       }
@@ -58,7 +66,7 @@ export default function KitPicker({ projectId, firstRun = false, onApplied, onEr
     setScriptsAsked(null);
     try {
       const r = await kitScripts(projectId, packages);
-      setNote(r.ok ? t("uiterlijk.scripts.klaar") : t("uiterlijk.scripts.mislukt", { detail: r.detail ?? "" }));
+      (r.ok ? toast.success : toast.error)(r.ok ? t("uiterlijk.scripts.klaar") : t("uiterlijk.scripts.mislukt", { detail: r.detail ?? "" }));
     } catch (e) {
       fail(e);
     }
@@ -67,7 +75,7 @@ export default function KitPicker({ projectId, firstRun = false, onApplied, onEr
   async function ownStyle() {
     try {
       await chatSend(projectId, t("uiterlijk.eigen.prompt"));
-      setNote(t("uiterlijk.eigen.verstuurd"));
+      toast.success(t("uiterlijk.eigen.verstuurd"));
     } catch (e) {
       fail(e);
     }
@@ -83,21 +91,44 @@ export default function KitPicker({ projectId, firstRun = false, onApplied, onEr
     }
   }
 
-  if (!list) return <p role="status" className="p-5 text-lg text-muted-foreground">{t("uiterlijk.laden")}</p>;
+  if (!list)
+    return (
+      <div role="status" className="space-y-3 p-5">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-40 w-full" />
+        <span className="sr-only">{t("uiterlijk.laden")}</span>
+      </div>
+    );
 
   const shown = hover ?? list.kits.find((k) => k.compatible) ?? null;
 
   if (phase.kind === "busy") {
     return (
       <div role="status" className="space-y-3 p-5 text-lg">
-        <div className="animate-pulse" aria-hidden="true">●</div>
+        <Skeleton className="h-3 w-full max-w-md animate-pulse" />
         <p>{t("uiterlijk.bezig")}</p>
         <p className="text-base text-muted-foreground">{phase.card.naam}</p>
       </div>
     );
   }
 
-  if (phase.kind === "done") return <Result phase={phase} onBack={() => setPhase({ kind: "pick" })} note={note} restored={restored} onUndo={(h) => void undo(h)} onMigrate={() => void chatSend(projectId, t("uiterlijk.wissel.migreerPrompt", { naam: phase.card.naam })).then(() => setNote(t("uiterlijk.eigen.verstuurd"))).catch(fail)} scriptsAsked={scriptsAsked} onScripts={(ok) => (ok && scriptsAsked ? void runScripts(scriptsAsked) : setScriptsAsked(null))} />;
+  if (phase.kind === "done") {
+    return (
+      <Result
+        phase={phase}
+        onBack={() => setPhase({ kind: "pick" })}
+        restored={restored}
+        onUndo={(h) => void undo(h)}
+        onMigrate={() =>
+          void chatSend(projectId, t("uiterlijk.wissel.migreerPrompt", { naam: phase.card.naam }))
+            .then(() => toast.success(t("uiterlijk.eigen.verstuurd")))
+            .catch(fail)
+        }
+        scriptsAsked={scriptsAsked}
+        onScripts={(ok) => (ok && scriptsAsked ? void runScripts(scriptsAsked) : setScriptsAsked(null))}
+      />
+    );
+  }
 
   return (
     <section aria-label={t("uiterlijk.titel")} className="space-y-4 p-5">
@@ -106,102 +137,116 @@ export default function KitPicker({ projectId, firstRun = false, onApplied, onEr
         <p className="mt-1 text-lg text-muted-foreground">{t("uiterlijk.intro")}</p>
       </header>
 
-      {note && <p role="status" className="rounded-lg bg-success/10 p-3 text-base">{note}</p>}
-
       <ul aria-label={t("uiterlijk.kiezer")} className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         {list.kits.map((k) => (
           <li key={k.id}>
-            <article
+            <Card
               data-testid={`kit-${k.id}`}
               onMouseEnter={() => setHover(k)}
               onMouseLeave={() => setHover(null)}
               onFocus={() => setHover(k)}
-              className={`flex h-full flex-col gap-2 rounded-xl border p-4 ${k.compatible ? "border-input" : "border-border opacity-60"}`}
+              className={`h-full ${k.compatible ? "" : "opacity-60"}`}
             >
-              <div className="flex items-start justify-between gap-2">
-                <h3 className="text-lg font-semibold">{k.naam}</h3>
-                <span className="rounded-full bg-accent px-3 py-1 text-sm">{k.label}</span>
-              </div>
-              <div aria-hidden="true" className="flex gap-1">
-                {[k.kleuren.primair, k.kleuren.achtergrond, k.kleuren.tekst].map((c) => (
-                  <span key={c} style={{ background: c }} className="h-4 w-8 rounded border border-input" />
-                ))}
-              </div>
-              <p className="text-base text-muted-foreground">{k.beschrijving}</p>
-              <p className="text-sm text-muted-foreground">{t("uiterlijk.licentie", { licentie: k.licentie })}</p>
-              <p className="text-sm text-muted-foreground">{t("uiterlijk.geschiktVoor", { stacks: k.stacks.map((s) => t(`uiterlijk.stack.${s}`, { defaultValue: s })).join(", ") })}</p>
-              {!k.compatible && <p className="text-sm text-warning">{t("uiterlijk.past")}</p>}
-              <button
-                disabled={!k.compatible}
-                onClick={() => setPhase({ kind: "confirm", card: k, mode: basis ? "basis" : "kit" })}
-                aria-label={`${basis ? t("uiterlijk.eigen.kitKies") : t("uiterlijk.kies")}: ${k.naam}`}
-                className="mt-auto min-h-11 rounded-lg bg-primary text-primary-foreground px-4 text-base font-medium hover:bg-primary/90 disabled:opacity-40"
-              >
-                {basis ? t("uiterlijk.eigen.kitKies") : t("uiterlijk.kies")}
-              </button>
-            </article>
+              <CardHeader>
+                <CardTitle className="text-lg">{k.naam}</CardTitle>
+                <CardDescription className="text-base">{k.beschrijving}</CardDescription>
+                <div className="col-start-2 row-span-2 row-start-1 self-start justify-self-end">
+                  <Badge>{k.label}</Badge>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <div aria-hidden="true" className="flex gap-1">
+                  {[k.kleuren.primair, k.kleuren.achtergrond, k.kleuren.tekst].map((c) => (
+                    <span key={c} style={{ background: c }} className="h-4 w-8 rounded border border-border" />
+                  ))}
+                </div>
+                <p className="text-sm text-muted-foreground">{t("uiterlijk.licentie", { licentie: k.licentie })}</p>
+                <p className="text-sm text-muted-foreground">{t("uiterlijk.geschiktVoor", { stacks: k.stacks.map((s) => t(`uiterlijk.stack.${s}`, { defaultValue: s })).join(", ") })}</p>
+                {!k.compatible && <p className="text-sm text-warning">{t("uiterlijk.past")}</p>}
+              </CardContent>
+              <CardFooter>
+                <Button
+                  disabled={!k.compatible}
+                  onClick={() => setPhase({ kind: "confirm", card: k, mode: basis ? "basis" : "kit" })}
+                  aria-label={`${basis ? t("uiterlijk.eigen.kitKies") : t("uiterlijk.kies")}: ${k.naam}`}
+                  className="w-full"
+                >
+                  {basis ? t("uiterlijk.eigen.kitKies") : t("uiterlijk.kies")}
+                </Button>
+              </CardFooter>
+            </Card>
           </li>
         ))}
       </ul>
 
       <aside aria-live="polite" data-testid="kit-live" className="rounded-xl border border-border p-3">
-        {shown?.preview ? (
-          <img src={shown.preview} alt={t("uiterlijk.livevoorbeeld", { naam: shown.naam })} className="w-full rounded-lg border border-border" />
-        ) : (
-          <p className="text-base text-muted-foreground">{t("uiterlijk.geenPreview")}</p>
-        )}
+        {shown?.preview ? <img src={shown.preview} alt={t("uiterlijk.livevoorbeeld", { naam: shown.naam })} className="w-full rounded-lg border border-border" /> : <p className="text-base text-muted-foreground">{t("uiterlijk.geenPreview")}</p>}
       </aside>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <article className="space-y-2 rounded-xl border border-border p-4">
-          <h3 className="text-lg font-semibold">{t("uiterlijk.eigen.titel")}</h3>
-          <p className="text-base text-muted-foreground">{t("uiterlijk.eigen.uitleg")}</p>
-          <button onClick={() => void ownStyle()} className="min-h-11 rounded-lg border border-input px-4 text-base hover:bg-muted">
-            {t("uiterlijk.eigen.kies")}
-          </button>
-        </article>
-        <article className="space-y-2 rounded-xl border border-border p-4">
-          <h3 className="text-lg font-semibold">{t("uiterlijk.eigen.kitTitel")}</h3>
-          <p className="text-base text-muted-foreground">{t("uiterlijk.eigen.kitUitleg")}</p>
-          <button
-            aria-pressed={basis}
-            onClick={() => setBasis((b) => !b)}
-            className={`min-h-11 rounded-lg border px-4 text-base ${basis ? "border-primary bg-accent" : "border-input hover:bg-muted"}`}
-          >
-            {t("uiterlijk.eigen.kitKies")}
-          </button>
-        </article>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">{t("uiterlijk.eigen.titel")}</CardTitle>
+            <CardDescription className="text-base">{t("uiterlijk.eigen.uitleg")}</CardDescription>
+          </CardHeader>
+          <CardFooter>
+            <Button variant="outline" onClick={() => void ownStyle()}>
+              {t("uiterlijk.eigen.kies")}
+            </Button>
+          </CardFooter>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">{t("uiterlijk.eigen.kitTitel")}</CardTitle>
+            <CardDescription className="text-base">{t("uiterlijk.eigen.kitUitleg")}</CardDescription>
+          </CardHeader>
+          <CardFooter>
+            <Button variant={basis ? "default" : "outline"} aria-pressed={basis} onClick={() => setBasis((b) => !b)}>
+              {t("uiterlijk.eigen.kitKies")}
+            </Button>
+          </CardFooter>
+        </Card>
       </div>
 
-      {phase.kind === "confirm" && (
-        <div className="fixed inset-0 z-20 flex items-center justify-center bg-foreground/50 p-4">
-          <div role="dialog" aria-modal="true" aria-label={phase.card.naam} className="w-full max-w-lg space-y-3 rounded-xl bg-card p-6 text-lg shadow-xl">
-            <h3 className="text-xl font-semibold">{phase.card.naam}</h3>
-            <p>{t("uiterlijk.licentie", { licentie: phase.card.licentie })}</p>
+      <Dialog open={phase.kind === "confirm"} onOpenChange={(o) => !o && setPhase({ kind: "pick" })}>
+        {phase.kind === "confirm" && (
+          <DialogContent aria-describedby={undefined}>
+            <DialogHeader>
+              <DialogTitle>{phase.card.naam}</DialogTitle>
+              <DialogDescription>{t("uiterlijk.licentie", { licentie: phase.card.licentie })}</DialogDescription>
+            </DialogHeader>
             {phase.card.pakketten.length > 0 && (
-              <div>
+              <div className="text-base">
                 <p>{t("uiterlijk.pakketten")}</p>
-                <ul className="list-disc pl-6 text-base">
+                <ul className="list-disc pl-6">
                   {phase.card.pakketten.map((p) => (
                     <li key={p}>{p}</li>
                   ))}
                 </ul>
               </div>
             )}
-            {phase.card.installatiescripts && <p role="note" className="text-base text-warning">{t("uiterlijk.scriptsWaarschuwing")}</p>}
-            {phase.card.attributieVerplicht && <p role="note" className="text-base text-warning">{t("uiterlijk.attributieNodig")}</p>}
+            {phase.card.installatiescripts && (
+              <Alert role="note" className="border-warning/40 bg-warning/10">
+                <AlertDescription className="text-warning">{t("uiterlijk.scriptsWaarschuwing")}</AlertDescription>
+              </Alert>
+            )}
+            {phase.card.attributieVerplicht && (
+              <Alert role="note" className="border-warning/40 bg-warning/10">
+                <AlertDescription className="text-warning">{t("uiterlijk.attributieNodig")}</AlertDescription>
+              </Alert>
+            )}
             <p className="text-base text-muted-foreground">{t("uiterlijk.veiligheid")}</p>
-            <div className="flex justify-end gap-2">
-              <button onClick={() => setPhase({ kind: "pick" })} className="min-h-11 rounded-lg px-4 hover:bg-muted">
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setPhase({ kind: "pick" })}>
                 {t("uiterlijk.annuleer")}
-              </button>
-              <button autoFocus onClick={() => void apply(phase.card, phase.mode)} className="min-h-11 rounded-lg bg-primary text-primary-foreground px-5 font-semibold hover:bg-primary/90">
+              </Button>
+              <Button autoFocus onClick={() => void apply(phase.card, phase.mode)}>
                 {t("uiterlijk.toepassen")}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        )}
+      </Dialog>
     </section>
   );
 }
@@ -209,7 +254,6 @@ export default function KitPicker({ projectId, firstRun = false, onApplied, onEr
 function Result({
   phase,
   onBack,
-  note,
   restored,
   onUndo,
   onMigrate,
@@ -218,7 +262,6 @@ function Result({
 }: {
   phase: { card: KitCard; out: KitApplyOutcome; mode: "kit" | "basis" };
   onBack: () => void;
-  note: string | null;
   restored: boolean;
   onUndo: (hash: string) => void;
   onMigrate: () => void;
@@ -229,31 +272,47 @@ function Result({
   const { out, card } = phase;
   if (!out.ok) {
     return (
-      <div role="alert" className="space-y-3 p-5 text-lg">
-        <h2 className="text-xl font-semibold">{t(`uiterlijk.fout.${out.code}`)}</h2>
-        {out.code !== "install_failed" && out.code !== "checks_failed" && out.detail && <p>{out.detail}</p>}
-        {!out.rolledBack && (out.code === "install_failed" || out.code === "checks_failed") && <p>{t("uiterlijk.fout.terugzettenMislukt")}</p>}
-        {out.detail && (out.code === "install_failed" || out.code === "checks_failed") && (
-          <details className="text-base text-muted-foreground">
-            <summary className="cursor-pointer">{t("uiterlijk.details")}</summary>
-            <pre className="mt-2 max-h-60 overflow-auto whitespace-pre-wrap rounded bg-background p-3 text-sm">{out.detail}</pre>
-          </details>
-        )}
-        <button onClick={onBack} className="min-h-11 rounded-lg border border-input px-4 hover:bg-muted">
-          {t("uiterlijk.kiesKit")}
-        </button>
+      <div className="p-5">
+        <Alert variant="destructive" className="space-y-3 text-lg">
+          <AlertTitle className="text-xl font-semibold">{t(`uiterlijk.fout.${out.code}`)}</AlertTitle>
+          <AlertDescription className="space-y-3 text-lg text-foreground">
+            {out.code !== "install_failed" && out.code !== "checks_failed" && out.detail && <p>{out.detail}</p>}
+            {!out.rolledBack && (out.code === "install_failed" || out.code === "checks_failed") && <p>{t("uiterlijk.fout.terugzettenMislukt")}</p>}
+            {out.detail && (out.code === "install_failed" || out.code === "checks_failed") && (
+              <Collapsible>
+                <CollapsibleTrigger asChild>
+                  <Button variant="ghost" size="sm" className="px-0">
+                    {t("uiterlijk.details")}
+                  </Button>
+                </CollapsibleTrigger>
+                <CollapsibleContent forceMount>
+                  <pre className="mt-2 max-h-60 overflow-auto rounded-lg bg-muted p-3 text-sm whitespace-pre-wrap">{out.detail}</pre>
+                </CollapsibleContent>
+              </Collapsible>
+            )}
+            <Button variant="outline" onClick={onBack}>
+              {t("uiterlijk.kiesKit")}
+            </Button>
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
   return (
     <div className="space-y-4 p-5 text-lg">
-      <p role="status" className="text-xl font-semibold">{t("uiterlijk.klaar", { naam: card.naam })}</p>
+      <p role="status" className="text-xl font-semibold">
+        {t("uiterlijk.klaar", { naam: card.naam })}
+      </p>
       {out.checksSkipped && <p className="text-base text-warning">{t("uiterlijk.controleOvergeslagen", { reden: out.checksSkipped })}</p>}
-      {note && <p role="status" className="rounded-lg bg-success/10 p-3 text-base">{note}</p>}
       {out.switched && (
         <div className="space-y-3">
           <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            {([["voor", out.shotBefore], ["na", out.shotAfter]] as const).map(([k, src]) => (
+            {(
+              [
+                ["voor", out.shotBefore],
+                ["na", out.shotAfter],
+              ] as const
+            ).map(([k, src]) => (
               <figure key={k} className="space-y-1">
                 <figcaption className="text-base font-semibold">{t(`uiterlijk.wissel.${k}`)}</figcaption>
                 {src ? <img src={src} alt={t(`uiterlijk.wissel.${k}`)} className="w-full rounded-lg border border-border" /> : <p className="text-base text-muted-foreground">{t("uiterlijk.wissel.geenBeeld")}</p>}
@@ -262,28 +321,32 @@ function Result({
           </div>
           <p className="text-base text-muted-foreground">{t("uiterlijk.wissel.migreerUitleg")}</p>
           <div className="flex flex-wrap gap-2">
-            <button onClick={onMigrate} className="min-h-11 rounded-lg bg-primary text-primary-foreground px-4 font-medium hover:bg-primary/90">
-              {t("uiterlijk.wissel.migreer")}
-            </button>
+            <Button onClick={onMigrate}>{t("uiterlijk.wissel.migreer")}</Button>
             {out.before && !restored && (
-              <button onClick={() => onUndo(out.before!)} className="min-h-11 rounded-lg border border-input px-4 hover:bg-muted">
+              <Button variant="outline" onClick={() => onUndo(out.before!)}>
                 {t("uiterlijk.wissel.terug")}
-              </button>
+              </Button>
             )}
           </div>
-          {restored && <p role="status" className="text-base">{t("uiterlijk.wissel.teruggezet")}</p>}
+          {restored && (
+            <p role="status" className="text-base">
+              {t("uiterlijk.wissel.teruggezet")}
+            </p>
+          )}
         </div>
       )}
-      {scriptsAsked && (
-        <div role="dialog" aria-label={t("uiterlijk.scripts.titel")} className="space-y-2 rounded-xl border border-warning p-4">
-          <h3 className="font-semibold">{t("uiterlijk.scripts.titel")}</h3>
-          <p className="text-base">{t("uiterlijk.scripts.uitleg", { pakketten: scriptsAsked.join(", ") })}</p>
-          <div className="flex gap-2">
-            <button onClick={() => onScripts(true)} className="min-h-11 rounded-lg bg-primary text-primary-foreground px-4 hover:bg-primary/90">{t("uiterlijk.scripts.ja")}</button>
-            <button onClick={() => onScripts(false)} className="min-h-11 rounded-lg border border-input px-4 hover:bg-muted">{t("uiterlijk.scripts.nee")}</button>
-          </div>
-        </div>
-      )}
+      <AlertDialog open={!!scriptsAsked} onOpenChange={(o) => !o && onScripts(false)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("uiterlijk.scripts.titel")}</AlertDialogTitle>
+            <AlertDialogDescription>{t("uiterlijk.scripts.uitleg", { pakketten: (scriptsAsked ?? []).join(", ") })}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("uiterlijk.scripts.nee")}</AlertDialogCancel>
+            <AlertDialogAction onClick={() => onScripts(true)}>{t("uiterlijk.scripts.ja")}</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

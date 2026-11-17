@@ -1,6 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { chatSend, kitCheck, kitCurrent, kitStrictness, kitTailor, runtime, type KitCheck, type KitCurrent, type KitFinding, type KitTailor } from "../../lib/api";
+import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { chatSend, kitCheck, kitCurrent, kitStrictness, kitTailor, runtime, type KitCheck, type KitCurrent, type KitFinding, type KitTailor } from "@/lib/api";
 import KitPicker from "./KitPicker";
 
 interface Props {
@@ -30,7 +38,6 @@ export default function AppearancePanel({ projectId, firstRun = false, onError }
   const { t } = useTranslation();
   const [cur, setCur] = useState<KitCurrent | null>(null);
   const [choosing, setChoosing] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
   const [check, setCheck] = useState<KitCheck | null>(null);
   const [checking, setChecking] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -48,7 +55,6 @@ export default function AppearancePanel({ projectId, firstRun = false, onError }
       try {
         const tokens = await kitTailor(projectId, change);
         setCur((c) => (c ? { ...c, tokens } : c));
-        setMsg(null);
       } catch (e) {
         onError(t("uiterlijk.aanpassen.mislukt", { reden: String(e) }));
       }
@@ -80,7 +86,7 @@ export default function AppearancePanel({ projectId, firstRun = false, onError }
   async function askAi(prompt: string) {
     try {
       await chatSend(projectId, prompt);
-      setMsg(t("uiterlijk.controle.verstuurd"));
+      toast.success(t("uiterlijk.controle.verstuurd"));
     } catch (e) {
       fail(e);
     }
@@ -89,20 +95,27 @@ export default function AppearancePanel({ projectId, firstRun = false, onError }
   async function save() {
     try {
       await runtime(projectId, "git.checkpoint", { message: "Uiterlijk aangepast" });
-      setMsg(t("uiterlijk.aanpassen.bewaard"));
+      toast.success(t("uiterlijk.aanpassen.bewaard"));
     } catch (e) {
       fail(e);
     }
   }
 
-  if (!cur) return <p role="status" className="p-5 text-lg text-muted-foreground">{t("uiterlijk.laden")}</p>;
+  if (!cur)
+    return (
+      <div role="status" className="space-y-3 p-5">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-32 w-full" />
+        <span className="sr-only">{t("uiterlijk.laden")}</span>
+      </div>
+    );
   if (!cur.kit || choosing) {
     return (
       <div>
         {choosing && cur.kit && (
-          <button onClick={() => setChoosing(false)} className="m-5 mb-0 min-h-11 rounded-lg border border-input px-4 text-base hover:bg-muted">
+          <Button variant="outline" className="m-5 mb-0" onClick={() => setChoosing(false)}>
             {t("uiterlijk.annuleer")}
-          </button>
+          </Button>
         )}
         <KitPicker
           projectId={projectId}
@@ -119,6 +132,7 @@ export default function AppearancePanel({ projectId, firstRun = false, onError }
   const tok = cur.tokens;
   const afronding = tok?.instellingen?.afronding ?? "";
   const ruimte = tok?.instellingen?.ruimte ?? "";
+  const font = fontKey(tok?.typografie.lettertype);
   return (
     <section aria-label={t("uiterlijk.titel")} className="space-y-5 p-5 text-lg">
       <header className="space-y-1">
@@ -130,93 +144,92 @@ export default function AppearancePanel({ projectId, firstRun = false, onError }
       </header>
 
       {cur.attributie.required && !cur.attributie.ok && (
-        <p role="alert" className="rounded-lg border border-warning bg-warning/10 p-3 text-base">
-          {t("uiterlijk.attributie.mist")}
-        </p>
+        <Alert className="border-warning/50 bg-warning/10">
+          <AlertDescription className="text-base text-foreground">{t("uiterlijk.attributie.mist")}</AlertDescription>
+        </Alert>
       )}
 
-      <div className="space-y-4 rounded-xl border border-border p-4">
-        <div>
-          <h3 className="text-lg font-semibold">{t("uiterlijk.aanpassen.titel")}</h3>
-          <p className="text-base text-muted-foreground">{t("uiterlijk.aanpassen.uitleg")}</p>
-        </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">{t("uiterlijk.aanpassen.titel")}</CardTitle>
+          <CardDescription className="text-base">{t("uiterlijk.aanpassen.uitleg")}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-5">
+          <Field orientation="horizontal">
+            <FieldLabel htmlFor="kleur" className="w-32 text-base">
+              {t("uiterlijk.aanpassen.kleur")}
+            </FieldLabel>
+            <Input
+              id="kleur"
+              type="color"
+              value={tok?.kleuren.licht.primair ?? ""}
+              onChange={(e) => {
+                const v = e.target.value;
+                setCur((c) => (c && c.tokens ? { ...c, tokens: { ...c.tokens, kleuren: { ...c.tokens.kleuren, licht: { ...c.tokens.kleuren.licht, primair: v } } } } : c));
+                void tailor({ hoofdkleur: v }, 300);
+              }}
+              className="h-11 w-20 cursor-pointer p-1"
+            />
+          </Field>
 
-        <label className="flex items-center gap-3">
-          <span className="w-32">{t("uiterlijk.aanpassen.kleur")}</span>
-          <input
-            type="color"
-            aria-label={t("uiterlijk.aanpassen.kleur")}
-            value={tok?.kleuren.licht.primair ?? "#3d5ae8"}
-            onChange={(e) => {
-              const v = e.target.value;
-              setCur((c) => (c && c.tokens ? { ...c, tokens: { ...c.tokens, kleuren: { ...c.tokens.kleuren, licht: { ...c.tokens.kleuren.licht, primair: v } } } } : c));
-              void tailor({ hoofdkleur: v }, 300);
-            }}
-            className="h-11 w-16 rounded border border-input bg-card"
-          />
-        </label>
+          {(
+            [
+              ["afronding", AFRONDING, afronding],
+              ["ruimte", RUIMTE, ruimte],
+            ] as const
+          ).map(([key, options, selected]) => (
+            <Field key={key} orientation="horizontal">
+              <span id={`label-${key}`} className="w-32 text-base font-medium">
+                {t(`uiterlijk.aanpassen.${key}`)}
+              </span>
+              <ToggleGroup type="single" variant="outline" role="radiogroup" aria-labelledby={`label-${key}`} value={selected} onValueChange={(v) => v && void tailor({ [key]: v } as KitTailor)} spacing={0}>
+                {options.map((o) => (
+                  <ToggleGroupItem key={o} value={o} className="px-4 text-base data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                    {t(`uiterlijk.aanpassen.${key === "afronding" ? "afrondingen" : "ruimtes"}.${o}`)}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
+            </Field>
+          ))}
 
-        {([
-          ["afronding", AFRONDING, afronding],
-          ["ruimte", RUIMTE, ruimte],
-        ] as const).map(([key, options, selected]) => (
-          <div key={key} role="radiogroup" aria-label={t(`uiterlijk.aanpassen.${key}`)} className="flex flex-wrap items-center gap-2">
-            <span className="w-32">{t(`uiterlijk.aanpassen.${key}`)}</span>
-            {options.map((o) => (
-              <button
-                key={o}
-                role="radio"
-                aria-checked={selected === o}
-                onClick={() => void tailor({ [key]: o } as KitTailor)}
-                className={`min-h-11 rounded-lg border px-4 text-base ${selected === o ? "border-primary bg-primary text-primary-foreground font-semibold" : "border-input hover:bg-muted"}`}
-              >
-                {t(`uiterlijk.aanpassen.${key === "afronding" ? "afrondingen" : "ruimtes"}.${o}`)}
-              </button>
-            ))}
+          <Field>
+            <span id="label-lettertype" className="text-base font-medium">
+              {t("uiterlijk.aanpassen.lettertype")}
+            </span>
+            <ToggleGroup type="single" variant="outline" role="radiogroup" aria-labelledby="label-lettertype" value={font} onValueChange={(v) => v && void tailor({ lettertype: FONTS[v as FontKey] })} className="flex-wrap" spacing={1}>
+              {(Object.keys(FONTS) as FontKey[]).map((k) => (
+                <ToggleGroupItem key={k} value={k} style={{ fontFamily: FONTS[k] }} className="px-4 text-base data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                  {t(`uiterlijk.aanpassen.lettertypes.${k}`)}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          </Field>
+
+          <div className="flex flex-wrap gap-2">
+            <Button onClick={() => void save()}>{t("uiterlijk.aanpassen.bewaar")}</Button>
+            <Button variant="outline" onClick={() => void tailor({ reset: true })}>
+              {t("uiterlijk.aanpassen.standaard")}
+            </Button>
           </div>
-        ))}
+        </CardContent>
+      </Card>
 
-        <label className="flex items-center gap-3">
-          <span className="w-32">{t("uiterlijk.aanpassen.lettertype")}</span>
-          <select
-            value={fontKey(tok?.typografie.lettertype)}
-            onChange={(e) => void tailor({ lettertype: FONTS[e.target.value as FontKey] })}
-            className="min-h-11 rounded-lg border border-input bg-card px-3 text-base"
-          >
-            {fontKey(tok?.typografie.lettertype) === "" && <option value="">{tok?.typografie.lettertype}</option>}
-            {(Object.keys(FONTS) as FontKey[]).map((k) => (
-              <option key={k} value={k}>
-                {t(`uiterlijk.aanpassen.lettertypes.${k}`)}
-              </option>
-            ))}
-          </select>
-        </label>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg">{t("uiterlijk.controle.titel")}</CardTitle>
+          <CardDescription className="text-base">{t("uiterlijk.controle.uitleg")}</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <Button variant="outline" onClick={() => void runCheck()} disabled={checking}>
+            {checking ? t("uiterlijk.controle.bezig") : t("uiterlijk.controle.knop")}
+          </Button>
+          {check && <CheckResult check={check} onFix={(p) => void askAi(p)} onStrictness={(l) => void strictness(l)} />}
+        </CardContent>
+      </Card>
 
-        <div className="flex flex-wrap gap-2">
-          <button onClick={() => void save()} className="min-h-11 rounded-lg bg-primary text-primary-foreground px-4 text-base font-medium hover:bg-primary/90">
-            {t("uiterlijk.aanpassen.bewaar")}
-          </button>
-          <button onClick={() => void tailor({ reset: true })} className="min-h-11 rounded-lg border border-input px-4 text-base hover:bg-muted">
-            {t("uiterlijk.aanpassen.standaard")}
-          </button>
-        </div>
-        {msg && <p role="status" className="text-base text-success">{msg}</p>}
-      </div>
-
-      <div className="space-y-3 rounded-xl border border-border p-4">
-        <div>
-          <h3 className="text-lg font-semibold">{t("uiterlijk.controle.titel")}</h3>
-          <p className="text-base text-muted-foreground">{t("uiterlijk.controle.uitleg")}</p>
-        </div>
-        <button onClick={() => void runCheck()} disabled={checking} className="min-h-11 rounded-lg border border-input px-4 text-base hover:bg-muted disabled:opacity-50">
-          {checking ? t("uiterlijk.controle.bezig") : t("uiterlijk.controle.knop")}
-        </button>
-        {check && <CheckResult check={check} onFix={(p) => void askAi(p)} onStrictness={(l) => void strictness(l)} />}
-      </div>
-
-      <button onClick={() => setChoosing(true)} className="min-h-11 rounded-lg border border-input px-4 text-base hover:bg-muted">
+      <Button variant="outline" onClick={() => setChoosing(true)}>
         {t("uiterlijk.huidig.andere")}
-      </button>
+      </Button>
     </section>
   );
 }
@@ -236,49 +249,53 @@ function CheckResult({ check, onFix, onStrictness }: { check: KitCheck; onFix: (
         const list = check.findings.filter((f) => f.rule === rule);
         if (list.length === 0) return null;
         return (
-          <section key={rule} aria-label={t(`uiterlijk.controle.regels.${rule}.titel`)} className="space-y-2 rounded-lg border border-border p-3">
-            <h4 className="font-semibold">
-              {t(`uiterlijk.controle.regels.${rule}.titel`)} ({list.length})
-            </h4>
-            <p className="text-base text-muted-foreground">{t(`uiterlijk.controle.regels.${rule}.uitleg`)}</p>
-            <ul className="space-y-2 text-base">
-              {list.slice(0, 20).map((f) => (
-                <li key={`${f.file}:${f.line}:${f.col}`} className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="min-w-0 break-words">{spot(f)}</span>
-                  <button
-                    onClick={() => onFix(t("uiterlijk.controle.prompt", { bestand: f.file, regel: f.line, melding: f.message, tip: f.fix }))}
-                    className="min-h-10 rounded-lg border border-input px-3 text-sm hover:bg-muted"
-                  >
-                    {t("uiterlijk.controle.herstel")}
-                  </button>
-                </li>
-              ))}
-            </ul>
-            {list.length > 1 && (
-              <button
-                onClick={() => onFix(t("uiterlijk.controle.promptAlles", { titel: t(`uiterlijk.controle.regels.${rule}.titel`), plekken: list.slice(0, 20).map((f) => `- ${f.file}:${f.line} ${f.message} ${f.fix}`).join("\n") }))}
-                className="min-h-11 rounded-lg bg-primary text-primary-foreground px-4 text-base font-medium hover:bg-primary/90"
-              >
-                {t("uiterlijk.controle.herstelAlles")}
-              </button>
-            )}
-          </section>
+          <Card key={rule} role="region" aria-label={t(`uiterlijk.controle.regels.${rule}.titel`)} size="sm">
+            <CardHeader>
+              <CardTitle>
+                {t(`uiterlijk.controle.regels.${rule}.titel`)} ({list.length})
+              </CardTitle>
+              <CardDescription className="text-base">{t(`uiterlijk.controle.regels.${rule}.uitleg`)}</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <ul className="space-y-2 text-base">
+                {list.slice(0, 20).map((f) => (
+                  <li key={`${f.file}:${f.line}:${f.col}`} className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="min-w-0 break-words">{spot(f)}</span>
+                    <Button variant="outline" size="sm" onClick={() => onFix(t("uiterlijk.controle.prompt", { bestand: f.file, regel: f.line, melding: f.message, tip: f.fix }))}>
+                      {t("uiterlijk.controle.herstel")}
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+              {list.length > 1 && (
+                <Button
+                  onClick={() =>
+                    onFix(
+                      t("uiterlijk.controle.promptAlles", {
+                        titel: t(`uiterlijk.controle.regels.${rule}.titel`),
+                        plekken: list.slice(0, 20).map((f) => `- ${f.file}:${f.line} ${f.message} ${f.fix}`).join("\n"),
+                      }),
+                    )
+                  }
+                >
+                  {t("uiterlijk.controle.herstelAlles")}
+                </Button>
+              )}
+            </CardContent>
+          </Card>
         );
       })}
-      <div role="radiogroup" aria-label={t("uiterlijk.controle.strengheid.titel")} className="space-y-2">
-        <p className="font-semibold">{t("uiterlijk.controle.strengheid.titel")}</p>
-        {(["waarschuwen", "blokkeren"] as const).map((l) => (
-          <button
-            key={l}
-            role="radio"
-            aria-checked={check.strengheid === l}
-            onClick={() => onStrictness(l)}
-            className={`mr-2 min-h-11 rounded-lg border px-4 text-base ${check.strengheid === l ? "border-primary bg-primary text-primary-foreground font-semibold" : "border-input hover:bg-muted"}`}
-            title={t(`uiterlijk.controle.strengheid.${l}Uitleg`)}
-          >
-            {t(`uiterlijk.controle.strengheid.${l}`)}
-          </button>
-        ))}
+      <div className="space-y-2">
+        <p id="strengheid-label" className="font-semibold">
+          {t("uiterlijk.controle.strengheid.titel")}
+        </p>
+        <ToggleGroup type="single" variant="outline" role="radiogroup" aria-labelledby="strengheid-label" value={check.strengheid} onValueChange={(v) => v && onStrictness(v as "waarschuwen" | "blokkeren")} spacing={0}>
+          {(["waarschuwen", "blokkeren"] as const).map((l) => (
+            <ToggleGroupItem key={l} value={l} title={t(`uiterlijk.controle.strengheid.${l}Uitleg`)} className="px-4 text-base data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+              {t(`uiterlijk.controle.strengheid.${l}`)}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
         <p className="text-sm text-muted-foreground">{t(`uiterlijk.controle.strengheid.${check.strengheid}Uitleg`)}</p>
       </div>
     </div>

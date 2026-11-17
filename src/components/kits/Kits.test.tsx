@@ -4,8 +4,10 @@ import KitPicker from "./KitPicker";
 import AppearancePanel from "./AppearancePanel";
 import type { KitApplyOutcome, KitCard, KitCurrent } from "../../lib/api";
 import * as api from "../../lib/api";
+import { toast } from "sonner";
 
 vi.mock("../../lib/api");
+vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 const card = (o: Partial<KitCard> = {}): KitCard => ({
   id: "fragments-ui",
@@ -68,7 +70,7 @@ describe("KitPicker", () => {
     expect(api.kitApply).toHaveBeenCalledWith(7, "fragments-ui");
     expect(onApplied).toHaveBeenCalled();
     expect(api.kitScripts).not.toHaveBeenCalled();
-    const ask = screen.getByRole("dialog", { name: "Installatiescripts goedkeuren?" });
+    const ask = screen.getByRole("alertdialog", { name: "Installatiescripts goedkeuren?" });
     expect(ask).toHaveTextContent("esbuild");
     fireEvent.click(within(ask).getByRole("button", { name: "Ja, uitvoeren" }));
     await waitFor(() => expect(api.kitScripts).toHaveBeenCalledWith(7, ["esbuild"]));
@@ -80,9 +82,9 @@ describe("KitPicker", () => {
     render(<KitPicker projectId={1} onApplied={vi.fn()} onError={vi.fn()} />);
     fireEvent.click(await screen.findByRole("button", { name: /Kies dit uiterlijk/ }));
     fireEvent.click(screen.getByRole("button", { name: "Toepassen" }));
-    const ask = await screen.findByRole("dialog", { name: "Installatiescripts goedkeuren?" });
+    const ask = await screen.findByRole("alertdialog", { name: "Installatiescripts goedkeuren?" });
     fireEvent.click(within(ask).getByRole("button", { name: "Nee, overslaan" }));
-    expect(screen.queryByRole("dialog", { name: "Installatiescripts goedkeuren?" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("alertdialog", { name: "Installatiescripts goedkeuren?" })).not.toBeInTheDocument();
     expect(api.kitScripts).not.toHaveBeenCalled();
   });
 
@@ -179,7 +181,7 @@ describe("AppearancePanel", () => {
     await waitFor(() => expect(api.kitTailor).toHaveBeenCalledWith(2, { afronding: "rond" }));
     fireEvent.click(screen.getByRole("radio", { name: "Ruim" }));
     await waitFor(() => expect(api.kitTailor).toHaveBeenCalledWith(2, { ruimte: "ruim" }));
-    fireEvent.change(screen.getByRole("combobox"), { target: { value: "serif" } });
+    fireEvent.click(screen.getByRole("radio", { name: "Met sierlijntjes (Georgia)" }));
     await waitFor(() => expect(api.kitTailor).toHaveBeenCalledWith(2, { lettertype: "Georgia, 'Times New Roman', serif" }));
     fireEvent.change(screen.getByLabelText("Hoofdkleur"), { target: { value: "#ff0066" } });
     await waitFor(() => expect(api.kitTailor).toHaveBeenCalledWith(2, { hoofdkleur: "#ff0066" }));
@@ -193,7 +195,7 @@ describe("AppearancePanel", () => {
     render(<AppearancePanel projectId={2} onError={vi.fn()} />);
     fireEvent.click(await screen.findByRole("button", { name: "Bewaar als versie" }));
     await waitFor(() => expect(api.runtime).toHaveBeenCalledWith(2, "git.checkpoint", { message: "Uiterlijk aangepast" }));
-    expect(await screen.findByText("Bewaard als versie.")).toBeInTheDocument();
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith("Bewaard als versie."));
   });
 
   it("waarschuwt als de verplichte vermelding is weggehaald", async () => {
