@@ -162,7 +162,7 @@ describe("kitlijst en scripts", () => {
     expect(l.kits[0].preview).toMatch(/^data:image\/png;base64,/);
     expect(l.geweigerd).toEqual([{ id: "gpl-kit", reden: expect.stringContaining("niet toegestaan") }]);
     const flutter = await listKits(p, null, "flutter");
-    expect(flutter.kits.every((k) => !k.compatible)).toBe(true);
+    expect(flutter.kits.filter((k) => k.compatible).map((k) => k.id)).toEqual(["material-flutter"]); // alleen Flutter-kits passen bij Flutter
     expect((await listKits(p, null)).kits.every((k) => k.compatible)).toBe(true); // nieuw project: nog geen stack
   });
 
