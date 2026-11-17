@@ -75,6 +75,16 @@ describe("MCP-tools (fase 3)", () => {
     expect(execFileSync("git", ["log", "--format=%s"], { cwd: ex.dir, encoding: "utf8" }).trim()).toBe("start");
   });
 
+  it("git_checkpoint eist een korte titel in gewone taal (max 8 woorden)", async () => {
+    await writeFile(path.join(ex.dir, "a.txt"), "x");
+    const lang = await call("git_checkpoint", { bericht: "een twee drie vier vijf zes zeven acht negen" });
+    expect(lang.isError).toBe(true);
+    expect(textOf(lang)).toMatch(/maximaal 8 woorden/);
+    const goed = await call("git_checkpoint", { bericht: "een twee drie vier vijf zes zeven acht" });
+    expect(goed.isError).toBeFalsy();
+    expect(textOf(await call("git_list_checkpoints"))).toContain("een twee drie vier vijf zes zeven acht");
+  });
+
   it("screenshot en console-errors uit de preview (slaat over zonder browser)", async (ctx) => {
     srv.runtime.setTrustedHash(ex.hash);
     await srv.runtime.dev.start();

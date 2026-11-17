@@ -265,6 +265,16 @@ describe("ChatPanel: terugval naar de terminal", () => {
   });
 });
 
+describe("ChatPanel: versies", () => {
+  it("toont een automatisch opgeslagen versie als rustige regel in het gesprek en opent de tijdlijn", async () => {
+    setup([msg("assistant", { text: "Klaar!" }), msg("version", { hash: "abc", title: "Bestelknop toegevoegd" })]);
+    expect(await screen.findByTestId("version-line")).toHaveTextContent("Versie opgeslagen: Bestelknop toegevoegd");
+    (api.runtime as Mock).mockResolvedValue([]);
+    fireEvent.click(screen.getByRole("button", { name: "Versies" }));
+    expect(await screen.findByRole("dialog", { name: "Versies van je project" })).toBeInTheDocument();
+  });
+});
+
 describe("ChatPanel: wisselen van AI en terugvallen", () => {
   it("'Wissel van AI' kiest een andere AI en meldt de scheiding", async () => {
     (api.chatSwitch as Mock).mockResolvedValue({ provider: "gemini", account_id: null, account_label: null, structured: false });

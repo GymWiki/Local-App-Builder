@@ -23,6 +23,47 @@ use std::sync::{Arc, Mutex};
 use tauri::{Emitter, Manager};
 use terminal::{PtyEvent, TerminalManager};
 
+/// Git-acties voor automatische versies, via de Node-runtime van het project.
+struct AppGit {
+    handle: tauri::AppHandle,
+}
+
+impl AppGit {
+    fn call(&self, project: i64, cmd: &str, args: serde_json::Value) -> Option<serde_json::Value> {
+        self.handle
+            .state::<McpManager>()
+            .call(project, cmd, args, std::time::Duration::from_secs(30))
+            .ok()
+    }
+}
+
+impl chat::Git for AppGit {
+    fn head(&self, project: i64) -> Option<chat::Version> {
+        let list = self.call(project, "git.list", serde_json::json!({ "limit": 1 }))?;
+        let c = list.as_array()?.first()?;
+        Some(chat::Version {
+            hash: c["hash"].as_str()?.to_string(),
+            title: c["message"].as_str()?.to_string(),
+        })
+    }
+    fn dirty(&self, project: i64) -> bool {
+        self.call(project, "git.status", serde_json::json!({}))
+            .map(|v| v["dirty"] == true)
+            .unwrap_or(false)
+    }
+    fn checkpoint(&self, project: i64, title: &str) -> Option<chat::Version> {
+        let r = self.call(
+            project,
+            "git.checkpoint",
+            serde_json::json!({ "message": title }),
+        )?;
+        (r["created"] == true).then(|| chat::Version {
+            hash: r["hash"].as_str().unwrap_or("").to_string(),
+            title: title.to_string(),
+        })
+    }
+}
+
 /// Chatgeschiedenis en instellingen in de app-database.
 struct AppStore {
     handle: tauri::AppHandle,
@@ -228,7 +269,8 @@ pub fn run() {
                 app.handle().clone(),
                 app.handle().clone(),
             );
-            app.manage(ChatManager::new(
+            let git_handle = app.handle().clone();
+            let chat_mgr = ChatManager::new(
                 Arc::new(AppStore { handle: h_store }),
                 Arc::new(move |out: ChatOut| {
                     let _ = h_out.emit("chat-out", out);
@@ -244,7 +286,9 @@ pub fn run() {
                         )
                         .map(|_| ())
                 }),
-            ));
+            );
+            chat_mgr.set_git(Arc::new(AppGit { handle: git_handle }));
+            app.manage(chat_mgr);
 
             let handle = app.handle().clone();
             let bridge = Arc::new(AppBridge {

@@ -609,3 +609,156 @@ fn toestemming_end_to_end_via_de_echte_mcp_server() {
 
     mcp.stop(p.id);
 }
+
+// ---------- automatische versies ----------
+
+#[derive(Default)]
+struct FakeGit {
+    head: Mutex<Option<Version>>,
+    dirty: Mutex<bool>,
+    made: Mutex<Vec<String>>,
+}
+
+impl Git for FakeGit {
+    fn head(&self, _p: i64) -> Option<Version> {
+        self.head.lock().unwrap().clone()
+    }
+    fn dirty(&self, _p: i64) -> bool {
+        *self.dirty.lock().unwrap()
+    }
+    fn checkpoint(&self, _p: i64, title: &str) -> Option<Version> {
+        self.made.lock().unwrap().push(title.to_string());
+        let v = Version {
+            hash: format!("hash{}", self.made.lock().unwrap().len()),
+            title: title.to_string(),
+        };
+        *self.head.lock().unwrap() = Some(v.clone());
+        *self.dirty.lock().unwrap() = false;
+        Some(v)
+    }
+}
+
+fn versions(h: &H) -> Vec<StoredMessage> {
+    history(h)
+        .into_iter()
+        .filter(|m| m.kind == "version")
+        .collect()
+}
+
+#[cfg(unix)]
+#[test]
+fn na_een_geslaagde_beurt_met_wijzigingen_komt_er_automatisch_een_versie_met_een_korte_titel() {
+    let h = harness();
+    let git = Arc::new(FakeGit::default());
+    *git.dirty.lock().unwrap() = true;
+    h.mgr.set_git(git.clone());
+    let (l, _f) = launch(&h, "ok");
+    h.mgr
+        .send(
+            h.project,
+            "Maak een bestelknop voor mijn bakkerij op de pagina",
+            true,
+            &l,
+        )
+        .unwrap();
+    wait_for("versie in de chat", || !versions(&h).is_empty());
+
+    let v = &versions(&h)[0];
+    let title = v.payload["title"].as_str().unwrap();
+    assert!(title.split_whitespace().count() <= 8, "{title}");
+    assert_eq!(*git.made.lock().unwrap(), vec![title.to_string()]);
+    assert_eq!(v.payload["hash"], "hash1");
+    // De versie staat ná het antwoord van de AI in de chat.
+    let kinds = kinds(&h);
+    assert!(
+        kinds.iter().position(|k| k == "assistant").unwrap()
+            < kinds.iter().position(|k| k == "version").unwrap()
+    );
+    h.mgr.close_all();
+}
+
+/// Git waarbij de AI "tijdens de beurt" zelf een versie maakt: de eerste `head()` (begin van de beurt) is de oude, daarna de nieuwe.
+struct AiMakesVersion {
+    calls: AtomicUsize,
+    made: Mutex<Vec<String>>,
+}
+
+impl Git for AiMakesVersion {
+    fn head(&self, _p: i64) -> Option<Version> {
+        let first = self.calls.fetch_add(1, Ordering::SeqCst) == 0;
+        Some(if first {
+            Version {
+                hash: "oud".into(),
+                title: "Begin".into(),
+            }
+        } else {
+            Version {
+                hash: "nieuw".into(),
+                title: "Bestelknop toegevoegd".into(),
+            }
+        })
+    }
+    fn dirty(&self, _p: i64) -> bool {
+        false
+    }
+    fn checkpoint(&self, _p: i64, title: &str) -> Option<Version> {
+        self.made.lock().unwrap().push(title.to_string());
+        None
+    }
+}
+
+#[cfg(unix)]
+#[test]
+fn heeft_de_ai_zelf_een_versie_gemaakt_dan_wordt_die_getoond_zonder_dubbele_versie() {
+    let h = harness();
+    let git = Arc::new(AiMakesVersion {
+        calls: AtomicUsize::new(0),
+        made: Mutex::default(),
+    });
+    h.mgr.set_git(git.clone());
+    let (l, _f) = launch(&h, "ok");
+    h.mgr.send(h.project, "doe iets", true, &l).unwrap();
+    wait_for("versie in de chat", || !versions(&h).is_empty());
+    assert_eq!(versions(&h)[0].payload["title"], "Bestelknop toegevoegd");
+    assert!(git.made.lock().unwrap().is_empty(), "geen extra checkpoint");
+    h.mgr.close_all();
+}
+
+#[cfg(unix)]
+#[test]
+fn zonder_wijzigingen_en_zonder_nieuwe_versie_komt_er_niets_bij_en_na_een_mislukte_beurt_ook_niet()
+{
+    let h = harness();
+    let git = Arc::new(FakeGit::default());
+    h.mgr.set_git(git.clone());
+    let (l, _f) = launch(&h, "ok");
+    h.mgr.send(h.project, "alleen een vraag", true, &l).unwrap();
+    wait_for("antwoord", || {
+        !h.mgr.busy(h.project) && kinds(&h).contains(&"assistant".to_string())
+    });
+    std::thread::sleep(Duration::from_millis(300));
+    assert!(versions(&h).is_empty() && git.made.lock().unwrap().is_empty());
+    h.mgr.close_all();
+
+    // mislukte beurt (CLI crasht): ook al zijn er wijzigingen, geen versie
+    let h = harness();
+    let git = Arc::new(FakeGit::default());
+    *git.dirty.lock().unwrap() = true;
+    h.mgr.set_git(git.clone());
+    let (l, _f) = launch(&h, "crash");
+    h.mgr.send(h.project, "hoi", true, &l).unwrap();
+    wait_for("foutkaart", || kinds(&h).contains(&"error".to_string()));
+    std::thread::sleep(Duration::from_millis(300));
+    assert!(git.made.lock().unwrap().is_empty());
+}
+
+#[cfg(unix)]
+#[test]
+fn zonder_git_koppeling_werkt_de_chat_gewoon() {
+    let h = harness();
+    let (l, _f) = launch(&h, "ok");
+    h.mgr.send(h.project, "hoi", true, &l).unwrap();
+    wait_for("antwoord", || kinds(&h).contains(&"assistant".to_string()));
+    assert!(versions(&h).is_empty());
+    h.mgr.close_all();
+}

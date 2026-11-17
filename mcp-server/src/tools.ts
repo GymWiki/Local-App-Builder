@@ -9,6 +9,7 @@ import type { Runtime } from "./runtime.js";
 
 const exec = promisify(execFile);
 export const NOTES_FILE = "PROJECT.md";
+export const MAX_TITLE_WORDS = 8;
 const MAX_NOTES_BYTES = 1_000_000;
 
 export interface ProjectCtx {
@@ -204,11 +205,14 @@ export function registerTools(server: McpServer, ctx: ProjectCtx, record: (r: Ca
     "git_checkpoint",
     {
       description:
-        "Maakt een checkpoint: git add -A + commit met het bericht. Gevoelige bestanden (.env, sleutels) worden nooit meegenomen. Doe dit pas als run_checks slaagt.",
+        "Slaat een versie op (git add -A + commit). Het bericht is een titel van maximaal 8 woorden in gewone taal, zonder jargon; de gebruiker ziet die in zijn tijdlijn. Gevoelige bestanden (.env, sleutels) worden nooit meegenomen. Doe dit pas als run_checks slaagt.",
       inputSchema: { bericht: z.string().min(1).max(200) },
     },
     ({ bericht }) =>
       run("git_checkpoint", `len=${bericht.length}`, async () => {
+        // De titel is bedoeld voor mensen (tijdlijn in Studio): kort en in gewone taal.
+        const words = bericht.trim().split(/\s+/).length;
+        if (words > MAX_TITLE_WORDS) throw new Error(`Gebruik een titel van maximaal ${MAX_TITLE_WORDS} woorden in gewone taal (nu ${words}).`);
         const r = await rt.control("git.checkpoint", { message: bericht });
         return JSON.stringify(r, null, 2);
       }),

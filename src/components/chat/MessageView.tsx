@@ -44,6 +44,13 @@ export default function MessageView({ message, live, technical, canRetry, onRetr
       );
     case "error":
       return <ErrorCard message={message} technical={technical} canRetry={canRetry} onRetry={onRetry} onOpenAccounts={onOpenAccounts} />;
+    case "version":
+      return (
+        <div data-testid="version-line" className="flex items-center gap-2 px-2 text-sm text-zinc-300">
+          <span aria-hidden="true">💾</span>
+          <span>{t("chat.versieOpgeslagen", { titel: p.title })}</span>
+        </div>
+      );
     case "divider":
       return (
         <div role="separator" className="flex items-center gap-3 py-2 text-sm text-zinc-400">

@@ -381,7 +381,8 @@
       "uitleg": "Het gesprek wordt voortgezet met een andere AI. Die leest eerst de projectnotities (PROJECT.md) om te weten waar het project staat.",
       "tip": "Tip: vraag de huidige AI eerst de projectnotities bij te werken."
     },
-    "geenAccount": "standaard"
+    "geenAccount": "standaard",
+    "versieOpgeslagen": "Versie opgeslagen: {{titel}}"
   },
   "instellingen": {
     "titel": "Instellingen",
@@ -402,5 +403,20 @@
       "toelichting": "Gevaarlijke acties, zoals verwijderen en publiceren, vragen altijd bevestiging, welke keuze je ook maakt."
     },
     "opgeslagen": "Opgeslagen"
+  },
+  "versies": {
+    "titel": "Versies van je project",
+    "knop": "Versies",
+    "sluit": "Sluiten",
+    "uitleg": "Na elke keer dat de AI klaar is, bewaart Studio automatisch een versie. Je kunt altijd terug naar een eerdere versie.",
+    "laden": "Bezig met laden…",
+    "leeg": "Er zijn nog geen versies. Na het eerste antwoord van de AI verschijnt hier de eerste.",
+    "huidig": "huidige versie",
+    "terug": "Terug naar deze versie",
+    "bevestigTitel": "Terug naar ‘{{titel}}’?",
+    "bevestigUitleg": "Je huidige werk wordt eerst bewaard als een versie. Er gaat dus niets verloren, en je kunt later weer terug naar nu.",
+    "ja": "Ja, ga terug",
+    "teruggezet": "Klaar: je project staat weer zoals bij ‘{{titel}}’. Je vorige werk staat veilig in de lijst.",
+    "alGelijk": "Het project staat al in deze versie."
   }
 }

@@ -6,6 +6,9 @@ pub mod human;
 pub mod policy;
 pub mod store;
 pub mod tools;
+pub mod versions;
+
+pub use versions::{Git, Version};
 
 use crate::error::{AppError, Result};
 use crate::provider::Provider;
@@ -155,6 +158,10 @@ struct Inner {
     next_gen: AtomicU64,
     /// aanvraag-id → (bericht-id, payload) van openstaande toestemmingsvragen
     perms: Mutex<HashMap<String, (i64, Value)>>,
+    /// Git-acties voor automatische versies (ontbreekt in tests zonder git).
+    git: Mutex<Option<Arc<dyn Git>>>,
+    /// Per project: de situatie aan het begin van de lopende beurt.
+    turns: Mutex<HashMap<i64, versions::TurnInfo>>,
 }
 
 #[derive(Clone)]
@@ -194,10 +201,11 @@ impl Inner {
 /// Tijdelijke toestand van één lopend proces (leeft in de lezer-thread).
 struct TurnState {
     rows: HashMap<String, (i64, Value)>,
+    last_text: Option<String>,
 }
 
 fn handle_event(
-    inner: &Inner,
+    inner: &Arc<Inner>,
     project: i64,
     provider: Provider,
     account: Option<i64>,
@@ -212,6 +220,7 @@ fn handle_event(
                 .set_session(project, provider.as_str(), account, Some(&session_id))
         }
         ChatEvent::Text { text, .. } => {
+            st.last_text = Some(text.clone());
             inner.push(project, "assistant", json!({ "text": text }));
         }
         ChatEvent::Action {
@@ -247,13 +256,20 @@ fn handle_event(
         }
         ChatEvent::Status { state } => inner.status(project, state, true),
         ChatEvent::Error { code, technical } => inner.error(project, code, &technical),
-        ChatEvent::TurnDone { .. } => {
+        ChatEvent::TurnDone { ok } => {
             let left = pending.load(Ordering::SeqCst).saturating_sub(1);
             pending.store(left, Ordering::SeqCst);
             if left > 0 {
                 inner.status(project, Status::Thinking, true);
             } else {
                 inner.status(project, Status::Done, false);
+            }
+            // Na een geslaagde beurt automatisch een versie bewaren (op een eigen thread: git kan even duren).
+            if ok && left == 0 {
+                let (inner, text) = (inner.clone(), st.last_text.take());
+                std::thread::spawn(move || versions::finish_turn(&inner, project, text));
+            } else if ok {
+                st.last_text = None;
             }
         }
         ChatEvent::Fallback { reason } => {
@@ -286,8 +302,15 @@ impl ChatManager {
                 answerer,
                 next_gen: AtomicU64::new(1),
                 perms: Mutex::new(HashMap::new()),
+                git: Mutex::new(None),
+                turns: Mutex::new(HashMap::new()),
             }),
         }
+    }
+
+    /// Koppelt de git-acties voor automatische versies.
+    pub fn set_git(&self, git: Arc<dyn Git>) {
+        *self.inner.git.lock().unwrap() = Some(git);
     }
 
     pub fn busy(&self, project: i64) -> bool {
@@ -363,6 +386,7 @@ impl ChatManager {
             std::thread::spawn(move || {
                 let mut st = TurnState {
                     rows: HashMap::new(),
+                    last_text: None,
                 };
                 for line in BufReader::new(stdout)
                     .lines()
@@ -489,6 +513,23 @@ impl ChatManager {
         }
         if visible {
             self.inner.push(project, "user", json!({ "text": text }));
+        }
+        if !self.busy(project) {
+            let head = self
+                .inner
+                .git
+                .lock()
+                .unwrap()
+                .clone()
+                .and_then(|g| g.head(project))
+                .map(|v| v.hash);
+            self.inner.turns.lock().unwrap().insert(
+                project,
+                versions::TurnInfo {
+                    head,
+                    user_text: text.to_string(),
+                },
+            );
         }
         self.inner.status(project, Status::Thinking, true);
         let line = adapter_for(launch.provider).unwrap().encode_user(text);

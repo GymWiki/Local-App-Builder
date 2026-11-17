@@ -13,7 +13,7 @@ Je hoeft de preview dus niet zelf te starten of te configureren. Gebruik de tool
 2. **Draai `run_checks`** (lint, build en tests uit `package.json` of `studio.json`; bij een statisch project: html, links en console). Doe dit na élke wijziging, ook als je zeker weet dat het goed is.
 3. **Roep na elke wijziging `get_preview_screenshot` aan** zodra de MCP-tools beschikbaar zijn (eventueel met `viewport: "mobile"`) en kijk of het resultaat klopt. Roep ook `get_console_errors` aan; bij servergedrag helpt `get_dev_logs`. Bij een statisch project controleert `run_checks` bovendien of de HTML aanwezig is, of lokale links kloppen en of de console schoon is.
 4. **Fouten?** Los die eerst op en begin weer bij stap 2. Ga niet verder met nieuwe functionaliteit zolang checks falen, en zet geen tests of regels uit om groen te worden.
-5. **Alles groen?** Maak een checkpoint met `git_checkpoint` (korte, beschrijvende boodschap, bijvoorbeeld "Inlogscherm toegevoegd"). Eén checkpoint per afgeronde stap.
+5. **Alles groen?** Maak een checkpoint met `git_checkpoint`. De titel is **maximaal 8 woorden in gewone taal, zonder jargon** (bijvoorbeeld "Inlogscherm toegevoegd"); de gebruiker ziet die in zijn tijdlijn met versies. Eén checkpoint per afgeronde stap. Doe je het niet, dan bewaart Studio na je beurt zelf een versie.
 
 ## Overige afspraken
 - Lees `PROJECT.md` aan het begin (`read_project_notes`) en werk het bij (`update_project_notes`) bij beslissingen en statuswijzigingen. Het is de overdracht naar de volgende AI of sessie.

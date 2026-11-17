@@ -22,6 +22,7 @@ import {
 } from "../../lib/api";
 import InstallGuide from "../InstallGuide";
 import ChatSwitchDialog from "./ChatSwitchDialog";
+import VersionsDialog from "./VersionsDialog";
 import MessageView from "./MessageView";
 import PermissionDialog from "./PermissionDialog";
 
@@ -48,6 +49,7 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
   const [text, setText] = useState("");
   const [missing, setMissing] = useState<CliStatus | null>(null);
   const [switching, setSwitching] = useState(false);
+  const [showVersions, setShowVersions] = useState(false);
   const end = useRef<HTMLDivElement>(null);
 
   const fail = useCallback((e: unknown) => onError(t("fout.algemeen", { bericht: String(e) })), [onError, t]);
@@ -137,6 +139,9 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
           {target && <span className="ml-2 text-base font-normal text-zinc-400">{aiName}{target.account_label ? ` · ${target.account_label}` : ""}</span>}
         </h2>
         <div className="flex gap-2">
+          <button onClick={() => setShowVersions(true)} className="min-h-10 rounded-lg border border-zinc-600 px-3 text-base hover:bg-zinc-800">
+            {t("versies.knop")}
+          </button>
           <button onClick={() => setSwitching(true)} className="min-h-10 rounded-lg border border-zinc-600 px-3 text-base hover:bg-zinc-800">
             {t("chat.wissel")}
           </button>
@@ -221,6 +226,7 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
       </form>
 
       {asked && <PermissionDialog message={asked} technical={technical} onAnswer={(allow) => void permissionAnswer(id, asked.payload.req_id, allow).catch(fail)} />}
+      {showVersions && <VersionsDialog projectId={id} onClose={() => setShowVersions(false)} onError={onError} />}
       {switching && <ChatSwitchDialog accounts={accounts} onCancel={() => setSwitching(false)} onPick={(p, a) => void switchTo(p, a)} />}
     </section>
   );
