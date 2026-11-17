@@ -9,6 +9,16 @@ vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 const project = { id: 3, naam: "Kapsalon", pad: "/p", template: "leeg", created_at: "", default_account_id: null };
 
+describe("PublishPanel: online zetten", () => {
+  it("legt uit wat nodig is en laat de AI helpen", async () => {
+    (api.chatSend as Mock).mockResolvedValue(undefined);
+    render(<PublishPanel project={project} onError={vi.fn()} />);
+    expect(screen.getByText(/Een eigen adres, zoals jouwbedrijf\.nl/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Vraag de AI om hulp hierbij" }));
+    await waitFor(() => expect(api.chatSend).toHaveBeenCalledWith(3, expect.stringContaining("online zetten")));
+  });
+});
+
 describe("PublishPanel: Download je project", () => {
   it("zegt dat de code van de gebruiker is en wat er niet in zit", () => {
     render(<PublishPanel project={project} onError={vi.fn()} />);

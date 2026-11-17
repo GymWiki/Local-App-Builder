@@ -686,7 +686,17 @@
     }
   },
   "publiceren": {
-    "titel": "Publiceren en delen",
+    "titel": "Delen en online zetten",
+    "online": {
+      "titel": "Wil je dat anderen je website zien?",
+      "uitleg": "Dan moet je project op internet staan. Daarvoor heb je meestal drie dingen nodig:",
+      "stap1": "Een gedownload project. Dat maak je hierboven met ‘Download je project’.",
+      "stap2": "Een plek op internet waar je website mag staan (een ‘hostingbedrijf’). Veel bedrijven laten je gratis beginnen.",
+      "stap3": "Een eigen adres, zoals jouwbedrijf.nl. Dat kost meestal een klein bedrag per jaar.",
+      "knop": "Vraag de AI om hulp hierbij",
+      "prompt": "Ik wil mijn website online zetten, maar ik ben geen techneut. Leg in eenvoudige stappen uit wat ik nodig heb en welke keuzes ik moet maken. Doe niets zonder dat ik het goedvind.",
+      "verstuurd": "De vraag is naar de AI gestuurd. Kijk bij het tabblad ‘Maken’ voor het antwoord."
+    },
     "export": {
       "titel": "Download je project",
       "uitleg": "Je krijgt een zip met alle bestanden van je project.",
