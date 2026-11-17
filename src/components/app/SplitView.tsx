@@ -15,11 +15,11 @@ export default function SplitView({ left, right, id }: Props) {
   if (!wide) return <div className="min-h-0 min-w-0 flex-1">{left}</div>;
   return (
     <ResizablePanelGroup id={id} orientation="horizontal" className="min-h-0 flex-1">
-      <ResizablePanel id={`${id}-links`} defaultSize={50} minSize={30} className="min-w-0">
+      <ResizablePanel id={`${id}-links`} defaultSize={55} minSize={35} className="min-w-0">
         {left}
       </ResizablePanel>
       <ResizableHandle withHandle />
-      <ResizablePanel id={`${id}-rechts`} defaultSize={50} minSize={25} className="min-w-0">
+      <ResizablePanel id={`${id}-rechts`} defaultSize={45} minSize={25} className="min-w-0">
         <div className="flex h-full min-h-0 min-w-0 flex-col">{right}</div>
       </ResizablePanel>
     </ResizablePanelGroup>

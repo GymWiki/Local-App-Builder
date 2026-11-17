@@ -71,7 +71,8 @@ describe("ChatPanel: gesprek", () => {
   });
 
   it("snelle acties sturen een vooraf geschreven opdracht", async () => {
-    setup();
+    setup([msg("user", { text: "Hoi" })]);
+    await screen.findByTestId("bubble-user");
     await screen.findByPlaceholderText("Beschrijf wat je wilt maken...");
     for (const [knop, woord] of [["Maak het mooier", "mooier"], ["Maak het mobielvriendelijk", "telefoon"], ["Er klopt iets niet", "foutmeldingen"], ["Wat is er veranderd?", "veranderd"]]) {
       fireEvent.click(screen.getByRole("button", { name: knop }));
@@ -235,7 +236,7 @@ describe("ChatPanel: fouten in mensentaal", () => {
 describe("ChatPanel: terugval naar de terminal", () => {
   it("een AI zonder chatweergave toont uitleg en opent de technische weergave; invoer is uitgeschakeld", async () => {
     const gemini: ChatTarget = { provider: "gemini", account_id: null, account_label: null, structured: false, mode: "build" };
-    const { onOpenAdvanced } = setup([], gemini);
+    const { onOpenAdvanced } = setup([msg("user", { text: "Hoi" })], gemini);
     const note = await screen.findByTestId("terminal-fallback");
     expect(note).toHaveTextContent("Deze AI werkt nog niet in de chat");
     expect(note).toHaveTextContent("Gemini");
@@ -516,7 +517,12 @@ describe("ChatPanel: startvoorbeelden", () => {
     await waitFor(() => expect(api.chatSend).toHaveBeenCalledWith(1, expect.stringContaining("kapsalon")));
   });
 
-  it("zodra er een gesprek is, zijn de voorbeelden weg maar blijven de vaste snelle acties", async () => {
+  it("hint onder het invoerveld legt Enter en Shift+Enter uit", async () => {
+    setup();
+    expect(await screen.findByText(/Shift \+ Enter begint een nieuwe regel/)).toBeInTheDocument();
+  });
+
+  it("in een leeg gesprek staan alleen voorbeelden; zodra er een gesprek is, komen de snelle acties", async () => {
     setup([msg("user", { text: "Hoi" })]);
     await screen.findByTestId("bubble-user");
     expect(screen.queryByRole("button", { name: /^Gebruik dit voorbeeld:/ })).not.toBeInTheDocument();
@@ -539,9 +545,9 @@ describe("ChatPanel: opdracht-verbeteraar", () => {
   it("de knop is uit bij een leeg veld en toont een bewerkbaar voorstel; er wordt niets verstuurd zonder bevestiging", async () => {
     setup();
     const veld = await screen.findByPlaceholderText("Beschrijf wat je wilt maken...");
-    expect(screen.getByRole("button", { name: "Verbeter mijn opdracht" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Verbeter tekst" })).toBeDisabled();
     fireEvent.change(veld, { target: { value: "  site voor mijn bakker " } });
-    fireEvent.click(screen.getByRole("button", { name: "Verbeter mijn opdracht" }));
+    fireEvent.click(screen.getByRole("button", { name: "Verbeter tekst" }));
     const voorstel = await screen.findByLabelText("Verbeterde opdracht");
     expect(api.improvePrompt).toHaveBeenCalledWith(1, "site voor mijn bakker");
     expect(voorstel).toHaveValue("Doel: een site voor de bakker.\n- Startpagina\n- Bestellen");
@@ -555,11 +561,11 @@ describe("ChatPanel: opdracht-verbeteraar", () => {
     setup();
     const veld = await screen.findByPlaceholderText("Beschrijf wat je wilt maken...");
     fireEvent.change(veld, { target: { value: "site" } });
-    fireEvent.click(screen.getByRole("button", { name: "Verbeter mijn opdracht" }));
+    fireEvent.click(screen.getByRole("button", { name: "Verbeter tekst" }));
     await screen.findByLabelText("Verbeterde opdracht");
     fireEvent.click(screen.getByRole("button", { name: "Zet in mijn tekstvak" }));
     await waitFor(() => expect(veld).toHaveValue("Doel: een site voor de bakker.\n- Startpagina\n- Bestellen"));
-    fireEvent.click(screen.getByRole("button", { name: "Verbeter mijn opdracht" }));
+    fireEvent.click(screen.getByRole("button", { name: "Verbeter tekst" }));
     await screen.findByLabelText("Verbeterde opdracht");
     fireEvent.click(screen.getByRole("button", { name: "Annuleren" }));
     await waitFor(() => expect(screen.queryByLabelText("Verbeterde opdracht")).not.toBeInTheDocument());
@@ -571,7 +577,7 @@ describe("ChatPanel: opdracht-verbeteraar", () => {
     setup();
     const veld = await screen.findByPlaceholderText("Beschrijf wat je wilt maken...");
     fireEvent.change(veld, { target: { value: "site" } });
-    fireEvent.click(screen.getByRole("button", { name: "Verbeter mijn opdracht" }));
+    fireEvent.click(screen.getByRole("button", { name: "Verbeter tekst" }));
     expect(await screen.findByText("De AI deed er te lang over.")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Probeer opnieuw" }));
     expect(await screen.findByLabelText("Verbeterde opdracht")).toHaveValue("Beter");

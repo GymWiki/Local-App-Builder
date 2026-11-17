@@ -271,6 +271,7 @@
     "invoerLabel": "Wat wil je maken of veranderen?",
     "placeholder": "Beschrijf wat je wilt maken...",
     "verstuur": "Versturen",
+    "hint": "Enter verstuurt je bericht. Shift + Enter begint een nieuwe regel.",
     "stop": "Stoppen",
     "geschiedenis": "Gesprek",
     "leeg": "Hier komt je gesprek. Vertel in gewone woorden wat je wilt maken, bijvoorbeeld: ‘een website voor mijn bakkerij’.",
@@ -429,6 +430,7 @@
     "versieOpgeslagen": "Versie opgeslagen: {{titel}}",
     "modus": {
       "label": "Wat moet de AI nu doen?",
+      "kop": "De AI mag:",
       "plan": "Eerst overleggen",
       "build": "Bouwen",
       "planUitleg": "De AI denkt mee en stelt een plan voor, maar past niets aan.",
@@ -455,7 +457,7 @@
       "overlegPrompt": "Stop even met bouwen. Leg in gewone woorden uit wat er misgaat en waarom, en stel een ander plan voor. Pas nog niets aan."
     },
     "bijlage": {
-      "knop": "Bestand toevoegen",
+      "knop": "Bestand",
       "kies": "Kies een afbeelding of document",
       "sleep": "Laat het bestand hier los om het mee te sturen",
       "verwijder": "Verwijder {{naam}}",
@@ -474,7 +476,7 @@
       "knop": "Gebruik dit voorbeeld"
     },
     "verbeter": {
-      "knop": "Verbeter mijn opdracht",
+      "knop": "Verbeter tekst",
       "knopUitleg": "De AI schrijft je zin om tot een duidelijke opdracht. Je ziet eerst een voorstel.",
       "titel": "Voorstel voor je opdracht",
       "uitleg": "Dit is een voorstel. Pas het gerust aan. Er wordt pas iets verstuurd als jij op ‘Versturen’ drukt.",

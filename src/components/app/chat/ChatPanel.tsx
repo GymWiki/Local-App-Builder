@@ -1,4 +1,13 @@
-import { useCallback, useEffect, useRef, useState, type ClipboardEvent, type DragEvent, type FormEvent, type KeyboardEvent } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ClipboardEvent,
+  type DragEvent,
+  type FormEvent,
+  type KeyboardEvent,
+} from "react";
 import { useTranslation } from "react-i18next";
 import { listen } from "@tauri-apps/api/event";
 import {
@@ -33,7 +42,14 @@ import MessageView from "./MessageView";
 import AssetThumb from "./AssetThumb";
 import ImproveDialog from "./ImproveDialog";
 import { WandSparklesIcon } from "lucide-react";
-import { CircleDotIcon, LoaderIcon, PaperclipIcon, SendIcon, SquareIcon, XIcon } from "lucide-react";
+import {
+  CircleDotIcon,
+  LoaderIcon,
+  PaperclipIcon,
+  SendIcon,
+  SquareIcon,
+  XIcon,
+} from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -57,7 +73,14 @@ import starter from "@/data/starter.json";
 /** Vaste snelle acties onder het gesprek; de teksten staan in src/data/starter.json. */
 const QUICK = starter.snelleActies;
 
-export default function ChatPanel({ project, accounts, technical, onOpenAdvanced, onOpenAccounts, onError }: Props) {
+export default function ChatPanel({
+  project,
+  accounts,
+  technical,
+  onOpenAdvanced,
+  onOpenAccounts,
+  onError,
+}: Props) {
   const { t } = useTranslation();
   const id = project.id;
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -77,7 +100,10 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
   const end = useRef<HTMLDivElement>(null);
   const picker = useRef<HTMLInputElement>(null);
 
-  const fail = useCallback((e: unknown) => onError(t("fout.algemeen", { bericht: String(e) })), [onError, t]);
+  const fail = useCallback(
+    (e: unknown) => onError(t("fout.algemeen", { bericht: String(e) })),
+    [onError, t],
+  );
 
   // Geschiedenis, doel-AI en of er al iets bezig is: bij het (her)openen van het project.
   useEffect(() => {
@@ -90,7 +116,10 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
         setMessages(h);
         setBusy(b);
         setStatus(b ? "thinking" : "idle");
-        setFallback(h.some((m) => m.kind === "notice" && m.payload.kind === "fallback") && h.at(-1)?.kind === "notice");
+        setFallback(
+          h.some((m) => m.kind === "notice" && m.payload.kind === "fallback") &&
+            h.at(-1)?.kind === "notice",
+        );
       })
       .catch((e) => !cancelled && fail(e));
     return () => {
@@ -103,8 +132,14 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
     const un = listen<ChatOut>("chat-out", (e) => {
       const ev = e.payload;
       if (ev.project_id !== id) return;
-      if (ev.type === "message") setMessages((m) => (m.some((x) => x.id === ev.message.id) ? m : [...m, ev.message]));
-      else if (ev.type === "update") setMessages((m) => m.map((x) => (x.id === ev.message.id ? ev.message : x)));
+      if (ev.type === "message")
+        setMessages((m) =>
+          m.some((x) => x.id === ev.message.id) ? m : [...m, ev.message],
+        );
+      else if (ev.type === "update")
+        setMessages((m) =>
+          m.map((x) => (x.id === ev.message.id ? ev.message : x)),
+        );
       else if (ev.type === "status") {
         setStatus(ev.state);
         setBusy(ev.busy);
@@ -121,14 +156,24 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
   async function send(body: string, fromProposal = false) {
     const trimmed = body.trim();
     const files = body === text || fromProposal ? pending : [];
-    if ((!trimmed && files.length === 0) || !target?.structured || uploading > 0) return;
+    if (
+      (!trimmed && files.length === 0) ||
+      !target?.structured ||
+      uploading > 0
+    )
+      return;
     try {
       const st = await cliStatus(target.provider);
       if (!st.installed) return setMissing(st);
       setMissing(null);
       setText("");
       setPending([]);
-      if (files.length > 0) await chatSend(id, trimmed, files.map((f) => f.path));
+      if (files.length > 0)
+        await chatSend(
+          id,
+          trimmed,
+          files.map((f) => f.path),
+        );
       else await chatSend(id, trimmed);
     } catch (e) {
       fail(e);
@@ -146,7 +191,11 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
       }
       const c = checkFile(name, file.size);
       if (!c.ok) {
-        onError(c.reason === "size" ? t("chat.bijlage.teGroot", { naam: name, max: c.max }) : t("chat.bijlage.typeNiet", { naam: name }));
+        onError(
+          c.reason === "size"
+            ? t("chat.bijlage.teGroot", { naam: name, max: c.max })
+            : t("chat.bijlage.typeNiet", { naam: name }),
+        );
         continue;
       }
       count++;
@@ -219,8 +268,13 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
     }
   }
 
-  const lastLoopId = [...messages].reverse().find((x) => x.kind === "loop_alert")?.id;
-  const asked = messages.find((m) => m.kind === "permission" && m.payload.state === "asked") ?? null;
+  const lastLoopId = [...messages]
+    .reverse()
+    .find((x) => x.kind === "loop_alert")?.id;
+  const asked =
+    messages.find(
+      (m) => m.kind === "permission" && m.payload.state === "asked",
+    ) ?? null;
   const aiName = target ? t(`provider.${target.provider}`) : "";
   const unavailable = target && (!target.structured || fallback);
 
@@ -234,12 +288,17 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
         setDragging(true);
       }}
       onDragLeave={(e) => {
-        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDragging(false);
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null))
+          setDragging(false);
       }}
       onDrop={(e) => (unavailable ? e.preventDefault() : onDrop(e))}
     >
       {dragging && (
-        <div role="note" data-testid="drop-hint" className="pointer-events-none absolute inset-x-0 top-1/3 z-10 mx-auto w-fit rounded-xl bg-primary px-6 py-4 text-lg font-semibold text-primary-foreground shadow-lg">
+        <div
+          role="note"
+          data-testid="drop-hint"
+          className="pointer-events-none absolute inset-x-0 top-1/3 z-10 mx-auto w-fit rounded-xl bg-primary px-6 py-4 text-lg font-semibold text-primary-foreground shadow-lg"
+        >
           {t("chat.bijlage.sleep")}
         </div>
       )}
@@ -254,10 +313,18 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
           )}
         </h2>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => setShowVersions(true)}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowVersions(true)}
+          >
             {t("versies.knop")}
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setSwitching(true)}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setSwitching(true)}
+          >
             {t("chat.wissel")}
           </Button>
           <Button variant="outline" size="sm" onClick={onOpenAdvanced}>
@@ -266,19 +333,33 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
         </div>
       </header>
 
-      <ScrollArea role="log" aria-live="polite" aria-label={t("chat.geschiedenis")} className="min-h-0 flex-1">
+      <ScrollArea
+        role="log"
+        aria-live="polite"
+        aria-label={t("chat.geschiedenis")}
+        className="min-h-0 flex-1"
+      >
         <div className="space-y-3 px-5 py-4">
           {messages.length === 0 && !unavailable && (
             <section aria-label={t("chat.start.titel")} className="space-y-3">
               <p className="text-lg text-muted-foreground">{t("chat.leeg")}</p>
               <h3 className="text-lg font-semibold">{t("chat.start.titel")}</h3>
-              <p className="text-base text-muted-foreground">{t("chat.start.uitleg")}</p>
+              <p className="text-base text-muted-foreground">
+                {t("chat.start.uitleg")}
+              </p>
               <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {starter.voorbeelden.map((v) => (
                   <li key={v.id}>
-                    <Button variant="outline" className="h-auto w-full flex-col items-start gap-1 py-3 text-left whitespace-normal" aria-label={`${t("chat.start.knop")}: ${v.titel}`} onClick={() => void send(v.prompt)}>
+                    <Button
+                      variant="outline"
+                      className="h-auto w-full flex-col items-start gap-1 py-3 text-left whitespace-normal"
+                      aria-label={`${t("chat.start.knop")}: ${v.titel}`}
+                      onClick={() => void send(v.prompt)}
+                    >
                       <span className="font-semibold">{v.titel}</span>
-                      <span className="text-sm font-normal text-muted-foreground">{v.uitleg}</span>
+                      <span className="text-sm font-normal text-muted-foreground">
+                        {v.uitleg}
+                      </span>
                     </Button>
                   </li>
                 ))}
@@ -291,7 +372,11 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
               message={m}
               live={busy}
               technical={technical}
-              canRetry={!busy && m.id === [...messages].reverse().find((x) => x.kind === "error")?.id}
+              canRetry={
+                !busy &&
+                m.id ===
+                  [...messages].reverse().find((x) => x.kind === "error")?.id
+              }
               onRetry={() => void chatRetry(id).catch(fail)}
               onOpenAccounts={onOpenAccounts}
               loop={{
@@ -304,12 +389,27 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
               }}
             />
           ))}
-          {missing && <InstallGuide status={missing} onInstalled={() => setMissing(null)} />}
+          {missing && (
+            <InstallGuide
+              status={missing}
+              onInstalled={() => setMissing(null)}
+            />
+          )}
           {unavailable && (
-            <Alert data-testid="terminal-fallback" role="note" className="space-y-3 border-warning bg-warning/10 p-5 text-lg">
-              <AlertTitle className="font-semibold">{t("chat.terugval.titel")}</AlertTitle>
+            <Alert
+              data-testid="terminal-fallback"
+              role="note"
+              className="space-y-3 border-warning bg-warning/10 p-5 text-lg"
+            >
+              <AlertTitle className="font-semibold">
+                {t("chat.terugval.titel")}
+              </AlertTitle>
               <AlertDescription className="space-y-3 text-lg text-foreground">
-                <p>{fallback && target?.structured ? t("chat.terugval.uitlegFout") : t("chat.terugval.uitleg", { ai: aiName })}</p>
+                <p>
+                  {fallback && target?.structured
+                    ? t("chat.terugval.uitlegFout")
+                    : t("chat.terugval.uitleg", { ai: aiName })}
+                </p>
                 <Button onClick={onOpenAdvanced}>{t("chat.technisch")}</Button>
               </AlertDescription>
             </Alert>
@@ -318,29 +418,69 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
         </div>
       </ScrollArea>
 
-      <div role="status" aria-live="polite" data-testid="status-line" className="flex items-center gap-3 border-t border-border px-5 py-2 text-base text-muted-foreground">
-        {busy ? <LoaderIcon aria-hidden="true" className="size-4 animate-spin" /> : <CircleDotIcon aria-hidden="true" className="size-4" />}
-        <span>{t(`chat.status.${busy ? status : status === "done" ? "done" : "idle"}`)}</span>
+      <div
+        role="status"
+        aria-live="polite"
+        data-testid="status-line"
+        className="flex items-center gap-3 border-t border-border px-5 py-2 text-base text-muted-foreground"
+      >
+        {busy ? (
+          <LoaderIcon aria-hidden="true" className="size-4 animate-spin" />
+        ) : (
+          <CircleDotIcon aria-hidden="true" className="size-4" />
+        )}
+        <span>
+          {t(
+            `chat.status.${busy ? status : status === "done" ? "done" : "idle"}`,
+          )}
+        </span>
         {busy && (
-          <Button variant="outline" size="xs" className="ml-auto" onClick={() => void chatStop(id)}>
+          <Button
+            variant="outline"
+            size="xs"
+            className="ml-auto"
+            onClick={() => void chatStop(id)}
+          >
             <SquareIcon aria-hidden="true" />
             {t("chat.stop")}
           </Button>
         )}
       </div>
 
-      <div className="flex flex-wrap gap-2 px-5 pb-2" role="group" aria-label={t("chat.snel.titel")}>
-        {QUICK.map((a) => (
-          <Button key={a.id} variant="outline" size="sm" className="rounded-full" disabled={!!unavailable} onClick={() => void send(a.prompt)}>
-            {a.label}
+      {messages.length > 0 && (
+        <div
+          className="flex gap-2 overflow-x-auto px-5 pb-2"
+          role="group"
+          aria-label={t("chat.snel.titel")}
+        >
+          {QUICK.map((a) => (
+            <Button
+              key={a.id}
+              variant="outline"
+              size="sm"
+              className="shrink-0 rounded-full"
+              disabled={!!unavailable}
+              onClick={() => void send(a.prompt)}
+            >
+              {a.label}
+            </Button>
+          ))}
+          <Button
+            variant="outline"
+            size="sm"
+            className="shrink-0 rounded-full"
+            disabled={!!unavailable}
+            onClick={() => void send(t("chat.snelPrompt.veranderd"))}
+          >
+            {t("chat.snel.veranderd")}
           </Button>
-        ))}
-        <Button variant="outline" size="sm" className="rounded-full" disabled={!!unavailable} onClick={() => void send(t("chat.snelPrompt.veranderd"))}>
-          {t("chat.snel.veranderd")}
-        </Button>
-      </div>
+        </div>
+      )}
 
       <div className="flex flex-wrap items-center gap-3 border-t border-border px-4 pt-3">
+        <span className="text-base text-muted-foreground">
+          {t("chat.modus.kop")}
+        </span>
         <ToggleGroup
           type="single"
           variant="outline"
@@ -353,7 +493,12 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
           spacing={0}
         >
           {(["plan", "build"] as const).map((m) => (
-            <ToggleGroupItem key={m} value={m} title={t(`chat.modus.${m}Uitleg`)} className="px-4 text-base data-[state=on]:bg-primary data-[state=on]:font-semibold data-[state=on]:text-primary-foreground">
+            <ToggleGroupItem
+              key={m}
+              value={m}
+              title={t(`chat.modus.${m}Uitleg`)}
+              className="px-4 text-base data-[state=on]:bg-accent data-[state=on]:font-semibold data-[state=on]:text-accent-foreground"
+            >
               {t(`chat.modus.${m}`)}
             </ToggleGroupItem>
           ))}
@@ -366,16 +511,26 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
       </div>
       {(pending.length > 0 || uploading > 0) && (
         <div className="flex flex-wrap items-center gap-3 px-4 pt-3">
-          <ul aria-label={t("chat.bijlage.lijst")} className="flex flex-wrap gap-3">
+          <ul
+            aria-label={t("chat.bijlage.lijst")}
+            className="flex flex-wrap gap-3"
+          >
             {pending.map((a) => (
               <li key={a.path} className="relative">
-                <AssetThumb projectId={id} path={a.path} name={a.name} kind={a.kind} />
+                <AssetThumb
+                  projectId={id}
+                  path={a.path}
+                  name={a.name}
+                  kind={a.kind}
+                />
                 <Button
                   type="button"
                   variant="secondary"
                   size="icon-xs"
                   aria-label={t("chat.bijlage.verwijder", { naam: a.name })}
-                  onClick={() => setPending((p) => p.filter((x) => x.path !== a.path))}
+                  onClick={() =>
+                    setPending((p) => p.filter((x) => x.path !== a.path))
+                  }
                   className="absolute -top-2 -right-2 rounded-full"
                 >
                   <XIcon aria-hidden="true" />
@@ -390,7 +545,7 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
           )}
         </div>
       )}
-      <form onSubmit={onSubmit} className="flex items-end gap-3 p-4">
+      <form onSubmit={onSubmit} className="flex flex-col gap-2 p-4">
         {/* Verborgen bestandskiezer: shadcn heeft hiervoor geen onderdeel; de zichtbare knop is een <Button>. */}
         {/* eslint-disable-next-line no-restricted-syntax */}
         <input
@@ -405,10 +560,6 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
             e.target.value = "";
           }}
         />
-        <Button type="button" variant="outline" size="lg" aria-label={t("chat.bijlage.kies")} title={t("chat.bijlage.kies")} disabled={!!unavailable} onClick={() => picker.current?.click()}>
-          <PaperclipIcon aria-hidden="true" />
-          {t("chat.bijlage.knop")}
-        </Button>
         <label className="sr-only" htmlFor="chat-input">
           {t("chat.invoerLabel")}
         </label>
@@ -419,21 +570,67 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
           onKeyDown={onKey}
           onPaste={onPaste}
           disabled={!!unavailable}
-          rows={3}
-          placeholder={mode === "plan" ? t("chat.modus.placeholderPlan") : t("chat.placeholder")}
-          className="min-h-24 min-w-0 flex-1 resize-y text-lg leading-relaxed"
+          rows={2}
+          placeholder={
+            mode === "plan"
+              ? t("chat.modus.placeholderPlan")
+              : t("chat.placeholder")
+          }
+          className="max-h-48 min-h-16 w-full min-w-0 resize-none overflow-y-auto text-lg leading-relaxed [field-sizing:content]"
+          aria-describedby="chat-hint"
         />
-        <Button type="button" variant="outline" size="lg" title={t("chat.verbeter.knopUitleg")} disabled={!text.trim() || !!unavailable || !target?.structured} onClick={() => setImproving(text.trim())}>
-          <WandSparklesIcon aria-hidden="true" />
-          {t("chat.verbeter.knop")}
-        </Button>
-        <Button type="submit" size="lg" disabled={(!text.trim() && pending.length === 0) || uploading > 0 || !!unavailable}>
-          <SendIcon aria-hidden="true" />
-          {t("chat.verstuur")}
-        </Button>
+        <p id="chat-hint" className="text-sm text-muted-foreground">
+          {t("chat.hint")}
+        </p>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            aria-label={t("chat.bijlage.kies")}
+            title={t("chat.bijlage.kies")}
+            disabled={!!unavailable}
+            onClick={() => picker.current?.click()}
+          >
+            <PaperclipIcon aria-hidden="true" />
+            {t("chat.bijlage.knop")}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            size="lg"
+            title={t("chat.verbeter.knopUitleg")}
+            disabled={!text.trim() || !!unavailable || !target?.structured}
+            onClick={() => setImproving(text.trim())}
+          >
+            <WandSparklesIcon aria-hidden="true" />
+            {t("chat.verbeter.knop")}
+          </Button>
+          <Button
+            type="submit"
+            size="lg"
+            className="ml-auto"
+            disabled={
+              (!text.trim() && pending.length === 0) ||
+              uploading > 0 ||
+              !!unavailable
+            }
+          >
+            <SendIcon aria-hidden="true" />
+            {t("chat.verstuur")}
+          </Button>
+        </div>
       </form>
 
-      {asked && <PermissionDialog message={asked} technical={technical} onAnswer={(allow) => void permissionAnswer(id, asked.payload.req_id, allow).catch(fail)} />}
+      {asked && (
+        <PermissionDialog
+          message={asked}
+          technical={technical}
+          onAnswer={(allow) =>
+            void permissionAnswer(id, asked.payload.req_id, allow).catch(fail)
+          }
+        />
+      )}
       {improving !== null && (
         <ImproveDialog
           projectId={id}
@@ -449,8 +646,20 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
           }}
         />
       )}
-      {showVersions && <VersionsDialog projectId={id} onClose={() => setShowVersions(false)} onError={onError} />}
-      {switching && <ChatSwitchDialog accounts={accounts} onCancel={() => setSwitching(false)} onPick={(p, a) => void switchTo(p, a)} />}
+      {showVersions && (
+        <VersionsDialog
+          projectId={id}
+          onClose={() => setShowVersions(false)}
+          onError={onError}
+        />
+      )}
+      {switching && (
+        <ChatSwitchDialog
+          accounts={accounts}
+          onCancel={() => setSwitching(false)}
+          onPick={(p, a) => void switchTo(p, a)}
+        />
+      )}
     </section>
   );
 }
