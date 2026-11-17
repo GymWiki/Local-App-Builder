@@ -19,6 +19,7 @@ import {
 import AppSidebar from "@/components/app/AppSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -150,7 +151,11 @@ export default function App() {
     setSessions((s) => ({ ...s, [id]: [] }));
     setMcp((m) => ({ ...m, [id]: null }));
     setPreview((m) => ({ ...m, [id]: null }));
-    if (selectedId === id) setSelectedId(null);
+    if (selectedId === id) {
+      setSelectedId(null);
+      setTab("maken");
+    }
+    toast.success(t("info.gesloten"));
   }
 
   const selected = projects.find((p) => p.id === selectedId) ?? null;
