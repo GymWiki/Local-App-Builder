@@ -1,4 +1,7 @@
 {
+  "ui": {
+    "sluiten": "Sluiten"
+  },
   "app": {
     "naam": "Studio"
   },
