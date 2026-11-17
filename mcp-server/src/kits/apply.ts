@@ -285,11 +285,11 @@ async function patchMain(dir: string): Promise<void> {
 }
 
 /** Tokens van het project aanpassen (hoofdkleur, afronding, ruimte, lettertype) en de gegenereerde bestanden vernieuwen. */
-export async function tailorProject(packsDir: string, projectDir: string, t: Tailor): Promise<Tokens> {
+export async function tailorProject(packsDir: string, projectDir: string, t: Tailor, reset = false): Promise<Tokens> {
   const info = await currentKit(projectDir);
   if (!info) throw new KitError("Dit project heeft nog geen uiterlijk gekozen.");
   const { kit } = loadKit(packsDir, info.kit);
-  const cur = JSON.parse(await readFile(path.join(projectDir, "design", "tokens.json"), "utf8")) as Tokens;
+  const cur = reset ? loadKit(packsDir, info.kit).tokens : (JSON.parse(await readFile(path.join(projectDir, "design", "tokens.json"), "utf8")) as Tokens);
   const next = tailorTokens(cur, t);
   await writeFile(path.join(projectDir, "design", "tokens.json"), JSON.stringify(next, null, 2) + "\n");
   if (info.stack === "react-vite") await writeFile(path.join(projectDir, "src", "kit", "tokens.css"), toCss(kit, next));

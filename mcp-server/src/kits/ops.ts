@@ -32,6 +32,7 @@ export interface KitCard {
   stacks: string[];
   compatible: boolean;
   attributieVerplicht: boolean;
+  installatiescripts: boolean;
   pakketten: string[];
   preview: string | null;
   /** Kleuren om te laten zien op de kaart. */
@@ -71,6 +72,7 @@ export async function listKits(packsDir: string, projectDir: string | null, stac
         stacks: kit.stacks,
         compatible: stack ? kit.stacks.includes(stack) : true,
         attributieVerplicht: kit.attributie.verplicht,
+        installatiescripts: kit.installatiescripts,
         pakketten: kit.type === "npm" ? [`${kit.pakketnaam}@${kit.versie}`, ...kit.extraPakketten.map((p) => `${p.naam}@${p.versie}`)] : kit.extraPakketten.map((p) => `${p.naam}@${p.versie}`),
         preview: previewUrl(path.join(dir, kit.preview)),
         kleuren: { primair: tokens.kleuren.licht.primair, achtergrond: tokens.kleuren.licht.achtergrond, tekst: tokens.kleuren.licht.tekst },
@@ -196,6 +198,8 @@ export async function runScripts(host: Pick<KitHost, "projectDir" | "run">, pack
   return r.exitCode === 0 ? { ok: true } : { ok: false, detail: r.output.trim().split("\n").slice(-6).join("\n") };
 }
 
-export async function tailor(host: Pick<KitHost, "projectDir" | "packsDir">, t: Tailor): Promise<Tokens> {
-  return tailorProject(host.packsDir, host.projectDir, t);
+/** Past de tokens aan. Met `reset` begint het opnieuw bij de standaardwaarden van de kit. */
+export async function tailor(host: Pick<KitHost, "projectDir" | "packsDir">, t: Tailor & { reset?: boolean }): Promise<Tokens> {
+  const { reset, ...rest } = t;
+  return tailorProject(host.packsDir, host.projectDir, rest, reset === true);
 }

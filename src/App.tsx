@@ -262,6 +262,8 @@ export default function App() {
             setDialogOpen(false);
             await refresh();
             await select(p.id);
+            // Een startklaar web-project: eerst een uiterlijk laten kiezen.
+            if (p.template !== "leeg") setTab("uiterlijk");
           }}
         />
       )}

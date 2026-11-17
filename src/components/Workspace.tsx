@@ -3,9 +3,10 @@ import { useTranslation } from "react-i18next";
 import type { Account, McpInfo, PreviewInfo, Project } from "../lib/api";
 import ChatPanel from "./chat/ChatPanel";
 import PreviewPanel from "./PreviewPanel";
+import AppearancePanel from "./kits/AppearancePanel";
 import TerminalPanel, { type Session } from "./TerminalPanel";
 
-export const TABS = ["maken", "publiceren", "geavanceerd"] as const;
+export const TABS = ["maken", "uiterlijk", "publiceren", "geavanceerd"] as const;
 export type Tab = (typeof TABS)[number];
 
 interface Props {
@@ -98,6 +99,26 @@ export default function Workspace({
               />
             </div>
           </div>
+          {tab === "uiterlijk" && (
+            <div role="tabpanel" className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-2">
+              <div className="min-h-0 min-w-0 overflow-y-auto border-r border-zinc-800">
+                <AppearancePanel key={project.id} projectId={project.id} firstRun={project.template !== "leeg"} onError={fail} />
+              </div>
+              <div className="hidden min-h-0 min-w-0 flex-col lg:flex">
+                <PreviewPanel
+                  project={project}
+                  mcp={mcp}
+                  preview={preview}
+                  visible
+                  reloadNonce={reloadNonce}
+                  autoSwitch={autoSwitch}
+                  onAutoSwitch={onAutoSwitch}
+                  onError={fail}
+                  onRetryMcp={onRetryMcp}
+                />
+              </div>
+            </div>
+          )}
           <div role="tabpanel" hidden={tab !== "geavanceerd"} className={`min-h-0 flex-1 flex-col ${tab === "geavanceerd" ? "flex" : "hidden"}`}>
             <TerminalPanel
               key={project.id}

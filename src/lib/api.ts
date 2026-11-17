@@ -271,3 +271,64 @@ export const chatSwitch = (projectId: number, provider: Provider, accountId: num
 export const permissionAnswer = (projectId: number, reqId: string, allow: boolean) =>
   invoke<void>("permission_answer", { projectId, reqId, allow });
 export const chatModeSet = (projectId: number, mode: ChatMode) => invoke<void>("chat_mode_set", { projectId, mode });
+
+// UI-kits (uiterlijk)
+export type KitStack = "react-vite" | "flutter";
+export interface KitCard {
+  id: string;
+  naam: string;
+  beschrijving: string;
+  label: string;
+  licentie: string;
+  stacks: string[];
+  compatible: boolean;
+  attributieVerplicht: boolean;
+  installatiescripts: boolean;
+  pakketten: string[];
+  preview: string | null;
+  kleuren: { primair: string; achtergrond: string; tekst: string };
+}
+export interface KitList {
+  stack: KitStack | null;
+  kits: KitCard[];
+  geweigerd: { id: string; reden: string }[];
+}
+export interface KitTokens {
+  kleuren: { licht: Record<string, string>; donker: Record<string, string> };
+  rondingen: Record<string, string>;
+  spacing: { schaal: number; eenheid: string };
+  typografie: { lettertype: string };
+  instellingen?: { afronding?: "scherp" | "gemiddeld" | "rond"; ruimte?: "compact" | "normaal" | "ruim" };
+}
+export interface KitCurrent {
+  kit: { kit: string; naam: string; versie: string | null; licentie: string; stack: KitStack } | null;
+  tokens: KitTokens | null;
+  attributie: { required: boolean; ok: boolean };
+}
+export type KitApplyCode = "ok" | "refused" | "install_failed" | "checks_failed" | "no_repo";
+export interface KitApplyOutcome {
+  ok: boolean;
+  code: KitApplyCode;
+  rolledBack: boolean;
+  detail?: string;
+  plan?: { kitId: string; naam: string; pakketten: string[]; verwijderen: string[] };
+  scriptsSkipped: string[];
+  checksSkipped?: string;
+  before?: string;
+  version?: string;
+  switched: boolean;
+  shotBefore?: string | null;
+  shotAfter?: string | null;
+}
+export interface KitTailor {
+  hoofdkleur?: string;
+  afronding?: "scherp" | "gemiddeld" | "rond";
+  ruimte?: "compact" | "normaal" | "ruim";
+  lettertype?: string;
+  reset?: boolean;
+}
+export const kitList = (projectId: number) => invoke<KitList>("kit_list", { projectId });
+export const kitCurrent = (projectId: number) => invoke<KitCurrent>("kit_current", { projectId });
+export const kitApply = (projectId: number, kit: string, tailor?: KitTailor) => invoke<KitApplyOutcome>("kit_apply", { projectId, kit, tailor });
+export const kitScripts = (projectId: number, packages: string[]) => invoke<{ ok: boolean; detail?: string }>("kit_scripts", { projectId, packages });
+export const kitTailor = (projectId: number, tailor: KitTailor) => invoke<KitTokens>("kit_tailor", { projectId, tailor });

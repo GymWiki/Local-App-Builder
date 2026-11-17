@@ -17,7 +17,8 @@
     "binnenkort": "Komt in een latere fase.",
     "geenProject": "Kies of maak een project om te beginnen.",
     "terminal": "Terminal",
-    "preview": "Preview"
+    "preview": "Preview",
+    "uiterlijk": "Uiterlijk"
   },
   "info": {
     "titel": "Projectinfo",
@@ -39,7 +40,12 @@
     "resultaat": "Er wordt een map “{{naam}}” aangemaakt in de gekozen locatie.",
     "annuleer": "Annuleren",
     "maak": "Project aanmaken",
-    "bezig": "Bezig…"
+    "bezig": "Bezig…",
+    "soort": "Soort project",
+    "soortLeeg": "Leeg project",
+    "soortLeegUitleg": "Je begint met een lege map. De AI bepaalt wat erin komt.",
+    "soortWeb": "Web-app met React",
+    "soortWebUitleg": "Een startklare website met React. Straks kies je hoe hij eruitziet."
   },
   "fout": {
     "algemeen": "Er ging iets mis: {{bericht}}"
@@ -468,5 +474,107 @@
     "ja": "Ja, ga terug",
     "teruggezet": "Klaar: je project staat weer zoals bij ‘{{titel}}’. Je vorige werk staat veilig in de lijst.",
     "alGelijk": "Het project staat al in deze versie."
+  },
+  "uiterlijk": {
+    "titel": "Uiterlijk van je app",
+    "intro": "Kies hoe je app eruitziet. De AI gebruikt dat uiterlijk bij alles wat hij bouwt, zodat alles bij elkaar past.",
+    "welkom": "Kies eerst hoe je app eruit moet zien",
+    "kiesKit": "Kies een uiterlijk",
+    "kiezer": "Beschikbare uiterlijken",
+    "livevoorbeeld": "Voorbeeld van {{naam}}",
+    "geenPreview": "Geen voorbeeld beschikbaar",
+    "licentie": "Licentie: {{licentie}}",
+    "geschiktVoor": "Geschikt voor: {{stacks}}",
+    "stack": {
+      "react-vite": "React-websites",
+      "flutter": "Flutter-apps"
+    },
+    "past": "Past niet bij dit project",
+    "kies": "Kies dit uiterlijk",
+    "pakketten": "Dit wordt aan je project toegevoegd:",
+    "scriptsWaarschuwing": "Dit pakket heeft installatiescripts. Die voer ik niet uit zonder jouw goedkeuring.",
+    "veiligheid": "Studio maakt eerst een versie van je project. Gaat er iets mis, dan zet ik alles terug zoals het was.",
+    "attributieNodig": "Voor dit uiterlijk is een vermelding verplicht. Studio zet die automatisch in NOTICE.md. Haal je die weg, dan waarschuw ik je.",
+    "toepassen": "Toepassen",
+    "annuleer": "Annuleren",
+    "bezig": "Bezig met het toepassen van het uiterlijk… Dit kan een minuut duren.",
+    "klaar": "Klaar! Je app heeft nu het uiterlijk ‘{{naam}}’.",
+    "controleOvergeslagen": "De controle van je project kon nu niet draaien. Draai hem zelf in het tabblad Maken. ({{reden}})",
+    "details": "Details",
+    "fout": {
+      "install_failed": "Het installeren lukte niet. Je project is teruggezet zoals het was.",
+      "checks_failed": "Je project werkte niet meer met dit uiterlijk. Ik heb alles teruggezet zoals het was.",
+      "refused": "Dit uiterlijk kan ik hier niet gebruiken.",
+      "no_repo": "Ik kan nog geen versie van je project maken, dus ik begin hier niet aan.",
+      "terugzettenMislukt": "Terugzetten lukte niet automatisch. Gebruik ‘Versies’ in het gesprek om terug te gaan."
+    },
+    "scripts": {
+      "titel": "Installatiescripts goedkeuren?",
+      "uitleg": "Deze pakketten willen bij het installeren eigen programma's draaien: {{pakketten}}. Doe dit alleen als je het uiterlijk vertrouwt.",
+      "ja": "Ja, uitvoeren",
+      "nee": "Nee, overslaan",
+      "klaar": "De scripts zijn uitgevoerd.",
+      "mislukt": "De scripts gaven een fout: {{detail}}"
+    },
+    "wissel": {
+      "voor": "Voor",
+      "na": "Na",
+      "geenBeeld": "Geen beeld beschikbaar (de preview draait nu niet).",
+      "migreer": "Laat de AI de onderdelen aanpassen",
+      "migreerUitleg": "De AI zet bestaande schermen over naar het nieuwe uiterlijk.",
+      "terug": "Terugdraaien naar het vorige uiterlijk",
+      "teruggezet": "Teruggezet naar het vorige uiterlijk.",
+      "migreerPrompt": "Ik heb het uiterlijk van deze app gewisseld naar ‘{{naam}}’. Zet alle bestaande schermen en onderdelen over naar de onderdelen van dit nieuwe uiterlijk. Lees eerst docs/ui-kit.md. Gebruik de regels van dit uiterlijk en pas bestaande onderdelen in src/components/app/ aan. Draai daarna run_checks."
+    },
+    "eigen": {
+      "titel": "Eigen stijl",
+      "uitleg": "De AI bedenkt alles zelf. Dat kost meer tijd en meer tokens dan een kant-en-klaar uiterlijk, en het wordt minder consequent.",
+      "kies": "Eigen stijl kiezen",
+      "prompt": "Ik wil een eigen stijl voor deze app, zonder kant-en-klare kit. Stel eerst een klein ontwerp voor (kleuren, lettertype, ronding en ruimte) en zet dat in design/tokens.json en in CSS-variabelen. Gebruik daarna alleen die waarden.",
+      "kitTitel": "Eigen stijl op basis van een kit",
+      "kitUitleg": "Je kiest een kit als basis. De AI past daarna alleen de kleuren, rondingen en een paar onderdelen aan.",
+      "kitKies": "Kit als basis kiezen",
+      "kitPrompt": "Ik heb ‘{{naam}}’ gekozen als basis. Maak er een eigen stijl van: pas alleen de tokens in design/tokens.json aan en maximaal een paar onderdelen, door ze in src/components/app/ te verpakken. Pas kitcomponenten nooit zelf aan.",
+      "verstuurd": "Ik heb de AI gevraagd om de eigen stijl te maken. Kijk in het tabblad Maken."
+    },
+    "huidig": {
+      "titel": "Gekozen uiterlijk",
+      "versie": "Versie {{versie}}",
+      "andere": "Ander uiterlijk kiezen",
+      "geen": "Je app heeft nog geen uiterlijk."
+    },
+    "attributie": {
+      "mist": "De vermelding in NOTICE.md ontbreekt. Voor dit uiterlijk is die verplicht. Zet de tekst terug, of kies een ander uiterlijk."
+    },
+    "aanpassen": {
+      "titel": "Zelf aanpassen",
+      "uitleg": "Wat je hier verandert, zie je meteen in het voorbeeld. Er is geen AI voor nodig.",
+      "kleur": "Hoofdkleur",
+      "afronding": "Afronding",
+      "afrondingen": {
+        "scherp": "Scherp",
+        "gemiddeld": "Gemiddeld",
+        "rond": "Rond"
+      },
+      "ruimte": "Ruimte",
+      "ruimtes": {
+        "compact": "Compact",
+        "normaal": "Normaal",
+        "ruim": "Ruim"
+      },
+      "lettertype": "Lettertype",
+      "lettertypes": {
+        "systeem": "Standaard van het apparaat",
+        "serif": "Met sierlijntjes (Georgia)",
+        "verdana": "Breed en rustig (Verdana)",
+        "trebuchet": "Vriendelijk (Trebuchet)",
+        "mono": "Schrijfmachine (Courier)"
+      },
+      "bewaar": "Bewaar als versie",
+      "bewaard": "Bewaard als versie.",
+      "standaard": "Terug naar de standaard van de kit",
+      "mislukt": "Aanpassen lukte niet: {{reden}}"
+    },
+    "laden": "Even laden…"
   }
 }

@@ -174,3 +174,18 @@ describe("kitlijst en scripts", () => {
     await expect(runScripts({ projectDir: dir, run: npm.run }, [])).rejects.toThrow();
   });
 });
+
+describe("via de runtime", () => {
+  it("kit.list en kit.current werken en een onbekende kit-map wordt geweigerd", async () => {
+    const { Runtime } = await import("../src/runtime.js");
+    const dir = await project();
+    const rt = new Runtime({ projectDir: dir, projectName: "t" });
+    const l = (await rt.control("kit.list", { packs: path.join(REPO, "design-packs") })) as { stack: string; kits: { id: string }[] };
+    expect(l.stack).toBe("react-vite");
+    expect(l.kits.map((k) => k.id)).toContain("fragments-ui");
+    expect(await rt.control("kit.current")).toMatchObject({ kit: null, attributie: { required: false } });
+    await expect(rt.control("kit.list", { packs: "design-packs" })).rejects.toThrow(/niet gevonden/);
+    await expect(rt.control("kit.apply", { kit: "fragments-ui", packs: "../x" })).rejects.toThrow(/niet gevonden/);
+    await rt.close();
+  });
+});

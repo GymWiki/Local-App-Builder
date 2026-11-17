@@ -247,6 +247,9 @@ describe("kit toepassen", () => {
     expect(css).toContain("--fui-scale: 0.875;");
     expect(JSON.parse(await readFile(path.join(dir, "design/tokens.json"), "utf8")).instellingen).toEqual({ afronding: "scherp", ruimte: "compact" });
     await expect(tailorProject(PACKS, await project(), { afronding: "rond" })).rejects.toThrow(/nog geen uiterlijk/);
+    await tailorProject(PACKS, dir, {}, true); // terug naar de standaard van de kit
+    expect(await readFile(path.join(dir, "src/kit/tokens.css"), "utf8")).toContain("--fui-seed-brand: #3d5ae8;");
+    expect(JSON.parse(await readFile(path.join(dir, "design/tokens.json"), "utf8")).instellingen).toBeUndefined();
   });
 });
 

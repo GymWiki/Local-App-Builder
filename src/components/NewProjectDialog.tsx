@@ -11,6 +11,7 @@ export default function NewProjectDialog({ onClose, onCreated }: Props) {
   const { t } = useTranslation();
   const [naam, setNaam] = useState("");
   const [map, setMap] = useState<string | null>(null);
+  const [soort, setSoort] = useState<"leeg" | "web-react-vite">("leeg");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,7 +21,7 @@ export default function NewProjectDialog({ onClose, onCreated }: Props) {
     setBusy(true);
     setError(null);
     try {
-      await onCreated(await createProject(naam.trim(), map));
+      await onCreated(await createProject(naam.trim(), map, soort));
     } catch (err) {
       setError(String(err));
       setBusy(false);
@@ -45,6 +46,21 @@ export default function NewProjectDialog({ onClose, onCreated }: Props) {
             className="mt-1 w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2"
           />
         </label>
+        <div role="radiogroup" aria-label={t("nieuw.soort")} className="space-y-2 text-sm">
+          {(["leeg", "web-react-vite"] as const).map((k) => (
+            <button
+              key={k}
+              type="button"
+              role="radio"
+              aria-checked={soort === k}
+              onClick={() => setSoort(k)}
+              className={`block w-full rounded border px-3 py-2 text-left ${soort === k ? "border-indigo-400 bg-indigo-950" : "border-zinc-700 hover:bg-zinc-800"}`}
+            >
+              <span className="font-medium">{t(k === "leeg" ? "nieuw.soortLeeg" : "nieuw.soortWeb")}</span>
+              <span className="block text-zinc-400">{t(k === "leeg" ? "nieuw.soortLeegUitleg" : "nieuw.soortWebUitleg")}</span>
+            </button>
+          ))}
+        </div>
         <div className="text-sm">
           <div className="mb-1">{t("nieuw.map")}</div>
           <div className="flex items-center gap-2">
