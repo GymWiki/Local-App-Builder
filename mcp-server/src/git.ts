@@ -13,6 +13,8 @@ export interface Checkpoint {
 
 /** Bestanden die we nooit in een checkpoint stoppen (geheimen). */
 const SENSITIVE = [/(^|\/)\.env(\..*)?$/i, /\.(pem|key|p12|pfx)$/i, /(^|\/)id_(rsa|ed25519|ecdsa)(\.pub)?$/i, /(^|\/)\.npmrc$/i, /(^|\/)credentials\.json$/i, /(^|\/)\.claude\/settings\.local\.json$/i];
+/** Zelfde lijst als SENSITIVE, als git-pathspecs (voor `git diff`). */
+const SENSITIVE_PATHSPECS = [".env", ".env.*", "**/.env", "**/.env.*", "*.pem", "*.key", "*.p12", "*.pfx", "**/id_rsa*", "**/id_ed25519*", "**/id_ecdsa*", ".npmrc", "**/.npmrc", "**/credentials.json", ".claude/settings.local.json"];
 const isSensitive = (p: string) => SENSITIVE.some((r) => r.test(p));
 
 export class Git {
@@ -64,6 +66,33 @@ export class Git {
 
   async status(): Promise<string> {
     return (await this.run(["status", "--porcelain=v1", "--branch"])).trim();
+  }
+
+  /**
+   * Wat is er het laatst veranderd? Is er niet-opgeslagen werk, dan dat; anders de laatste versie ten opzichte van de vorige.
+   * Gevoelige bestanden doen nooit mee en de tekst wordt ingekort.
+   */
+  async lastChange(maxChars = 24_000): Promise<{ source: "werk" | "versie"; title: string; files: string[]; diff: string; truncated: boolean }> {
+    if (!(await this.isRepo()) || !(await this.hasCommits())) throw new Error("Er zijn nog geen versies om mee te vergelijken.");
+    const exclude = SENSITIVE_PATHSPECS.map((p) => `:(exclude,glob)${p}`);
+    const changed = (await this.run(["status", "--porcelain=v1", "-z", "-uall"])).split("\0").filter(Boolean).map((l) => l.slice(3)).filter((f) => !isSensitive(f));
+    const dirty = changed.length > 0;
+    let files: string[];
+    let diff: string;
+    let title: string;
+    if (dirty) {
+      title = "Nog niet opgeslagen wijzigingen";
+      files = changed;
+      diff = await this.run(["diff", "HEAD", "--no-color", "--", ".", ...exclude]);
+    } else {
+      title = (await this.run(["log", "-n1", "--format=%s"])).trim();
+      const hasParent = await this.run(["rev-parse", "--verify", "-q", "HEAD~1"]).then(() => true, () => false);
+      const range = hasParent ? ["HEAD~1", "HEAD"] : ["--root", "HEAD"];
+      files = (await this.run(hasParent ? ["diff", "--name-only", "-z", ...range] : ["show", "--name-only", "--format=", "-z", "HEAD"])).split("\0").filter(Boolean).filter((f) => !isSensitive(f));
+      diff = await this.run(hasParent ? ["diff", "--no-color", ...range, "--", ".", ...exclude] : ["show", "--no-color", "--format=", "HEAD", "--", ".", ...exclude]);
+    }
+    const truncated = diff.length > maxChars;
+    return { source: dirty ? "werk" : "versie", title, files, diff: truncated ? diff.slice(0, maxChars) : diff, truncated };
   }
 
   async isDirty(): Promise<boolean> {

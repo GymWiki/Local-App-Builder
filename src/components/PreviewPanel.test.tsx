@@ -142,3 +142,28 @@ describe("PreviewNotice", () => {
     expect(view).toHaveBeenCalled();
   });
 });
+
+describe("PreviewPanel: schermgrootte", () => {
+  it("wisselt tussen telefoon, tablet en computer; alleen de breedte van het voorbeeld verandert", () => {
+    show(info());
+    const frame = () => screen.getByTitle("Preview") as HTMLIFrameElement;
+    expect(frame().dataset.viewport).toBe("computer");
+    expect(frame().style.width).toBe("");
+    expect(frame().getAttribute("src")).toBe("http://127.0.0.1:4000/");
+    const groep = screen.getByRole("radiogroup", { name: "Schermgrootte van het voorbeeld" });
+    expect(groep).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("radio", { name: "Telefoon" }));
+    expect(frame().style.width).toBe("390px");
+    expect(frame().dataset.viewport).toBe("telefoon");
+    fireEvent.click(screen.getByRole("radio", { name: "Tablet" }));
+    expect(frame().style.width).toBe("768px");
+    fireEvent.click(screen.getByRole("radio", { name: "Computer" }));
+    expect(frame().style.width).toBe("");
+    expect(frame().getAttribute("src")).toBe("http://127.0.0.1:4000/"); // de pagina zelf blijft dezelfde
+  });
+
+  it("zonder draaiende preview staat er geen schermkeuze", () => {
+    show(info({ status: "idle", url: null }));
+    expect(screen.queryByRole("radiogroup", { name: "Schermgrootte van het voorbeeld" })).not.toBeInTheDocument();
+  });
+});

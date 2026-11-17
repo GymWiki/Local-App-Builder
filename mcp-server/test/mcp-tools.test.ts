@@ -32,11 +32,12 @@ afterEach(async () => {
 });
 
 describe("MCP-tools (fase 3)", () => {
-  it("toont tien tools", async () => {
+  it("toont alle tools", async () => {
     const names = (await client.listTools()).tools.map((t) => t.name).sort();
     expect(names).toEqual([
       "get_console_errors",
       "get_dev_logs",
+      "get_last_change",
       "get_preview_screenshot",
       "git_checkpoint",
       "git_list_checkpoints",
@@ -73,6 +74,32 @@ describe("MCP-tools (fase 3)", () => {
     expect(r.isError).toBeFalsy();
     expect(textOf(await call("git_list_checkpoints"))).toContain("start");
     expect(execFileSync("git", ["log", "--format=%s"], { cwd: ex.dir, encoding: "utf8" }).trim()).toBe("start");
+  });
+
+  it("get_last_change toont niet-opgeslagen werk en daarna de laatste versie, zonder geheimen en ingekort", async () => {
+    await writeFile(path.join(ex.dir, "a.txt"), "eerste\n");
+    expect((await call("git_checkpoint", { bericht: "eerste versie" })).isError).toBeFalsy();
+    await writeFile(path.join(ex.dir, "a.txt"), "eerste\ntweede regel\n");
+    await writeFile(path.join(ex.dir, ".env"), "GEHEIM=hunter2\n");
+    await writeFile(path.join(ex.dir, "sleutel.pem"), "PRIVATE KEY\n");
+    let t = textOf(await call("get_last_change"));
+    expect(t).toContain("nog niet opgeslagen werk");
+    expect(t).toContain("+tweede regel");
+    expect(t).not.toMatch(/hunter2|PRIVATE KEY|\.env|sleutel\.pem/);
+    expect((await call("git_checkpoint", { bericht: "tweede versie" })).isError).toBeFalsy();
+    t = textOf(await call("get_last_change"));
+    expect(t).toContain("laatste versie — tweede versie");
+    expect(t).toContain("+tweede regel");
+    expect(t).not.toContain("hunter2");
+    const c = await srv.runtime.git.lastChange(10);
+    expect(c.truncated).toBe(true);
+    expect(c.diff.length).toBe(10);
+  });
+
+  it("get_last_change zegt het netjes als er nog niets is om te vergelijken", async () => {
+    const r = await call("get_last_change");
+    expect(r.isError).toBe(true);
+    expect(textOf(r)).toMatch(/Er zijn nog geen versies/);
   });
 
   it("git_checkpoint eist een korte titel in gewone taal (max 8 woorden)", async () => {

@@ -219,6 +219,20 @@ export function registerTools(server: McpServer, ctx: ProjectCtx, record: (r: Ca
   );
 
   server.registerTool(
+    "get_last_change",
+    {
+      description:
+        "Geeft de laatste wijziging in het project: niet-opgeslagen werk, of anders de laatste versie ten opzichte van de vorige (bestandslijst + wijzigingen, ingekort, zonder geheimen). Gebruik dit om de gebruiker in gewone woorden uit te leggen wat er veranderd is.",
+      inputSchema: {},
+    },
+    () =>
+      run("get_last_change", "", async () => {
+        const c = await rt.git.lastChange();
+        return [`Bron: ${c.source === "werk" ? "nog niet opgeslagen werk" : "laatste versie"} — ${c.title}`, `Bestanden (${c.files.length}): ${c.files.slice(0, 40).join(", ")}`, c.truncated ? "(de wijzigingen hieronder zijn ingekort)" : "", "", c.diff].join("\n");
+      }),
+  );
+
+  server.registerTool(
     "git_list_checkpoints",
     {
       description: "Lijst met de laatste checkpoints (nieuwste eerst).",

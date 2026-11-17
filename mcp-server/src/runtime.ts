@@ -339,6 +339,8 @@ export class Runtime {
         return this.last;
       case "git.list":
         return this.git.list(Number(args.limit) || 30);
+      case "git.diff":
+        return this.git.lastChange();
       case "git.status":
         return { status: await this.git.status(), dirty: await this.git.isDirty() };
       case "git.checkpoint": {

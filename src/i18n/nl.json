@@ -204,7 +204,14 @@
     "installeren": "Installeren…",
     "vertrouwScripts": "Vertrouwen en starten",
     "opnieuwProberen": "Opnieuw proberen",
-    "laatsteRegels": "Laatste logregels"
+    "laatsteRegels": "Laatste logregels",
+    "weergave": {
+      "titel": "Schermgrootte van het voorbeeld",
+      "telefoon": "Telefoon",
+      "tablet": "Tablet",
+      "computer": "Computer",
+      "uitleg": "Dit verandert alleen de breedte van het voorbeeld, niet je project."
+    }
   },
   "activiteit": {
     "checks": "Laatste checks",
@@ -269,7 +276,7 @@
       "veranderd": "Wat is er veranderd?"
     },
     "snelPrompt": {
-      "veranderd": "Wat is er sinds de vorige versie veranderd? Vat het in gewone woorden samen, zonder technische details."
+      "veranderd": "Wat is er veranderd? Gebruik de tool get_last_change om de laatste wijziging te bekijken en vat die samen in ten hoogste vijf korte zinnen, in gewone woorden en zonder vakjargon of bestandsnamen."
     },
     "details": "Details",
     "verberg": "Verberg details",

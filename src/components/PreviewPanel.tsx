@@ -21,6 +21,11 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+
+/** Breedte van het voorbeeld per schermgrootte (alleen de breedte verandert; `null` = de hele breedte). */
+export const VIEWPORTS = { telefoon: 390, tablet: 768, computer: null } as const;
+export type ViewportKey = keyof typeof VIEWPORTS;
 
 interface Props {
   project: Project;
@@ -47,6 +52,7 @@ export default function PreviewPanel({ project, mcp, preview, visible, reloadNon
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   const [manualReload, setManualReload] = useState(0);
+  const [viewport, setViewport] = useState<ViewportKey>("computer");
   const [logs, setLogs] = useState<string[]>([]);
   const [config, setConfig] = useState<ConfigInfo | null>(null);
   const status = preview?.status ?? "idle";
@@ -197,6 +203,15 @@ export default function PreviewPanel({ project, mcp, preview, visible, reloadNon
             </Button>
           )}
           {status === "running" && (
+            <ToggleGroup type="single" variant="outline" size="sm" role="radiogroup" aria-label={t("preview.weergave.titel")} value={viewport} onValueChange={(v) => v && setViewport(v as ViewportKey)} spacing={0}>
+              {(Object.keys(VIEWPORTS) as ViewportKey[]).map((k) => (
+                <ToggleGroupItem key={k} value={k} title={t("preview.weergave.uitleg")} className="px-3 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                  {t(`preview.weergave.${k}`)}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          )}
+          {status === "running" && (
             <Button size="sm" variant="outline" onClick={() => setManualReload((n) => n + 1)}>
               <RotateCwIcon aria-hidden="true" />
               {t("preview.ververs")}
@@ -208,14 +223,16 @@ export default function PreviewPanel({ project, mcp, preview, visible, reloadNon
       {usesRuntime && !runtimeUp && !problem && <div className="border-b border-border px-5 py-2 text-sm text-muted-foreground">{t("preview.geenRuntime")}</div>}
       {body()}
 
-      <div className="relative min-h-0 flex-1 bg-background">
+      <div className={`relative min-h-0 flex-1 ${viewport === "computer" ? "bg-background" : "flex justify-center overflow-auto bg-muted"}`}>
         {status === "running" && preview?.url ? (
           <iframe
             key={frameKey}
             title={t("tabs.preview")}
             src={preview.url}
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
-            className="h-full w-full bg-background"
+            data-viewport={viewport}
+            style={VIEWPORTS[viewport] ? { width: VIEWPORTS[viewport] } : undefined}
+            className={`h-full bg-background ${viewport === "computer" ? "w-full" : "max-w-full shrink-0 border-x border-border"}`}
           />
         ) : status === "starting" ? (
           <div role="status" className="flex h-full flex-col items-center justify-center gap-4 p-8 text-base text-muted-foreground">

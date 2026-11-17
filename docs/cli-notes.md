@@ -131,3 +131,6 @@ Bron: cli-reference.md. `--tools ""` schakelt alle ingebouwde tools uit; `-p` we
 - Studio zet daarom alleen een lijstje "Bijgevoegde bestanden … - assets/…" achter de opdracht (`assets::prompt_suffix`). Alleen relatieve paden binnen het project gaan mee.
 - Tauri 2 vangt bestanden slepen standaard zelf af; `dragDropEnabled: false` in `tauri.conf.json` laat de gewone HTML5-sleepgebeurtenissen van de webview door (nodig voor Windows).
 - Niet geverifieerd voor Gemini/Codex (nog geen chatadapter); dezelfde padaanpak is daar niet getest.
+
+## Wat is er veranderd? (functie 9)
+- Geen CLI-optie nodig: de knop stuurt een gewone opdracht naar de AI, die de MCP-tool `get_last_change` aanroept (nieuw; `mcp-server/src/tools.ts`, `git.ts#lastChange`). De tool geeft niet-opgeslagen werk of anders de laatste versie ten opzichte van de vorige, ingekort tot 24.000 tekens en zonder gevoelige bestanden (.env, sleutels, .npmrc, …). De opdracht vraagt om ten hoogste vijf korte zinnen zonder vakjargon.
