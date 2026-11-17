@@ -31,6 +31,12 @@ import ChatSwitchDialog from "./ChatSwitchDialog";
 import VersionsDialog from "./VersionsDialog";
 import MessageView from "./MessageView";
 import AssetThumb from "./AssetThumb";
+import { CircleDotIcon, LoaderIcon, PaperclipIcon, SendIcon, SquareIcon, XIcon } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Textarea } from "@/components/ui/textarea";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { checkFile, MAX_FILES, pastedName, readBase64 } from "./files";
 import PermissionDialog from "./PermissionDialog";
 
@@ -234,97 +240,99 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
       <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-5 py-3">
         <h2 className="text-lg font-semibold">
           {t("chat.titel")}
-          {target && <span className="ml-2 text-base font-normal text-muted-foreground">{aiName}{target.account_label ? ` · ${target.account_label}` : ""}</span>}
+          {target && (
+            <span className="ml-2 text-base font-normal text-muted-foreground">
+              {aiName}
+              {target.account_label ? ` · ${target.account_label}` : ""}
+            </span>
+          )}
         </h2>
         <div className="flex gap-2">
-          <button onClick={() => setShowVersions(true)} className="min-h-10 rounded-lg border border-input px-3 text-base hover:bg-muted">
+          <Button variant="outline" size="sm" onClick={() => setShowVersions(true)}>
             {t("versies.knop")}
-          </button>
-          <button onClick={() => setSwitching(true)} className="min-h-10 rounded-lg border border-input px-3 text-base hover:bg-muted">
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setSwitching(true)}>
             {t("chat.wissel")}
-          </button>
-          <button onClick={onOpenAdvanced} className="min-h-10 rounded-lg border border-input px-3 text-base hover:bg-muted">
+          </Button>
+          <Button variant="outline" size="sm" onClick={onOpenAdvanced}>
             {t("chat.technisch")}
-          </button>
+          </Button>
         </div>
       </header>
 
-      <div role="log" aria-live="polite" aria-label={t("chat.geschiedenis")} className="min-h-0 flex-1 space-y-3 overflow-y-auto px-5 py-4">
-        {messages.length === 0 && !unavailable && <p className="text-lg text-muted-foreground">{t("chat.leeg")}</p>}
-        {messages.map((m) => (
-          <MessageView
-            key={m.id}
-            message={m}
-            live={busy}
-            technical={technical}
-            canRetry={!busy && m.id === [...messages].reverse().find((x) => x.kind === "error")?.id}
-            onRetry={() => void chatRetry(id).catch(fail)}
-            onOpenAccounts={onOpenAccounts}
-            loop={{
-              active: m.id === lastLoopId && !busy,
-              onRestore: async (hash) => {
-                await runtime<RestoreResult>(id, "git.restore", { hash });
-              },
-              onDiscuss: () => void discuss(),
-              onOtherAi: () => setSwitching(true),
-            }}
-          />
-        ))}
-        {missing && <InstallGuide status={missing} onInstalled={() => setMissing(null)} />}
-        {unavailable && (
-          <div role="note" data-testid="terminal-fallback" className="space-y-3 rounded-xl border border-warning bg-warning/10 p-5 text-lg">
-            <div className="font-semibold">{t("chat.terugval.titel")}</div>
-            <p>{fallback && target?.structured ? t("chat.terugval.uitlegFout") : t("chat.terugval.uitleg", { ai: aiName })}</p>
-            <button onClick={onOpenAdvanced} className="min-h-11 rounded-lg bg-primary text-primary-foreground px-5 font-medium hover:bg-primary/90">
-              {t("chat.technisch")}
-            </button>
-          </div>
-        )}
-        <div ref={end} />
-      </div>
+      <ScrollArea role="log" aria-live="polite" aria-label={t("chat.geschiedenis")} className="min-h-0 flex-1">
+        <div className="space-y-3 px-5 py-4">
+          {messages.length === 0 && !unavailable && <p className="text-lg text-muted-foreground">{t("chat.leeg")}</p>}
+          {messages.map((m) => (
+            <MessageView
+              key={m.id}
+              message={m}
+              live={busy}
+              technical={technical}
+              canRetry={!busy && m.id === [...messages].reverse().find((x) => x.kind === "error")?.id}
+              onRetry={() => void chatRetry(id).catch(fail)}
+              onOpenAccounts={onOpenAccounts}
+              loop={{
+                active: m.id === lastLoopId && !busy,
+                onRestore: async (hash) => {
+                  await runtime<RestoreResult>(id, "git.restore", { hash });
+                },
+                onDiscuss: () => void discuss(),
+                onOtherAi: () => setSwitching(true),
+              }}
+            />
+          ))}
+          {missing && <InstallGuide status={missing} onInstalled={() => setMissing(null)} />}
+          {unavailable && (
+            <Alert data-testid="terminal-fallback" role="note" className="space-y-3 border-warning bg-warning/10 p-5 text-lg">
+              <AlertTitle className="font-semibold">{t("chat.terugval.titel")}</AlertTitle>
+              <AlertDescription className="space-y-3 text-lg text-foreground">
+                <p>{fallback && target?.structured ? t("chat.terugval.uitlegFout") : t("chat.terugval.uitleg", { ai: aiName })}</p>
+                <Button onClick={onOpenAdvanced}>{t("chat.technisch")}</Button>
+              </AlertDescription>
+            </Alert>
+          )}
+          <div ref={end} />
+        </div>
+      </ScrollArea>
 
       <div role="status" aria-live="polite" data-testid="status-line" className="flex items-center gap-3 border-t border-border px-5 py-2 text-base text-muted-foreground">
-        <span aria-hidden="true" className={busy ? "animate-pulse" : ""}>
-          {busy ? "●" : "○"}
-        </span>
+        {busy ? <LoaderIcon aria-hidden="true" className="size-4 animate-spin" /> : <CircleDotIcon aria-hidden="true" className="size-4" />}
         <span>{t(`chat.status.${busy ? status : status === "done" ? "done" : "idle"}`)}</span>
         {busy && (
-          <button onClick={() => void chatStop(id)} className="ml-auto min-h-9 rounded-lg border border-input px-3 text-sm hover:bg-muted">
+          <Button variant="outline" size="xs" className="ml-auto" onClick={() => void chatStop(id)}>
+            <SquareIcon aria-hidden="true" />
             {t("chat.stop")}
-          </button>
+          </Button>
         )}
       </div>
 
-      <div className="flex flex-wrap gap-2 px-5 pb-2" aria-label={t("chat.snel.titel")}>
+      <div className="flex flex-wrap gap-2 px-5 pb-2" role="group" aria-label={t("chat.snel.titel")}>
         {QUICK.map((k) => (
-          <button
-            key={k}
-            disabled={!!unavailable}
-            onClick={() => void send(t(`chat.snelPrompt.${k}`))}
-            className="min-h-10 rounded-full border border-input px-4 text-base hover:bg-muted disabled:opacity-40"
-          >
+          <Button key={k} variant="outline" size="sm" className="rounded-full" disabled={!!unavailable} onClick={() => void send(t(`chat.snelPrompt.${k}`))}>
             {t(`chat.snel.${k}`)}
-          </button>
+          </Button>
         ))}
       </div>
 
       <div className="flex flex-wrap items-center gap-3 border-t border-border px-4 pt-3">
-        <div role="radiogroup" aria-label={t("chat.modus.label")} className="inline-flex overflow-hidden rounded-lg border border-input">
+        <ToggleGroup
+          type="single"
+          variant="outline"
+          size="sm"
+          role="radiogroup"
+          aria-label={t("chat.modus.label")}
+          value={mode}
+          disabled={!!unavailable}
+          onValueChange={(v) => v && void chooseMode(v as ChatMode)}
+          spacing={0}
+        >
           {(["plan", "build"] as const).map((m) => (
-            <button
-              key={m}
-              type="button"
-              role="radio"
-              aria-checked={mode === m}
-              title={t(`chat.modus.${m}Uitleg`)}
-              disabled={!!unavailable}
-              onClick={() => void chooseMode(m)}
-              className={`min-h-10 px-4 text-base ${mode === m ? "bg-primary font-semibold text-primary-foreground" : "text-foreground hover:bg-muted"}`}
-            >
+            <ToggleGroupItem key={m} value={m} title={t(`chat.modus.${m}Uitleg`)} className="px-4 text-base data-[state=on]:bg-primary data-[state=on]:font-semibold data-[state=on]:text-primary-foreground">
               {t(`chat.modus.${m}`)}
-            </button>
+            </ToggleGroupItem>
           ))}
-        </div>
+        </ToggleGroup>
         {mode === "plan" && (
           <span data-testid="plan-banner" className="text-sm text-warning">
             {t("chat.modus.banner")}
@@ -337,18 +345,24 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
             {pending.map((a) => (
               <li key={a.path} className="relative">
                 <AssetThumb projectId={id} path={a.path} name={a.name} kind={a.kind} />
-                <button
+                <Button
                   type="button"
+                  variant="secondary"
+                  size="icon-xs"
                   aria-label={t("chat.bijlage.verwijder", { naam: a.name })}
                   onClick={() => setPending((p) => p.filter((x) => x.path !== a.path))}
-                  className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-secondary text-sm hover:bg-muted"
+                  className="absolute -top-2 -right-2 rounded-full"
                 >
-                  ✕
-                </button>
+                  <XIcon aria-hidden="true" />
+                </Button>
               </li>
             ))}
           </ul>
-          {uploading > 0 && <span role="status" className="text-base text-muted-foreground">{t("chat.bijlage.bezig")}</span>}
+          {uploading > 0 && (
+            <span role="status" className="text-base text-muted-foreground">
+              {t("chat.bijlage.bezig")}
+            </span>
+          )}
         </div>
       )}
       <form onSubmit={onSubmit} className="flex items-end gap-3 p-4">
@@ -364,20 +378,14 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
             e.target.value = "";
           }}
         />
-        <button
-          type="button"
-          aria-label={t("chat.bijlage.kies")}
-          title={t("chat.bijlage.kies")}
-          disabled={!!unavailable}
-          onClick={() => picker.current?.click()}
-          className="min-h-12 rounded-xl border border-input px-4 text-base hover:bg-muted disabled:opacity-40"
-        >
-          📎 {t("chat.bijlage.knop")}
-        </button>
+        <Button type="button" variant="outline" size="lg" aria-label={t("chat.bijlage.kies")} title={t("chat.bijlage.kies")} disabled={!!unavailable} onClick={() => picker.current?.click()}>
+          <PaperclipIcon aria-hidden="true" />
+          {t("chat.bijlage.knop")}
+        </Button>
         <label className="sr-only" htmlFor="chat-input">
           {t("chat.invoerLabel")}
         </label>
-        <textarea
+        <Textarea
           id="chat-input"
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -386,15 +394,12 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
           disabled={!!unavailable}
           rows={3}
           placeholder={mode === "plan" ? t("chat.modus.placeholderPlan") : t("chat.placeholder")}
-          className="min-h-24 flex-1 resize-y rounded-xl border border-input bg-card px-4 py-3 text-lg leading-relaxed placeholder:text-muted-foreground disabled:opacity-50"
+          className="min-h-24 flex-1 resize-y text-lg leading-relaxed"
         />
-        <button
-          type="submit"
-          disabled={(!text.trim() && pending.length === 0) || uploading > 0 || !!unavailable}
-          className="min-h-12 rounded-xl bg-primary text-primary-foreground px-6 text-lg font-semibold hover:bg-primary/90 disabled:opacity-40"
-        >
+        <Button type="submit" size="lg" disabled={(!text.trim() && pending.length === 0) || uploading > 0 || !!unavailable}>
+          <SendIcon aria-hidden="true" />
           {t("chat.verstuur")}
-        </button>
+        </Button>
       </form>
 
       {asked && <PermissionDialog message={asked} technical={technical} onAnswer={(allow) => void permissionAnswer(id, asked.payload.req_id, allow).catch(fail)} />}
