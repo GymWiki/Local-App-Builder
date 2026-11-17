@@ -58,6 +58,10 @@ impl ChatAdapter for ClaudeAdapter {
         ]
         .map(String::from)
         .to_vec();
+        if ctx.plan {
+            // Eerst overleggen: Claude start in zijn planmodus en wijzigt niets (permission-modes.md).
+            args.extend(["--permission-mode".into(), "plan".into()]);
+        }
         if let Some(tool) = &ctx.permission_tool {
             args.extend(["--permission-prompt-tool".into(), tool.clone()]);
             // Onze eigen Studio-tools (controleren, screenshot, versies) hoeven nooit om toestemming te vragen.
@@ -71,6 +75,10 @@ impl ChatAdapter for ClaudeAdapter {
         }
         let (program, args) = cli::launch(Path::new(&ctx.binary), args);
         Launch { program, args }
+    }
+
+    fn supports_plan_mode(&self) -> bool {
+        true
     }
 
     fn encode_user(&self, text: &str) -> String {
@@ -593,6 +601,7 @@ mod tests {
             resume: Some("sess-1".into()),
             mcp_config: Some(PathBuf::from("/data/chat/1/mcp.json")),
             permission_tool: Some("mcp__studio__permission_prompt".into()),
+            plan: false,
         });
         let args = l.args.join(" ");
         for must in [
@@ -608,11 +617,21 @@ mod tests {
             assert!(args.contains(must), "{must} ontbreekt in {args}");
         }
         assert!(!args.contains("--include-partial-messages"));
+        let plan = a.launch(&LaunchCtx {
+            binary: PathBuf::from("claude"),
+            resume: None,
+            mcp_config: None,
+            permission_tool: None,
+            plan: true,
+        });
+        assert!(plan.args.join(" ").contains("--permission-mode plan"));
+        assert!(a.supports_plan_mode());
         let fresh = a.launch(&LaunchCtx {
             binary: PathBuf::from("claude"),
             resume: None,
             mcp_config: None,
             permission_tool: None,
+            plan: false,
         });
         assert!(!fresh.args.join(" ").contains("--resume"));
     }

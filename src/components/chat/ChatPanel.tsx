@@ -4,6 +4,7 @@ import { listen } from "@tauri-apps/api/event";
 import {
   chatBusy,
   chatHistory,
+  chatModeSet,
   chatRetry,
   chatSend,
   chatStop,
@@ -13,6 +14,7 @@ import {
   permissionAnswer,
   type Account,
   type ChatMessage,
+  type ChatMode,
   type ChatOut,
   type ChatStatus,
   type ChatTarget,
@@ -47,6 +49,7 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
   const [busy, setBusy] = useState(false);
   const [fallback, setFallback] = useState(false);
   const [text, setText] = useState("");
+  const [mode, setMode] = useState<ChatMode>("build");
   const [missing, setMissing] = useState<CliStatus | null>(null);
   const [switching, setSwitching] = useState(false);
   const [showVersions, setShowVersions] = useState(false);
@@ -61,6 +64,7 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
       .then(([tg, h, b]) => {
         if (cancelled) return;
         setTarget(tg);
+        setMode(tg.mode ?? "build");
         setMessages(h);
         setBusy(b);
         setStatus(b ? "thinking" : "idle");
@@ -83,6 +87,7 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
         setStatus(ev.state);
         setBusy(ev.busy);
       } else if (ev.type === "fallback") setFallback(true);
+      else if (ev.type === "mode") setMode(ev.mode);
     });
     return () => void un.then((f) => f());
   }, [id]);
@@ -100,6 +105,16 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
       setMissing(null);
       setText("");
       await chatSend(id, trimmed);
+    } catch (e) {
+      fail(e);
+    }
+  }
+
+  async function chooseMode(m: ChatMode) {
+    if (m === mode) return;
+    setMode(m);
+    try {
+      await chatModeSet(id, m);
     } catch (e) {
       fail(e);
     }
@@ -202,7 +217,30 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
         ))}
       </div>
 
-      <form onSubmit={onSubmit} className="flex items-end gap-3 border-t border-zinc-800 p-4">
+      <div className="flex flex-wrap items-center gap-3 border-t border-zinc-800 px-4 pt-3">
+        <div role="radiogroup" aria-label={t("chat.modus.label")} className="inline-flex overflow-hidden rounded-lg border border-zinc-600">
+          {(["plan", "build"] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              role="radio"
+              aria-checked={mode === m}
+              title={t(`chat.modus.${m}Uitleg`)}
+              disabled={!!unavailable}
+              onClick={() => void chooseMode(m)}
+              className={`min-h-10 px-4 text-base ${mode === m ? "bg-indigo-700 font-semibold text-white" : "text-zinc-200 hover:bg-zinc-800"}`}
+            >
+              {t(`chat.modus.${m}`)}
+            </button>
+          ))}
+        </div>
+        {mode === "plan" && (
+          <span data-testid="plan-banner" className="text-sm text-amber-200">
+            {t("chat.modus.banner")}
+          </span>
+        )}
+      </div>
+      <form onSubmit={onSubmit} className="flex items-end gap-3 p-4">
         <label className="sr-only" htmlFor="chat-input">
           {t("chat.invoerLabel")}
         </label>
@@ -213,7 +251,7 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
           onKeyDown={onKey}
           disabled={!!unavailable}
           rows={3}
-          placeholder={t("chat.placeholder")}
+          placeholder={mode === "plan" ? t("chat.modus.placeholderPlan") : t("chat.placeholder")}
           className="min-h-24 flex-1 resize-y rounded-xl border border-zinc-600 bg-zinc-900 px-4 py-3 text-lg leading-relaxed placeholder:text-zinc-400 disabled:opacity-50"
         />
         <button

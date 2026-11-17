@@ -320,7 +320,11 @@
         "start_server": "De AI start een voorbeeld van je werk.",
         "save_version": "De AI bewaart de huidige stand als een terugzetbare versie.",
         "generic": "De AI wil een actie uitvoeren."
-      }
+      },
+      "planTitel": "Wil je dat de AI dit plan gaat bouwen?",
+      "planUitleg": "Dit is het plan van de AI. Als je ‘Ja, bouw dit’ kiest, gaat hij aan de slag.",
+      "planJa": "Ja, bouw dit",
+      "planNee": "Nee, nog even overleggen"
     },
     "fout": {
       "not_logged_in": {
@@ -382,7 +386,16 @@
       "tip": "Tip: vraag de huidige AI eerst de projectnotities bij te werken."
     },
     "geenAccount": "standaard",
-    "versieOpgeslagen": "Versie opgeslagen: {{titel}}"
+    "versieOpgeslagen": "Versie opgeslagen: {{titel}}",
+    "modus": {
+      "label": "Wat moet de AI nu doen?",
+      "plan": "Eerst overleggen",
+      "build": "Bouwen",
+      "planUitleg": "De AI denkt mee en stelt een plan voor, maar past niets aan.",
+      "buildUitleg": "De AI gaat meteen aan de slag en bouwt.",
+      "banner": "Overleg-modus: de AI bespreekt een plan en past niets aan. Kies ‘Bouwen’ als je wilt dat hij begint.",
+      "placeholderPlan": "Vertel wat je wilt; we bespreken eerst een plan..."
+    }
   },
   "instellingen": {
     "titel": "Instellingen",

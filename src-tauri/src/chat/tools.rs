@@ -16,6 +16,8 @@ pub struct Classified {
     pub read_only: bool,
     /// Raakt een bestand buiten de projectmap.
     pub outside_project: bool,
+    /// De AI vraagt om het plan goed te keuren (ExitPlanMode); `detail` bevat dan het plan.
+    pub plan_exit: bool,
 }
 
 fn str_of<'a>(v: &'a Value, keys: &[&str]) -> Option<&'a str> {
@@ -337,6 +339,7 @@ pub fn classify(tool: &str, input: &Value, project_dir: &Path) -> Classified {
         danger: false,
         read_only: false,
         outside_project: false,
+        plan_exit: false,
     };
     let path = str_of(input, &["file_path", "path", "notebook_path"]);
     let with_file = |c: &mut Classified, kind: ActionKind| {
@@ -371,6 +374,11 @@ pub fn classify(tool: &str, input: &Value, project_dir: &Path) -> Classified {
         "TodoWrite" => {
             c.kind = ActionKind::Plan;
             c.read_only = true;
+        }
+        "ExitPlanMode" => {
+            c.kind = ActionKind::Plan;
+            c.plan_exit = true;
+            c.detail = str_of(input, &["plan"]).unwrap_or("").to_string();
         }
         "WebSearch" | "WebFetch" => {
             c.kind = ActionKind::WebLookup;
@@ -482,6 +490,19 @@ mod tests {
             (ActionKind::RunCommand, false, false)
         );
         assert_eq!(bash_info("").kind, ActionKind::RunCommand);
+    }
+
+    #[test]
+    fn plan_goedkeuren_is_herkenbaar_en_bevat_het_plan() {
+        let c = classify(
+            "ExitPlanMode",
+            &json!({"plan": "# Plan\n1. Maak index.html"}),
+            &dir(),
+        );
+        assert!(c.plan_exit && !c.read_only && !c.danger);
+        assert_eq!(c.kind, ActionKind::Plan);
+        assert!(c.detail.contains("Maak index.html"));
+        assert!(!classify("Write", &json!({}), &dir()).plan_exit);
     }
 
     #[test]

@@ -113,6 +113,9 @@ impl chat::Store for AppStore {
     fn setting(&self, key: &str) -> Option<String> {
         self.with(|c| db::get_setting(c, key)).ok().flatten()
     }
+    fn set_setting(&self, key: &str, value: &str) {
+        let _ = self.with(|c| db::set_setting(c, key, value));
+    }
 }
 
 /// Verbindt de preview met de rest van de app (runtime, instellingen).
@@ -275,17 +278,19 @@ pub fn run() {
                 Arc::new(move |out: ChatOut| {
                     let _ = h_out.emit("chat-out", out);
                 }),
-                Arc::new(move |project: i64, id: &str, allow: bool| {
-                    h_ans
-                        .state::<McpManager>()
-                        .call(
-                            project,
-                            "permission.answer",
-                            serde_json::json!({ "id": id, "allow": allow }),
-                            std::time::Duration::from_secs(5),
-                        )
-                        .map(|_| ())
-                }),
+                Arc::new(
+                    move |project: i64, id: &str, allow: bool, message: Option<&str>| {
+                        h_ans
+                            .state::<McpManager>()
+                            .call(
+                                project,
+                                "permission.answer",
+                                serde_json::json!({ "id": id, "allow": allow, "message": message }),
+                                std::time::Duration::from_secs(5),
+                            )
+                            .map(|_| ())
+                    },
+                ),
             );
             chat_mgr.set_git(Arc::new(AppGit { handle: git_handle }));
             app.manage(chat_mgr);
@@ -346,6 +351,7 @@ pub fn run() {
             commands::chat_send,
             commands::chat_retry,
             commands::chat_busy,
+            commands::chat_mode_set,
             commands::chat_stop,
             commands::chat_switch,
             commands::permission_answer,

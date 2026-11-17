@@ -23,9 +23,22 @@ impl Mode {
 pub enum Decision {
     Allow,
     Ask,
+    /// Overleg-modus: schrijfacties worden zonder vraag geweigerd.
+    Deny,
 }
 
-pub fn decide(mode: Mode, c: &Classified) -> Decision {
+pub fn decide(mode: Mode, plan_mode: bool, c: &Classified) -> Decision {
+    // Overleg-modus: het plan zelf mag de gebruiker goedkeuren; verder wordt alles geweigerd dat iets verandert of uitvoert.
+    if plan_mode {
+        if c.plan_exit {
+            return Decision::Ask;
+        }
+        return if c.read_only {
+            Decision::Allow
+        } else {
+            Decision::Deny
+        };
+    }
     // 1. Onomkeerbaar of naar buiten: altijd vragen, in elke stand.
     if c.danger || c.outside_project {
         return Decision::Ask;
@@ -57,7 +70,7 @@ mod tests {
     use std::path::Path;
 
     fn d(tool: &str, input: serde_json::Value, mode: Mode) -> Decision {
-        decide(mode, &classify(tool, &input, Path::new("/p")))
+        decide(mode, false, &classify(tool, &input, Path::new("/p")))
     }
 
     #[test]
@@ -140,6 +153,53 @@ mod tests {
         assert_eq!(
             d("Bash", json!({"command": "ls -la"}), Mode::Always),
             Decision::Allow
+        );
+    }
+
+    #[test]
+    fn overleg_modus_weigert_schrijfacties_en_laat_lezen_en_het_plan_door() {
+        let dec = |tool: &str, input: serde_json::Value| {
+            decide(
+                Mode::Important,
+                true,
+                &classify(tool, &input, Path::new("/p")),
+            )
+        };
+        assert_eq!(
+            dec("Write", json!({"file_path": "/p/a.html"})),
+            Decision::Deny
+        );
+        assert_eq!(
+            dec("Edit", json!({"file_path": "/p/a.html"})),
+            Decision::Deny
+        );
+        assert_eq!(
+            dec("Bash", json!({"command": "npm install"})),
+            Decision::Deny
+        );
+        assert_eq!(
+            dec("Bash", json!({"command": "rm -rf x"})),
+            Decision::Deny,
+            "ook gevaarlijk: geweigerd, niet gevraagd"
+        );
+        assert_eq!(
+            dec("Read", json!({"file_path": "/p/a.html"})),
+            Decision::Allow
+        );
+        assert_eq!(dec("Grep", json!({"pattern": "x"})), Decision::Allow);
+        assert_eq!(
+            dec("ExitPlanMode", json!({"plan": "x"})),
+            Decision::Ask,
+            "de gebruiker keurt het plan goed"
+        );
+        // ook in "vraag altijd" blijft dit gelden
+        assert_eq!(
+            decide(
+                Mode::Always,
+                true,
+                &classify("Write", &json!({"file_path": "a"}), Path::new("/p"))
+            ),
+            Decision::Deny
         );
     }
 }

@@ -109,3 +109,19 @@ code.claude.com/docs/en/agent-sdk/{typescript,streaming-vs-single-mode}.md, gith
 - Adapter-interface in Rust (`chat::ChatAdapter`): `command`, `encode_user`, `parse_line`. Alleen `ClaudeAdapter` is ingevuld; voor andere providers geeft het register `None` en toont de UI de terminal-weergave.
 - Terugval ook tijdens het draaien: komt er van Claude geen geldige JSON (oude versie, onbekende vlag), dan meldt de chat dat en opent de technische weergave.
 - Fixtures voor de parser (`src-tauri/tests/fixtures/claude/`): `real_hello_mcp_failed.jsonl` en `real_write_page.jsonl` zijn **opnames van een echte run** (opgeschoond: paden, hook-uitvoer en toollijst ingekort). De overige bestanden (`build_page`, `bash_commands`, `auth_error`, `max_turns`, `subagent`, `retry_and_unknown`, `garbage`) zijn **handgeschreven naar het gedocumenteerde schema** voor situaties die lastig live op te nemen zijn.
+
+---
+
+# Tien kleine functies (fase 6): CLI-opties
+
+## Plan-modus ("Eerst overleggen") — Claude Code (gebouwd)
+Bronnen: code.claude.com/docs/en/permission-modes.md, cli-reference.md; geverifieerd met een echte run (2026-11-17).
+- `claude --permission-mode plan` start in planmodus: Claude onderzoekt en schrijft een plan, maar **wijzigt je bestanden niet** ("blocks edits until you approve a plan"). Andere waarden: `default`, `acceptEdits`, `auto`, `dontAsk`, `bypassPermissions`, `manual`. De vlag werkt ook met `-p --input-format stream-json`; `system/init` meldt dan `permissionMode: "plan"`.
+- **Echte run** (Studio-MCP als `--permission-prompt-tool`): in de projectmap kwam niets te staan. Claude schreef zijn planbestand zelf naar `<CLAUDE_CONFIG_DIR>/plans/*.md` (zonder om toestemming te vragen) en riep daarna de tool **`ExitPlanMode`** aan met `input.plan` (de plantekst). Die aanroep loopt via onze toestemming-tool; weigeren gaf `tool_result … is_error` en Claude bleef overleggen ("Wat wil je anders hebben?"). Goedkeuren verlaat de planmodus (permission-modes.md: "Approving a plan exits plan mode").
+- Wisselen van modus midden in een sessie kan niet met een CLI-vlag: Studio stopt het proces en start het bij het volgende bericht opnieuw met `--resume <sessie-id>` en de andere modus. Het gesprek blijft dus doorlopen.
+- Aanvullende veiligheid: ook in overleg-modus weigert Studio zelf alle schrijf-/uitvoeracties die via de toestemming-tool binnenkomen (behalve het plan zelf).
+- **CLI zonder planmodus** (nu: geen enkele gebouwde adapter; Gemini/Codex vallen terug op de terminal): de adapter meldt `supports_plan_mode() == false` en Studio zet dan een instructie voor de eerste regel van elk bericht ("[Overleg-modus] Je mag … GEEN bestanden …").
+- Ook relevant: `--append-system-prompt` (cli-reference.md) hadden we kunnen gebruiken, maar de instructie in het bericht werkt voor elke CLI en niet alleen voor Claude.
+
+## Eenmalige AI-aanroep zonder tools (opdracht-verbeteraar) — Claude Code
+Bron: cli-reference.md. `--tools ""` schakelt alle ingebouwde tools uit; `-p` werkt met `--output-format text`. (Wordt gebruikt bij functie 7.)

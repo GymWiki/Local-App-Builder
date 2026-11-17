@@ -6,6 +6,7 @@ struct H {
     mgr: ChatManager,
     out: Arc<Mutex<Vec<ChatOut>>>,
     answers: Arc<Mutex<Vec<(i64, String, bool)>>>,
+    deny_messages: Arc<Mutex<Vec<String>>>,
     store: Arc<ConnStore>,
     project: i64,
     dir: tempfile::TempDir,
@@ -18,12 +19,16 @@ fn harness() -> H {
     let store = Arc::new(ConnStore(Mutex::new(conn)));
     let out: Arc<Mutex<Vec<ChatOut>>> = Arc::default();
     let answers: Arc<Mutex<Vec<(i64, String, bool)>>> = Arc::default();
-    let (o, a) = (out.clone(), answers.clone());
+    let deny_messages: Arc<Mutex<Vec<String>>> = Arc::default();
+    let (o, a, dm) = (out.clone(), answers.clone(), deny_messages.clone());
     let mgr = ChatManager::new(
         store.clone(),
         Arc::new(move |e| o.lock().unwrap().push(e)),
-        Arc::new(move |p, id, allow| {
+        Arc::new(move |p, id, allow, msg: Option<&str>| {
             a.lock().unwrap().push((p, id.to_string(), allow));
+            if let Some(m) = msg {
+                dm.lock().unwrap().push(m.to_string());
+            }
             Ok(())
         }),
     );
@@ -31,6 +36,7 @@ fn harness() -> H {
         mgr,
         out,
         answers,
+        deny_messages,
         store,
         project: p.id,
         dir,
@@ -537,13 +543,13 @@ fn toestemming_end_to_end_via_de_echte_mcp_server() {
     let chat = ChatManager::new(
         store.clone(),
         Arc::new(|_| {}),
-        Arc::new(move |project, id, allow| {
+        Arc::new(move |project, id, allow, msg: Option<&str>| {
             m2.get()
                 .unwrap()
                 .call(
                     project,
                     "permission.answer",
-                    json!({ "id": id, "allow": allow }),
+                    json!({ "id": id, "allow": allow, "message": msg }),
                     Duration::from_secs(5),
                 )
                 .map(|_| ())
@@ -761,4 +767,167 @@ fn zonder_git_koppeling_werkt_de_chat_gewoon() {
     wait_for("antwoord", || kinds(&h).contains(&"assistant".to_string()));
     assert!(versions(&h).is_empty());
     h.mgr.close_all();
+}
+
+// ---------- plan-modus (eerst overleggen) ----------
+
+fn args_lines(fake: &Path) -> Vec<String> {
+    std::fs::read_to_string(fake.join("args.txt"))
+        .unwrap_or_default()
+        .lines()
+        .map(str::to_string)
+        .collect()
+}
+
+#[test]
+fn modus_is_standaard_bouwen_wordt_per_project_onthouden_en_meldt_de_wijziging() {
+    let h = harness();
+    assert_eq!(h.mgr.mode(h.project), "build");
+    h.mgr.set_mode(h.project, "plan").unwrap();
+    assert_eq!(h.mgr.mode(h.project), "plan");
+    assert!(h
+        .out
+        .lock()
+        .unwrap()
+        .iter()
+        .any(|o| matches!(o, ChatOut::Mode { mode, .. } if mode == "plan")));
+    assert!(h.mgr.set_mode(h.project, "rommel").is_err());
+
+    // een ander project heeft zijn eigen keuze
+    let other = {
+        let c = h.store.0.lock().unwrap();
+        let d = tempfile::tempdir().unwrap();
+        let p = projects::create(&c, "Tweede", d.path(), "leeg").unwrap();
+        std::mem::forget(d);
+        p.id
+    };
+    assert_eq!(h.mgr.mode(other), "build");
+    // en de keuze staat in de database (blijft dus bewaard na herstart)
+    assert_eq!(
+        h.store
+            .setting(&format!("chat_mode:{}", h.project))
+            .as_deref(),
+        Some("plan")
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn in_overleg_modus_start_de_cli_in_planmodus_en_wisselen_herstart_met_hervatten() {
+    let h = harness();
+    let (l, fake) = launch(&h, "ok");
+    h.mgr.send(h.project, "een", true, &l).unwrap();
+    wait_for("antwoord", || kinds(&h).contains(&"assistant".to_string()));
+    assert!(
+        !args_lines(&fake)[0].contains("--permission-mode"),
+        "bouwen: geen planmodus"
+    );
+
+    h.mgr.set_mode(h.project, "plan").unwrap();
+    h.mgr.send(h.project, "twee", true, &l).unwrap();
+    wait_for("tweede antwoord", || {
+        kinds(&h).iter().filter(|k| *k == "assistant").count() == 2
+    });
+    let second = args_lines(&fake)[1].clone();
+    assert!(second.contains("--permission-mode plan"), "{second}");
+    assert!(
+        second.contains("--resume sess-123"),
+        "zelfde gesprek: {second}"
+    );
+
+    h.mgr.set_mode(h.project, "build").unwrap();
+    h.mgr.send(h.project, "drie", true, &l).unwrap();
+    wait_for("derde antwoord", || {
+        kinds(&h).iter().filter(|k| *k == "assistant").count() == 3
+    });
+    let third = args_lines(&fake)[2].clone();
+    assert!(
+        !third.contains("--permission-mode") && third.contains("--resume"),
+        "{third}"
+    );
+    h.mgr.close_all();
+}
+
+#[test]
+fn zonder_eigen_planmodus_krijgt_de_ai_een_instructie_om_niets_te_wijzigen() {
+    assert_eq!(plan_text("Maak een site", false), "Maak een site");
+    let t = plan_text("Maak een site", true);
+    assert!(
+        t.starts_with("[Overleg-modus]")
+            && t.contains("GEEN bestanden")
+            && t.ends_with("Maak een site")
+    );
+}
+
+#[test]
+fn in_overleg_modus_worden_schrijfacties_zonder_vraag_geweigerd_en_lezen_mag() {
+    let h = harness();
+    h.mgr.set_mode(h.project, "plan").unwrap();
+    let file = h
+        .dir
+        .path()
+        .join("index.html")
+        .to_string_lossy()
+        .to_string();
+    ask(&h, "w", "Write", json!({ "file_path": file }));
+    ask(&h, "b", "Bash", json!({ "command": "rm -rf x" }));
+    ask(&h, "r", "Read", json!({ "file_path": file }));
+    let ans = h.answers.lock().unwrap().clone();
+    assert!(
+        ans.contains(&(h.project, "w".into(), false))
+            && ans.contains(&(h.project, "b".into(), false))
+    );
+    assert!(ans.contains(&(h.project, "r".into(), true)));
+    assert!(h
+        .deny_messages
+        .lock()
+        .unwrap()
+        .iter()
+        .all(|m| m.contains("overleg-modus")));
+    assert!(
+        history(&h).iter().all(|m| m.kind != "permission"),
+        "geen dialoog voor geweigerde acties"
+    );
+}
+
+#[test]
+fn plan_goedkeuren_vraagt_de_gebruiker_en_ja_zet_het_project_op_bouwen() {
+    let h = harness();
+    h.mgr.set_mode(h.project, "plan").unwrap();
+    ask(
+        &h,
+        "plan1",
+        "ExitPlanMode",
+        json!({ "plan": "# Plan\n1. Maak index.html" }),
+    );
+    let m = history(&h)
+        .into_iter()
+        .find(|m| m.kind == "permission")
+        .unwrap();
+    assert_eq!(m.payload["plan_exit"], true);
+    assert!(m.payload["detail"]
+        .as_str()
+        .unwrap()
+        .contains("Maak index.html"));
+    assert_eq!(h.mgr.mode(h.project), "plan", "nog niet goedgekeurd");
+
+    h.mgr.answer_permission(h.project, "plan1", true).unwrap();
+    assert_eq!(h.mgr.mode(h.project), "build");
+    assert!(h
+        .out
+        .lock()
+        .unwrap()
+        .iter()
+        .any(|o| matches!(o, ChatOut::Mode { mode, .. } if mode == "build")));
+    assert!(h
+        .answers
+        .lock()
+        .unwrap()
+        .contains(&(h.project, "plan1".into(), true)));
+
+    // Nee: blijft overleggen
+    h.mgr.set_mode(h.project, "plan").unwrap();
+    ask(&h, "plan2", "ExitPlanMode", json!({ "plan": "x" }));
+    h.mgr.answer_permission(h.project, "plan2", false).unwrap();
+    assert_eq!(h.mgr.mode(h.project), "plan");
 }

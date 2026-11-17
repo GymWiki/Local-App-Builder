@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { ChatMessage } from "../../lib/api";
+import FormattedText from "./formatText";
 
 interface Props {
   message: ChatMessage;
@@ -19,6 +20,7 @@ export default function PermissionDialog({ message, technical, onAnswer }: Props
   const first = useRef<HTMLButtonElement>(null);
   useEffect(() => first.current?.focus(), [message.id]);
 
+  const isPlan = p.plan_exit === true;
   const question = String(
     p.outside_project ? t("chat.toestemming.vraag.buiten") : t(`chat.toestemming.vraag.${kind}`, { defaultValue: t("chat.toestemming.vraag.generic") }),
   );
@@ -35,18 +37,23 @@ export default function PermissionDialog({ message, technical, onAnswer }: Props
       >
         <div className="text-sm uppercase tracking-wide text-zinc-400">{t("chat.toestemming.titel")}</div>
         <h2 id="perm-title" className="text-xl font-semibold">
-          {question}
+          {isPlan ? t("chat.toestemming.planTitel") : question}
         </h2>
         <p id="perm-explain" className="text-lg text-zinc-200">
-          {explain}
+          {isPlan ? t("chat.toestemming.planUitleg") : explain}
         </p>
+        {isPlan && (
+          <div data-testid="plan-text" className="max-h-64 overflow-y-auto rounded-lg bg-zinc-950 p-4 text-base text-zinc-100">
+            <FormattedText text={String(p.detail ?? "")} />
+          </div>
+        )}
         {p.outside_project && <p className="text-base text-amber-300">{t("chat.toestemming.buitenProject")}</p>}
         {danger && (
           <p role="note" className="rounded-lg bg-red-950 p-3 text-base text-red-100">
             ⚠ {t("chat.toestemming.gevaar")}
           </p>
         )}
-        {p.detail && (
+        {p.detail && !isPlan && (
           <div>
             <button onClick={() => setOpen((v) => !v)} aria-expanded={open} className="text-sm text-indigo-300 hover:underline">
               {t("chat.toestemming.details")}
@@ -64,14 +71,14 @@ export default function PermissionDialog({ message, technical, onAnswer }: Props
             onClick={() => onAnswer(false)}
             className="min-h-12 min-w-24 rounded-lg border border-zinc-500 px-6 text-lg hover:bg-zinc-800"
           >
-            {t("chat.toestemming.nee")}
+            {isPlan ? t("chat.toestemming.planNee") : t("chat.toestemming.nee")}
           </button>
           <button
             ref={danger ? undefined : first}
             onClick={() => onAnswer(true)}
             className={`min-h-12 min-w-24 rounded-lg px-6 text-lg font-semibold ${danger ? "bg-red-700 hover:bg-red-600" : "bg-indigo-600 hover:bg-indigo-500"}`}
           >
-            {t("chat.toestemming.ja")}
+            {isPlan ? t("chat.toestemming.planJa") : t("chat.toestemming.ja")}
           </button>
         </div>
       </div>

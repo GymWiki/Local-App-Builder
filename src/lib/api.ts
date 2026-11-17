@@ -235,13 +235,17 @@ export type ChatOut =
   | { type: "message"; project_id: number; message: ChatMessage }
   | { type: "update"; project_id: number; message: ChatMessage }
   | { type: "status"; project_id: number; state: ChatStatus; busy: boolean }
-  | { type: "fallback"; project_id: number; reason: string };
+  | { type: "fallback"; project_id: number; reason: string }
+  | { type: "mode"; project_id: number; mode: ChatMode };
+
+export type ChatMode = "plan" | "build";
 
 export interface ChatTarget {
   provider: Provider;
   account_id: number | null;
   account_label: string | null;
   structured: boolean;
+  mode: ChatMode;
 }
 
 export const chatTarget = (projectId: number) => invoke<ChatTarget>("chat_target", { projectId });
@@ -254,3 +258,4 @@ export const chatSwitch = (projectId: number, provider: Provider, accountId: num
   invoke<ChatTarget>("chat_switch", { projectId, provider, accountId });
 export const permissionAnswer = (projectId: number, reqId: string, allow: boolean) =>
   invoke<void>("permission_answer", { projectId, reqId, allow });
+export const chatModeSet = (projectId: number, mode: ChatMode) => invoke<void>("chat_mode_set", { projectId, mode });

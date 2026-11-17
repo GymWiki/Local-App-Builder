@@ -28,6 +28,8 @@ pub struct LaunchCtx {
     pub resume: Option<String>,
     pub mcp_config: Option<PathBuf>,
     pub permission_tool: Option<String>,
+    /// Overleg-modus: de CLI start in zijn planmodus.
+    pub plan: bool,
 }
 
 pub struct Launch {
@@ -39,6 +41,8 @@ pub struct Launch {
 pub trait ChatAdapter: Send {
     fn launch(&self, ctx: &LaunchCtx) -> Launch;
     /// Eén regel (met newline) voor stdin.
+    /// Kent de CLI een eigen planmodus (waarin geen bestanden worden gewijzigd)?
+    fn supports_plan_mode(&self) -> bool;
     fn encode_user(&self, text: &str) -> String;
     fn parse_line(&mut self, line: &str) -> Vec<ChatEvent>;
     /// Heeft de CLI al een geldige gestructureerde gebeurtenis geleverd?
@@ -69,6 +73,7 @@ pub trait Store: Send + Sync {
         session: Option<&str>,
     );
     fn setting(&self, key: &str) -> Option<String>;
+    fn set_setting(&self, key: &str, value: &str);
 }
 
 /// Store op een gewone SQLite-verbinding (tests en eenvoudig gebruik).
@@ -102,6 +107,9 @@ impl Store for ConnStore {
             .ok()
             .flatten()
     }
+    fn set_setting(&self, key: &str, value: &str) {
+        let _ = crate::db::set_setting(&self.0.lock().unwrap(), key, value);
+    }
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -124,11 +132,31 @@ pub enum ChatOut {
         project_id: i64,
         reason: String,
     },
+    /// De keuze Overleggen/Bouwen van dit project is veranderd.
+    Mode {
+        project_id: i64,
+        mode: String,
+    },
+}
+
+/// Instructie voor CLI's zonder eigen planmodus.
+pub const PLAN_INSTRUCTION: &str = "[Overleg-modus] Je mag in deze beurt GEEN bestanden maken, aanpassen of verwijderen en geen opdrachten uitvoeren die iets veranderen. Bespreek in gewone woorden wat je zou doen en stel een kort plan voor.";
+
+pub fn plan_text(text: &str, with_instruction: bool) -> String {
+    if with_instruction {
+        format!("{PLAN_INSTRUCTION}\n\n{text}")
+    } else {
+        text.to_string()
+    }
+}
+
+fn mode_key(project: i64) -> String {
+    format!("chat_mode:{project}")
 }
 
 pub type ChatSink = Arc<dyn Fn(ChatOut) + Send + Sync>;
-/// Antwoord op een toestemmingsvraag doorgeven aan de MCP-server (project, aanvraag-id, toegestaan).
-pub type Answerer = Arc<dyn Fn(i64, &str, bool) -> Result<()> + Send + Sync>;
+/// Antwoord op een toestemmingsvraag doorgeven aan de MCP-server (project, aanvraag-id, toegestaan, uitleg bij weigeren).
+pub type Answerer = Arc<dyn Fn(i64, &str, bool, Option<&str>) -> Result<()> + Send + Sync>;
 
 #[derive(Clone)]
 pub struct ChatLaunch {
@@ -148,6 +176,7 @@ struct Live {
     account_id: Option<i64>,
     gen: u64,
     pending: Arc<AtomicUsize>,
+    plan: bool,
 }
 
 struct Inner {
@@ -323,7 +352,7 @@ impl ChatManager {
             .unwrap_or(false)
     }
 
-    fn spawn_live(&self, project: i64, launch: &ChatLaunch) -> Result<()> {
+    fn spawn_live(&self, project: i64, launch: &ChatLaunch, plan: bool) -> Result<()> {
         let mut adapter = adapter_for(launch.provider).ok_or_else(|| {
             AppError::Invalid(
                 "Deze AI heeft nog geen chatweergave; gebruik de technische weergave.".into(),
@@ -340,6 +369,7 @@ impl ChatManager {
             resume,
             mcp_config: launch.mcp_config.clone(),
             permission_tool: launch.permission_tool.clone(),
+            plan,
         });
         let mut cmd = Command::new(&l.program);
         cmd.args(&l.args)
@@ -462,25 +492,52 @@ impl ChatManager {
                 account_id: launch.account_id,
                 gen,
                 pending,
+                plan,
             },
         );
         Ok(())
     }
 
-    fn ensure_live(&self, project: i64, launch: &ChatLaunch) -> Result<()> {
+    fn ensure_live(&self, project: i64, launch: &ChatLaunch, plan: bool) -> Result<()> {
         let stale = {
             let live = self.inner.live.lock().unwrap();
-            live.get(&project)
-                .map(|l| l.provider != launch.provider || l.account_id != launch.account_id)
+            live.get(&project).map(|l| {
+                l.provider != launch.provider || l.account_id != launch.account_id || l.plan != plan
+            })
         };
         match stale {
             Some(false) => Ok(()),
+            // Andere AI, ander account of andere modus: nieuw proces (de sessie wordt hervat met --resume).
             Some(true) => {
                 self.stop(project);
-                self.spawn_live(project, launch)
+                self.spawn_live(project, launch, plan)
             }
-            None => self.spawn_live(project, launch),
+            None => self.spawn_live(project, launch, plan),
         }
+    }
+
+    /// "plan" (eerst overleggen) of "build" (bouwen): de keuze van dit project.
+    pub fn mode(&self, project: i64) -> String {
+        match self.inner.store.setting(&mode_key(project)).as_deref() {
+            Some("plan") => "plan".into(),
+            _ => "build".into(),
+        }
+    }
+
+    /// Onthoudt de keuze en laat het proces bij het volgende bericht opnieuw starten in de juiste modus.
+    pub fn set_mode(&self, project: i64, mode: &str) -> Result<()> {
+        if !matches!(mode, "plan" | "build") {
+            return Err(AppError::Invalid("Onbekende modus.".into()));
+        }
+        if self.mode(project) != mode {
+            self.inner.store.set_setting(&mode_key(project), mode);
+            self.stop(project);
+            (self.inner.sink)(ChatOut::Mode {
+                project_id: project,
+                mode: mode.into(),
+            });
+        }
+        Ok(())
     }
 
     fn write_line(&self, project: i64, line: &str) -> std::io::Result<()> {
@@ -532,9 +589,12 @@ impl ChatManager {
             );
         }
         self.inner.status(project, Status::Thinking, true);
-        let line = adapter_for(launch.provider).unwrap().encode_user(text);
+        let adapter = adapter_for(launch.provider).unwrap();
+        let plan = self.mode(project) == "plan";
+        // Heeft de CLI geen eigen planmodus, dan krijgt de AI in plaats daarvan een instructie om niets te wijzigen.
+        let line = adapter.encode_user(&plan_text(text, plan && !adapter.supports_plan_mode()));
         let attempt = |this: &Self| -> Result<()> {
-            this.ensure_live(project, launch)?;
+            this.ensure_live(project, launch, plan && adapter.supports_plan_mode())?;
             this.write_line(project, &line)
                 .map_err(|e| AppError::Invalid(format!("Kon niet naar de AI schrijven: {e}")))
         };
@@ -603,14 +663,23 @@ impl ChatManager {
         };
         let c = tools::classify(tool, &input, project_dir);
         let mode = policy::Mode::parse(self.inner.store.setting("ui:permission_mode").as_deref());
-        match policy::decide(mode, &c) {
+        let plan_mode = self.mode(project) == "plan";
+        match policy::decide(mode, plan_mode, &c) {
             policy::Decision::Allow => {
-                let _ = (self.inner.answerer)(project, id, true);
+                let _ = (self.inner.answerer)(project, id, true, None);
+            }
+            policy::Decision::Deny => {
+                let _ = (self.inner.answerer)(
+                    project,
+                    id,
+                    false,
+                    Some("Je zit in overleg-modus: er mag nu niets worden aangepast. Bespreek eerst het plan met de gebruiker."),
+                );
             }
             policy::Decision::Ask => {
                 let payload = json!({
                     "req_id": id, "tool": tool, "kind": c.kind, "params": c.params, "detail": c.detail,
-                    "danger": c.danger, "outside_project": c.outside_project, "state": "asked"
+                    "danger": c.danger, "outside_project": c.outside_project, "plan_exit": c.plan_exit, "state": "asked"
                 });
                 if let Some(m) = self.inner.push(project, "permission", payload.clone()) {
                     self.inner
@@ -642,8 +711,24 @@ impl ChatManager {
 
     /// Het antwoord van de gebruiker (Ja/Nee) op een openstaande vraag.
     pub fn answer_permission(&self, project: i64, req_id: &str, allow: bool) -> Result<()> {
+        // Een goedgekeurd plan betekent: vanaf nu bouwen (de CLI verlaat zijn planmodus zelf).
+        let approves_plan = allow
+            && self
+                .inner
+                .perms
+                .lock()
+                .unwrap()
+                .get(req_id)
+                .is_some_and(|(_, p)| p["plan_exit"] == true);
         self.settle(project, req_id, if allow { "allowed" } else { "denied" })?;
-        (self.inner.answerer)(project, req_id, allow)
+        if approves_plan {
+            self.inner.store.set_setting(&mode_key(project), "build");
+            (self.inner.sink)(ChatOut::Mode {
+                project_id: project,
+                mode: "build".into(),
+            });
+        }
+        (self.inner.answerer)(project, req_id, allow, None)
     }
 
     /// De MCP-server heeft de vraag laten verlopen (geen antwoord binnen de tijd).

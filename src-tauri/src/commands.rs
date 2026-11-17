@@ -444,6 +444,8 @@ pub struct ChatTarget {
     pub account_label: Option<String>,
     /// Heeft deze AI een chatweergave? Zo niet: terugval op de terminal.
     pub structured: bool,
+    /// "plan" (eerst overleggen) of "build" (bouwen).
+    pub mode: String,
 }
 
 /// Welke AI praat in de chat? Eerst de keuze in de chat zelf (sessie), dan het standaardaccount, anders Claude.
@@ -463,21 +465,22 @@ fn resolve_target(
     Ok((Provider::Claude, None))
 }
 
-fn target_of(provider: Provider, acc: &Option<accounts::Account>) -> ChatTarget {
+fn target_of(provider: Provider, acc: &Option<accounts::Account>, mode: String) -> ChatTarget {
     ChatTarget {
         provider: provider.as_str().into(),
         account_id: acc.as_ref().map(|a| a.id),
         account_label: acc.as_ref().map(|a| a.label.clone()),
         structured: chat::supports_structured(provider),
+        mode,
     }
 }
 
 #[tauri::command]
-pub fn chat_target(db: State<Db>, project_id: i64) -> Result<ChatTarget> {
+pub fn chat_target(db: State<Db>, chat: State<ChatManager>, project_id: i64) -> Result<ChatTarget> {
     let c = db.conn()?;
     let p = projects::get(&c, project_id)?;
     let (provider, acc) = resolve_target(&c, &p)?;
-    Ok(target_of(provider, &acc))
+    Ok(target_of(provider, &acc, chat.mode(project_id)))
 }
 
 #[tauri::command]
@@ -597,6 +600,11 @@ pub fn chat_retry(
 }
 
 #[tauri::command]
+pub fn chat_mode_set(chat: State<ChatManager>, project_id: i64, mode: String) -> Result<()> {
+    chat.set_mode(project_id, &mode)
+}
+
+#[tauri::command]
 pub fn chat_busy(chat: State<ChatManager>, project_id: i64) -> bool {
     chat.busy(project_id)
 }
@@ -635,7 +643,7 @@ pub fn chat_switch(
     };
     let divider = json!({ "kind": "switched", "provider": provider.as_str(), "label": account.as_ref().map(|a| a.label.clone()) });
     chat.new_session(project_id, provider, account_id, divider);
-    let target = target_of(provider, &account);
+    let target = target_of(provider, &account, chat.mode(project_id));
     if target.structured {
         let launch = prepare_chat(&app, &db, &mcp, &chat, &profiles, project_id)?;
         chat.send(project_id, cli::HANDOVER_PROMPT, false, &launch)?;

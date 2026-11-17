@@ -17,7 +17,7 @@ vi.mock("@tauri-apps/api/event", () => ({
 const emit = (out: ChatOut) => act(() => handlers["chat-out"]({ payload: out }));
 
 const project: Project = { id: 1, naam: "Mijn site", pad: "/p", template: "leeg", created_at: "", default_account_id: null };
-const claude: ChatTarget = { provider: "claude", account_id: null, account_label: null, structured: true };
+const claude: ChatTarget = { provider: "claude", account_id: null, account_label: null, structured: true, mode: "build" };
 let nextId = 100;
 const msg = (kind: ChatMessage["kind"], payload: ChatMessage["payload"]): ChatMessage => ({ id: nextId++, project_id: 1, kind, payload, created_at: "" });
 
@@ -234,7 +234,7 @@ describe("ChatPanel: fouten in mensentaal", () => {
 
 describe("ChatPanel: terugval naar de terminal", () => {
   it("een AI zonder chatweergave toont uitleg en opent de technische weergave; invoer is uitgeschakeld", async () => {
-    const gemini: ChatTarget = { provider: "gemini", account_id: null, account_label: null, structured: false };
+    const gemini: ChatTarget = { provider: "gemini", account_id: null, account_label: null, structured: false, mode: "build" };
     const { onOpenAdvanced } = setup([], gemini);
     const note = await screen.findByTestId("terminal-fallback");
     expect(note).toHaveTextContent("Deze AI werkt nog niet in de chat");
@@ -265,6 +265,52 @@ describe("ChatPanel: terugval naar de terminal", () => {
   });
 });
 
+describe("ChatPanel: plan-modus (eerst overleggen)", () => {
+  it("toont de schakelaar met Bouwen als standaard en onthoudt een keuze via de backend", async () => {
+    (api.chatModeSet as Mock).mockResolvedValue(undefined);
+    setup();
+    const build = await screen.findByRole("radio", { name: "Bouwen" });
+    expect(build).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByRole("radiogroup", { name: "Wat moet de AI nu doen?" })).toBeInTheDocument();
+    expect(screen.queryByTestId("plan-banner")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("radio", { name: "Eerst overleggen" }));
+    await waitFor(() => expect(api.chatModeSet).toHaveBeenCalledWith(1, "plan"));
+    expect(screen.getByRole("radio", { name: "Eerst overleggen" })).toHaveAttribute("aria-checked", "true");
+    expect(screen.getByTestId("plan-banner")).toHaveTextContent("past niets aan");
+    expect(screen.getByPlaceholderText("Vertel wat je wilt; we bespreken eerst een plan...")).toBeInTheDocument();
+  });
+
+  it("begint in overleg-modus als het project zo was ingesteld (per project onthouden)", async () => {
+    setup([], { ...claude, mode: "plan" });
+    expect(await screen.findByRole("radio", { name: "Eerst overleggen" })).toHaveAttribute("aria-checked", "true");
+  });
+
+  it("de modus volgt gebeurtenissen: een goedgekeurd plan zet de schakelaar op Bouwen", async () => {
+    setup([], { ...claude, mode: "plan" });
+    await screen.findByRole("radio", { name: "Bouwen" });
+    await emit({ type: "mode", project_id: 1, mode: "build" });
+    expect(screen.getByRole("radio", { name: "Bouwen" })).toHaveAttribute("aria-checked", "true");
+    await emit({ type: "mode", project_id: 2, mode: "plan" });
+    expect(screen.getByRole("radio", { name: "Bouwen" })).toHaveAttribute("aria-checked", "true");
+  });
+
+  it("het plan van de AI verschijnt als vraag in gewone taal met 'Ja, bouw dit' en 'Nee, nog even overleggen'", async () => {
+    const m = msg("permission", { req_id: "p1", kind: "plan", tool: "ExitPlanMode", params: {}, detail: "# Plan\n- Een pagina met een kop\n- Een bestelknop", danger: false, outside_project: false, plan_exit: true, state: "asked" });
+    setup([m], { ...claude, mode: "plan" });
+    const dlg = await screen.findByRole("alertdialog");
+    expect(dlg).toHaveTextContent("Wil je dat de AI dit plan gaat bouwen?");
+    expect(screen.getByTestId("plan-text")).toHaveTextContent("Een bestelknop");
+    fireEvent.click(within(dlg).getByRole("button", { name: "Ja, bouw dit" }));
+    await waitFor(() => expect(api.permissionAnswer).toHaveBeenCalledWith(1, "p1", true));
+  });
+
+  it("'Nee, nog even overleggen' weigert het plan", async () => {
+    setup([msg("permission", { req_id: "p2", kind: "plan", tool: "ExitPlanMode", params: {}, detail: "x", danger: false, outside_project: false, plan_exit: true, state: "asked" })], { ...claude, mode: "plan" });
+    fireEvent.click(await screen.findByRole("button", { name: "Nee, nog even overleggen" }));
+    await waitFor(() => expect(api.permissionAnswer).toHaveBeenCalledWith(1, "p2", false));
+  });
+});
+
 describe("ChatPanel: versies", () => {
   it("toont een automatisch opgeslagen versie als rustige regel in het gesprek en opent de tijdlijn", async () => {
     setup([msg("assistant", { text: "Klaar!" }), msg("version", { hash: "abc", title: "Bestelknop toegevoegd" })]);
@@ -277,7 +323,7 @@ describe("ChatPanel: versies", () => {
 
 describe("ChatPanel: wisselen van AI en terugvallen", () => {
   it("'Wissel van AI' kiest een andere AI en meldt de scheiding", async () => {
-    (api.chatSwitch as Mock).mockResolvedValue({ provider: "gemini", account_id: null, account_label: null, structured: false });
+    (api.chatSwitch as Mock).mockResolvedValue({ provider: "gemini", account_id: null, account_label: null, structured: false, mode: "build" });
     setup();
     fireEvent.click(await screen.findByRole("button", { name: "Wissel van AI" }));
     const dlg = await screen.findByRole("dialog");
