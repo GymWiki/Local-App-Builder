@@ -55,3 +55,7 @@ Lokale desktop-app (Tauri 2 + React/TypeScript/Vite + Tailwind, Rust-backend, SQ
 - **Lint-regels** (eslint.config.js, geldt voor `src/`, behalve `src/components/ui/` en tests): geen `#hex`, `rgb()`, `hsl()` of `oklch()` in code en geen gewone `<button>`, `<input>`, `<select>`, `<textarea>` of `<dialog>`; gebruik de shadcn-onderdelen. Alleen de verborgen bestandskiezer in de chat heeft een gemotiveerde uitzondering.
 - Thema: de klasse `dark` staat op `<html>` (ThemeProvider, instelling `ui:theme`: system/light/dark). De terminal (xterm) leest zijn kleuren uit dezelfde variabelen (`src/lib/terminal-theme.ts`, `--term-*`) en wisselt mee.
 - Screenshots van de belangrijkste schermen maak je met `node scripts/ui-shots.mjs <voorvoegsel> [licht,donker]` (Tauri-aanroepen worden nagebootst); ze komen in `docs/ui/`.
+
+## UI-kits toevoegen (ontwikkelwerkwijze)
+- Een nieuwe UI-kit, thema of componentenbibliotheek aan de kit library toevoegen gaat via de skill `add-kit` (`.claude/skills/add-kit/SKILL.md`): typ `/add-kit <pakketnaam of URL>` of vraag in één zin "voeg [kit] toe aan de kit library". De skill onderzoekt, beslist (alleen MIT, Apache-2.0, BSD-2/3-Clause, ISC; exacte versie), maakt `design-packs/<id>/`, test (`npm run kit:validate`, `kit:test`, `kit:try`, `kit:check`) en legt het vast in `docs/kits.md`. Formaat en achtergrond: `docs/kits.md`.
+- Voer nooit installatiescripts van onbekende pakketten uit zonder bevestiging, gebruik geen kit met een niet-toegestane licentie en kopieer geen code uit kits met een onbekende licentie.

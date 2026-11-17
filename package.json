@@ -14,6 +14,8 @@
     "mcp:build": "node scripts/mcp-prepare.mjs",
     "kit:validate": "npm run mcp:build && node scripts/kit.mjs validate",
     "kit:test": "npm run mcp:build && node scripts/kit.mjs test",
+    "kit:try": "npm run mcp:build && node scripts/kit.mjs try",
+    "kit:check": "npm run mcp:build && node scripts/kit.mjs check",
     "kit:schema": "npm run mcp:build && node scripts/kit.mjs schema",
     "ui:shots": "node scripts/ui-shots.mjs",
     "ui:a11y": "node scripts/ui-a11y.mjs",

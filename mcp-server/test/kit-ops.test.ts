@@ -176,6 +176,23 @@ describe("kitlijst en scripts", () => {
   });
 });
 
+describe("kit uitproberen", () => {
+  it("maakt een proefproject buiten de repo en weigert mappen in de repo, niet-lege mappen en verboden licenties", async () => {
+    const { kitTry } = await import("../src/kits/kittest.js");
+    const root = await tmp();
+    await cp(path.join(REPO, "templates"), path.join(root, "templates"), { recursive: true });
+    await cp(await packs(), path.join(root, "design-packs"), { recursive: true });
+    const npm = fakeNpm();
+    const dir = path.join(await tmp(), "proef");
+    const r = await kitTry(root, "fragments-ui", dir, npm.run);
+    expect(r.plan).toEqual(["@usefragments/ui@4.5.0"]);
+    expect(existsSync(path.join(dir, "design/kit.json"))).toBe(true);
+    await expect(kitTry(root, "fragments-ui", path.join(root, "binnen"), npm.run)).rejects.toThrow(/buiten de Studio-repository/);
+    await expect(kitTry(root, "fragments-ui", dir, npm.run)).rejects.toThrow(/niet leeg/);
+    await expect(kitTry(root, "gpl-kit", path.join(await tmp(), "x"), npm.run)).rejects.toThrow(/niet toegestaan/);
+  });
+});
+
 describe("via de runtime", () => {
   it("kit.list en kit.current werken en een onbekende kit-map wordt geweigerd", async () => {
     const { Runtime } = await import("../src/runtime.js");

@@ -1,5 +1,5 @@
 import { createServer } from "node:http";
-import { cp, mkdtemp, readFile, rm, writeFile, mkdir } from "node:fs/promises";
+import { cp, mkdtemp, readFile, readdir, rm, writeFile, mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -153,6 +153,22 @@ export async function kitTest(o: KitTestOptions): Promise<StepReport[]> {
     await rm(tmp, { recursive: true, force: true });
   }
   return steps;
+}
+
+/** Maakt een proefproject om een kit uit te proberen: leeg template + kit, in een nieuwe map buiten de repository. */
+export async function kitTry(root: string, kitId: string, dir: string, run: Run = realRun): Promise<{ dir: string; plan: string[] }> {
+  const abs = path.resolve(dir);
+  const rel = path.relative(path.resolve(root), abs);
+  if (!rel.startsWith("..") && !path.isAbsolute(rel)) throw new Error("Kies een map buiten de Studio-repository voor het proefproject.");
+  if (existsSync(abs) && (await readdir(abs)).length > 0) throw new Error(`${abs} is niet leeg. Kies een nieuwe of lege map.`);
+  const packs = path.join(root, "design-packs");
+  loadKit(packs, kitId); // weigert o.a. niet-toegestane licenties
+  await mkdir(abs, { recursive: true });
+  await cp(path.join(root, "templates", "web-react-vite"), abs, { recursive: true });
+  const i = await run("npm install --ignore-scripts --no-audit --no-fund", abs);
+  if (i.exitCode !== 0) throw new Error(`npm install lukte niet:\n${i.output.split("\n").slice(-8).join("\n")}`);
+  const r = await applyKit({ packsDir: packs, projectDir: abs, kitId, run });
+  return { dir: abs, plan: r.plan.pakketten };
 }
 
 export async function writeJson(file: string, data: unknown): Promise<void> {

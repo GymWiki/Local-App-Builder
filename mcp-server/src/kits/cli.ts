@@ -2,7 +2,8 @@ import { writeFile } from "node:fs/promises";
 import path from "node:path";
 import { listKitIds, validateAll } from "./registry.js";
 import { kitJsonSchema, tokensJsonSchema } from "./schema.js";
-import { kitTest, realRun } from "./kittest.js";
+import { kitTest, kitTry, realRun } from "./kittest.js";
+import { checkProject } from "./check.js";
 
 /** Command line voor `npm run kit:validate`, `npm run kit:test -- <id>` en `kit:schema`. */
 async function main(argv: string[]): Promise<number> {
@@ -45,7 +46,32 @@ async function main(argv: string[]): Promise<number> {
     }
     return bad ? 1 : 0;
   }
-  console.error("Onbekend commando. Gebruik: validate | test <id> | schema");
+  if (cmd === "try") {
+    const [id, dir] = rest;
+    if (!id || !dir) {
+      console.error("Gebruik: npm run kit:try -- <kit-id> <nieuwe-map-buiten-de-repo>");
+      return 2;
+    }
+    const r = await kitTry(root, id, dir);
+    console.log(`✔ Proefproject klaar in ${r.dir}\n  pakketten: ${r.plan.join(", ") || "geen"}\n  Bouw er een pagina in (zie docs/ui-kit.md) en draai daarna: npm run kit:check -- ${r.dir}`);
+    return 0;
+  }
+  if (cmd === "check") {
+    const [dir] = rest;
+    if (!dir) {
+      console.error("Gebruik: npm run kit:check -- <projectmap>");
+      return 2;
+    }
+    const res = await checkProject(path.resolve(dir));
+    if (!res.enabled) {
+      console.error("✘ In deze map is nog geen kit toegepast (design/kit-check.json ontbreekt).");
+      return 1;
+    }
+    for (const f of res.findings) console.error(`✘ ${f.file}:${f.line} [${f.rule}] ${f.message} ${f.fix}`);
+    console.log(res.findings.length ? `\n${res.findings.length} afwijking(en) in ${res.scanned} bestanden.` : `✔ Kit-check groen (${res.scanned} bestanden).`);
+    return res.findings.length ? 1 : 0;
+  }
+  console.error("Onbekend commando. Gebruik: validate | test <id> | try <id> <map> | check <map> | schema");
   return 2;
 }
 
