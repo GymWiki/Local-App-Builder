@@ -12,6 +12,7 @@ use crate::mcp_config;
 use crate::preview::{PreviewInfo, PreviewManager};
 use crate::projects::{self, Project};
 use crate::provider::Provider;
+use crate::templates;
 use crate::terminal::{Snapshot, SpawnSpec, TerminalManager};
 use rusqlite::Connection;
 use serde::Serialize;
@@ -41,17 +42,29 @@ pub fn list_projects(db: State<Db>) -> Result<Vec<Project>> {
 
 #[tauri::command]
 pub fn create_project(
+    app: tauri::AppHandle,
     db: State<Db>,
     naam: String,
     bovenliggend_pad: String,
     template: Option<String>,
 ) -> Result<Project> {
-    projects::create(
+    let template = template.unwrap_or_else(|| "leeg".into());
+    let project = projects::create(
         &*db.conn()?,
         &naam,
         &PathBuf::from(bovenliggend_pad),
-        template.as_deref().unwrap_or("leeg"),
-    )
+        &template,
+    )?;
+    if template != "leeg" {
+        // Een echt template: bestanden erin zetten. Lukt dat niet, dan verdwijnt het project weer uit de lijst (de map blijft staan).
+        let copied = templates::bundled(&app, "templates")
+            .and_then(|t| templates::copy_template(&t, &template, Path::new(&project.pad)));
+        if let Err(e) = copied {
+            let _ = projects::delete(&*db.conn()?, project.id);
+            return Err(e);
+        }
+    }
+    Ok(project)
 }
 
 /// Verwijdert alleen uit de lijst; bestanden op schijf blijven staan.
@@ -265,6 +278,7 @@ fn timeout_for(cmd: &str) -> Duration {
     match cmd {
         "checks.run" => Duration::from_secs(60 * 60),
         "dev.start" | "dev.restart" | "dev.stop" => Duration::from_secs(30),
+        "kit.apply" | "kit.scripts" => Duration::from_secs(20 * 60),
         _ => Duration::from_secs(60),
     }
 }
@@ -277,9 +291,10 @@ pub fn runtime_call(
     cmd: String,
     args: Option<Value>,
 ) -> Result<Value> {
-    if cmd == "trust.set" {
+    if cmd == "trust.set" || cmd.starts_with("kit.") {
         return Err(AppError::Invalid(
-            "Gebruik trust_studio_config om te vertrouwen.".into(),
+            "Dit commando heeft een eigen route (trust_studio_config of de kit_*-commando's)."
+                .into(),
         ));
     }
     mcp.call(
@@ -973,4 +988,111 @@ mod attachment_tests {
                 .contains("maximaal")
         );
     }
+}
+
+/// Roept een kit-commando van de runtime aan. De map met kits komt van Studio zelf (nooit van de UI).
+fn kit_call(
+    app: &tauri::AppHandle,
+    db: &Db,
+    mcp: &McpManager,
+    project_id: i64,
+    cmd: &str,
+    mut args: Value,
+) -> Result<Value> {
+    let project = projects::get(&*db.conn()?, project_id)?;
+    project_dir(&project)?;
+    begin_mcp(app, &project);
+    let ready = mcp.wait_ready(project_id, Duration::from_secs(15));
+    if !ready.map(|i| i.is_up()).unwrap_or(false) {
+        return Err(AppError::Invalid(
+            "De koppeling met Studio is er nog niet. Probeer het over een paar seconden opnieuw."
+                .into(),
+        ));
+    }
+    let packs = templates::bundled(app, "design-packs")?;
+    args["packs"] = json!(packs.to_string_lossy());
+    let timeout = timeout_for(cmd);
+    mcp.call(project_id, cmd, args, timeout)
+}
+
+#[tauri::command(async)]
+pub fn kit_list(
+    app: tauri::AppHandle,
+    db: State<Db>,
+    mcp: State<McpManager>,
+    project_id: i64,
+) -> Result<Value> {
+    kit_call(&app, &db, &mcp, project_id, "kit.list", json!({}))
+}
+
+#[tauri::command(async)]
+pub fn kit_current(
+    app: tauri::AppHandle,
+    db: State<Db>,
+    mcp: State<McpManager>,
+    project_id: i64,
+) -> Result<Value> {
+    kit_call(&app, &db, &mcp, project_id, "kit.current", json!({}))
+}
+
+/// Past een kit toe (met checkpoint vooraf en automatisch terugdraaien bij een fout). Ververst daarna de preview.
+#[tauri::command(async)]
+pub fn kit_apply(
+    app: tauri::AppHandle,
+    db: State<Db>,
+    mcp: State<McpManager>,
+    previews: State<PreviewManager>,
+    project_id: i64,
+    kit: String,
+    tailor: Option<Value>,
+) -> Result<Value> {
+    let dir = project_dir(&projects::get(&*db.conn()?, project_id)?)?;
+    previews.open(project_id, dir.clone()); // plan opnieuw bepalen (bijv. net een template erin gezet)
+    let out = kit_call(
+        &app,
+        &db,
+        &mcp,
+        project_id,
+        "kit.apply",
+        json!({ "kit": kit, "tailor": tailor }),
+    );
+    previews.open(project_id, dir);
+    out
+}
+
+#[tauri::command(async)]
+pub fn kit_scripts(
+    app: tauri::AppHandle,
+    db: State<Db>,
+    mcp: State<McpManager>,
+    project_id: i64,
+    packages: Vec<String>,
+) -> Result<Value> {
+    kit_call(
+        &app,
+        &db,
+        &mcp,
+        project_id,
+        "kit.scripts",
+        json!({ "packages": packages }),
+    )
+}
+
+/// Past hoofdkleur, afronding, ruimte of lettertype aan (meteen zichtbaar in de preview).
+#[tauri::command(async)]
+pub fn kit_tailor(
+    app: tauri::AppHandle,
+    db: State<Db>,
+    mcp: State<McpManager>,
+    project_id: i64,
+    tailor: Value,
+) -> Result<Value> {
+    kit_call(
+        &app,
+        &db,
+        &mcp,
+        project_id,
+        "kit.tailor",
+        json!({ "tailor": tailor }),
+    )
 }

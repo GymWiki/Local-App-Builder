@@ -13,6 +13,7 @@ mod node;
 mod preview;
 mod projects;
 mod provider;
+mod templates;
 mod terminal;
 mod winpath;
 
@@ -354,6 +355,11 @@ pub fn run() {
             commands::preview_install,
             commands::chat_target,
             commands::chat_history,
+            commands::kit_list,
+            commands::kit_current,
+            commands::kit_apply,
+            commands::kit_scripts,
+            commands::kit_tailor,
             commands::chat_send,
             commands::chat_attach,
             commands::chat_asset_data,

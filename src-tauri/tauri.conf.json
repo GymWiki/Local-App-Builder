@@ -36,6 +36,8 @@
     ],
     "resources": {
       "../mcp-server/dist/index.mjs": "mcp-server/index.mjs",
+      "../design-packs": "design-packs",
+      "../templates": "templates",
       "../mcp-server/node_modules/playwright-core": "mcp-server/node_modules/playwright-core"
     }
   }

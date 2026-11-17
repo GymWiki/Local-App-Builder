@@ -9,6 +9,8 @@ import { PreviewObserver } from "./preview.js";
 import { runCommand } from "./proc.js";
 import { checkHtml, checkLinks } from "./static-checks.js";
 import { relevantLines } from "./text.js";
+import { applyWithSafety, current as kitCurrent, listKits, runScripts, tailor as kitTailor, type KitHost } from "./kits/ops.js";
+import type { Tailor } from "./kits/tokens.js";
 
 export type CheckName = "lint" | "build" | "test" | "html" | "links" | "console";
 export const CHECK_ORDER: CheckName[] = ["lint", "build", "test", "html", "links", "console"];
@@ -247,6 +249,39 @@ export class Runtime {
     return this.last;
   }
 
+  private packsDir(args: Record<string, unknown>): string {
+    const p = typeof args.packs === "string" ? args.packs : "";
+    if (!path.isAbsolute(p) || !existsSync(p)) throw new Error("De kit-bibliotheek (design-packs) is niet gevonden.");
+    return p;
+  }
+
+  private kitHost(args: Record<string, unknown>): KitHost {
+    return {
+      projectDir: this.projectDir,
+      packsDir: this.packsDir(args),
+      git: this.git,
+      run: async (command, cwd) => {
+        const r = await runCommand(command, cwd, 10 * 60 * 1000);
+        return { exitCode: r.timedOut ? null : r.exitCode, output: r.output };
+      },
+      checks: async () => {
+        try {
+          const r = await this.runChecks(["lint", "build"]);
+          const bad = r.steps.filter((x) => x.status === "failed" || x.status === "timeout");
+          return { ok: bad.length === 0, lines: bad.flatMap((x) => [`[${x.name}]`, ...x.output.slice(0, 20)]) };
+        } catch (e) {
+          const msg = (e as Error).message;
+          if (/Geen checks|goedgekeurd|loopt al/.test(msg)) return { ok: true, lines: [], skipped: msg };
+          throw e;
+        }
+      },
+      screenshot: async () => {
+        const shot = await this.observer.screenshot({});
+        return `data:image/jpeg;base64,${shot.data.toString("base64")}`;
+      },
+    };
+  }
+
   /** Antwoorden op commando's die de app (UI) via stdin stuurt. Alleen deze lijst is bereikbaar. */
   async control(cmd: string, args: Record<string, unknown> = {}): Promise<unknown> {
     switch (cmd) {
@@ -300,6 +335,19 @@ export class Runtime {
         this.emit({ event: "git" });
         return r;
       }
+      case "kit.list":
+        return listKits(this.packsDir(args), this.projectDir, args.stack === "react-vite" || args.stack === "flutter" ? args.stack : undefined);
+      case "kit.current":
+        return kitCurrent(this.projectDir);
+      case "kit.apply": {
+        const out = await applyWithSafety(this.kitHost(args), String(args.kit ?? ""), (args.tailor as Tailor | undefined) ?? undefined);
+        this.emit({ event: "git" });
+        return out;
+      }
+      case "kit.scripts":
+        return runScripts(this.kitHost(args), Array.isArray(args.packages) ? args.packages.map(String) : []);
+      case "kit.tailor":
+        return kitTailor(this.kitHost(args), (args.tailor as Tailor) ?? {});
       default:
         throw new Error(`Onbekend commando: ${cmd}`);
     }
