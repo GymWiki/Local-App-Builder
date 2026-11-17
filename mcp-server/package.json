@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "build": "tsc --noEmit && esbuild src/index.ts --bundle --platform=node --target=node20 --format=esm --external:playwright-core --outfile=dist/index.mjs",
+    "build": "tsc --noEmit && esbuild src/index.ts --bundle --platform=node --target=node20 --format=esm --external:playwright-core --outfile=dist/index.mjs && esbuild src/kits/cli.ts --bundle --platform=node --target=node20 --format=esm --external:playwright-core --outfile=dist/kits-cli.mjs",
     "lint": "tsc --noEmit",
     "test": "npm run build && vitest run"
   },

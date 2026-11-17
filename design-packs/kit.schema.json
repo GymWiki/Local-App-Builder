@@ -1,0 +1,282 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Studio kit.json",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{1,39}$"
+    },
+    "naam": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 60
+    },
+    "beschrijving": {
+      "type": "string",
+      "minLength": 10,
+      "maxLength": 300
+    },
+    "label": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 40
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "npm",
+        "bestanden"
+      ]
+    },
+    "pakketnaam": {
+      "type": "string",
+      "pattern": "^(?:@[a-z0-9][a-z0-9._-]*\\/)?[a-z0-9][a-z0-9._-]*$"
+    },
+    "versie": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$"
+    },
+    "extraPakketten": {
+      "default": [],
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "naam": {
+            "type": "string",
+            "pattern": "^(?:@[a-z0-9][a-z0-9._-]*\\/)?[a-z0-9][a-z0-9._-]*$"
+          },
+          "versie": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+\\.\\d+(?:-[0-9A-Za-z.-]+)?$"
+          }
+        },
+        "required": [
+          "naam",
+          "versie"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "bron": {
+      "type": "string",
+      "format": "uri"
+    },
+    "licentie": {
+      "type": "string",
+      "minLength": 2
+    },
+    "attributie": {
+      "type": "object",
+      "properties": {
+        "verplicht": {
+          "type": "boolean"
+        },
+        "tekst": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "verplicht",
+        "tekst"
+      ],
+      "additionalProperties": false
+    },
+    "stacks": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^[a-z0-9-]+$"
+      }
+    },
+    "installatiestappen": {
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 3
+      }
+    },
+    "installatiescripts": {
+      "default": false,
+      "type": "boolean"
+    },
+    "setup": {
+      "type": "object",
+      "properties": {
+        "uitvoer": {
+          "type": "string",
+          "enum": [
+            "css",
+            "dart"
+          ]
+        },
+        "stijlImports": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "provider": {
+          "default": null,
+          "anyOf": [
+            {
+              "type": "object",
+              "properties": {
+                "pakket": {
+                  "type": "string"
+                },
+                "naam": {
+                  "type": "string"
+                },
+                "props": {
+                  "default": {},
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "string"
+                  },
+                  "additionalProperties": {
+                    "type": "string"
+                  }
+                }
+              },
+              "required": [
+                "pakket",
+                "naam"
+              ],
+              "additionalProperties": false
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tokenMap": {
+          "default": {},
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "tokenMapDonker": {
+          "default": {},
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "rootAttributen": {
+          "default": {},
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "uitvoer"
+      ],
+      "additionalProperties": false
+    },
+    "tokens": {
+      "default": "tokens.json",
+      "type": "string"
+    },
+    "kitcontext": {
+      "type": "object",
+      "properties": {
+        "catalogus": {
+          "type": "string",
+          "enum": [
+            "fragments-json",
+            "typings",
+            "bestanden"
+          ]
+        },
+        "maxTokens": {
+          "default": 6000,
+          "type": "integer",
+          "minimum": 500,
+          "maximum": 20000
+        },
+        "importPad": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "catalogus",
+        "importPad"
+      ],
+      "additionalProperties": false
+    },
+    "componenten": {
+      "type": "string"
+    },
+    "regels": {
+      "default": "rules.md",
+      "type": "string"
+    },
+    "preview": {
+      "default": "preview.png",
+      "type": "string"
+    },
+    "voorbeeld": {
+      "default": "voorbeeld.tsx",
+      "type": "string"
+    },
+    "kitCheck": {
+      "default": {
+        "vervangNative": {},
+        "verbodenImports": []
+      },
+      "type": "object",
+      "properties": {
+        "vervangNative": {
+          "default": {},
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "verbodenImports": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "id",
+    "naam",
+    "beschrijving",
+    "label",
+    "type",
+    "bron",
+    "licentie",
+    "attributie",
+    "stacks",
+    "installatiestappen",
+    "setup",
+    "kitcontext"
+  ],
+  "additionalProperties": false
+}

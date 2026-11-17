@@ -31,7 +31,7 @@ Elke kit staat in `design-packs/<id>/`:
 | `kit.json` | gegevens (zie `design-packs/kit.schema.json`) |
 | `tokens.json` | kleuren (licht/donker), rondingen, spacing, schaduw, typografie — één bron van waarheid |
 | `rules.md` | korte AI-regels voor deze kit |
-| `preview.png`, `voorbeeld.html` | plaatje en kleine voorbeeldpagina |
+| `preview.png`, `voorbeeld.tsx` | plaatje en kleine voorbeeldpagina |
 | `components/` | alleen bij type `bestanden` |
 
 Toegestane licenties: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC. Versies zijn exact (geen `^`/`~`/`latest`).
@@ -40,3 +40,4 @@ Toegestane licenties: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC. Versies 
 <!-- kit-register -->
 | Kit | Bron | Licentie | Versie | Datum | Bevindingen |
 |---|---|---|---|---|---|
+| `fragments-ui` | https://github.com/fragments-sdk/ui (npm: @usefragments/ui) | MIT (LICENSE in pakket én in officiële repo gecontroleerd 2026-11-17) | 4.5.0 | 2026-11-17 | Alleen react/react-dom verplicht; geen installatiescripts; runtime-thema via `--fui-seed-brand`, `--fui-radius`, `--fui-scale`, `--fui-font-sans`; `fragments.json` levert de catalogus. |

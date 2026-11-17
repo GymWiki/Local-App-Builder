@@ -1,0 +1,42 @@
+{
+  "id": "fragments-ui",
+  "naam": "Fragments UI",
+  "beschrijving": "Een complete, rustige componentenbibliotheek met ruim 60 onderdelen: knoppen, formulieren, tabellen, menu's en meer. Werkt meteen goed in licht en donker.",
+  "label": "Snel en compleet",
+  "type": "npm",
+  "pakketnaam": "@usefragments/ui",
+  "versie": "4.5.0",
+  "extraPakketten": [],
+  "bron": "https://github.com/fragments-sdk/ui",
+  "licentie": "MIT",
+  "attributie": { "verplicht": false, "tekst": "" },
+  "stacks": ["react-vite"],
+  "installatiestappen": [
+    "Het pakket @usefragments/ui (versie 4.5.0) wordt aan je project toegevoegd.",
+    "Studio zet je kleuren, afronding, ruimte en lettertype in design/tokens.json en maakt daar src/kit/tokens.css van.",
+    "Je app wordt omringd door het thema van de kit, zodat alle onderdelen er meteen goed uitzien."
+  ],
+  "installatiescripts": false,
+  "setup": {
+    "uitvoer": "css",
+    "stijlImports": ["@usefragments/ui/styles"],
+    "provider": { "pakket": "@usefragments/ui", "naam": "Theme", "props": {} },
+    "tokenMap": {
+      "--fui-seed-brand": "kleuren.licht.primair",
+      "--fui-radius": "rondingen.midden",
+      "--fui-scale": "spacing.schaal",
+      "--fui-font-sans": "typografie.lettertype"
+    },
+    "tokenMapDonker": {},
+    "rootAttributen": {}
+  },
+  "tokens": "tokens.json",
+  "kitcontext": { "catalogus": "fragments-json", "maxTokens": 6000, "importPad": "@usefragments/ui" },
+  "regels": "rules.md",
+  "preview": "preview.png",
+  "voorbeeld": "voorbeeld.tsx",
+  "kitCheck": {
+    "vervangNative": { "button": "Button", "input": "Input", "select": "Select", "textarea": "Textarea", "dialog": "Dialog" },
+    "verbodenImports": ["@mui/", "@chakra-ui/", "antd", "@mantine/", "react-bootstrap", "@radix-ui/", "@headlessui/", "@nextui-org/", "@ark-ui/", "@heroui/"]
+  }
+}

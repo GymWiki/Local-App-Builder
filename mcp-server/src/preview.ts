@@ -23,7 +23,7 @@ const MAX_ENTRIES = 200;
 const isFavicon = (url?: string) => !!url && /\/favicon\.ico(?:[?#].*)?$/i.test(url);
 const NAV_TIMEOUT = 15_000;
 
-async function launchBrowser(): Promise<Browser> {
+export async function launchBrowser(): Promise<Browser> {
   let pw: any;
   try {
     pw = await import("playwright-core");
