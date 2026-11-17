@@ -6,6 +6,7 @@ mod cli;
 mod commands;
 mod db;
 mod error;
+mod export;
 mod instructions;
 mod mcp;
 mod mcp_config;
@@ -355,6 +356,7 @@ pub fn run() {
             commands::preview_install,
             commands::chat_target,
             commands::chat_history,
+            commands::export_project,
             commands::kit_list,
             commands::kit_current,
             commands::kit_apply,

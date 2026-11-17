@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { open } from "@tauri-apps/plugin-dialog";
+import { open, save } from "@tauri-apps/plugin-dialog";
 
 export type Provider = "claude" | "gemini";
 
@@ -348,3 +348,17 @@ export interface KitCheck {
 }
 export const kitCheck = (projectId: number) => invoke<KitCheck>("kit_check", { projectId });
 export const kitStrictness = (projectId: number, level: "waarschuwen" | "blokkeren") => invoke<{ strengheid: string }>("kit_strictness", { projectId, level });
+
+// exporteren ("Download je project")
+export interface ExportResult {
+  path: string;
+  files: number;
+  bytes: number;
+  skipped_secrets: string[];
+  skipped_large: string[];
+}
+export const exportProject = (projectId: number, dest: string) => invoke<ExportResult>("export_project", { projectId, dest });
+export async function kiesZipBestand(defaultName: string): Promise<string | null> {
+  const result = await save({ defaultPath: defaultName, filters: [{ name: "Zip", extensions: ["zip"] }] });
+  return typeof result === "string" ? result : null;
+}

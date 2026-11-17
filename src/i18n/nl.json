@@ -656,5 +656,19 @@
         "blokkerenUitleg": "Afwijkingen laten de controle mislukken. De AI moet ze eerst herstellen."
       }
     }
+  },
+  "publiceren": {
+    "titel": "Publiceren en delen",
+    "export": {
+      "titel": "Download je project",
+      "uitleg": "Je krijgt een zip met alle bestanden van je project.",
+      "van_jou": "De code is van jou. Hij zit niet vast aan Studio: je kunt hem openen, aanpassen en publiceren waar je maar wilt.",
+      "niet_mee": "Niet in de zip: de map node_modules, bouwuitvoer die je opnieuw kunt maken, en geheimen zoals .env-bestanden en sleutels.",
+      "knop": "Download je project",
+      "bezig": "Bezig met inpakken…",
+      "klaar": "Klaar: {{aantal}} bestanden opgeslagen in {{pad}}.",
+      "geheimen": "Deze geheime bestanden zijn bewust niet meegenomen: {{lijst}}.",
+      "groot": "Deze bestanden waren te groot en zijn overgeslagen: {{lijst}}."
+    }
   }
 }

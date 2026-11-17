@@ -1120,7 +1120,14 @@ pub fn kit_strictness(
     project_id: i64,
     level: String,
 ) -> Result<Value> {
-    kit_call(&app, &db, &mcp, project_id, "kit.strictness", json!({ "level": level }))
+    kit_call(
+        &app,
+        &db,
+        &mcp,
+        project_id,
+        "kit.strictness",
+        json!({ "level": level }),
+    )
 }
 
 #[cfg(test)]
@@ -1129,11 +1136,36 @@ mod setting_tests {
 
     #[test]
     fn alle_instellingen_van_de_ui_zijn_toegestaan_en_waarden_worden_gecontroleerd() {
-        for key in ["preview_auto_switch", "communication_mode", "permission_mode", "loop_threshold", "theme"] {
+        for key in [
+            "preview_auto_switch",
+            "communication_mode",
+            "permission_mode",
+            "loop_threshold",
+            "theme",
+        ] {
             assert!(UI_SETTINGS.contains(&key), "{key} ontbreekt in UI_SETTINGS");
         }
-        assert!(valid_setting("theme", "system") && valid_setting("theme", "light") && valid_setting("theme", "dark"));
+        assert!(
+            valid_setting("theme", "system")
+                && valid_setting("theme", "light")
+                && valid_setting("theme", "dark")
+        );
         assert!(!valid_setting("theme", "paars"));
-        assert!(valid_setting("loop_threshold", "3") && !valid_setting("loop_threshold", "1") && !valid_setting("loop_threshold", "abc"));
+        assert!(
+            valid_setting("loop_threshold", "3")
+                && !valid_setting("loop_threshold", "1")
+                && !valid_setting("loop_threshold", "abc")
+        );
     }
+}
+
+/// "Download je project": maakt een zip (zonder node_modules, bouwuitvoer en geheimen) op de gekozen plek.
+#[tauri::command(async)]
+pub fn export_project(
+    db: State<Db>,
+    project_id: i64,
+    dest: String,
+) -> Result<crate::export::ExportResult> {
+    let dir = project_dir(&projects::get(&*db.conn()?, project_id)?)?;
+    crate::export::export_zip(&dir, Path::new(&dest))
 }

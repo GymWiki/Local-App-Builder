@@ -5,6 +5,7 @@ import ChatPanel from "./app/chat/ChatPanel";
 import PreviewPanel from "./PreviewPanel";
 import AppearancePanel from "./kits/AppearancePanel";
 import SplitView from "./app/SplitView";
+import PublishPanel from "./app/PublishPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import TerminalPanel, { type Session } from "./TerminalPanel";
@@ -128,8 +129,8 @@ export default function Workspace({
               onRetryMcp={onRetryMcp}
             />
           </TabsContent>
-          <TabsContent value="publiceren" className="flex flex-1 items-center justify-center text-lg text-muted-foreground">
-            {t("tabs.binnenkort")}
+          <TabsContent value="publiceren" className="flex min-h-0 flex-1">
+            <PublishPanel project={project} onError={fail} />
           </TabsContent>
         </>
       )}
