@@ -60,7 +60,7 @@ describe("MCP-probleemmelding", () => {
     expect(screen.queryByTestId("mcp-problem")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Controleer in Claude" }));
     const res = await screen.findByTestId("mcp-check");
-    expect(res).toHaveTextContent("wacht op jouw goedkeuring");
+    expect(res).toHaveTextContent("wacht nog op goedkeuring");
     expect(res).toHaveTextContent("Pending approval");
     expect(api.verifyClaudeMcp).toHaveBeenCalledWith(1, null);
   });

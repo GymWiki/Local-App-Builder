@@ -82,13 +82,13 @@
     "controleBezig": "Controleren…",
     "controle": {
       "connected": "Claude ziet de studio-server en kan verbinden.",
-      "pending_approval": "Claude wacht op jouw goedkeuring. Start Claude in de terminal en kies Ja bij de vraag over de ‘studio’-server uit .mcp.json (en vertrouw de map).",
+      "pending_approval": "Claude wacht nog op goedkeuring van de ‘studio’-server (mogelijk heb je hem eerder afgewezen, of staat de map nog niet als vertrouwd). Start Claude in de terminal en kies Ja.",
       "failed": "Claude ziet de server wel, maar kan niet verbinden. Zie de uitvoer hieronder.",
       "not_found": "Claude vindt geen ‘studio’-server in deze projectmap.",
       "timeout": "Het controlecommando duurde te lang.",
       "unknown": "Onbekend resultaat; zie de uitvoer hieronder."
     },
-    "goedkeuring": "Claude vraagt bij de eerste start om goedkeuring voor de ‘studio’-server. Kies Ja; daarna verschijnt hier ‘verbonden’."
+    "goedkeuring": "Studio heeft de ‘studio’-server voor Claude goedgekeurd. Vraagt Claude bij de eerste start of hij deze map mag vertrouwen, kies dan Ja; daarna verschijnt hier ‘verbonden’."
   },
   "cli": {
     "nietGevonden": "{{naam}} is niet geïnstalleerd",

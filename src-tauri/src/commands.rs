@@ -1,4 +1,5 @@
 use crate::accounts::{self, Account};
+use crate::claude_approval;
 use crate::cli::{self, CliStatus};
 use crate::error::{AppError, Result};
 use crate::instructions;
@@ -241,6 +242,8 @@ pub fn verify_claude_mcp(
         .ok_or_else(|| AppError::Invalid("claude is niet geïnstalleerd.".into()))?;
     let dir = project_dir(&project)?;
     mcp_config::ensure(Provider::Claude, &dir)?;
+    let mut approval_warnings = Vec::new();
+    approve_for_claude(&dir, &mut approval_warnings);
 
     let mut env = base_env();
     env.extend(cli::mcp_env(
@@ -270,9 +273,13 @@ pub fn verify_claude_mcp(
         cmd.creation_flags(0x0800_0000);
     }
     let out = cli::output_with_timeout(cmd, Duration::from_secs(45)).map_err(AppError::Invalid)?;
+    let mut output = out.text.trim().to_string();
+    if !approval_warnings.is_empty() {
+        output = format!("{}\n\n{output}", approval_warnings.join("\n"));
+    }
     Ok(McpCheck {
         verdict: mcp_verdict(out.status, &out.text).into(),
-        output: out.text.trim().to_string(),
+        output,
     })
 }
 
@@ -317,6 +324,17 @@ pub struct SessionInfo {
     pub account_label: Option<String>,
     pub project_id: Option<i64>,
     pub warnings: Vec<String>,
+}
+
+/// Keurt onze server in Claude goed (zie claude_approval.rs). Geeft eventuele waarschuwingen terug.
+fn approve_for_claude(dir: &Path, warnings: &mut Vec<String>) {
+    match claude_approval::ensure(dir) {
+        Ok(claude_approval::Outcome::Rejected) => warnings.push(
+            "Je hebt de ‘studio’-server eerder afgewezen in Claude; Studio keurt hem niet opnieuw goed. Verwijder ‘studio’ uit disabledMcpjsonServers in .claude/settings.local.json als je dat wilt.".into(),
+        ),
+        Ok(_) => {}
+        Err(e) => warnings.push(e.to_string()),
+    }
 }
 
 fn base_env() -> Vec<(String, String)> {
@@ -408,7 +426,12 @@ pub fn start_ai(
     let info = mcp.start(project.id, &project.naam, &dir);
     if let (true, Some(port)) = (info.is_up(), info.port) {
         match mcp_config::ensure(provider, &dir) {
-            Ok(_) => env.extend(cli::mcp_env(&mcp::url_for(port), mcp.token())),
+            Ok(_) => {
+                env.extend(cli::mcp_env(&mcp::url_for(port), mcp.token()));
+                if provider == Provider::Claude {
+                    approve_for_claude(&dir, &mut warnings);
+                }
+            }
             Err(e) => warnings.push(e.to_string()),
         }
     } else if let Some(e) = info.error {

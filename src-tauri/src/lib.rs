@@ -1,4 +1,5 @@
 mod accounts;
+mod claude_approval;
 mod cli;
 mod commands;
 mod db;

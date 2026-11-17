@@ -12,7 +12,7 @@ export interface Checkpoint {
 }
 
 /** Bestanden die we nooit in een checkpoint stoppen (geheimen). */
-const SENSITIVE = [/(^|\/)\.env(\..*)?$/i, /\.(pem|key|p12|pfx)$/i, /(^|\/)id_(rsa|ed25519|ecdsa)(\.pub)?$/i, /(^|\/)\.npmrc$/i, /(^|\/)credentials\.json$/i];
+const SENSITIVE = [/(^|\/)\.env(\..*)?$/i, /\.(pem|key|p12|pfx)$/i, /(^|\/)id_(rsa|ed25519|ecdsa)(\.pub)?$/i, /(^|\/)\.npmrc$/i, /(^|\/)credentials\.json$/i, /(^|\/)\.claude\/settings\.local\.json$/i];
 const isSensitive = (p: string) => SENSITIVE.some((r) => r.test(p));
 
 export class Git {

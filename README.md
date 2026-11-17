@@ -50,7 +50,7 @@ Zet in de projectmap een `studio.json` (de Preview-tab maakt een voorbeeld aan):
 - `npm run tauri dev` en de release-build draaien eerst `scripts/mcp-prepare.mjs`: installeert zo nodig de dependencies van `mcp-server/` en bouwt `dist/index.mjs`.
 - Studio zoekt Node in PATH en op bekende plekken (Program Files, nvm, fnm, Volta, scoop, Homebrew), start `node --version` en eist versie 20+.
 - Mislukt het starten, dan toont de terminalbalk en de Preview-tab de echte reden (Node ontbreekt/te oud, serverbestand ontbreekt, crash met laatste logregels, time-out) en een knop **Opnieuw proberen**.
-- Claude vraagt bij de eerste start in een project om goedkeuring van de `studio`-server uit `.mcp.json`. Zolang dat niet is gebeurd, ziet Claude de tools niet. De knop **Controleer in Claude** draait `claude mcp get studio` met de juiste omgeving en meldt connected / wacht op goedkeuring / mislukt.
+- Studio keurt de `studio`-server voor Claude goed via `.claude/settings.local.json` (alleen onze naam wordt toegevoegd; een eerdere afwijzing door jou wordt gerespecteerd; het bestand blijft uit git). Claude vraagt bij de eerste start in een nieuwe map nog wel eenmalig of je de map vertrouwt: kies Ja, anders blijft de server ‘Pending approval’. De knop **Controleer in Claude** draait `claude mcp get studio` met de juiste omgeving en meldt connected / wacht op goedkeuring / mislukt.
 
 ## Bewust niet gedaan
 - Geen MCP-tool om de dev-server te starten: dat doet de gebruiker in de Preview-tab (vertrouwensgrens). De AI krijgt een duidelijke melding als de preview niet draait.

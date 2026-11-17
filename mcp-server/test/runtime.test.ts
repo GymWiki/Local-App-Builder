@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -189,6 +189,15 @@ describe("Runtime tegen een voorbeeldproject", () => {
     const list = await rt.git.list();
     expect(list.map((c) => c.message)).toEqual(["eerste"]);
     await expect(rt.control("git.checkpoint", { message: "  " })).rejects.toThrow();
+  });
+
+  it("git: persoonlijke Claude-instellingen (goedkeuring) komen nooit in een checkpoint", async () => {
+    await mkdir(path.join(ex.dir, ".claude"));
+    await writeFile(path.join(ex.dir, ".claude/settings.local.json"), '{"enabledMcpjsonServers":["studio"]}');
+    await writeFile(path.join(ex.dir, "a.txt"), "x");
+    const r = (await rt.control("git.checkpoint", { message: "met claude-map" })) as { skipped: string[] };
+    expect(r.skipped).toContain(".claude/settings.local.json");
+    expect(execFileSync("git", ["ls-files"], { cwd: ex.dir, encoding: "utf8" })).not.toContain("settings.local.json");
   });
 
   it("git restore: zet terug als nieuwe commit en bewaart niet-opgeslagen werk eerst", async () => {
