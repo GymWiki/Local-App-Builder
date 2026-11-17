@@ -71,3 +71,39 @@ Claude Code leest `CLAUDE.md`, Gemini CLI `GEMINI.md` en Codex `AGENTS.md` als p
 - Profiel per account: Claude → `CLAUDE_CONFIG_DIR`, Gemini → `GEMINI_CLI_HOME`.
 - "Wissel van AI" hervat **niet** (sessies zijn per account/CLI en onderling niet uitwisselbaar): de nieuwe AI start vers en krijgt PROJECT.md als overdracht.
 - Op Windows zijn npm-CLI's `.cmd`-shims: die starten we via `cmd.exe /D /C`. Niet op Windows getest.
+
+---
+
+# Gestructureerde uitvoer voor de chat-weergave (fase 5)
+
+Gecontroleerd op 2026-11-17 tegen de actuele documentatie. Bronnen: code.claude.com/docs/en/{headless,cli-reference,errors,permissions,memory,skills}.md,
+code.claude.com/docs/en/agent-sdk/{typescript,streaming-vs-single-mode}.md, github.com/google-gemini/gemini-cli `docs/cli/{headless,gemini-md,cli-reference}.md`.
+
+## Claude Code — wél gestructureerd (gebouwd)
+- **Uitvoer**: `claude -p --output-format stream-json --verbose` geeft per regel één JSON-gebeurtenis (headless.md). `--include-partial-messages` voegt `stream_event`-delta's toe (woord-voor-woord); wij gebruiken die **niet** (zie "niet gedaan").
+- **Invoer (meerdere beurten in één proces)**: `--input-format stream-json` met per regel `{"type":"user","message":{"role":"user","content":"…"}}` (streaming-vs-single-mode.md; `content` mag ook een lijst blokken zijn). Het proces blijft draaien tussen beurten; extra berichten die tijdens een beurt binnenkomen worden in de wachtrij gezet (cli-reference `--max-turns`).
+- **Gebeurtenissen** (SDK-typen, agent-sdk/typescript.md):
+  - `system` met `subtype: "init"`: eerste gebeurtenis, bevat `session_id`, model, tools, `mcp_servers` en `mcp_server_errors`. Ook `system/api_retry` (met `error`: `authentication_failed`, `rate_limit`, `overloaded`, `billing_error`, …).
+  - `assistant`: `message.content` is een lijst blokken (`text`, `thinking`, `tool_use` met `id`/`name`/`input`); optioneel `error` (dezelfde foutcategorieën) en `parent_tool_use_id` (≠ null = subagent).
+  - `user`: bevat `tool_result`-blokken (`tool_use_id`, `content`, `is_error`).
+  - `result`: laatste regel van een beurt; `subtype: "success"` of `error_max_turns` / `error_during_execution` / …, met `is_error`, `result`, `session_id`, `duration_ms`, `total_cost_usd`, `permission_denials`.
+- **Hervatten**: `--resume <session_id>` (cli-reference; het id komt uit `system/init` of `result`). `--session-id <uuid>` kiest zelf een id. Sessies staan onder de configmap, dus hervatten werkt per account (zie fase 2).
+- **Toestemmingen**: `--permission-prompt-tool mcp__<server>__<tool>` (cli-reference). Sinds v2.1.302 start `claude -p` in *Manual mode*: een aanroep die toestemming nodig heeft wordt geweigerd tenzij de prompt-tool (of een hook) hem goedkeurt (headless.md). De tool moet **één tekstblok** teruggeven met JSON `{"behavior":"allow"}` (optioneel `updatedInput`) of `{"behavior":"deny","message":"…"}`, zonder `structuredContent` en dus zonder `outputSchema` (errors.md). Claude wacht tot de MCP-server verbonden is (MCP_TIMEOUT, standaard 30 s). Een `allow` voor een MCP-tool die ‘user interaction’ vereist wordt een deny.
+- **Niet gedocumenteerd, dus niet geverifieerd**: de **namen van de invoerargumenten** die Claude aan de prompt-tool geeft. Onze tool accepteert daarom `tool_name`, `input` en `tool_use_id` (de namen uit de SDK-callback `canUseTool`), laat ze alle drie optioneel en weigert bij onleesbare invoer.
+- **MCP bij `-p`**: `--mcp-config` laadt servers uit een bestand/string; `${VAR}`-uitbreiding geldt volgens mcp.md voor `.mcp.json`, `~/.claude.json` en `--mcp-config`-bestanden (zelfde aanpak als fase 2: geen token op de commandoregel of in het bestand). Entries zonder `type` worden overgeslagen (`mcp_server_errors`).
+- **Instructiebestanden**: `./CLAUDE.md` of `./.claude/CLAUDE.md` (memory.md). `AGENTS.md` leest Claude **alleen als er géén** `CLAUDE.md` is; bestaan beide, dan telt alleen `CLAUDE.md` (memory.md, tabel). Onze identieke blokken in beide bestanden worden dus nooit dubbel geladen.
+- **Skills**: `.claude/skills/<naam>/SKILL.md` met YAML-frontmatter (`name`, `description`); de beschrijving bepaalt wanneer Claude de skill inzet; projectskills horen in de repo te staan (skills.md).
+
+## Gemini CLI — gestructureerde uitvoer bestaat, niet gebouwd (adapter volgt)
+- `gemini -p "…" --output-format stream-json` geeft JSONL met typen `init` (sessie-id, model), `message` (gebruiker/assistent), `tool_use`, `tool_result`, `error` en `result` (headless.md). Exitcodes: 0, 1, 42 (invoerfout), 53 (beurtlimiet).
+- Er is **geen gedocumenteerde invoer via stdin voor meerdere beurten**; een chat zou per beurt een proces starten met `--resume` (zie fase 2). Toestemmingen via een MCP-tool zijn voor Gemini niet gedocumenteerd.
+- Instructiebestand: `GEMINI.md` in de werkmap en bovenliggende mappen, plus `~/.gemini/GEMINI.md` (gemini-md.md); de bestanden worden samengevoegd.
+- Besluit voor nu: **terugval op de terminal-weergave** tot de adapter er is.
+
+## Codex CLI — NIET GEVERIFIEERD
+`developers.openai.com`/`learn.chatgpt.com` zijn niet bereikbaar (zie eerder); de GitHub-README noemt geen structuur-uitvoer. We nemen dus niets aan over `codex exec --json`, toestemmingen of hervatten. Codex blijft uitgeschakeld en valt terug op de terminal. `AGENTS.md` als instructiebestand voor Codex is **niet** uit de Codex-docs bevestigd; Claude leest het wel (zie boven), en we schrijven het omdat de gebruiker erom vroeg.
+
+## Beslissingen
+- Adapter-interface in Rust (`chat::ChatAdapter`): `command`, `encode_user`, `parse_line`. Alleen `ClaudeAdapter` is ingevuld; voor andere providers geeft het register `None` en toont de UI de terminal-weergave.
+- Terugval ook tijdens het draaien: komt er van Claude geen geldige JSON (oude versie, onbekende vlag), dan meldt de chat dat en opent de technische weergave.
+- De fixtures voor de parser (`src-tauri/tests/fixtures/claude/*.jsonl`) zijn **handgeschreven naar het gedocumenteerde schema**, niet opgenomen uit een live sessie (er is geen ingelogde CLI in deze omgeving).

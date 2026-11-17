@@ -110,6 +110,26 @@ export function registerTools(server: McpServer, ctx: ProjectCtx, record: (r: Ca
   const rt = ctx.runtime;
   if (!rt) return;
 
+  // Toestemmingen voor de chat-weergave: `claude --permission-prompt-tool mcp__studio__permission_prompt`.
+  // Moet één tekstblok met JSON teruggeven en geen structuredContent (dus geen outputSchema), zie docs/cli-notes.md.
+  server.registerTool(
+    "permission_prompt",
+    {
+      description: "Interne tool van Studio: vraagt de gebruiker om toestemming voor een actie van de AI. Niet zelf aanroepen.",
+      inputSchema: {
+        tool_name: z.string().optional(),
+        input: z.record(z.string(), z.unknown()).optional(),
+        tool_use_id: z.string().optional(),
+      },
+    },
+    ({ tool_name, input, tool_use_id }) =>
+      run("permission_prompt", "", async () => {
+        if (!tool_name) return JSON.stringify({ behavior: "deny", message: "Onleesbare toestemmingsvraag; de actie is niet uitgevoerd." });
+        const r = await rt.requestPermission(tool_name, input ?? {}, tool_use_id);
+        return JSON.stringify(r.allow ? { behavior: "allow", updatedInput: input ?? {} } : { behavior: "deny", message: r.message ?? "De gebruiker heeft dit niet toegestaan." });
+      }),
+  );
+
   server.registerTool(
     "run_checks",
     {

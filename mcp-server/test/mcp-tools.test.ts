@@ -32,7 +32,7 @@ afterEach(async () => {
 });
 
 describe("MCP-tools (fase 3)", () => {
-  it("toont negen tools", async () => {
+  it("toont tien tools", async () => {
     const names = (await client.listTools()).tools.map((t) => t.name).sort();
     expect(names).toEqual([
       "get_console_errors",
@@ -40,6 +40,7 @@ describe("MCP-tools (fase 3)", () => {
       "get_preview_screenshot",
       "git_checkpoint",
       "git_list_checkpoints",
+      "permission_prompt",
       "project_status",
       "read_project_notes",
       "run_checks",

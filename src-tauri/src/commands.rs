@@ -1,4 +1,7 @@
 use crate::accounts::{self, Account};
+use crate::chat::events::ErrorCode;
+use crate::chat::store::StoredMessage;
+use crate::chat::{self, ChatLaunch, ChatManager};
 use crate::claude_approval;
 use crate::cli::{self, CliStatus};
 use crate::error::{AppError, Result};
@@ -55,11 +58,14 @@ pub fn create_project(
 pub fn delete_project(
     db: State<Db>,
     mcp: State<McpManager>,
-    term: State<TerminalManager>,
+    previews: State<PreviewManager>,
+    chat: State<ChatManager>,
     id: i64,
 ) -> Result<()> {
+    // Terminals sluit de frontend per tab; hier de chat, preview (watcher, statische server) en de MCP-runtime.
+    chat.stop(id);
+    previews.close(id);
     mcp.stop(id);
-    let _ = term; // sessies sluit de frontend per tab; de MCP-server stopt hier
     projects::delete(&*db.conn()?, id)
 }
 
@@ -152,7 +158,8 @@ pub fn open_project(
 ) -> Result<McpInfo> {
     let p = projects::get(&*db.conn()?, id)?;
     // Vaste werkwijze (CLAUDE.md / GEMINI.md / AGENTS.md) bijwerken; mislukken mag het openen niet blokkeren.
-    let _ = instructions::ensure(Path::new(&p.pad));
+    let simple = crate::db::communication_simple(&*db.conn()?);
+    let _ = instructions::ensure(Path::new(&p.pad), simple);
     // Zero-config preview werkt direct (statisch zonder Node); de runtime volgt op de achtergrond.
     previews.open(p.id, PathBuf::from(&p.pad));
     Ok(begin_mcp(&app, &p))
@@ -190,7 +197,19 @@ pub fn preview_install(previews: State<PreviewManager>, id: i64) -> Result<Previ
     previews.install(id)
 }
 
-const UI_SETTINGS: &[&str] = &["preview_auto_switch"];
+const UI_SETTINGS: &[&str] = &[
+    "preview_auto_switch",
+    "communication_mode",
+    "permission_mode",
+];
+
+fn valid_setting(key: &str, value: &str) -> bool {
+    match key {
+        "communication_mode" => matches!(value, "simple" | "technical"),
+        "permission_mode" => matches!(value, "always" | "important"),
+        _ => value.len() <= 20,
+    }
+}
 
 #[tauri::command]
 pub fn get_ui_setting(db: State<Db>, key: String) -> Result<Option<String>> {
@@ -200,16 +219,35 @@ pub fn get_ui_setting(db: State<Db>, key: String) -> Result<Option<String>> {
     crate::db::get_setting(&*db.conn()?, &format!("ui:{key}"))
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn set_ui_setting(db: State<Db>, key: String, value: String) -> Result<()> {
-    if !UI_SETTINGS.contains(&key.as_str()) || value.len() > 20 {
+    if !UI_SETTINGS.contains(&key.as_str()) || !valid_setting(&key, &value) {
         return Err(AppError::Invalid("Onbekende instelling.".into()));
     }
-    crate::db::set_setting(&*db.conn()?, &format!("ui:{key}"), &value)
+    let all = {
+        let c = db.conn()?;
+        crate::db::set_setting(&c, &format!("ui:{key}"), &value)?;
+        projects::list(&c)?
+    };
+    // "Eenvoudige taal" aan/uit: instructiebestanden van alle projecten meteen bijwerken (alleen onze blokken).
+    if key == "communication_mode" {
+        for p in all {
+            if Path::new(&p.pad).is_dir() {
+                let _ = instructions::ensure(Path::new(&p.pad), value == "simple");
+            }
+        }
+    }
+    Ok(())
 }
 
 #[tauri::command(async)]
-pub fn close_project(mcp: State<McpManager>, previews: State<PreviewManager>, id: i64) {
+pub fn close_project(
+    mcp: State<McpManager>,
+    previews: State<PreviewManager>,
+    chat: State<ChatManager>,
+    id: i64,
+) {
+    chat.stop(id);
     previews.close(id);
     mcp.stop(id);
 }
@@ -395,6 +433,219 @@ mod tests {
         assert_eq!(mcp_verdict(None, ""), "timeout");
         assert_eq!(mcp_verdict(Some(0), "iets anders"), "unknown");
     }
+}
+
+// ---------- chat ----------
+
+#[derive(Debug, Serialize)]
+pub struct ChatTarget {
+    pub provider: String,
+    pub account_id: Option<i64>,
+    pub account_label: Option<String>,
+    /// Heeft deze AI een chatweergave? Zo niet: terugval op de terminal.
+    pub structured: bool,
+}
+
+/// Welke AI praat in de chat? Eerst de keuze in de chat zelf (sessie), dan het standaardaccount, anders Claude.
+fn resolve_target(
+    conn: &Connection,
+    project: &Project,
+) -> Result<(Provider, Option<accounts::Account>)> {
+    if let Some(s) = chat::store::session(conn, project.id)? {
+        let acc = s.account_id.and_then(|id| accounts::get(conn, id).ok());
+        return Ok((Provider::parse(&s.provider)?, acc));
+    }
+    if let Some(id) = project.default_account_id {
+        if let Ok(a) = accounts::get(conn, id) {
+            return Ok((Provider::parse(&a.provider)?, Some(a)));
+        }
+    }
+    Ok((Provider::Claude, None))
+}
+
+fn target_of(provider: Provider, acc: &Option<accounts::Account>) -> ChatTarget {
+    ChatTarget {
+        provider: provider.as_str().into(),
+        account_id: acc.as_ref().map(|a| a.id),
+        account_label: acc.as_ref().map(|a| a.label.clone()),
+        structured: chat::supports_structured(provider),
+    }
+}
+
+#[tauri::command]
+pub fn chat_target(db: State<Db>, project_id: i64) -> Result<ChatTarget> {
+    let c = db.conn()?;
+    let p = projects::get(&c, project_id)?;
+    let (provider, acc) = resolve_target(&c, &p)?;
+    Ok(target_of(provider, &acc))
+}
+
+#[tauri::command]
+pub fn chat_history(
+    db: State<Db>,
+    project_id: i64,
+    limit: Option<i64>,
+) -> Result<Vec<StoredMessage>> {
+    chat::store::history(
+        &*db.conn()?,
+        project_id,
+        limit.unwrap_or(200).clamp(1, 1000),
+    )
+}
+
+/// Bouwt alles wat nodig is om de chat-CLI te starten (binary, omgeving, MCP-config). Wacht hooguit kort op de MCP-server.
+fn prepare_chat(
+    app: &tauri::AppHandle,
+    db: &Db,
+    mcp: &McpManager,
+    chat: &ChatManager,
+    profiles: &Profiles,
+    project_id: i64,
+) -> Result<ChatLaunch> {
+    let (project, provider, account) = {
+        let c = db.conn()?;
+        let p = projects::get(&c, project_id)?;
+        let (prov, acc) = resolve_target(&c, &p)?;
+        (p, prov, acc)
+    };
+    if !chat::supports_structured(provider) {
+        return Err(AppError::Invalid(
+            "Deze AI heeft nog geen chatweergave; gebruik de technische weergave.".into(),
+        ));
+    }
+    let binary = cli::resolve(provider.binary()).ok_or_else(|| {
+        AppError::Invalid(format!("{} is niet geïnstalleerd.", provider.binary()))
+    })?;
+    let dir = project_dir(&project)?;
+
+    begin_mcp(app, &project);
+    let info = mcp.wait_ready(project.id, Duration::from_secs(4));
+    let Some((true, Some(port))) = info.as_ref().map(|i| (i.is_up(), i.port)) else {
+        let why = info
+            .and_then(|i| i.error)
+            .unwrap_or_else(|| "De MCP-server is nog niet klaar.".into());
+        chat.report_error(project_id, ErrorCode::McpUnavailable, &why);
+        return Err(AppError::Invalid(format!(
+            "De koppeling met Studio is er nog niet: {why}"
+        )));
+    };
+
+    // `--mcp-config`-bestand met alleen verwijzingen (${STUDIO_MCP_URL}); het token gaat via de omgeving.
+    let app_data = profiles
+        .0
+        .parent()
+        .map(Path::to_path_buf)
+        .unwrap_or_else(|| profiles.0.clone());
+    let cfg_dir = app_data.join("chat").join(project_id.to_string());
+    std::fs::create_dir_all(&cfg_dir)?;
+    let cfg = cfg_dir.join("mcp.json");
+    let body =
+        json!({ "mcpServers": { mcp_config::SERVER_NAME: mcp_config::entry(Provider::Claude) } });
+    std::fs::write(
+        &cfg,
+        serde_json::to_string_pretty(&body).unwrap_or_default(),
+    )?;
+
+    let mut env = base_env();
+    env.extend(cli::mcp_env(&mcp::url_for(port), mcp.token()));
+    let profile = account.as_ref().map(|a| PathBuf::from(&a.profile_dir));
+    if let Some(p) = &profile {
+        std::fs::create_dir_all(p)?;
+    }
+    env.extend(cli::profile_env(provider, profile.as_deref()));
+    Ok(ChatLaunch {
+        provider,
+        account_id: account.map(|a| a.id),
+        binary,
+        cwd: dir,
+        env,
+        mcp_config: Some(cfg),
+        permission_tool: Some("mcp__studio__permission_prompt".into()),
+    })
+}
+
+#[tauri::command(async)]
+#[allow(clippy::too_many_arguments)]
+pub fn chat_send(
+    app: tauri::AppHandle,
+    db: State<Db>,
+    mcp: State<McpManager>,
+    chat: State<ChatManager>,
+    profiles: State<Profiles>,
+    project_id: i64,
+    text: String,
+    visible: Option<bool>,
+) -> Result<()> {
+    let launch = prepare_chat(&app, &db, &mcp, &chat, &profiles, project_id)?;
+    chat.send(project_id, &text, visible.unwrap_or(true), &launch)
+}
+
+/// "Probeer opnieuw": stuurt het laatste bericht van de gebruiker nog eens (zonder een nieuwe ballon).
+#[tauri::command(async)]
+pub fn chat_retry(
+    app: tauri::AppHandle,
+    db: State<Db>,
+    mcp: State<McpManager>,
+    chat: State<ChatManager>,
+    profiles: State<Profiles>,
+    project_id: i64,
+) -> Result<()> {
+    let text = chat::store::last_user_text(&*db.conn()?, project_id)?
+        .ok_or_else(|| AppError::Invalid("Er is nog niets om opnieuw te proberen.".into()))?;
+    let launch = prepare_chat(&app, &db, &mcp, &chat, &profiles, project_id)?;
+    chat.send(project_id, &text, false, &launch)
+}
+
+#[tauri::command]
+pub fn chat_stop(chat: State<ChatManager>, project_id: i64) {
+    chat.stop(project_id);
+}
+
+/// "Wissel van AI": nieuwe sessie met een scheiding in de chat. Heeft de nieuwe AI een chatweergave, dan krijgt hij PROJECT.md als overdracht.
+#[tauri::command(async)]
+#[allow(clippy::too_many_arguments)]
+pub fn chat_switch(
+    app: tauri::AppHandle,
+    db: State<Db>,
+    mcp: State<McpManager>,
+    chat: State<ChatManager>,
+    profiles: State<Profiles>,
+    project_id: i64,
+    provider: String,
+    account_id: Option<i64>,
+) -> Result<ChatTarget> {
+    let provider = Provider::parse(&provider)?;
+    let account = {
+        let c = db.conn()?;
+        let acc = account_id.map(|id| accounts::get(&c, id)).transpose()?;
+        if let Some(a) = &acc {
+            if a.provider != provider.as_str() {
+                return Err(AppError::Invalid(
+                    "Dit account hoort bij een andere AI.".into(),
+                ));
+            }
+        }
+        projects::set_default_account(&c, project_id, account_id)?;
+        acc
+    };
+    let divider = json!({ "kind": "switched", "provider": provider.as_str(), "label": account.as_ref().map(|a| a.label.clone()) });
+    chat.new_session(project_id, provider, account_id, divider);
+    let target = target_of(provider, &account);
+    if target.structured {
+        let launch = prepare_chat(&app, &db, &mcp, &chat, &profiles, project_id)?;
+        chat.send(project_id, cli::HANDOVER_PROMPT, false, &launch)?;
+    }
+    Ok(target)
+}
+
+#[tauri::command(async)]
+pub fn permission_answer(
+    chat: State<ChatManager>,
+    project_id: i64,
+    req_id: String,
+    allow: bool,
+) -> Result<()> {
+    chat.answer_permission(project_id, &req_id, allow)
 }
 
 // ---------- terminal ----------

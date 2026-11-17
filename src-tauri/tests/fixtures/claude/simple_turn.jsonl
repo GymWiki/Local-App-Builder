@@ -1,0 +1,3 @@
+{"type":"system","subtype":"init","session_id":"b6f1c2d4-1111-4a2b-9c3d-0123456789ab","model":"claude-sonnet-5-5","tools":["Read","Write","Edit","Bash"],"mcp_servers":[{"name":"studio","status":"connected"}],"cwd":"/home/u/Mijn Site"}
+{"type":"assistant","message":{"id":"msg_01","role":"assistant","model":"claude-sonnet-5-5","content":[{"type":"text","text":"Hallo! Wat wil je maken?"}],"stop_reason":"end_turn"},"parent_tool_use_id":null,"session_id":"b6f1c2d4-1111-4a2b-9c3d-0123456789ab"}
+{"type":"result","subtype":"success","is_error":false,"duration_ms":1234,"num_turns":1,"result":"Hallo! Wat wil je maken?","session_id":"b6f1c2d4-1111-4a2b-9c3d-0123456789ab","total_cost_usd":0.01,"permission_denials":[]}

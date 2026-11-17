@@ -1,0 +1,10 @@
+{"type":"system","subtype":"init","session_id":"sess-bash-1"}
+{"type":"assistant","message":{"id":"m1","content":[{"type":"tool_use","id":"t1","name":"Bash","input":{"command":"npm install vite","description":"Installeer vite"}}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"t1","content":"added 80 packages"}]}}
+{"type":"assistant","message":{"id":"m2","content":[{"type":"tool_use","id":"t2","name":"Bash","input":{"command":"npm run build"}}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"t2","is_error":true,"content":"src/main.ts(4,7): error TS2322: Type 'string' is not assignable to type 'number'.\nnpm ERR! code 1"}]}}
+{"type":"assistant","message":{"id":"m3","content":[{"type":"tool_use","id":"t3","name":"Edit","input":{"file_path":"/home/u/Mijn Site/src/main.ts","old_string":"a","new_string":"b"}}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"t3","content":"edited"}]}}
+{"type":"assistant","message":{"id":"m4","content":[{"type":"tool_use","id":"t4","name":"Bash","input":{"command":"npm run build"}}]}}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"t4","content":"built in 1.2s"}]}}
+{"type":"result","subtype":"success","is_error":false,"session_id":"sess-bash-1","result":"ok"}

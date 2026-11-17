@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import { mkdir } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
@@ -48,6 +49,8 @@ export interface RuntimeOptions {
   projectName: string;
   emit?: Emit;
   readyTimeoutMs?: number;
+  /** Hoe lang een toestemmingsvraag openstaat voordat ze als ‘nee’ verloopt (standaard 10 minuten). */
+  permissionTimeoutMs?: number;
 }
 
 export class Runtime {
@@ -61,11 +64,14 @@ export class Runtime {
   private last: ChecksResult | null = null;
   private checking: AbortController | null = null;
   private readonly emit: Emit;
+  private readonly permissionTimeoutMs: number;
+  private readonly permissions = new Map<string, (r: { allow: boolean; message?: string }) => void>();
 
   constructor(o: RuntimeOptions) {
     this.projectDir = o.projectDir;
     this.projectName = o.projectName;
     this.emit = o.emit ?? (() => undefined);
+    this.permissionTimeoutMs = o.permissionTimeoutMs ?? 10 * 60 * 1000;
     this.git = new Git(o.projectDir);
     this.dev = new DevServer({
       cwd: o.projectDir,
@@ -248,6 +254,9 @@ export class Runtime {
         const l = await loadConfig(this.projectDir);
         return { ...l, trusted: !!l.hash && l.hash === this.trustedHash };
       }
+      case "permission.answer":
+        this.answerPermission(String(args.id ?? ""), args.allow === true, typeof args.message === "string" ? args.message : undefined);
+        return { ok: true };
       case "plan.set":
         this.plan = (args && typeof args === "object" ? (args as unknown as PlanPush) : null) ?? null;
         return { ok: true };
@@ -296,8 +305,42 @@ export class Runtime {
     }
   }
 
+  /**
+   * Een toestemmingsvraag van de AI-CLI (`--permission-prompt-tool`). De app beslist (automatisch of via een dialoog);
+   * zonder antwoord binnen de tijd of bij sluiten wordt het ‘nee’.
+   */
+  requestPermission(toolName: string, input: unknown, toolUseId?: string): Promise<{ allow: boolean; message?: string }> {
+    const id = randomUUID();
+    return new Promise((resolve) => {
+      const timer = setTimeout(() => {
+        if (this.permissions.delete(id)) {
+          this.emit({ event: "permission_expired", id });
+          resolve({ allow: false, message: "Er kwam geen antwoord van de gebruiker; de actie is niet uitgevoerd." });
+        }
+      }, this.permissionTimeoutMs);
+      timer.unref();
+      this.permissions.set(id, (r) => {
+        clearTimeout(timer);
+        resolve(r);
+      });
+      const json = JSON.stringify(input ?? {});
+      this.emit({ event: "permission_request", id, tool_name: toolName, tool_use_id: toolUseId ?? null, input: json.length > 20_000 ? { truncated: true } : input ?? {} });
+    });
+  }
+
+  answerPermission(id: string, allow: boolean, message?: string): void {
+    const done = this.permissions.get(id);
+    if (!done) throw new Error("Onbekende of al beantwoorde toestemmingsvraag.");
+    this.permissions.delete(id);
+    done({ allow, message });
+  }
+
   /** Stopt alles wat dit project draait: checks, dev-server en de onzichtbare browser. */
   async close(): Promise<void> {
+    for (const [id, done] of [...this.permissions]) {
+      this.permissions.delete(id);
+      done({ allow: false, message: "Het project is gesloten." });
+    }
     this.checking?.abort();
     await Promise.all([this.dev.stop(), this.observer.close()]);
   }

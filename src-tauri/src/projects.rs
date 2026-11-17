@@ -169,7 +169,7 @@ pub fn create(
     let result = (|| {
         git_init(&dir)?;
         fs::write(dir.join("PROJECT.md"), project_md(naam))?;
-        crate::instructions::ensure(&dir)?;
+        crate::instructions::ensure(&dir, crate::db::communication_simple(conn))?;
         let pad = dir.to_string_lossy().to_string();
         conn.execute(
             "INSERT INTO projects (naam, pad, template) VALUES (?1, ?2, ?3)",

@@ -8,6 +8,7 @@ const MIGRATIONS: &[&str] = &[
     include_str!("../migrations/0001_init.sql"),
     include_str!("../migrations/0002_fase2.sql"),
     include_str!("../migrations/0003_fase3.sql"),
+    include_str!("../migrations/0004_chat.sql"),
 ];
 
 pub fn open(path: &Path) -> Result<Connection> {
@@ -55,6 +56,15 @@ pub fn set_setting(conn: &Connection, key: &str, value: &str) -> Result<()> {
     Ok(())
 }
 
+/// Staat "Eenvoudige taal" aan (standaard)? Alleen de waarde "technical" zet het uit.
+pub fn communication_simple(conn: &Connection) -> bool {
+    get_setting(conn, "ui:communication_mode")
+        .ok()
+        .flatten()
+        .as_deref()
+        != Some("technical")
+}
+
 #[cfg(test)]
 pub fn schema_version(conn: &Connection) -> Result<usize> {
     Ok(conn.query_row("PRAGMA user_version", [], |r| r.get(0))?)
@@ -81,6 +91,8 @@ mod tests {
             tables(&conn),
             vec![
                 "ai_accounts",
+                "chat_messages",
+                "chat_sessions",
                 "check_runs",
                 "mcp_calls",
                 "projects",

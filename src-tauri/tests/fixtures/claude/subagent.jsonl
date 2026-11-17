@@ -1,0 +1,6 @@
+{"type":"system","subtype":"init","session_id":"sess-sub-1"}
+{"type":"assistant","message":{"id":"m1","content":[{"type":"tool_use","id":"task1","name":"Task","input":{"description":"zoek iets","prompt":"x"}}]},"parent_tool_use_id":null}
+{"type":"assistant","message":{"id":"m2","content":[{"type":"tool_use","id":"inner1","name":"Read","input":{"file_path":"a.txt"}}]},"parent_tool_use_id":"task1"}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"inner1","content":"x"}]},"parent_tool_use_id":"task1"}
+{"type":"user","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"task1","content":"klaar"}]},"parent_tool_use_id":null}
+{"type":"result","subtype":"success","is_error":false,"session_id":"sess-sub-1","result":"ok"}

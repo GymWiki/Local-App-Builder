@@ -1,4 +1,5 @@
 mod accounts;
+mod chat;
 mod claude_approval;
 mod cli;
 mod commands;
@@ -14,12 +15,64 @@ mod provider;
 mod terminal;
 mod winpath;
 
+use chat::{ChatManager, ChatOut};
 use mcp::{McpEvent, McpManager};
 use preview::{Bridge, PreviewEvent, PreviewManager};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use tauri::{Emitter, Manager};
 use terminal::{PtyEvent, TerminalManager};
+
+/// Chatgeschiedenis en instellingen in de app-database.
+struct AppStore {
+    handle: tauri::AppHandle,
+}
+
+impl AppStore {
+    fn with<T>(
+        &self,
+        f: impl FnOnce(&rusqlite::Connection) -> error::Result<T>,
+    ) -> error::Result<T> {
+        let db = self.handle.state::<commands::Db>();
+        let guard = db.conn()?;
+        f(&guard)
+    }
+}
+
+impl chat::Store for AppStore {
+    fn insert(
+        &self,
+        project: i64,
+        kind: &str,
+        payload: serde_json::Value,
+    ) -> error::Result<chat::store::StoredMessage> {
+        self.with(|c| chat::store::insert(c, project, kind, &payload))
+    }
+    fn update(
+        &self,
+        id: i64,
+        payload: serde_json::Value,
+    ) -> error::Result<chat::store::StoredMessage> {
+        self.with(|c| chat::store::update(c, id, &payload))
+    }
+    fn session(&self, project: i64) -> Option<chat::store::SessionRow> {
+        self.with(|c| chat::store::session(c, project))
+            .ok()
+            .flatten()
+    }
+    fn set_session(
+        &self,
+        project: i64,
+        provider: &str,
+        account: Option<i64>,
+        session: Option<&str>,
+    ) {
+        let _ = self.with(|c| chat::store::set_session(c, project, provider, account, session));
+    }
+    fn setting(&self, key: &str) -> Option<String> {
+        self.with(|c| db::get_setting(c, key)).ok().flatten()
+    }
+}
 
 /// Verbindt de preview met de rest van de app (runtime, instellingen).
 struct AppBridge {
@@ -118,6 +171,31 @@ pub fn run() {
                     project_id,
                     payload,
                 } => {
+                    match payload["event"].as_str() {
+                        Some("permission_request") => {
+                            let (h, p) = (handle.clone(), payload.clone());
+                            std::thread::spawn(move || {
+                                let dir = h
+                                    .state::<commands::Db>()
+                                    .conn()
+                                    .ok()
+                                    .and_then(|c| projects::get(&c, project_id).ok())
+                                    .map(|p| std::path::PathBuf::from(p.pad));
+                                if let Some(dir) = dir {
+                                    h.state::<ChatManager>()
+                                        .on_permission_request(project_id, &dir, &p);
+                                }
+                            });
+                        }
+                        Some("permission_expired") => {
+                            if let Some(id) = payload["id"].as_str() {
+                                handle
+                                    .state::<ChatManager>()
+                                    .expire_permission(project_id, id);
+                            }
+                        }
+                        _ => {}
+                    }
                     if payload["event"] == "dev" {
                         // Op een eigen thread: de verwerking kan de runtime zelf bevragen, en die antwoorden komen via deze lezer binnen.
                         let (h, p) = (handle.clone(), payload.clone());
@@ -144,6 +222,29 @@ pub fn run() {
                 }
             });
             app.manage(McpManager::new(mcp::new_token(), mcp_scripts(app), sink));
+
+            let (h_out, h_ans, h_store) = (
+                app.handle().clone(),
+                app.handle().clone(),
+                app.handle().clone(),
+            );
+            app.manage(ChatManager::new(
+                Arc::new(AppStore { handle: h_store }),
+                Arc::new(move |out: ChatOut| {
+                    let _ = h_out.emit("chat-out", out);
+                }),
+                Arc::new(move |project: i64, id: &str, allow: bool| {
+                    h_ans
+                        .state::<McpManager>()
+                        .call(
+                            project,
+                            "permission.answer",
+                            serde_json::json!({ "id": id, "allow": allow }),
+                            std::time::Duration::from_secs(5),
+                        )
+                        .map(|_| ())
+                }),
+            ));
 
             let handle = app.handle().clone();
             let bridge = Arc::new(AppBridge {
@@ -196,6 +297,13 @@ pub fn run() {
             commands::preview_restart,
             commands::preview_trust_scripts,
             commands::preview_install,
+            commands::chat_target,
+            commands::chat_history,
+            commands::chat_send,
+            commands::chat_retry,
+            commands::chat_stop,
+            commands::chat_switch,
+            commands::permission_answer,
             commands::get_ui_setting,
             commands::set_ui_setting,
             commands::start_shell,
@@ -210,6 +318,7 @@ pub fn run() {
         .expect("Studio kon niet starten")
         .run(|app, event| {
             if let tauri::RunEvent::Exit = event {
+                app.state::<ChatManager>().close_all();
                 app.state::<PreviewManager>().close_all();
                 app.state::<TerminalManager>().close_all();
                 app.state::<McpManager>().stop_all();
