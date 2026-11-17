@@ -17,7 +17,7 @@ const project: Project = { id: 1, naam: "P", pad: "/p", template: "leeg", create
 
 describe("Workspace", () => {
   it("toont de tabs Maken, Publiceren en Geavanceerd (geen losse Terminal/Preview-tab)", () => {
-    render(<Workspace project={null} />);
+    render(<Workspace project={project} />);
     for (const naam of ["Maken", "Publiceren", "Geavanceerd"]) {
       expect(screen.getByRole("tab", { name: naam })).toBeInTheDocument();
     }
@@ -43,7 +43,11 @@ describe("Workspace", () => {
   });
 
   it("zonder project staat er een uitnodiging in gewone taal", () => {
-    render(<Workspace project={null} />);
-    expect(screen.getByText(/Kies of maak een project/)).toBeInTheDocument();
+    const onNew = vi.fn();
+    render(<Workspace project={null} onNewProject={onNew} />);
+    expect(screen.getByText(/Heb je al een project/)).toBeInTheDocument();
+    expect(screen.queryByRole("tab", { name: "Maken" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Maak je eerste project" }));
+    expect(onNew).toHaveBeenCalled();
   });
 });

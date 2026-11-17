@@ -13,12 +13,17 @@
     "annuleer": "Annuleren",
     "verwijderKnop": "Uit de lijst halen"
   },
+  "welkom": {
+    "titel": "Welkom bij Studio",
+    "uitleg": "Hier maak je een website of app samen met een AI. Je vertelt in gewone woorden wat je wilt. Techniek hoef je niet te snappen.",
+    "knop": "Maak je eerste project"
+  },
   "tabs": {
     "maken": "Maken",
     "publiceren": "Publiceren",
     "geavanceerd": "Geavanceerd",
     "binnenkort": "Komt in een latere fase.",
-    "geenProject": "Kies of maak een project om te beginnen.",
+    "geenProject": "Heb je al een project? Kies het links in de lijst.",
     "terminal": "Terminal",
     "preview": "Preview",
     "uiterlijk": "Uiterlijk"

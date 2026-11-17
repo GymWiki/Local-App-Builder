@@ -8,9 +8,16 @@ import SplitView from "./app/SplitView";
 import PublishPanel from "./app/PublishPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { PlusIcon } from "lucide-react";
 import TerminalPanel, { type Session } from "./TerminalPanel";
 
-export const TABS = ["maken", "uiterlijk", "publiceren", "geavanceerd"] as const;
+export const TABS = [
+  "maken",
+  "uiterlijk",
+  "publiceren",
+  "geavanceerd",
+] as const;
 export type Tab = (typeof TABS)[number];
 
 interface Props {
@@ -27,6 +34,8 @@ interface Props {
   /** "Technisch"-stand: ruwe details standaard zichtbaar. */
   technical?: boolean;
   onOpenAccounts?: () => void;
+  /** Opent het venster om een project te maken (vanuit het welkomstscherm). */
+  onNewProject?: () => void;
   onSessionsChange?: (updater: (prev: Session[]) => Session[]) => void;
   onError?: (msg: string) => void;
   onRetryMcp?: () => Promise<void> | void;
@@ -45,6 +54,7 @@ export default function Workspace({
   onTab,
   technical = false,
   onOpenAccounts,
+  onNewProject,
   onSessionsChange,
   onError,
   onRetryMcp,
@@ -70,24 +80,59 @@ export default function Workspace({
   );
 
   return (
-    <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)} className="min-h-0 flex-1 gap-0">
-      <div className="border-b border-border px-3 pt-2">
-        <TabsList aria-label={t("app.naam")} className="group-data-horizontal/tabs:h-14 gap-1">
-          {TABS.map((id) => (
-            <TabsTrigger key={id} value={id} className="h-12 px-6 text-lg data-active:font-semibold">
-              {t(`tabs.${id}`)}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-      </div>
+    <Tabs
+      value={tab}
+      onValueChange={(v) => setTab(v as Tab)}
+      className="min-h-0 flex-1 gap-0"
+    >
+      {project && (
+        <div className="border-b border-border px-3 pt-2">
+          <TabsList
+            aria-label={t("app.naam")}
+            className="group-data-horizontal/tabs:h-14 gap-1"
+          >
+            {TABS.map((id) => (
+              <TabsTrigger
+                key={id}
+                value={id}
+                className="h-12 px-6 text-lg data-active:font-semibold"
+              >
+                {t(`tabs.${id}`)}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
+      )}
       {!project ? (
-        <div role="tabpanel" className="flex flex-1 items-center justify-center text-lg text-muted-foreground">
-          {t("tabs.geenProject")}
+        <div
+          role="tabpanel"
+          className="flex flex-1 items-center justify-center p-8"
+        >
+          <div className="max-w-md space-y-4 text-center">
+            <h2 className="text-2xl font-semibold">{t("welkom.titel")}</h2>
+            <p className="text-lg text-muted-foreground">
+              {t("welkom.uitleg")}
+            </p>
+            <p className="text-base text-muted-foreground">
+              {t("tabs.geenProject")}
+            </p>
+            {onNewProject && (
+              <Button size="lg" onClick={onNewProject}>
+                <PlusIcon aria-hidden="true" />
+                {t("welkom.knop")}
+              </Button>
+            )}
+          </div>
         </div>
       ) : (
         <>
           {/* Blijft gemount (verborgen) zodat gesprek, preview en lopende terminals hun toestand houden. */}
-          <TabsContent value="maken" forceMount hidden={tab !== "maken"} className={tab === "maken" ? "flex min-h-0 flex-1" : "hidden"}>
+          <TabsContent
+            value="maken"
+            forceMount
+            hidden={tab !== "maken"}
+            className={tab === "maken" ? "flex min-h-0 flex-1" : "hidden"}
+          >
             <SplitView
               id="maken"
               left={
@@ -110,14 +155,26 @@ export default function Workspace({
                 id="uiterlijk"
                 left={
                   <ScrollArea className="h-full">
-                    <AppearancePanel key={project.id} projectId={project.id} firstRun={project.template !== "leeg"} onError={fail} />
+                    <AppearancePanel
+                      key={project.id}
+                      projectId={project.id}
+                      firstRun={project.template !== "leeg"}
+                      onError={fail}
+                    />
                   </ScrollArea>
                 }
                 right={preview_(true)}
               />
             </TabsContent>
           )}
-          <TabsContent value="geavanceerd" forceMount hidden={tab !== "geavanceerd"} className={tab === "geavanceerd" ? "flex min-h-0 flex-1 flex-col" : "hidden"}>
+          <TabsContent
+            value="geavanceerd"
+            forceMount
+            hidden={tab !== "geavanceerd"}
+            className={
+              tab === "geavanceerd" ? "flex min-h-0 flex-1 flex-col" : "hidden"
+            }
+          >
             <TerminalPanel
               key={project.id}
               project={project}

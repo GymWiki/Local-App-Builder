@@ -228,6 +228,7 @@ export default function App() {
             onTab={setTab}
             technical={communication === "technical"}
             onOpenAccounts={() => setView("accounts")}
+            onNewProject={() => setDialogOpen(true)}
             onSessionsChange={(fn) => selected && setSessions((s) => ({ ...s, [selected.id]: fn(s[selected.id] ?? []) }))}
             onError={setError}
             onRetryMcp={() => (selected ? select(selected.id) : undefined)}
