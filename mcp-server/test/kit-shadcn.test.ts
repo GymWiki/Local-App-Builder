@@ -78,3 +78,70 @@ describe("kit ‘shadcn’ (type bestanden)", () => {
     expect(cfg.verbodenImports).toContain("@usefragments/");
   });
 });
+
+describe("startkits (neutraal, warm, zakelijk) en Material voor Flutter", () => {
+  it("de drie webkits delen de componenten maar hebben een eigen thema, en de kiezer toont ze allemaal", async () => {
+    const { listKits } = await import("../src/kits/ops.js");
+    const dir = await project();
+    const l = await listKits(PACKS, dir);
+    const ids = l.kits.map((k) => k.id);
+    for (const id of ["fragments-ui", "shadcn", "shadcn-neutraal", "shadcn-warm", "shadcn-zakelijk"]) expect(ids).toContain(id);
+    expect(l.kits.filter((k) => k.compatible).length).toBeGreaterThanOrEqual(5);
+    expect(l.kits.find((k) => k.id === "material-flutter")!.compatible).toBe(false); // past niet bij een React-project
+    const css: Record<string, string> = {};
+    for (const id of ["shadcn-neutraal", "shadcn-warm", "shadcn-zakelijk"]) {
+      const d = await project();
+      await applyKit({ packsDir: PACKS, projectDir: d, kitId: id, run: npm });
+      css[id] = await readFile(path.join(d, "src/kit/tokens.css"), "utf8");
+      expect(await readFile(path.join(d, "src/kit/components/button.tsx"), "utf8")).toContain("buttonVariants");
+    }
+    expect(new Set(Object.values(css)).size).toBe(3);
+    expect(css["shadcn-warm"]).toContain("--radius: 28px;");
+    expect(css["shadcn-zakelijk"]).toContain("--radius: 6px;");
+    expect(css["shadcn-neutraal"]).toContain("--primary: #3f3f46;");
+  });
+
+  it("wisselt tussen twee webkits: tokens vervangen, dezelfde componenten blijven", async () => {
+    const dir = await project();
+    await applyKit({ packsDir: PACKS, projectDir: dir, kitId: "shadcn-neutraal", run: npm });
+    await applyKit({ packsDir: PACKS, projectDir: dir, kitId: "shadcn-warm", run: npm });
+    const css = await readFile(path.join(dir, "src/kit/tokens.css"), "utf8");
+    expect(css).toContain("--primary: #c2410c;");
+    expect(css).not.toContain("#3f3f46");
+    expect(JSON.parse(await readFile(path.join(dir, "design/kit.json"), "utf8")).kit).toBe("shadcn-warm");
+    expect((await readFile(path.join(dir, "CLAUDE.md"), "utf8")).match(/studio:use-kit:start/g)).toHaveLength(1);
+    expect(await readFile(path.join(dir, "CLAUDE.md"), "utf8")).toContain("Warm en speels");
+  });
+
+  async function flutterProject(): Promise<string> {
+    const d = await mkdtemp(path.join(tmpdir(), "flutterkit-"));
+    tmps.push(d);
+    await writeFile(path.join(d, "pubspec.yaml"), "name: x\n");
+    return d;
+  }
+
+  it("past Material toe op een Flutter-project: thema, catalogus en Flutter-regels, zonder pakketten", async () => {
+    const dir = await flutterProject();
+    const calls: string[] = [];
+    const r = await applyKit({ packsDir: PACKS, projectDir: dir, kitId: "material-flutter", run: async (c) => (calls.push(c), { exitCode: 0, output: "" }) });
+    expect(calls).toEqual([]);
+    expect(r.plan.pakketten).toEqual([]);
+    const dart = await readFile(path.join(dir, "lib/theme/app_theme.dart"), "utf8");
+    expect(dart).toContain("Color(0xFF6750A4)");
+    expect(dart).toContain("ThemeData");
+    const cat = await readFile(path.join(dir, "docs/ui-kit.md"), "utf8");
+    expect(cat).toContain("FilledButton");
+    expect(cat).toContain("lib/widgets/app/");
+    expect(cat).not.toContain("src/components/app");
+    const claude = await readFile(path.join(dir, "CLAUDE.md"), "utf8");
+    expect(claude).toContain("lib/widgets/app/");
+    expect(claude).toContain("AppTheme.licht()");
+    expect(claude).not.toContain("node_modules");
+    expect(JSON.parse(await readFile(path.join(dir, "design/kit.json"), "utf8"))).toMatchObject({ kit: "material-flutter", licentie: "BSD-3-Clause", stack: "flutter" });
+  });
+
+  it("weigert webkits op een Flutter-project en Material op een React-project", async () => {
+    await expect(planApply(PACKS, "shadcn", await flutterProject())).rejects.toThrow(/past niet bij dit project/);
+    await expect(planApply(PACKS, "material-flutter", await project())).rejects.toThrow(/past niet bij dit project/);
+  });
+});

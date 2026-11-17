@@ -193,19 +193,29 @@ export interface CatalogResult {
 }
 
 /** Maakt de catalogus (Markdown) voor een kit in een project. Het pakket moet al in node_modules staan (bij type npm). */
-export async function buildCatalog(projectDir: string, kit: Kit, tokens: Tokens, rules: string): Promise<CatalogResult> {
+export async function buildCatalog(projectDir: string, kit: Kit, tokens: Tokens, rules: string, manual?: string): Promise<CatalogResult> {
   const budgetTokens = kit.kitcontext.maxTokens;
   const version = kit.versie ?? "-";
-  const tokenRows = Object.entries(kit.setup.tokenMap).map(([v, p]) => `| \`${v}\` | ${resolveToken(tokens, p)} | ${p} |`);
+  const isDart = kit.setup.uitvoer === "dart";
+  const tokenRows = isDart
+    ? [`| \`AppTheme.licht()\` / \`AppTheme.donker()\` | ThemeData uit design/tokens.json | lib/theme/app_theme.dart |`]
+    : Object.entries(kit.setup.tokenMap).map(([v, p]) => `| \`${v}\` | ${resolveToken(tokens, p)} | ${p} |`);
   const intro = [
     `# UI-kit: ${kit.naam}${kit.pakketnaam ? ` (${kit.pakketnaam} ${version})` : ""}`,
     `<!-- studio:catalogus kit=${kit.id} versie=${version} -->`,
     "Door Studio gemaakt uit het pakket. Niet met de hand aanpassen; het wordt vernieuwd bij een versie-update.",
     "",
     "## Gebruik",
-    `- Importeer altijd uit \`${kit.kitcontext.importPad}\`. Nieuwe eigen componenten komen in \`src/components/app/\`.`,
-    "- Kleuren, ruimte, afronding en lettertype komen uit tokens (`design/tokens.json` → `src/kit/tokens.css`). Gebruik nooit losse kleuren, pixelwaarden of lettertypes.",
-    "- Onderdelen met een punt (zoals `Card.Header`) zijn delen van één component.",
+    ...(isDart
+      ? [
+          `- Gebruik de widgets uit \`${kit.kitcontext.importPad}\`. Eigen samengestelde widgets komen in \`lib/widgets/app/\`.`,
+          "- Kleuren, afronding en lettertype komen uit het thema (`design/tokens.json` → `lib/theme/app_theme.dart`): gebruik `Theme.of(context)` en `AppTheme`, nooit losse kleuren (`Color(0x…)`) of vaste lettertypes.",
+        ]
+      : [
+          `- Importeer altijd uit \`${kit.kitcontext.importPad}\`. Nieuwe eigen componenten komen in \`src/components/app/\`.`,
+          "- Kleuren, ruimte, afronding en lettertype komen uit tokens (`design/tokens.json` → `src/kit/tokens.css`). Gebruik nooit losse kleuren, pixelwaarden of lettertypes.",
+          "- Onderdelen met een punt (zoals `Card.Header`) zijn delen van één component.",
+        ]),
     "",
     "## Tokens van dit project",
     "| Variabele | Waarde | Bron |",
@@ -227,7 +237,11 @@ export async function buildCatalog(projectDir: string, kit: Kit, tokens: Tokens,
   let source: CatalogResult["source"] = "geen-pakket";
   const pkgDir = kit.pakketnaam ? path.join(projectDir, "node_modules", ...kit.pakketnaam.split("/")) : null;
 
-  if (kit.type === "npm" && pkgDir && existsSync(pkgDir)) {
+  if (kit.kitcontext.catalogus === "handmatig") {
+    body = manual?.trim() ? `${manual.trim()}\n` : "## Componenten\nDe lijst met onderdelen van deze kit ontbreekt.\n";
+    components = (body.match(/^- \*\*/gm) ?? []).length;
+    source = "bestanden";
+  } else if (kit.type === "npm" && pkgDir && existsSync(pkgDir)) {
     const pkg = (await readJson<{ types?: string; exports?: Record<string, unknown>; peerDependenciesMeta?: Record<string, { optional?: boolean }> }>(path.join(pkgDir, "package.json"))) ?? {};
     const frags = kit.kitcontext.catalogus === "fragments-json" ? await readJson<FragmentsJson>(path.join(pkgDir, "fragments.json")) : null;
     if (frags?.fragments) {
@@ -257,8 +271,8 @@ export async function buildCatalog(projectDir: string, kit: Kit, tokens: Tokens,
 }
 
 /** Schrijft docs/ui-kit.md in het project. */
-export async function writeCatalog(projectDir: string, kit: Kit, tokens: Tokens, rules: string): Promise<CatalogResult> {
-  const res = await buildCatalog(projectDir, kit, tokens, rules);
+export async function writeCatalog(projectDir: string, kit: Kit, tokens: Tokens, rules: string, manual?: string): Promise<CatalogResult> {
+  const res = await buildCatalog(projectDir, kit, tokens, rules, manual);
   const file = path.join(projectDir, CATALOG_FILE);
   await mkdir(path.dirname(file), { recursive: true });
   await writeFile(file, res.text);

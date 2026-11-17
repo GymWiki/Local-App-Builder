@@ -241,7 +241,8 @@
           "enum": [
             "fragments-json",
             "typings",
-            "bestanden"
+            "bestanden",
+            "handmatig"
           ]
         },
         "maxTokens": {

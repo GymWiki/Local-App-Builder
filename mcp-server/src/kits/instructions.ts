@@ -13,6 +13,7 @@ const SKILL_MARKER = "<!-- studio:managed:use-kit";
 
 /** De vaste bouwregels. Het enige dat per kit verschilt: naam, importpad en de eigen regels van de kit. */
 export function rulesText(kit: Kit, kitRules: string): string {
+  if (kit.setup.uitvoer === "dart") return dartRulesText(kit, kitRules);
   const pkg = kit.pakketnaam ? ` (${kit.pakketnaam} ${kit.versie})` : "";
   return `## Uiterlijk (UI-kit): ${kit.naam}
 Deze app gebruikt de UI-kit **${kit.naam}**${pkg}. Houd je altijd aan deze bouwregels:
@@ -94,4 +95,18 @@ export async function writeKitInstructions(projectDir: string, kit: Kit | null, 
     files.push(".claude/skills/use-kit/SKILL.md");
   }
   return { files, skipped };
+}
+
+function dartRulesText(kit: Kit, kitRules: string): string {
+  return `## Uiterlijk (UI-kit): ${kit.naam}
+Deze app gebruikt de UI-kit **${kit.naam}**. Houd je altijd aan deze bouwregels:
+
+1. Gebruik altijd eerst bestaande kitwidgets. Kijk in \`docs/ui-kit.md\` welke er zijn (${kit.kitcontext.importPad}).
+2. Nieuwe widgets komen in \`lib/widgets/app/\`. Bouw ze op uit kitwidgets en het thema (\`design/tokens.json\` → \`lib/theme/app_theme.dart\`): geen losse kleuren (\`Color(0x…)\`), vaste maten of lettertypes; gebruik \`Theme.of(context)\`.
+3. Pas widgets uit het framework nooit aan en kopieer ze niet. Heb je een variant nodig, maak een wrapper in \`lib/widgets/app/\`.
+4. Houd naamgeving, ruimte en gedrag (hover, focus, uitgeschakeld) gelijk aan de kit. Zet in \`MaterialApp\`: \`theme: AppTheme.licht()\` en \`darkTheme: AppTheme.donker()\`.
+5. Draai na elke wijziging \`run_checks\` en herstel meldingen voordat je klaar bent.
+
+Regels van deze kit:
+${kitRules.trim()}`;
 }

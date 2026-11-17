@@ -48,7 +48,7 @@ export const KitSchema = z
     tokens: z.string().default("tokens.json"),
     kitcontext: z
       .object({
-        catalogus: z.enum(["fragments-json", "typings", "bestanden"]),
+        catalogus: z.enum(["fragments-json", "typings", "bestanden", "handmatig"]),
         maxTokens: z.number().int().min(500).max(20000).default(6000),
         importPad: z.string(),
         /** Componenten die een pagina of formulier het vaakst nodig heeft: die krijgen in de catalogus altijd de meeste details. */

@@ -344,7 +344,8 @@ export async function applyKit(o: ApplyOptions): Promise<ApplyResult> {
   }
   // De AI laten aansluiten: catalogus (docs/ui-kit.md) en bouwregels (CLAUDE.md/GEMINI.md/AGENTS.md + skill use-kit).
   const rules = await readFile(path.join(loaded.dir, kit.regels), "utf8").catch(() => "");
-  const cat = await writeCatalog(dir, kit, tokens, rules);
+  const manual = await readFile(path.join(loaded.dir, "catalogus.md"), "utf8").catch(() => undefined);
+  const cat = await writeCatalog(dir, kit, tokens, rules, manual);
   files.push(CATALOG_FILE);
   const ins = await writeKitInstructions(dir, kit, rules);
   files.push(...ins.files);

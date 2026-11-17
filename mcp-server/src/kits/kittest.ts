@@ -78,8 +78,9 @@ export async function kitTest(o: KitTestOptions): Promise<StepReport[]> {
   if (!(await step("kit lezen en controleren", async () => void (loaded = loadKit(packs, o.kitId))))) return steps;
   const kit = loaded!.kit;
   const stack = kit.stacks[0];
+  if (stack === "flutter") return flutterTest(o, loaded!, steps, step, run);
   if (stack !== "react-vite") {
-    steps.push({ naam: `bouwen (${stack})`, status: "overgeslagen", detail: `Geen testtemplate of toolchain voor ${stack} in deze omgeving; alleen bestanden gegenereerd en gecontroleerd.` });
+    steps.push({ naam: `bouwen (${stack})`, status: "overgeslagen", detail: `Geen testtemplate voor ${stack}.` });
     return steps;
   }
   const tmp = await mkdtemp(path.join(tmpdir(), `kit-test-${o.kitId}-`));
@@ -149,6 +150,54 @@ export async function kitTest(o: KitTestOptions): Promise<StepReport[]> {
         srv.close();
       }
     });
+  } finally {
+    await rm(tmp, { recursive: true, force: true });
+  }
+  return steps;
+}
+
+/** Flutter: pas de kit toe op een minimaal Flutter-project en controleer de gegenereerde bestanden. Bouwen kan alleen als Flutter geïnstalleerd is. */
+async function flutterTest(
+  o: KitTestOptions,
+  loaded: ReturnType<typeof loadKit>,
+  steps: StepReport[],
+  step: (naam: string, f: () => Promise<string | void>) => Promise<boolean>,
+  run: Run,
+): Promise<StepReport[]> {
+  const { kit } = loaded;
+  const packs = path.join(o.root, "design-packs");
+  const tmp = await mkdtemp(path.join(tmpdir(), `kit-test-${o.kitId}-`));
+  try {
+    await mkdir(path.join(tmp, "lib"), { recursive: true });
+    await writeFile(path.join(tmp, "pubspec.yaml"), "name: proef\nenvironment:\n  sdk: ^3.0.0\ndependencies:\n  flutter:\n    sdk: flutter\n");
+    await writeFile(path.join(tmp, "lib", "main.dart"), "void main() {}\n");
+    if (!(await step("kit toepassen", async () => {
+      const r = await applyKit({ packsDir: packs, projectDir: tmp, kitId: o.kitId, run: async () => ({ exitCode: 0, output: "" }) });
+      return `${r.files.length} bestanden`;
+    }))) return steps;
+    await step("thema gegenereerd", async () => {
+      const dart = await readFile(path.join(tmp, "lib", "theme", "app_theme.dart"), "utf8");
+      for (const needle of ["ThemeData", "ColorScheme.light", "ColorScheme.dark", "AppTheme"]) if (!dart.includes(needle)) throw new Error(`app_theme.dart mist ${needle}.`);
+      if (!existsSync(path.join(packs, o.kitId, kit.voorbeeld))) throw new Error("Het voorbeeldbestand ontbreekt.");
+    });
+    await step("catalogus en bouwregels", async () => {
+      const cat = await readFile(path.join(tmp, "docs", "ui-kit.md"), "utf8");
+      const comps = (cat.match(/^- \*\*/gm) ?? []).length;
+      if (comps < 5) throw new Error(`docs/ui-kit.md bevat maar ${comps} onderdelen.`);
+      if (estimateTokens(cat) > kit.kitcontext.maxTokens) throw new Error("docs/ui-kit.md is te groot.");
+      if (!(await readFile(path.join(tmp, "CLAUDE.md"), "utf8")).includes("lib/widgets/app/")) throw new Error("CLAUDE.md mist de Flutter-bouwregels.");
+      return `±${estimateTokens(cat)} tokens, ${comps} onderdelen`;
+    });
+    const flutter = await run("flutter --version", tmp).catch(() => ({ exitCode: 1, output: "" }));
+    if (flutter.exitCode === 0) {
+      await cp(path.join(packs, o.kitId, kit.voorbeeld), path.join(tmp, "lib", "main.dart"));
+      await step("flutter analyze", async () => {
+        const r = await run("flutter analyze", tmp);
+        if (r.exitCode !== 0) throw new Error(r.output.split("\n").slice(-12).join("\n"));
+      });
+    } else {
+      steps.push({ naam: "bouwen en analyseren (flutter)", status: "overgeslagen", detail: "Flutter is niet geïnstalleerd in deze omgeving: alleen de gegenereerde bestanden zijn gecontroleerd, niet of de app bouwt." });
+    }
   } finally {
     await rm(tmp, { recursive: true, force: true });
   }
