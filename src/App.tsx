@@ -16,7 +16,9 @@ import {
   setUiSetting,
   type Project,
 } from "./lib/api";
-import Sidebar from "./components/Sidebar";
+import AppSidebar from "@/components/app/AppSidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import Workspace from "./components/Workspace";
 import InfoPanel from "./components/InfoPanel";
 import NewProjectDialog from "./components/NewProjectDialog";
@@ -161,8 +163,9 @@ export default function App() {
   const noticeProject = notice != null ? projects.find((p) => p.id === notice) : null;
 
   return (
-    <div className="flex h-full">
-      <Sidebar
+    <TooltipProvider>
+    <SidebarProvider className="h-full min-h-0">
+      <AppSidebar
         projects={projects}
         selectedId={view === "project" ? selectedId : null}
         accountsActive={view === "accounts"}
@@ -267,6 +270,7 @@ export default function App() {
           }}
         />
       )}
-    </div>
+    </SidebarProvider>
+    </TooltipProvider>
   );
 }

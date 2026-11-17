@@ -38,7 +38,7 @@ describe("Workspace", () => {
     fireEvent.click(screen.getByRole("button", { name: "Technische weergave" }));
     expect(screen.getByRole("tab", { name: "Geavanceerd" })).toHaveAttribute("aria-selected", "true");
     expect(screen.getByTestId("terminal").closest("[role=tabpanel]")).toBeVisible();
-    fireEvent.click(screen.getByRole("tab", { name: "Maken" }));
+    fireEvent.mouseDown(screen.getByRole("tab", { name: "Maken" })); // Radix-tabs schakelen bij indrukken
     expect(screen.getByTestId("terminal").closest("[role=tabpanel]")).not.toBeVisible();
   });
 

@@ -8,7 +8,10 @@
     "leeg": "Nog geen projecten. Maak je eerste project aan.",
     "verwijder": "Verwijderen uit lijst",
     "bevestigVerwijder": "“{{naam}}” uit de lijst verwijderen? De bestanden op je computer blijven staan.",
-    "instellingen": "Instellingen"
+    "instellingen": "Instellingen",
+    "verwijderTitel": "Project uit de lijst halen?",
+    "annuleer": "Annuleren",
+    "verwijderKnop": "Uit de lijst halen"
   },
   "tabs": {
     "maken": "Maken",
