@@ -23,16 +23,14 @@
   "paginaScroltVerticaal": false,
   "afgekapt": [
    "Nieuw project",
-   "Close"
+   "Sluiten"
   ],
   "klein": [
    "BUTTON (23x23)",
    "INPUT (23x23)"
   ],
   "buitenBeeld": [],
-  "engels": [
-   "Close"
-  ],
+  "engels": [],
   "dubbeleScroll": []
  },
  {
@@ -45,17 +43,17 @@
   "paginaScroltVerticaal": false,
   "afgekapt": [
    "Nieuw project",
-   "Close"
+   "Sluiten"
   ],
   "klein": [
    "BUTTON (23x23)",
    "INPUT (23x23)"
   ],
   "buitenBeeld": [],
-  "engels": [
-   "Close"
-  ],
-  "dubbeleScroll": []
+  "engels": [],
+  "dubbeleScroll": [
+   "div[dialog-content] 408x734"
+  ]
  },
  {
   "stap": "2d-naam-en-map-ingevuld",
@@ -67,17 +65,17 @@
   "paginaScroltVerticaal": false,
   "afgekapt": [
    "Nieuw project",
-   "Close"
+   "Sluiten"
   ],
   "klein": [
    "BUTTON (23x23)",
    "INPUT (23x23)"
   ],
   "buitenBeeld": [],
-  "engels": [
-   "Close"
-  ],
-  "dubbeleScroll": []
+  "engels": [],
+  "dubbeleScroll": [
+   "div[dialog-content] 408x734"
+  ]
  },
  {
   "stap": "2e-project-aangemaakt",
@@ -91,14 +89,12 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Takenlijst (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 536x213",
-   "textarea[textarea] 30x110"
+   "div[scroll-area-viewport] 589x265"
   ]
  },
  {
@@ -113,14 +109,12 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Takenlijst (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 536x213",
-   "textarea[textarea] 30x110"
+   "div[scroll-area-viewport] 589x265"
   ]
  },
  {
@@ -135,14 +129,12 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Takenlijst (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 536x197",
-   "textarea[textarea] 30x110"
+   "div[scroll-area-viewport] 589x194"
   ]
  },
  {
@@ -158,18 +150,13 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Takenlijst (23x23)",
    "BUTTON (23x23)"
   ],
-  "buitenBeeld": [
-   "Computer",
-   "Vernieuwen"
-  ],
+  "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div 536x626",
-   "div[scroll-area-viewport] 536x146",
-   "textarea[textarea] 30x110"
+   "section 589x626",
+   "div[scroll-area-viewport] 589x184"
   ]
  },
  {
@@ -185,18 +172,13 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Takenlijst (23x23)",
    "BUTTON (23x23)"
   ],
-  "buitenBeeld": [
-   "Computer",
-   "Vernieuwen"
-  ],
+  "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div 536x626",
-   "div[scroll-area-viewport] 536x146",
-   "textarea[textarea] 30x110"
+   "section 589x626",
+   "div[scroll-area-viewport] 589x184"
   ]
  },
  {
@@ -212,18 +194,13 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Takenlijst (23x23)",
    "BUTTON (23x23)"
   ],
-  "buitenBeeld": [
-   "Computer",
-   "Vernieuwen"
-  ],
+  "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div 536x626",
-   "div[scroll-area-viewport] 536x146",
-   "textarea[textarea] 30x110"
+   "section 589x626",
+   "div[scroll-area-viewport] 589x184"
   ]
  },
  {
@@ -236,15 +213,12 @@
   "paginaScroltVerticaal": false,
   "afgekapt": [],
   "klein": [
-   "Verwijderen uit lijst: Takenlijst (23x23)",
    "BUTTON (23x23)"
   ],
-  "buitenBeeld": [
-   "Vernieuwen"
-  ],
+  "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 370x626",
+   "div[scroll-area-viewport] 407x626",
    "div[scroll-area-viewport] 329x768"
   ]
  },
@@ -257,20 +231,15 @@
   "paginaScroltHorizontaal": false,
   "paginaScroltVerticaal": false,
   "afgekapt": [
-   "Close"
+   "Sluiten"
   ],
   "klein": [
-   "Verwijderen uit lijst: Takenlijst (23x23)",
    "BUTTON (23x23)"
   ],
-  "buitenBeeld": [
-   "Vernieuwen"
-  ],
-  "engels": [
-   "Close"
-  ],
+  "buitenBeeld": [],
+  "engels": [],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 370x626",
+   "div[scroll-area-viewport] 407x626",
    "div[scroll-area-viewport] 329x768",
    "div[scroll-area-viewport] 407x673"
   ]
@@ -285,15 +254,12 @@
   "paginaScroltVerticaal": false,
   "afgekapt": [],
   "klein": [
-   "Verwijderen uit lijst: Takenlijst (23x23)",
    "BUTTON (23x23)"
   ],
-  "buitenBeeld": [
-   "Vernieuwen"
-  ],
+  "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 370x626",
+   "div[scroll-area-viewport] 407x626",
    "div[scroll-area-viewport] 329x768"
   ]
  },
@@ -306,9 +272,7 @@
   "paginaScroltHorizontaal": false,
   "paginaScroltVerticaal": false,
   "afgekapt": [],
-  "klein": [
-   "Verwijderen uit lijst: Takenlijst (23x23)"
-  ],
+  "klein": [],
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [

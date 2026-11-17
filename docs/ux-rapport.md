@@ -142,3 +142,78 @@ Meetwaarden over alle runs: 198× een knop van 23×23 px (sluit-kruisje), 126× 
 - **Gebruikers zelf:** de personas zijn gespeeld door mij; echte gebruikers kunnen andere dingen doen (andere woorden zoeken, in andere volgorde klikken).
 - **Contrastmetingen per pixel:** alleen visueel en door de bestaande WCAG-test.
 - Eén aanname: de nep-AI toont de berichten die de echte AI-adapter ook stuurt (foutcodes `network`, `not_logged_in`); echte meldingen kunnen afwijken.
+
+
+---
+
+# Fase B – status na reparatie
+
+Alle reparaties staan als aparte commits op branch `ccr-b2c1b01d-7ba1q7` (zoek op `UX U..`). Na elke stap: lint, tsc, vitest (231 tests) en build groen; `npm run ui:a11y` geeft 0 schendingen. Nieuw: `npm run ux:test` (scripts/ux-test.mjs) draait op de zeven formaten de hoofdflow (nieuw project → opdracht typen → Enter → antwoord), controleert onder meer breedte van het invoerveld, zichtbaarheid van "Versturen" en "Project aanmaken", horizontale scroll en klikdoelen, en vergelijkt screenshots met `docs/ux/basis/` (`--update` zet nieuwe basis).
+
+## Status per probleem
+
+| ID | Ernst | Status | Wat er gedaan is |
+|----|-------|--------|------------------|
+| U01 | Blokkerend | **Opgelost** | Invoerveld staat op een eigen rij, volle breedte, groeit tot een maximum (30% van de vensterhoogte) en scrolt daarna. Test: ≥ 240 px breed op alle formaten. |
+| U02 | Blokkerend | **Opgelost** | Knoppen onder het veld slaan om; "Versturen" staat rechts en is op alle formaten binnen beeld. Knoplabels korter: "Bestand", "Verbeter tekst". |
+| U03 | Groot | **Deels** | Snelle acties alleen in een lopend gesprek (in een leeg gesprek staan de voorbeelden), op lage vensters (≤ 760 px hoog) verdwijnen chips en hint (hint blijft voor schermlezers), gesprek heeft minimaal 10 rem. Op 900×600 moet het paneel nog scrollen om het invoerveld volledig te zien. |
+| U04 | Groot | **Opgelost** | Dialogen hebben een maximale hoogte en scrollen intern; test: "Project aanmaken" bereikbaar op 900×600. |
+| U05 | Groot | **Deels** | Tekst in gewoon Nederlands ("Claude is nog niet geïnstalleerd… plak in de Terminal… Hulp bij installeren"). Het commando blijft zichtbaar; een knop "Installeer voor mij" is een functiewijziging en is bewust niet gemaakt. |
+| U06 | Groot | **Opgelost** | Titel en hints zonder jargon; `spawn node ENOENT` en logregels staan onder "Technische details". |
+| U07 | Groot | **Opgelost** | "Welke AI?", "Naam van dit account", geen "profielmap"/"CLI". |
+| U08 | Groot | **Opgelost** | Titel "Delen en online zetten"; uitleg met drie dingen die je nodig hebt, plus knop "Vraag de AI om hulp hierbij" (gebruikt de bestaande chat). Echt publiceren blijft niet gebouwd (bewust, fase 2). |
+| U09 | Groot | **Opgelost** | Modusknop is neutraal (niet meer blauw), met kop "De AI mag:". Alleen "Versturen" is primair. |
+| U10 | Middel | **Opgelost** | Welkomstscherm met uitleg en één knop "Maak je eerste project"; tabs zijn verborgen zolang er geen project is. |
+| U11 | Middel | **Opgelost** | "Startklare website" i.p.v. "Web-app met React". |
+| U12 | Middel | **Bewust niet** | Bij nader inzien bestond de bevestiging al (melding in het Versies-venster na terugzetten); mijn test klikte niet op "Ja, ga terug". De tweede ingang in het infopaneel blijft: het is dezelfde actie op een andere plek. |
+| U13 | Middel | **Opgelost** | Na sluiten terug naar het welkomstscherm, tab gereset, melding "Je werk is bewaard". |
+| U14 | Middel | **Opgelost** | Preview-knoppen slaan om; "Herstart" heet nu "Opnieuw starten". |
+| U15 | Middel | **Deels** | Jargon eruit (Soort project, Laatste controle, Eerdere versies), maar het paneel blijft staan. Nog te beoordelen: inklappen of weghalen. |
+| U16 | Middel | **Opgelost** | Bij "niet ingelogd" is "Naar AI-accounts" de hoofdactie. |
+| U17 | Middel | **Opgelost** | Hint onder het veld: "Enter verstuurt je bericht. Shift + Enter begint een nieuwe regel." |
+| U18 | Middel | **Opgelost** | Dialogen breken lange woorden af. |
+| U19 | Middel | **Opgelost** | "Hoe de AI tegen je praat". |
+| U20 | Middel | **Deels** | Template/checks/checkpoints/tijdlijn/run_checks/runtime vervangen. Nog Engels/techniek in de standaardweergave: "MCP: …"-badge en "Technische weergave" op het tabblad Geavanceerd. |
+| U21 | Middel | **Opgelost** | Uitleg bij "Kies een onderdeel" is concreter. |
+| U22 | Klein | **Opgelost** | Verwijderknop 36 px; test controleert klikdoelen ≥ 32 px. Het keuzevakje "Automatisch naar de preview wisselen" is 20 px, maar het label ernaast (≥ 36 px) is ook klikbaar. |
+| U23 | Klein | **Deels** | Meldingen verplaatst naar boven in het midden: ze overlappen niet meer met knoppen rechtsonder, wel kort met de tabbalk. |
+| U24 | Klein | **Opgelost** | Volledige projectnaam als tooltip. |
+| U25 | Klein | **Opgelost** | Sluitknop-label "Sluiten". |
+| U26 | Klein | **Bewust niet** | In dialogen krijgt het eerste veld al focus; de volgorde op de hoofdpagina is logisch. Niet aangepast. |
+| U27 | Klein | **Opgelost** | Vanaf 2200 px breed is het lettertype 21 px i.p.v. 17 px; schermen daaronder blijven ongewijzigd. |
+
+## Voor/na (licht)
+
+| Onderwerp | Voor | Na |
+|-----------|------|----|
+| Gesprek met invoerveld op 1280×720 | `ux/voor-na/voor-matrix-laptop-1280x720-04-d-na-opdracht-licht.png` | `ux/voor-na/na-matrix-laptop-1280x720-04-d-na-opdracht-licht.png` |
+| Nieuw project op 900×600 | `ux/voor-na/voor-matrix-minimaal-900x600-02-b-nieuw-project-licht.png` | `ux/voor-na/na-matrix-minimaal-900x600-02-b-nieuw-project-licht.png` |
+| Startscherm | `ux/voor-na/voor-joke-01-…` | `ux/voor-na/na-joke-01-…` |
+| AI niet geïnstalleerd | `ux/voor-na/voor-fout-cli_weg-06-…` | `ux/voor-na/na-fout-cli_weg-06-…` |
+| Node ontbreekt | `ux/voor-na/voor-fout-mcp_weg-06-…` | `ux/voor-na/na-fout-mcp_weg-06-…` |
+| Accounts | `ux/voor-na/voor-joke-21-…` | `ux/voor-na/na-joke-21-…` |
+| Delen en online zetten | `ux/voor-na/voor-joke-23-…` | `ux/voor-na/na-joke-23-…` |
+
+Alle schermen na de reparatie (licht en donker) staan opnieuw in `docs/ux/<scenario>/`; de basis voor de regressietest in `docs/ux/basis/`.
+
+## Herhaalde test als de drie personas
+
+- **Joke:** weet nu wat ze moet doen (welkomstscherm), ziet een breed tekstvak met uitleg over Enter, begrijpt de accountpagina en foutmeldingen. Blijft lastig: "Technische weergave", "Geavanceerd" en de MCP-badge zijn nog technisch; Publiceren is nog geen echte publicatie.
+- **Daan:** kan direct typen en voorbeelden gebruiken; preview-balk slaat om. Nog onduidelijk wat "Uiterlijk" precies verandert.
+- **Sanne:** typen en Enter werken, de lange opdracht blijft binnen het veld; chips scrollen horizontaal en "Er klopt iets niet" is op smalle vensters deels afgekapt (Klein, nieuw gevonden).
+- **Nieuw gevonden bij de hertest:** de melding "Project gesloten" overlapt kort de tabbalk (Klein); op 900×600 moet het gesprekspaneel nog scrollen om het invoerveld volledig te zien (Middel, zie U03).
+
+## Dit moet u zelf nog beoordelen
+
+1. Zijn de nieuwe knoplabels ("Bestand", "Verbeter tekst", "De AI mag:") duidelijk genoeg voor uw doelgroep?
+2. Moet het infopaneel rechts standaard dicht of weg (U15)?
+3. Wilt u de tabbladnaam "Geavanceerd" en de knop "Technische weergave" hernoemen (bijv. "Voor ervaren gebruikers")?
+4. Wilt u een knop "Installeer voor mij" voor de AI-programma's (nieuwe functie, vereist een beveiligingsafweging)?
+5. Moet "Publiceren" echt online zetten kunnen (Vercel e.d.), of blijft het bij uitleg + hulp van de AI?
+
+## Wat niet geverifieerd kon worden
+
+- Alles uit de lijst "Niet getest" in fase A blijft gelden: de echte Tauri-app, echte Windows-schaling (125/150% is nagebootst via viewportgrootte), de native bestandskiezer, de echte terminal en echte CLI's.
+- `field-sizing: content` (het meegroeien van het invoerveld) is in Chromium getest. In oudere WebKit-versies (Linux/macOS) valt het veld terug op een vaste hoogte met scrollen; dat is nog niet in de echte app gezien.
+- De visuele regressietest vergelijkt met schermafbeeldingen uit dezelfde omgeving (Chromium, Linux, lokale lettertypen); op een andere machine kunnen kleine afwijkingen voorkomen en moet `--update` gebruikt worden.
+- Of de nieuwe teksten voor echte niet-technische gebruikers begrijpelijk zijn is niet gemeten met echte mensen, alleen beoordeeld door mijn persona's.

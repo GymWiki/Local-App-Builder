@@ -23,16 +23,14 @@
   "paginaScroltVerticaal": false,
   "afgekapt": [
    "Nieuw project",
-   "Close"
+   "Sluiten"
   ],
   "klein": [
    "BUTTON (23x23)",
    "INPUT (23x23)"
   ],
   "buitenBeeld": [],
-  "engels": [
-   "Close"
-  ],
+  "engels": [],
   "dubbeleScroll": []
  },
  {
@@ -45,16 +43,14 @@
   "paginaScroltVerticaal": false,
   "afgekapt": [
    "Nieuw project",
-   "Close"
+   "Sluiten"
   ],
   "klein": [
    "BUTTON (23x23)",
    "INPUT (23x23)"
   ],
   "buitenBeeld": [],
-  "engels": [
-   "Close"
-  ],
+  "engels": [],
   "dubbeleScroll": []
  },
  {
@@ -67,16 +63,14 @@
   "paginaScroltVerticaal": false,
   "afgekapt": [
    "Nieuw project",
-   "Close"
+   "Sluiten"
   ],
   "klein": [
    "BUTTON (23x23)",
    "INPUT (23x23)"
   ],
   "buitenBeeld": [],
-  "engels": [
-   "Close"
-  ],
+  "engels": [],
   "dubbeleScroll": []
  },
  {
@@ -92,15 +86,11 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Sanne Coaching &  (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
   "engels": [],
-  "dubbeleScroll": [
-   "div[scroll-area-viewport] 647x525",
-   "textarea[textarea] 30x110"
-  ]
+  "dubbeleScroll": []
  },
  {
   "stap": "3-lange-opdracht-met-shift-enter",
@@ -115,14 +105,12 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Sanne Coaching &  (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 647x525",
-   "textarea[textarea] 30x110"
+   "div[scroll-area-viewport] 712x524"
   ]
  },
  {
@@ -138,14 +126,12 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Sanne Coaching &  (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 647x525",
-   "textarea[textarea] 30x110"
+   "div[scroll-area-viewport] 712x500"
   ]
  },
  {
@@ -161,14 +147,11 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Sanne Coaching &  (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
   "engels": [],
-  "dubbeleScroll": [
-   "textarea[textarea] 30x110"
-  ]
+  "dubbeleScroll": []
  },
  {
   "stap": "3d-ai-klaar",
@@ -184,14 +167,12 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Sanne Coaching &  (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 647x458",
-   "textarea[textarea] 30x110"
+   "div[scroll-area-viewport] 712x494"
   ]
  },
  {
@@ -205,23 +186,19 @@
   "afgekapt": [
    "Sanne Coaching & Advies – lange naam met",
    "— Klaar",
-   "Wat wil je maken of veranderen?"
+   "Wat wil je maken of veranderen?",
+   "Enter verstuurt je bericht. Shift + Ente"
   ],
   "klein": [
-   "Verwijderen uit lijst: Sanne Coaching &  (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [
-   "Details",
-   "Tablet",
-   "Computer",
-   "Vernieuwen"
+   "Details"
   ],
   "engels": [],
   "dubbeleScroll": [
-   "div 493x578",
-   "div[scroll-area-viewport] 493x98",
-   "textarea[textarea] 30x110"
+   "section 542x578",
+   "div[scroll-area-viewport] 542x184"
   ]
  },
  {
@@ -230,24 +207,22 @@
   "notitie": "",
   "vw": 1000,
   "vh": 700,
-  "paginaScroltHorizontaal": true,
-  "paginaScroltVerticaal": true,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
   "afgekapt": [
    "Sanne Coaching & Advies – lange naam met",
    "— Klaar",
-   "Wat wil je maken of veranderen?"
+   "Wat wil je maken of veranderen?",
+   "Enter verstuurt je bericht. Shift + Ente"
   ],
-  "klein": [
-   "Verwijderen uit lijst: Sanne Coaching &  (23x23)"
-  ],
+  "klein": [],
   "buitenBeeld": [
-   "Details",
-   "Versturen"
+   "Details"
   ],
   "engels": [],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 706x111",
-   "textarea[textarea] 30x110"
+   "section 706x553",
+   "div[scroll-area-viewport] 706x194"
   ]
  },
  {
@@ -256,23 +231,22 @@
   "notitie": "",
   "vw": 900,
   "vh": 600,
-  "paginaScroltHorizontaal": true,
-  "paginaScroltVerticaal": true,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
   "afgekapt": [
    "Sanne Coaching & Advies – lange naam met",
    "— Klaar",
-   "Wat wil je maken of veranderen?"
+   "Wat wil je maken of veranderen?",
+   "Enter verstuurt je bericht. Shift + Ente"
   ],
-  "klein": [
-   "Verwijderen uit lijst: Sanne Coaching &  (23x23)"
-  ],
+  "klein": [],
   "buitenBeeld": [
-   "Details",
-   "Versturen"
+   "Details"
   ],
   "engels": [],
   "dubbeleScroll": [
-   "textarea[textarea] 30x110"
+   "section 606x453",
+   "div[scroll-area-viewport] 606x184"
   ]
  },
  {
@@ -289,14 +263,12 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Sanne Coaching &  (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 647x458",
-   "textarea[textarea] 30x110"
+   "div[scroll-area-viewport] 712x494"
   ]
  },
  {
@@ -311,19 +283,15 @@
    "Sanne Coaching & Advies – lange naam met",
    "— Klaar",
    "Wat wil je maken of veranderen?",
-   "Close"
+   "Sluiten"
   ],
   "klein": [
-   "Verwijderen uit lijst: Sanne Coaching &  (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
-  "engels": [
-   "Close"
-  ],
+  "engels": [],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 647x458",
-   "textarea[textarea] 30x110"
+   "div[scroll-area-viewport] 712x494"
   ]
  },
  {
@@ -340,14 +308,12 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Sanne Coaching &  (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 647x458",
-   "textarea[textarea] 30x110"
+   "div[scroll-area-viewport] 712x494"
   ]
  },
  {
@@ -361,11 +327,11 @@
   "afgekapt": [
    "Sanne Coaching & Advies – lange naam met"
   ],
-  "klein": [
-   "Verwijderen uit lijst: Sanne Coaching &  (23x23)"
-  ],
+  "klein": [],
   "buitenBeeld": [],
   "engels": [],
-  "dubbeleScroll": []
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 1296x938"
+  ]
  }
 ]

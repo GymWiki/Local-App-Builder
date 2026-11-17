@@ -88,6 +88,7 @@ const personas = {
       await klik(p, /Terug naar|Zet terug/, n, "Terug naar een eerdere versie");
       await rec.shot(p, "6b-terugzetten-bevestiging");
       await p.keyboard.press("Escape");
+      await p.keyboard.press("Escape");
       await rec.shot(p, "6c-na-escape");
       await klik(p, /Wissel van AI/, n);
       await rec.shot(p, "7-wissel-van-ai");

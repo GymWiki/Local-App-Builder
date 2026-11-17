@@ -22,15 +22,13 @@
   "paginaScroltHorizontaal": false,
   "paginaScroltVerticaal": false,
   "afgekapt": [
-   "Close"
+   "Sluiten"
   ],
   "klein": [
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
-  "engels": [
-   "Close"
-  ],
+  "engels": [],
   "dubbeleScroll": [
    "div[scroll-area-viewport] 407x769"
   ]
@@ -59,16 +57,14 @@
   "paginaScroltVerticaal": false,
   "afgekapt": [
    "Nieuw project",
-   "Close"
+   "Sluiten"
   ],
   "klein": [
    "BUTTON (23x23)",
    "INPUT (23x23)"
   ],
   "buitenBeeld": [],
-  "engels": [
-   "Close"
-  ],
+  "engels": [],
   "dubbeleScroll": []
  },
  {
@@ -81,16 +77,14 @@
   "paginaScroltVerticaal": false,
   "afgekapt": [
    "Nieuw project",
-   "Close"
+   "Sluiten"
   ],
   "klein": [
    "BUTTON (23x23)",
    "INPUT (23x23)"
   ],
   "buitenBeeld": [],
-  "engels": [
-   "Close"
-  ],
+  "engels": [],
   "dubbeleScroll": []
  },
  {
@@ -103,16 +97,14 @@
   "paginaScroltVerticaal": false,
   "afgekapt": [
    "Nieuw project",
-   "Close"
+   "Sluiten"
   ],
   "klein": [
    "BUTTON (23x23)",
    "INPUT (23x23)"
   ],
   "buitenBeeld": [],
-  "engels": [
-   "Close"
-  ],
+  "engels": [],
   "dubbeleScroll": []
  },
  {
@@ -125,16 +117,14 @@
   "paginaScroltVerticaal": false,
   "afgekapt": [
    "Nieuw project",
-   "Close"
+   "Sluiten"
   ],
   "klein": [
    "BUTTON (23x23)",
    "INPUT (23x23)"
   ],
   "buitenBeeld": [],
-  "engels": [
-   "Close"
-  ],
+  "engels": [],
   "dubbeleScroll": []
  },
  {
@@ -149,14 +139,12 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Hovenier Joke (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 455x309",
-   "textarea[textarea] 30x110"
+   "div[scroll-area-viewport] 501x297"
   ]
  },
  {
@@ -171,14 +159,12 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Hovenier Joke (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 455x309",
-   "textarea[textarea] 30x110"
+   "div[scroll-area-viewport] 501x297"
   ]
  },
  {
@@ -193,14 +179,12 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Hovenier Joke (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 455x293",
-   "textarea[textarea] 30x110"
+   "div[scroll-area-viewport] 501x226"
   ]
  },
  {
@@ -217,14 +201,12 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Hovenier Joke (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 455x226",
-   "textarea[textarea] 30x110"
+   "div[scroll-area-viewport] 501x184"
   ]
  },
  {
@@ -240,14 +222,13 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Hovenier Joke (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 455x242",
-   "textarea[textarea] 30x110"
+   "div[scroll-area-viewport] 501x184",
+   "div 501x46"
   ]
  },
  {
@@ -263,14 +244,13 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Hovenier Joke (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 455x242",
-   "textarea[textarea] 30x110"
+   "div[scroll-area-viewport] 501x184",
+   "div 501x46"
   ]
  },
  {
@@ -286,14 +266,12 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Hovenier Joke (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 455x226",
-   "textarea[textarea] 30x110"
+   "div[scroll-area-viewport] 501x184"
   ]
  },
  {
@@ -310,15 +288,13 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Hovenier Joke (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div 455x722",
-   "div[scroll-area-viewport] 455x226",
-   "textarea[textarea] 30x110"
+   "section 501x722",
+   "div[scroll-area-viewport] 501x184"
   ]
  },
  {
@@ -334,15 +310,14 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Hovenier Joke (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div 455x722",
-   "div[scroll-area-viewport] 455x242",
-   "textarea[textarea] 30x110"
+   "section 501x722",
+   "div[scroll-area-viewport] 501x184",
+   "div 501x46"
   ]
  },
  {
@@ -356,20 +331,17 @@
   "afgekapt": [
    "— Klaar",
    "Wat wil je maken of veranderen?",
-   "Close"
+   "Sluiten"
   ],
   "klein": [
-   "Verwijderen uit lijst: Hovenier Joke (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
-  "engels": [
-   "Close"
-  ],
+  "engels": [],
   "dubbeleScroll": [
-   "div 455x722",
-   "div[scroll-area-viewport] 455x242",
-   "textarea[textarea] 30x110"
+   "section 501x722",
+   "div[scroll-area-viewport] 501x184",
+   "div 501x46"
   ]
  },
  {
@@ -383,20 +355,17 @@
   "afgekapt": [
    "— Klaar",
    "Wat wil je maken of veranderen?",
-   "Close"
+   "Sluiten"
   ],
   "klein": [
-   "Verwijderen uit lijst: Hovenier Joke (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
-  "engels": [
-   "Close"
-  ],
+  "engels": [],
   "dubbeleScroll": [
-   "div 455x722",
-   "div[scroll-area-viewport] 455x242",
-   "textarea[textarea] 30x110"
+   "section 501x722",
+   "div[scroll-area-viewport] 501x184",
+   "div 501x46"
   ]
  },
  {
@@ -410,20 +379,17 @@
   "afgekapt": [
    "— Klaar",
    "Wat wil je maken of veranderen?",
-   "Close"
+   "Sluiten"
   ],
   "klein": [
-   "Verwijderen uit lijst: Hovenier Joke (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
-  "engels": [
-   "Close"
-  ],
+  "engels": [],
   "dubbeleScroll": [
-   "div 455x722",
-   "div[scroll-area-viewport] 455x242",
-   "textarea[textarea] 30x110"
+   "section 501x722",
+   "div[scroll-area-viewport] 501x184",
+   "div 501x46"
   ]
  },
  {
@@ -437,20 +403,17 @@
   "afgekapt": [
    "— Klaar",
    "Wat wil je maken of veranderen?",
-   "Close"
+   "Sluiten"
   ],
   "klein": [
-   "Verwijderen uit lijst: Hovenier Joke (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
-  "engels": [
-   "Close"
-  ],
+  "engels": [],
   "dubbeleScroll": [
-   "div 455x722",
-   "div[scroll-area-viewport] 455x242",
-   "textarea[textarea] 30x110"
+   "section 501x722",
+   "div[scroll-area-viewport] 501x184",
+   "div 501x46"
   ]
  },
  {
@@ -463,7 +426,6 @@
   "paginaScroltVerticaal": false,
   "afgekapt": [],
   "klein": [
-   "Verwijderen uit lijst: Hovenier Joke (23x23)",
    "Claude Gemini Codex (nog niet beschikbaa (1x1)"
   ],
   "buitenBeeld": [],
@@ -480,7 +442,6 @@
   "paginaScroltVerticaal": false,
   "afgekapt": [],
   "klein": [
-   "Verwijderen uit lijst: Hovenier Joke (23x23)",
    "Claude Gemini Codex (nog niet beschikbaa (1x1)"
   ],
   "buitenBeeld": [],
@@ -496,12 +457,12 @@
   "paginaScroltHorizontaal": false,
   "paginaScroltVerticaal": false,
   "afgekapt": [],
-  "klein": [
-   "Verwijderen uit lijst: Hovenier Joke (23x23)"
-  ],
+  "klein": [],
   "buitenBeeld": [],
   "engels": [],
-  "dubbeleScroll": []
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 912x722"
+  ]
  },
  {
   "stap": "8b-veiligheid",
@@ -512,12 +473,12 @@
   "paginaScroltHorizontaal": false,
   "paginaScroltVerticaal": false,
   "afgekapt": [],
-  "klein": [
-   "Verwijderen uit lijst: Hovenier Joke (23x23)"
-  ],
+  "klein": [],
   "buitenBeeld": [],
   "engels": [],
-  "dubbeleScroll": []
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 912x722"
+  ]
  },
  {
   "stap": "8c-download",
@@ -528,12 +489,12 @@
   "paginaScroltHorizontaal": false,
   "paginaScroltVerticaal": false,
   "afgekapt": [],
-  "klein": [
-   "Verwijderen uit lijst: Hovenier Joke (23x23)"
-  ],
+  "klein": [],
   "buitenBeeld": [],
   "engels": [],
-  "dubbeleScroll": []
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 912x722"
+  ]
  },
  {
   "stap": "9a-geavanceerd",
@@ -544,9 +505,7 @@
   "paginaScroltHorizontaal": false,
   "paginaScroltVerticaal": false,
   "afgekapt": [],
-  "klein": [
-   "Verwijderen uit lijst: Hovenier Joke (23x23)"
-  ],
+  "klein": [],
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": []
@@ -560,9 +519,7 @@
   "paginaScroltHorizontaal": false,
   "paginaScroltVerticaal": false,
   "afgekapt": [],
-  "klein": [
-   "Verwijderen uit lijst: Hovenier Joke (23x23)"
-  ],
+  "klein": [],
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": []
@@ -575,13 +532,19 @@
   "vh": 864,
   "paginaScroltHorizontaal": false,
   "paginaScroltVerticaal": false,
-  "afgekapt": [],
+  "afgekapt": [
+   "— Klaar",
+   "Wat wil je maken of veranderen?"
+  ],
   "klein": [
-   "Verwijderen uit lijst: Hovenier Joke (23x23)"
+   "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
+   "section 501x722",
+   "div[scroll-area-viewport] 501x184",
+   "div 501x46",
    "div[scroll-area-viewport] 329x864"
   ]
  }

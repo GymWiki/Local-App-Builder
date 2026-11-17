@@ -23,16 +23,14 @@
   "paginaScroltVerticaal": false,
   "afgekapt": [
    "Nieuw project",
-   "Close"
+   "Sluiten"
   ],
   "klein": [
    "BUTTON (23x23)",
    "INPUT (23x23)"
   ],
   "buitenBeeld": [],
-  "engels": [
-   "Close"
-  ],
+  "engels": [],
   "dubbeleScroll": []
  },
  {
@@ -45,16 +43,14 @@
   "paginaScroltVerticaal": false,
   "afgekapt": [
    "Nieuw project",
-   "Close"
+   "Sluiten"
   ],
   "klein": [
    "BUTTON (23x23)",
    "INPUT (23x23)"
   ],
   "buitenBeeld": [],
-  "engels": [
-   "Close"
-  ],
+  "engels": [],
   "dubbeleScroll": []
  },
  {
@@ -67,16 +63,14 @@
   "paginaScroltVerticaal": false,
   "afgekapt": [
    "Nieuw project",
-   "Close"
+   "Sluiten"
   ],
   "klein": [
    "BUTTON (23x23)",
    "INPUT (23x23)"
   ],
   "buitenBeeld": [],
-  "engels": [
-   "Close"
-  ],
+  "engels": [],
   "dubbeleScroll": []
  },
  {
@@ -91,14 +85,12 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Fouttest (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 455x309",
-   "textarea[textarea] 30x110"
+   "div[scroll-area-viewport] 501x297"
   ]
  },
  {
@@ -113,14 +105,12 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Fouttest (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 455x309",
-   "textarea[textarea] 30x110"
+   "div[scroll-area-viewport] 501x297"
   ]
  },
  {
@@ -135,13 +125,12 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Fouttest (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "textarea[textarea] 30x110"
+   "div[scroll-area-viewport] 501x242"
   ]
  },
  {
@@ -156,13 +145,12 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Fouttest (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "textarea[textarea] 30x110"
+   "div[scroll-area-viewport] 501x242"
   ]
  },
  {
@@ -177,13 +165,12 @@
    "Wat wil je maken of veranderen?"
   ],
   "klein": [
-   "Verwijderen uit lijst: Fouttest (23x23)",
    "BUTTON (23x23)"
   ],
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "textarea[textarea] 30x110"
+   "div[scroll-area-viewport] 501x242"
   ]
  }
 ]
