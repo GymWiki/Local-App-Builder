@@ -22,6 +22,7 @@ import InfoPanel from "./components/InfoPanel";
 import NewProjectDialog from "./components/NewProjectDialog";
 import AccountsScreen from "./components/AccountsScreen";
 import PreviewNotice from "./components/PreviewNotice";
+import SettingsScreen, { type CommunicationMode, type PermissionMode } from "./components/SettingsScreen";
 import type { Tab } from "./components/Workspace";
 import type { Session } from "./components/TerminalPanel";
 
@@ -30,14 +31,16 @@ export default function App() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [view, setView] = useState<"project" | "accounts">("project");
+  const [view, setView] = useState<"project" | "accounts" | "settings">("project");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sessions, setSessions] = useState<Record<number, Session[]>>({});
   const [mcp, setMcp] = useState<Record<number, McpInfo | null>>({});
   const [preview, setPreview] = useState<Record<number, PreviewInfo | null>>({});
   const [reloadNonce, setReloadNonce] = useState<Record<number, number>>({});
-  const [tab, setTab] = useState<Tab>("terminal");
+  const [tab, setTab] = useState<Tab>("maken");
+  const [communication, setCommunication] = useState<CommunicationMode>("simple");
+  const [permission, setPermission] = useState<PermissionMode>("important");
   const [autoSwitch, setAutoSwitch] = useState(false);
   const [notice, setNotice] = useState<number | null>(null);
   const [tick, setTick] = useState<Record<number, number>>({});
@@ -85,6 +88,12 @@ export default function App() {
   useEffect(() => {
     getUiSetting("preview_auto_switch")
       .then((v) => setAutoSwitch(v === "1"))
+      .catch(() => undefined);
+    getUiSetting("communication_mode")
+      .then((v) => setCommunication(v === "technical" ? "technical" : "simple"))
+      .catch(() => undefined);
+    getUiSetting("permission_mode")
+      .then((v) => setPermission(v === "always" ? "always" : "important"))
       .catch(() => undefined);
   }, []);
 
@@ -139,7 +148,7 @@ export default function App() {
   useEffect(() => {
     availableRef.current = (id: number) => {
       if (autoSwitch) {
-        void select(id).then(() => setTab("preview"));
+        void select(id).then(() => setTab("maken"));
       } else {
         setNotice(id);
       }
@@ -156,6 +165,8 @@ export default function App() {
         onSelect={(id) => void select(id)}
         onNew={() => setDialogOpen(true)}
         onAccounts={() => setView("accounts")}
+        settingsActive={view === "settings"}
+        onSettings={() => setView("settings")}
         onDeleted={async (id) => {
           await close(id);
           await refresh();
@@ -175,11 +186,24 @@ export default function App() {
             onView={() => {
               const id = noticeProject.id;
               setNotice(null);
-              void select(id).then(() => setTab("preview"));
+              void select(id).then(() => setTab("maken"));
             }}
           />
         )}
-        {view === "accounts" ? (
+        {view === "settings" ? (
+          <SettingsScreen
+            communication={communication}
+            permission={permission}
+            onCommunication={(v) => {
+              setCommunication(v);
+              void setUiSetting("communication_mode", v).catch(fail);
+            }}
+            onPermission={(v) => {
+              setPermission(v);
+              void setUiSetting("permission_mode", v).catch(fail);
+            }}
+          />
+        ) : view === "accounts" ? (
           <AccountsScreen accounts={accounts} onChanged={refreshAccounts} onError={setError} />
         ) : (
           <Workspace
@@ -196,6 +220,8 @@ export default function App() {
             }}
             tab={tab}
             onTab={setTab}
+            technical={communication === "technical"}
+            onOpenAccounts={() => setView("accounts")}
             onSessionsChange={(fn) => selected && setSessions((s) => ({ ...s, [selected.id]: fn(s[selected.id] ?? []) }))}
             onError={setError}
             onRetryMcp={() => (selected ? select(selected.id) : undefined)}

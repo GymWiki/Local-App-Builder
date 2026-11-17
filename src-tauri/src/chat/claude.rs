@@ -121,6 +121,17 @@ impl ChatAdapter for ClaudeAdapter {
             "system" => {
                 if v["subtype"] == "init" {
                     note_session(self, &mut out, v["session_id"].as_str());
+                    // Zonder de Studio-koppeling kan de AI geen toestemming vragen en niets controleren: meteen melden.
+                    let studio_failed = v["mcp_servers"].as_array().is_some_and(|a| {
+                        a.iter()
+                            .any(|s| s["name"] == "studio" && s["status"] == "failed")
+                    });
+                    if studio_failed {
+                        out.push(ChatEvent::Error {
+                            code: ErrorCode::McpUnavailable,
+                            technical: "studio: status failed (system/init)".into(),
+                        });
+                    }
                 }
             }
             "assistant" => {
@@ -488,6 +499,78 @@ mod tests {
         for _ in 0..5 {
             assert!(a.parse_line("zomaar een regel").is_empty());
         }
+    }
+
+    const REAL_HELLO: &str =
+        include_str!("../../tests/fixtures/claude/real_hello_mcp_failed.jsonl");
+    const REAL_WRITE: &str = include_str!("../../tests/fixtures/claude/real_write_page.jsonl");
+
+    /// Opname van een echte `claude -p --input-format stream-json`-run (zie docs/cli-notes.md): extra gebeurtenistypen
+    /// zoals active_goal, autocompact_state, stream_event en rate_limit_event worden genegeerd.
+    #[test]
+    fn echte_opname_hallo_met_mislukte_studio_koppeling() {
+        let ev = run(REAL_HELLO);
+        assert_eq!(ev.len(), 4, "{ev:?}");
+        assert!(matches!(&ev[0], ChatEvent::Session { session_id } if session_id.len() == 36));
+        assert!(
+            matches!(
+                &ev[1],
+                ChatEvent::Error {
+                    code: ErrorCode::McpUnavailable,
+                    ..
+                }
+            ),
+            "init meldt studio: failed"
+        );
+        assert_eq!(
+            ev[2],
+            ChatEvent::Text {
+                id: ev_text_id(&ev[2]),
+                text: "Hallo! 👋 Waar kan ik je vandaag mee helpen?".into()
+            }
+        );
+        assert_eq!(ev[3], ChatEvent::TurnDone { ok: true });
+    }
+
+    fn ev_text_id(e: &ChatEvent) -> String {
+        if let ChatEvent::Text { id, .. } = e {
+            id.clone()
+        } else {
+            String::new()
+        }
+    }
+
+    #[test]
+    fn echte_opname_pagina_schrijven_met_toestemming_via_de_studio_tool() {
+        let ev = run(REAL_WRITE);
+        let actions: Vec<(&ActionKind, &Value)> = ev
+            .iter()
+            .filter_map(|e| {
+                if let ChatEvent::Action { kind, params, .. } = e {
+                    Some((kind, params))
+                } else {
+                    None
+                }
+            })
+            .collect();
+        assert_eq!(actions.len(), 1);
+        assert_eq!(*actions[0].0, ActionKind::FileCreated);
+        assert_eq!(
+            (
+                actions[0].1["file"].as_str(),
+                actions[0].1["page"].as_bool()
+            ),
+            (Some("index.html"), Some(true))
+        );
+        assert!(ev.iter().any(|e| matches!(e, ChatEvent::ActionResult { ok: true, summary, .. } if summary.contains("File created successfully"))));
+        assert!(ev
+            .iter()
+            .any(|e| matches!(e, ChatEvent::Text { text, .. } if text.contains("Hallo wereld"))));
+        assert!(
+            !ev.iter().any(|e| matches!(e, ChatEvent::Error { .. })),
+            "studio was verbonden: geen foutmelding"
+        );
+        assert_eq!(ev.last().unwrap(), &ChatEvent::TurnDone { ok: true });
     }
 
     #[test]

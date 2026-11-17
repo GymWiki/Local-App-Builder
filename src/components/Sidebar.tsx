@@ -6,13 +6,15 @@ interface Props {
   selectedId: number | null;
   accountsActive: boolean;
   onAccounts: () => void;
+  settingsActive?: boolean;
+  onSettings?: () => void;
   onSelect: (id: number) => void;
   onNew: () => void;
   onDeleted: (id: number) => void | Promise<void>;
   onError: (msg: string) => void;
 }
 
-export default function Sidebar({ projects, selectedId, accountsActive, onSelect, onNew, onAccounts, onDeleted, onError }: Props) {
+export default function Sidebar({ projects, selectedId, accountsActive, settingsActive = false, onSettings, onSelect, onNew, onAccounts, onDeleted, onError }: Props) {
   const { t } = useTranslation();
 
   async function remove(p: Project) {
@@ -68,6 +70,15 @@ export default function Sidebar({ projects, selectedId, accountsActive, onSelect
         >
           {t("accounts.titel")}
         </button>
+        {onSettings && (
+          <button
+            onClick={onSettings}
+            aria-current={settingsActive}
+            className={`mt-1 w-full rounded px-3 py-2 text-left text-sm ${settingsActive ? "bg-zinc-800" : "hover:bg-zinc-800/60"}`}
+          >
+            {t("sidebar.instellingen")}
+          </button>
+        )}
       </div>
     </aside>
   );

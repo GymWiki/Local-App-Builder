@@ -40,3 +40,9 @@ Lokale desktop-app (Tauri 2 + React/TypeScript/Vite + Tailwind, Rust-backend, SQ
 ## Paden naar Node (Windows)
 - Geef `node` nooit een `\\?\`-pad (extended-length). Laat paden voor scripts/omgevingsvariabelen via `winpath::for_node` / `winpath::clean_path` lopen en gebruik `Path`/`PathBuf`, geen string-splits op `:` of `\`. Tests met spaties en schijfletters staan in `winpath.rs` en `mcp.rs`.
 - De MCP-start is nooit blokkerend voor de rest van de app (`begin_mcp` in `commands.rs`); gebruik `wait_ready` met een korte time-out als iets de uitkomst nodig heeft.
+
+## Chat-weergave
+- Eén adapter per CLI (`src-tauri/src/chat/`): `ChatAdapter` (`launch`, `encode_user`, `parse_line`). Zonder adapter = terugval op de terminal. Voeg nooit een adapter toe zonder de uitvoer van de échte CLI te hebben opgenomen als fixture.
+- UI-tekst voor acties/vragen/fouten zit in `src/i18n/nl.json` (`chat.*`), niet in Rust: de backend levert alleen codes + parameters.
+- Gevaarlijke acties (`danger`) en schrijven buiten de projectmap vragen altijd toestemming, in elke stand (`chat/policy.rs`).
+- Instructieblokken in CLAUDE.md/GEMINI.md/AGENTS.md zijn afgebakend per naam (`instructions.rs`); alleen eigen blokken toevoegen/verversen/verwijderen.

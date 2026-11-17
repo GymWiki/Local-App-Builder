@@ -32,6 +32,16 @@ De database (`studio.db`) staat in de app-datamap van het besturingssysteem (`nl
 - Bronnen en verificatie: `docs/cli-notes.md`.
 - Claude vraagt bij de eerste start om goedkeuring van de projectserver uit `.mcp.json`; dat is bedoeld gedrag.
 
+## Chat-weergave (fase 5)
+Studio is gemaakt voor mensen die schrikken van een terminal. Het scherm heeft de tabs **Maken**, **Publiceren** en **Geavanceerd**:
+- **Maken**: links het gesprek met de AI, rechts de preview (zie hieronder). Grote invoer ("Beschrijf wat je wilt maken..."), tekstballonnen, een statusregel ("Bezig met nadenken", "Bestanden aanpassen", "Controleert of alles werkt", "Klaar") en snelle acties ("Maak het mooier", "Maak het mobielvriendelijk", "Er klopt iets niet", "Wat is er veranderd?").
+- **Actiekaartjes** vertalen wat de AI doet naar mensentaal ("Pagina gemaakt: index.html", "Foutje gevonden en hersteld"); commando's en paden zitten achter *Details*.
+- **Toestemmingen** lopen via een MCP-tool (`permission_prompt`, `--permission-prompt-tool`) en verschijnen als dialoog met **Ja**/**Nee**. Kies bij *Instellingen* tussen **Vraag altijd** en **Vraag alleen bij belangrijke dingen**; gevaarlijke acties (verwijderen, publiceren, buiten het project schrijven) vragen altijd.
+- **Fouten** in mensentaal met **Probeer opnieuw** en uitklapbare technische details.
+- **Geschiedenis en sessie** staan per project in SQLite; bij heropenen hervat Studio de sessie (`--resume`). **Wissel van AI** start een nieuwe sessie met PROJECT.md als overdracht.
+- **Geavanceerd** (en de knop *Technische weergave* in de chat) bevat de ruwe terminal. CLI's zonder gebouwde/geverifieerde gestructureerde uitvoer (nu: Gemini en Codex) vallen terug op de terminal.
+- **Instellingen → Eenvoudige taal / Technisch**: in de eenvoudige stand schrijft Studio een afgebakend blok *Zo praat je met de gebruiker* in `CLAUDE.md`, `GEMINI.md` en `AGENTS.md` én een skill `.claude/skills/eenvoudig-communiceren/SKILL.md`. In de technische stand verdwijnt dat blok weer. Eigen tekst in die bestanden blijft altijd staan; een eigen skill met dezelfde naam wordt nooit overschreven.
+
 ## Zero-config preview (fase 4)
 Studio detecteert bij het openen van een project én bij elke bestandswijziging (file watcher) wat het is:
 - **Alleen `index.html`** (root of `public/`): ingebouwde statische server in Rust, alleen `127.0.0.1` op een willekeurige poort, zonder Node.js. Wijzigingen verversen de pagina automatisch (Server-Sent Events + een klein script dat in de HTML wordt geplakt). Dotfiles (`.env`, `.git`), `..` en symlinks naar buiten de map worden niet geserveerd.

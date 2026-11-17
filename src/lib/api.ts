@@ -211,3 +211,46 @@ export const previewTrustScripts = (id: number) => invoke<PreviewInfo>("preview_
 export const previewInstall = (id: number) => invoke<PreviewInfo>("preview_install", { id });
 export const getUiSetting = (key: string) => invoke<string | null>("get_ui_setting", { key });
 export const setUiSetting = (key: string, value: string) => invoke<void>("set_ui_setting", { key, value });
+
+// chat-weergave
+export type ChatStatus = "thinking" | "editing" | "working" | "checking" | "done" | "idle";
+export type ActionKind =
+  | "file_created" | "file_edited" | "file_read" | "search" | "run_checks" | "install_packages" | "start_server"
+  | "run_command" | "delete_files" | "publish" | "save_version" | "list_versions" | "view_preview"
+  | "find_page_errors" | "read_logs" | "read_notes" | "update_notes" | "plan" | "web_lookup" | "helper" | "other";
+export type ChatErrorCode =
+  | "not_logged_in" | "rate_limit" | "overloaded" | "billing" | "network" | "model_not_found"
+  | "cli_crashed" | "cli_missing" | "mcp_unavailable" | "unknown";
+
+export interface ChatMessage {
+  id: number;
+  project_id: number;
+  kind: "user" | "assistant" | "action" | "permission" | "error" | "divider" | "notice";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  payload: Record<string, any>;
+  created_at: string;
+}
+
+export type ChatOut =
+  | { type: "message"; project_id: number; message: ChatMessage }
+  | { type: "update"; project_id: number; message: ChatMessage }
+  | { type: "status"; project_id: number; state: ChatStatus; busy: boolean }
+  | { type: "fallback"; project_id: number; reason: string };
+
+export interface ChatTarget {
+  provider: Provider;
+  account_id: number | null;
+  account_label: string | null;
+  structured: boolean;
+}
+
+export const chatTarget = (projectId: number) => invoke<ChatTarget>("chat_target", { projectId });
+export const chatHistory = (projectId: number, limit = 200) => invoke<ChatMessage[]>("chat_history", { projectId, limit });
+export const chatBusy = (projectId: number) => invoke<boolean>("chat_busy", { projectId });
+export const chatSend = (projectId: number, text: string) => invoke<void>("chat_send", { projectId, text });
+export const chatRetry = (projectId: number) => invoke<void>("chat_retry", { projectId });
+export const chatStop = (projectId: number) => invoke<void>("chat_stop", { projectId });
+export const chatSwitch = (projectId: number, provider: Provider, accountId: number | null) =>
+  invoke<ChatTarget>("chat_switch", { projectId, provider, accountId });
+export const permissionAnswer = (projectId: number, reqId: string, allow: boolean) =>
+  invoke<void>("permission_answer", { projectId, reqId, allow });

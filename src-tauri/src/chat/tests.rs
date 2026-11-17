@@ -472,3 +472,140 @@ fn onleesbare_aanvraag_wordt_genegeerd_zonder_te_crashen() {
     );
     assert!(history(&h).iter().all(|m| m.kind != "permission") || perm_state(&h, "z").is_some());
 }
+
+// ---------- end-to-end: echte MCP-server (Node) + ChatManager ----------
+
+fn raw_permission_call(
+    port: u16,
+    token: &str,
+    tool: &str,
+    input: Value,
+) -> std::thread::JoinHandle<String> {
+    let token = token.to_string();
+    let tool = tool.to_string();
+    std::thread::spawn(move || {
+        use std::io::{Read, Write};
+        let body = json!({ "jsonrpc": "2.0", "id": 1, "method": "tools/call",
+            "params": { "name": "permission_prompt", "arguments": { "tool_name": tool, "input": input } } })
+        .to_string();
+        let mut s = std::net::TcpStream::connect(("127.0.0.1", port)).unwrap();
+        s.set_read_timeout(Some(Duration::from_secs(20))).unwrap();
+        write!(s, "POST /mcp HTTP/1.1\r\nHost: 127.0.0.1:{port}\r\nAuthorization: Bearer {token}\r\nContent-Type: application/json\r\nAccept: application/json, text/event-stream\r\nConnection: close\r\nContent-Length: {}\r\n\r\n{body}", body.len()).unwrap();
+        let mut out = String::new();
+        let _ = s.read_to_string(&mut out);
+        out
+    })
+}
+
+#[test]
+fn toestemming_end_to_end_via_de_echte_mcp_server() {
+    use crate::mcp::{new_token, McpEvent, McpManager};
+    let script = Path::new(env!("CARGO_MANIFEST_DIR")).join("../mcp-server/dist/index.mjs");
+    if !script.is_file() || crate::node::find().is_err() {
+        return eprintln!("overgeslagen: node of mcp-server/dist ontbreekt");
+    }
+    let conn = db::open_in_memory().unwrap();
+    let dir = tempfile::tempdir().unwrap();
+    let p = projects::create(&conn, "P", dir.path(), "leeg").unwrap();
+    let store = Arc::new(ConnStore(Mutex::new(conn)));
+
+    let chat_cell: Arc<std::sync::OnceLock<ChatManager>> = Arc::default();
+    let mcp_cell: Arc<std::sync::OnceLock<Arc<McpManager>>> = Arc::default();
+    let (c1, d1) = (chat_cell.clone(), dir.path().to_path_buf());
+    let mcp = Arc::new(McpManager::new(
+        new_token(),
+        vec![script],
+        Arc::new(move |ev| {
+            if let McpEvent::Runtime {
+                project_id,
+                payload,
+            } = ev
+            {
+                if payload["event"] == "permission_request" {
+                    if let Some(chat) = c1.get().cloned() {
+                        let d = d1.clone();
+                        std::thread::spawn(move || {
+                            chat.on_permission_request(project_id, &d, &payload)
+                        });
+                    }
+                }
+            }
+        }),
+    ));
+    mcp_cell.set(mcp.clone()).ok();
+    let m2 = mcp_cell.clone();
+    let chat = ChatManager::new(
+        store.clone(),
+        Arc::new(|_| {}),
+        Arc::new(move |project, id, allow| {
+            m2.get()
+                .unwrap()
+                .call(
+                    project,
+                    "permission.answer",
+                    json!({ "id": id, "allow": allow }),
+                    Duration::from_secs(5),
+                )
+                .map(|_| ())
+        }),
+    );
+    chat_cell.set(chat.clone()).ok();
+
+    let info = mcp.start(p.id, "P", dir.path());
+    assert!(info.is_up(), "{info:?}");
+    let port = info.port.unwrap();
+    let state = |req: &str| -> Option<String> {
+        store::history(&store.0.lock().unwrap(), p.id, 50)
+            .unwrap()
+            .into_iter()
+            .find(|m| m.kind == "permission" && m.payload["req_id"] == req)
+            .map(|m| m.payload["state"].as_str().unwrap().to_string())
+    };
+    let asked_id = || -> Option<String> {
+        store::history(&store.0.lock().unwrap(), p.id, 50)
+            .unwrap()
+            .into_iter()
+            .find(|m| m.kind == "permission" && m.payload["state"] == "asked")
+            .map(|m| m.payload["req_id"].as_str().unwrap().to_string())
+    };
+
+    // 1. Gewoon bouwwerk binnen het project: automatisch toegestaan, zonder dialoog.
+    let file = dir.path().join("index.html").to_string_lossy().to_string();
+    let r = raw_permission_call(port, mcp.token(), "Write", json!({ "file_path": file }))
+        .join()
+        .unwrap();
+    assert!(r.contains(r#"\"behavior\":\"allow\""#), "{r}");
+
+    // 2. Gevaarlijk: de dialoog verschijnt; 'Ja' laat de aanroep slagen.
+    let call = raw_permission_call(
+        port,
+        mcp.token(),
+        "Bash",
+        json!({ "command": "rm -rf dist" }),
+    );
+    wait_for("vraag aan de gebruiker", || asked_id().is_some());
+    let id = asked_id().unwrap();
+    chat.answer_permission(p.id, &id, true).unwrap();
+    let r = call.join().unwrap();
+    assert!(r.contains(r#"\"behavior\":\"allow\""#), "{r}");
+    assert_eq!(state(&id).as_deref(), Some("allowed"));
+
+    // 3. 'Nee' geeft deny met uitleg.
+    let call = raw_permission_call(
+        port,
+        mcp.token(),
+        "Bash",
+        json!({ "command": "git push origin main" }),
+    );
+    wait_for("tweede vraag", || asked_id().is_some());
+    let id = asked_id().unwrap();
+    chat.answer_permission(p.id, &id, false).unwrap();
+    let r = call.join().unwrap();
+    assert!(
+        r.contains(r#"\"behavior\":\"deny\""#) && r.contains("niet toegestaan"),
+        "{r}"
+    );
+    assert_eq!(state(&id).as_deref(), Some("denied"));
+
+    mcp.stop(p.id);
+}

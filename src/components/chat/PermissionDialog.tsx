@@ -1,0 +1,80 @@
+import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import type { ChatMessage } from "../../lib/api";
+
+interface Props {
+  message: ChatMessage;
+  technical: boolean;
+  onAnswer: (allow: boolean) => void;
+}
+
+/** Toestemmingsvraag in gewone taal met Ja en Nee. Gevaarlijke acties krijgen een duidelijke waarschuwing en "Nee" als standaardfocus. */
+export default function PermissionDialog({ message, technical, onAnswer }: Props) {
+  const { t } = useTranslation();
+  const p = message.payload;
+  const [open, setOpen] = useState(technical);
+  const danger = p.danger === true;
+  const kind: string = p.kind;
+  const params = p.params ?? {};
+  const first = useRef<HTMLButtonElement>(null);
+  useEffect(() => first.current?.focus(), [message.id]);
+
+  const question = String(
+    p.outside_project ? t("chat.toestemming.vraag.buiten") : t(`chat.toestemming.vraag.${kind}`, { defaultValue: t("chat.toestemming.vraag.generic") }),
+  );
+  const explain = String(t(`chat.toestemming.uitleg.${kind}`, { ...params, defaultValue: t("chat.toestemming.uitleg.generic") }));
+
+  return (
+    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/70 p-4">
+      <div
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="perm-title"
+        aria-describedby="perm-explain"
+        className={`w-full max-w-lg space-y-4 rounded-xl border-2 bg-zinc-900 p-6 shadow-2xl ${danger ? "border-red-500" : "border-indigo-500"}`}
+      >
+        <div className="text-sm uppercase tracking-wide text-zinc-400">{t("chat.toestemming.titel")}</div>
+        <h2 id="perm-title" className="text-xl font-semibold">
+          {question}
+        </h2>
+        <p id="perm-explain" className="text-lg text-zinc-200">
+          {explain}
+        </p>
+        {p.outside_project && <p className="text-base text-amber-300">{t("chat.toestemming.buitenProject")}</p>}
+        {danger && (
+          <p role="note" className="rounded-lg bg-red-950 p-3 text-base text-red-100">
+            ⚠ {t("chat.toestemming.gevaar")}
+          </p>
+        )}
+        {p.detail && (
+          <div>
+            <button onClick={() => setOpen((v) => !v)} aria-expanded={open} className="text-sm text-indigo-300 hover:underline">
+              {t("chat.toestemming.details")}
+            </button>
+            {open && (
+              <pre data-testid="perm-details" className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap rounded bg-zinc-950 p-3 font-mono text-sm text-zinc-300">
+                {p.detail}
+              </pre>
+            )}
+          </div>
+        )}
+        <div className="flex justify-end gap-3">
+          <button
+            ref={danger ? first : undefined}
+            onClick={() => onAnswer(false)}
+            className="min-h-12 min-w-24 rounded-lg border border-zinc-500 px-6 text-lg hover:bg-zinc-800"
+          >
+            {t("chat.toestemming.nee")}
+          </button>
+          <button
+            ref={danger ? undefined : first}
+            onClick={() => onAnswer(true)}
+            className={`min-h-12 min-w-24 rounded-lg px-6 text-lg font-semibold ${danger ? "bg-red-700 hover:bg-red-600" : "bg-indigo-600 hover:bg-indigo-500"}`}
+          >
+            {t("chat.toestemming.ja")}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

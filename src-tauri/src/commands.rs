@@ -597,6 +597,11 @@ pub fn chat_retry(
 }
 
 #[tauri::command]
+pub fn chat_busy(chat: State<ChatManager>, project_id: i64) -> bool {
+    chat.busy(project_id)
+}
+
+#[tauri::command]
 pub fn chat_stop(chat: State<ChatManager>, project_id: i64) {
     chat.stop(project_id);
 }

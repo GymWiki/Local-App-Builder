@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { Account, McpInfo, PreviewInfo, Project } from "../lib/api";
+import ChatPanel from "./chat/ChatPanel";
 import PreviewPanel from "./PreviewPanel";
 import TerminalPanel, { type Session } from "./TerminalPanel";
 
-export const TABS = ["terminal", "preview", "publiceren"] as const;
+export const TABS = ["maken", "publiceren", "geavanceerd"] as const;
 export type Tab = (typeof TABS)[number];
 
 interface Props {
@@ -18,42 +19,86 @@ interface Props {
   onAutoSwitch?: (v: boolean) => void;
   tab?: Tab;
   onTab?: (t: Tab) => void;
+  /** "Technisch"-stand: ruwe details standaard zichtbaar. */
+  technical?: boolean;
+  onOpenAccounts?: () => void;
   onSessionsChange?: (updater: (prev: Session[]) => Session[]) => void;
   onError?: (msg: string) => void;
   onRetryMcp?: () => Promise<void> | void;
 }
 
-export default function Workspace({ project, accounts = [], sessions = [], mcp = null, preview = null, reloadNonce = 0, autoSwitch = false, onAutoSwitch, tab: tabProp, onTab, onSessionsChange, onError, onRetryMcp }: Props) {
+export default function Workspace({
+  project,
+  accounts = [],
+  sessions = [],
+  mcp = null,
+  preview = null,
+  reloadNonce = 0,
+  autoSwitch = false,
+  onAutoSwitch,
+  tab: tabProp,
+  onTab,
+  technical = false,
+  onOpenAccounts,
+  onSessionsChange,
+  onError,
+  onRetryMcp,
+}: Props) {
   const { t } = useTranslation();
-  const [innerTab, setInnerTab] = useState<Tab>("terminal");
+  const [innerTab, setInnerTab] = useState<Tab>("maken");
   const tab = tabProp ?? innerTab;
   const setTab = onTab ?? setInnerTab;
+  const fail = onError ?? (() => undefined);
 
   return (
     <section className="flex min-h-0 flex-1 flex-col">
-      <div role="tablist" className="flex gap-1 border-b border-zinc-800 px-3 pt-2">
+      <div role="tablist" aria-label={t("app.naam")} className="flex gap-1 border-b border-zinc-800 px-3 pt-2">
         {TABS.map((id) => (
           <button
             key={id}
             role="tab"
             aria-selected={tab === id}
             onClick={() => setTab(id)}
-            className={`rounded-t px-4 py-2 text-sm ${
-              tab === id ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-zinc-200"
-            }`}
+            className={`min-h-11 rounded-t-lg px-6 text-lg ${tab === id ? "bg-zinc-800 font-semibold text-white" : "text-zinc-300 hover:text-white"}`}
           >
             {t(`tabs.${id}`)}
           </button>
         ))}
       </div>
       {!project ? (
-        <div role="tabpanel" className="flex flex-1 items-center justify-center text-zinc-500">
+        <div role="tabpanel" className="flex flex-1 items-center justify-center text-lg text-zinc-300">
           {t("tabs.geenProject")}
         </div>
       ) : (
         <>
-          {/* Blijft gemount (verborgen) zodat lopende terminals hun scrollback houden. */}
-          <div role="tabpanel" className={`min-h-0 flex-1 flex-col ${tab === "terminal" ? "flex" : "hidden"}`}>
+          {/* Blijft gemount (verborgen) zodat gesprek, preview en lopende terminals hun toestand houden. */}
+          <div role="tabpanel" hidden={tab !== "maken"} className={`min-h-0 flex-1 ${tab === "maken" ? "grid grid-cols-1 lg:grid-cols-2" : "hidden"}`}>
+            <div className="min-h-0 min-w-0 border-r border-zinc-800">
+              <ChatPanel
+                key={project.id}
+                project={project}
+                accounts={accounts}
+                technical={technical}
+                onOpenAdvanced={() => setTab("geavanceerd")}
+                onOpenAccounts={onOpenAccounts ?? (() => undefined)}
+                onError={fail}
+              />
+            </div>
+            <div className="hidden min-h-0 min-w-0 flex-col lg:flex">
+              <PreviewPanel
+                project={project}
+                mcp={mcp}
+                preview={preview}
+                visible={tab === "maken"}
+                reloadNonce={reloadNonce}
+                autoSwitch={autoSwitch}
+                onAutoSwitch={onAutoSwitch}
+                onError={fail}
+                onRetryMcp={onRetryMcp}
+              />
+            </div>
+          </div>
+          <div role="tabpanel" hidden={tab !== "geavanceerd"} className={`min-h-0 flex-1 flex-col ${tab === "geavanceerd" ? "flex" : "hidden"}`}>
             <TerminalPanel
               key={project.id}
               project={project}
@@ -61,25 +106,12 @@ export default function Workspace({ project, accounts = [], sessions = [], mcp =
               sessions={sessions}
               mcp={mcp}
               onSessionsChange={onSessionsChange ?? (() => undefined)}
-              onError={onError ?? (() => undefined)}
-              onRetryMcp={onRetryMcp}
-            />
-          </div>
-          <div role="tabpanel" className={`min-h-0 flex-1 flex-col ${tab === "preview" ? "flex" : "hidden"}`}>
-            <PreviewPanel
-              project={project}
-              mcp={mcp}
-              preview={preview}
-              visible={tab === "preview"}
-              reloadNonce={reloadNonce}
-              autoSwitch={autoSwitch}
-              onAutoSwitch={onAutoSwitch}
-              onError={onError ?? (() => undefined)}
+              onError={fail}
               onRetryMcp={onRetryMcp}
             />
           </div>
           {tab === "publiceren" && (
-            <div role="tabpanel" className="flex flex-1 items-center justify-center text-zinc-500">
+            <div role="tabpanel" className="flex flex-1 items-center justify-center text-lg text-zinc-300">
               {t("tabs.binnenkort")}
             </div>
           )}

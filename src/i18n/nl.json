@@ -7,14 +7,17 @@
     "nieuwProject": "Nieuw project",
     "leeg": "Nog geen projecten. Maak je eerste project aan.",
     "verwijder": "Verwijderen uit lijst",
-    "bevestigVerwijder": "“{{naam}}” uit de lijst verwijderen? De bestanden op je computer blijven staan."
+    "bevestigVerwijder": "“{{naam}}” uit de lijst verwijderen? De bestanden op je computer blijven staan.",
+    "instellingen": "Instellingen"
   },
   "tabs": {
-    "terminal": "Terminal",
-    "preview": "Preview",
+    "maken": "Maken",
     "publiceren": "Publiceren",
+    "geavanceerd": "Geavanceerd",
     "binnenkort": "Komt in een latere fase.",
-    "geenProject": "Kies of maak een project om te beginnen."
+    "geenProject": "Kies of maak een project om te beginnen.",
+    "terminal": "Terminal",
+    "preview": "Preview"
   },
   "info": {
     "titel": "Projectinfo",
@@ -24,7 +27,8 @@
     "aangemaakt": "Aangemaakt",
     "geenSelectie": "Geen project geselecteerd.",
     "standaardAccount": "Standaardaccount",
-    "sluit": "Project sluiten (stopt terminals en MCP)"
+    "sluit": "Project sluiten (stopt terminals en MCP)",
+    "technischWeergave": "Technische weergave"
   },
   "nieuw": {
     "titel": "Nieuw project",
@@ -215,5 +219,188 @@
     "beschikbaar": "Preview beschikbaar voor ‘{{naam}}’",
     "bekijk": "Bekijk preview",
     "sluit": "Sluiten"
+  },
+  "chat": {
+    "titel": "Gesprek met de AI",
+    "invoerLabel": "Wat wil je maken of veranderen?",
+    "placeholder": "Beschrijf wat je wilt maken...",
+    "verstuur": "Versturen",
+    "stop": "Stoppen",
+    "geschiedenis": "Gesprek",
+    "leeg": "Hier komt je gesprek. Vertel in gewone woorden wat je wilt maken, bijvoorbeeld: ‘een website voor mijn bakkerij’.",
+    "technisch": "Technische weergave",
+    "wissel": "Wissel van AI",
+    "nieuwGesprek": "Nieuw gesprek",
+    "status": {
+      "thinking": "Bezig met nadenken",
+      "editing": "Bestanden aanpassen",
+      "working": "Bezig met werken",
+      "checking": "Controleert of alles werkt",
+      "done": "Klaar",
+      "idle": "Klaar om te helpen"
+    },
+    "snel": {
+      "titel": "Snelle acties",
+      "mooier": "Maak het mooier",
+      "mobiel": "Maak het mobielvriendelijk",
+      "klopt": "Er klopt iets niet",
+      "veranderd": "Wat is er veranderd?"
+    },
+    "snelPrompt": {
+      "mooier": "Maak het ontwerp mooier en rustiger: let op kleuren, ruimte tussen onderdelen en een prettig lettertype. Verander niets aan de inhoud.",
+      "mobiel": "Zorg dat alles er ook op een telefoon goed uitziet en makkelijk te bedienen is. Controleer het daarna met een schermafbeelding op telefoonformaat.",
+      "klopt": "Er klopt iets niet. Kijk eerst zelf in de preview en naar eventuele foutmeldingen, zoek wat er mis is en los het op. Leg daarna in gewone woorden uit wat er aan de hand was.",
+      "veranderd": "Wat is er sinds de vorige versie veranderd? Vat het in gewone woorden samen, zonder technische details."
+    },
+    "details": "Details",
+    "verberg": "Verberg details",
+    "toonDetails": "Toon details",
+    "actie": {
+      "file_created": "Bestand gemaakt: {{file}}",
+      "file_created_page": "Pagina gemaakt: {{file}}",
+      "file_edited": "Bestand aangepast: {{file}}",
+      "file_edited_page": "Pagina aangepast: {{file}}",
+      "file_read": "Bekijkt een bestand",
+      "search": "Zoekt in je project",
+      "run_checks": "Controleert of alles werkt",
+      "run_checks_fixed": "Foutje gevonden en hersteld",
+      "run_checks_error": "Controle: er klopt nog iets niet",
+      "install_packages": "Installeert onderdelen",
+      "start_server": "Start de voorbeeldweergave",
+      "run_command": "Voert een opdracht uit",
+      "delete_files": "Verwijdert bestanden",
+      "publish": "Publiceert je werk",
+      "save_version": "Slaat een versie op: {{message}}",
+      "save_version_leeg": "Slaat een versie op",
+      "list_versions": "Bekijkt eerdere versies",
+      "view_preview": "Bekijkt de voorbeeldweergave",
+      "find_page_errors": "Zoekt naar fouten op de pagina",
+      "read_logs": "Leest de meldingen van de voorbeeldweergave",
+      "read_notes": "Leest de projectnotities",
+      "update_notes": "Werkt de projectnotities bij",
+      "plan": "Maakt een plan",
+      "web_lookup": "Zoekt op het internet",
+      "helper": "Vraagt een hulpje om mee te denken",
+      "other": "Doet iets extra's"
+    },
+    "actieMislukt": "Dit lukte niet. De AI probeert het opnieuw.",
+    "actieBezig": "Bezig…",
+    "actieKlaar": "Klaar",
+    "toestemming": {
+      "titel": "De AI vraagt toestemming",
+      "ja": "Ja",
+      "nee": "Nee",
+      "details": "Wat doet dit precies?",
+      "gevaar": "Let op: dit kan niet gemakkelijk worden teruggedraaid.",
+      "buitenProject": "Dit gaat buiten je project.",
+      "toegestaan": "Toestemming gegeven",
+      "geweigerd": "Toestemming geweigerd",
+      "verlopen": "Geen antwoord gegeven",
+      "vraag": {
+        "file_created": "Mag de AI dit bestand maken?",
+        "file_edited": "Mag de AI dit bestand aanpassen?",
+        "delete_files": "Mag de AI iets verwijderen?",
+        "publish": "Mag de AI je werk publiceren of versturen?",
+        "run_command": "Mag de AI een opdracht op je computer uitvoeren?",
+        "install_packages": "Mag de AI onderdelen installeren?",
+        "web_lookup": "Mag de AI iets op het internet opzoeken?",
+        "start_server": "Mag de AI de voorbeeldweergave starten?",
+        "save_version": "Mag de AI een versie opslaan?",
+        "generic": "Mag de AI dit doen?",
+        "buiten": "Mag de AI een bestand buiten je project aanpassen?"
+      },
+      "uitleg": {
+        "file_created": "De AI maakt of overschrijft een bestand in je project: {{file}}.",
+        "file_edited": "De AI past een bestand in je project aan: {{file}}.",
+        "delete_files": "Bestanden of mappen worden verwijderd. Dat kan niet altijd worden teruggedraaid.",
+        "publish": "Je werk wordt buiten deze computer gedeeld of verstuurd.",
+        "run_command": "De AI wil een programma op je computer starten. Bij ‘details’ zie je welk programma.",
+        "install_packages": "Hulponderdelen worden van internet gehaald en geïnstalleerd.",
+        "web_lookup": "De AI zoekt informatie op het internet.",
+        "start_server": "De AI start een voorbeeld van je werk.",
+        "save_version": "De AI bewaart de huidige stand als een terugzetbare versie.",
+        "generic": "De AI wil een actie uitvoeren."
+      }
+    },
+    "fout": {
+      "not_logged_in": {
+        "titel": "Je bent nog niet ingelogd",
+        "uitleg": "Log eerst in bij je AI-account. Dat doe je bij ‘AI-accounts’.",
+        "knop": "Naar AI-accounts"
+      },
+      "rate_limit": {
+        "titel": "De AI heeft even rust nodig",
+        "uitleg": "Je hebt tijdelijk het maximum bereikt. Probeer het over een paar minuten opnieuw."
+      },
+      "overloaded": {
+        "titel": "De AI is even druk bezig",
+        "uitleg": "Probeer het over een momentje opnieuw."
+      },
+      "billing": {
+        "titel": "Er is iets mis met je abonnement",
+        "uitleg": "Controleer je account bij de aanbieder van de AI."
+      },
+      "network": {
+        "titel": "Geen verbinding met internet",
+        "uitleg": "Controleer je internetverbinding en probeer het opnieuw."
+      },
+      "model_not_found": {
+        "titel": "Dit AI-model is niet beschikbaar",
+        "uitleg": "Kies een ander account of probeer het later opnieuw."
+      },
+      "cli_crashed": {
+        "titel": "De AI is onverwacht gestopt",
+        "uitleg": "Dat gebeurt soms. Probeer het opnieuw."
+      },
+      "cli_missing": {
+        "titel": "De AI is niet geïnstalleerd",
+        "uitleg": "Installeer eerst de AI. In de technische weergave staat hoe."
+      },
+      "mcp_unavailable": {
+        "titel": "De koppeling met Studio ontbreekt",
+        "uitleg": "Studio kon de koppeling met de AI niet starten. Probeer het opnieuw."
+      },
+      "unknown": {
+        "titel": "Er ging iets mis",
+        "uitleg": "Probeer het opnieuw. Lukt het niet, open dan de technische details."
+      },
+      "opnieuw": "Probeer opnieuw",
+      "technisch": "Technische details"
+    },
+    "terugval": {
+      "titel": "Deze AI werkt nog niet in de chat",
+      "uitleg": "{{ai}} kan nog niet met de chatweergave worden gebruikt. Open de technische weergave om er toch mee te werken.",
+      "uitlegFout": "De chatweergave werkt niet met deze versie van de AI. Open de technische weergave om er toch mee te werken."
+    },
+    "scheiding": {
+      "gewisseld": "Gewisseld naar {{ai}}",
+      "nieuw": "Nieuw gesprek"
+    },
+    "wisselDialoog": {
+      "titel": "Wissel van AI",
+      "uitleg": "Het gesprek wordt voortgezet met een andere AI. Die leest eerst de projectnotities (PROJECT.md) om te weten waar het project staat.",
+      "tip": "Tip: vraag de huidige AI eerst de projectnotities bij te werken."
+    },
+    "geenAccount": "standaard"
+  },
+  "instellingen": {
+    "titel": "Instellingen",
+    "taal": {
+      "titel": "Taal van de AI",
+      "eenvoudig": "Eenvoudige taal",
+      "eenvoudigUitleg": "De AI praat in gewone woorden, zonder vakjargon. Aanbevolen.",
+      "technisch": "Technisch",
+      "technischUitleg": "De AI mag vaktaal gebruiken en je ziet ruwe details. Voor ervaren gebruikers.",
+      "toelichting": "Studio zet deze keuze als instructie in CLAUDE.md, GEMINI.md en AGENTS.md van je projecten. Eigen tekst in die bestanden blijft ongemoeid."
+    },
+    "toestemming": {
+      "titel": "Toestemmingen",
+      "altijd": "Vraag altijd",
+      "altijdUitleg": "Studio vraagt toestemming voor alles wat iets verandert of uitvoert. Alleen kijken mag zonder vraag.",
+      "belangrijk": "Vraag alleen bij belangrijke dingen",
+      "belangrijkUitleg": "Gewoon bouwwerk (bestanden maken, controleren) gaat zonder vraag. Onbekende opdrachten vragen toestemming.",
+      "toelichting": "Gevaarlijke acties, zoals verwijderen en publiceren, vragen altijd bevestiging, welke keuze je ook maakt."
+    },
+    "opgeslagen": "Opgeslagen"
   }
 }

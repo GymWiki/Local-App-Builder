@@ -301,6 +301,7 @@ pub fn run() {
             commands::chat_history,
             commands::chat_send,
             commands::chat_retry,
+            commands::chat_busy,
             commands::chat_stop,
             commands::chat_switch,
             commands::permission_answer,

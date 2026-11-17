@@ -1,0 +1,58 @@
+import { useTranslation } from "react-i18next";
+import type { ChatMessage } from "../../lib/api";
+import ActionCard from "./ActionCard";
+import ErrorCard from "./ErrorCard";
+import FormattedText from "./formatText";
+
+interface Props {
+  message: ChatMessage;
+  live: boolean;
+  technical: boolean;
+  canRetry: boolean;
+  onRetry: () => void;
+  onOpenAccounts: () => void;
+}
+
+export default function MessageView({ message, live, technical, canRetry, onRetry, onOpenAccounts }: Props) {
+  const { t } = useTranslation();
+  const p = message.payload;
+  switch (message.kind) {
+    case "user":
+      return (
+        <div className="flex justify-end">
+          <div data-testid="bubble-user" className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-sm bg-indigo-700 px-5 py-3 text-lg leading-relaxed text-white">
+            {p.text}
+          </div>
+        </div>
+      );
+    case "assistant":
+      return (
+        <div className="flex justify-start">
+          <div data-testid="bubble-ai" className="max-w-[90%] rounded-2xl rounded-bl-sm bg-zinc-800 px-5 py-3 text-lg leading-relaxed text-zinc-100">
+            <FormattedText text={p.text ?? ""} />
+          </div>
+        </div>
+      );
+    case "action":
+      return <ActionCard message={message} live={live} technical={technical} />;
+    case "permission":
+      return (
+        <div data-testid="permission-record" className="px-2 text-sm text-zinc-400">
+          🔒 {t(`chat.toestemming.${p.state === "allowed" ? "toegestaan" : p.state === "denied" ? "geweigerd" : p.state === "expired" ? "verlopen" : "titel"}`)}
+          {technical && p.detail ? ` — ${String(p.detail).slice(0, 80)}` : ""}
+        </div>
+      );
+    case "error":
+      return <ErrorCard message={message} technical={technical} canRetry={canRetry} onRetry={onRetry} onOpenAccounts={onOpenAccounts} />;
+    case "divider":
+      return (
+        <div role="separator" className="flex items-center gap-3 py-2 text-sm text-zinc-400">
+          <span className="h-px flex-1 bg-zinc-700" />
+          <span>{p.kind === "switched" ? t("chat.scheiding.gewisseld", { ai: `${p.provider}${p.label ? ` · ${p.label}` : ""}` }) : t("chat.scheiding.nieuw")}</span>
+          <span className="h-px flex-1 bg-zinc-700" />
+        </div>
+      );
+    default:
+      return null; // "notice" (terugval) wordt in het paneel zelf getoond
+  }
+}

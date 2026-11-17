@@ -290,7 +290,6 @@ impl ChatManager {
         }
     }
 
-    #[cfg(test)]
     pub fn busy(&self, project: i64) -> bool {
         self.inner
             .live
