@@ -12,6 +12,7 @@ import {
   chatTarget,
   cliStatus,
   permissionAnswer,
+  runtime,
   type Account,
   type ChatMessage,
   type ChatMode,
@@ -21,6 +22,7 @@ import {
   type CliStatus,
   type Project,
   type Provider,
+  type RestoreResult,
 } from "../../lib/api";
 import InstallGuide from "../InstallGuide";
 import ChatSwitchDialog from "./ChatSwitchDialog";
@@ -120,6 +122,17 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
     }
   }
 
+  // Uit de bug-lus: eerst overleggen in plaats van verder bouwen.
+  async function discuss() {
+    try {
+      await chatModeSet(id, "plan");
+      setMode("plan");
+      await chatSend(id, t("chat.lus.overlegPrompt"));
+    } catch (e) {
+      fail(e);
+    }
+  }
+
   function onSubmit(e: FormEvent) {
     e.preventDefault();
     void send(text);
@@ -142,6 +155,7 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
     }
   }
 
+  const lastLoopId = [...messages].reverse().find((x) => x.kind === "loop_alert")?.id;
   const asked = messages.find((m) => m.kind === "permission" && m.payload.state === "asked") ?? null;
   const aiName = target ? t(`provider.${target.provider}`) : "";
   const unavailable = target && (!target.structured || fallback);
@@ -177,6 +191,14 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
             canRetry={!busy && m.id === [...messages].reverse().find((x) => x.kind === "error")?.id}
             onRetry={() => void chatRetry(id).catch(fail)}
             onOpenAccounts={onOpenAccounts}
+            loop={{
+              active: m.id === lastLoopId && !busy,
+              onRestore: async (hash) => {
+                await runtime<RestoreResult>(id, "git.restore", { hash });
+              },
+              onDiscuss: () => void discuss(),
+              onOtherAi: () => setSwitching(true),
+            }}
           />
         ))}
         {missing && <InstallGuide status={missing} onInstalled={() => setMissing(null)} />}

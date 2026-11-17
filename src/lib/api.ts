@@ -225,7 +225,7 @@ export type ChatErrorCode =
 export interface ChatMessage {
   id: number;
   project_id: number;
-  kind: "user" | "assistant" | "action" | "permission" | "error" | "divider" | "notice" | "version";
+  kind: "user" | "assistant" | "action" | "permission" | "error" | "divider" | "notice" | "version" | "loop_alert";
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload: Record<string, any>;
   created_at: string;

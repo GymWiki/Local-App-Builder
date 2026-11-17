@@ -67,6 +67,18 @@ pub enum ErrorCode {
     Unknown,
 }
 
+/// Samenvatting van een controle (lint/build/test/…): voor de bug-lus bewaker.
+#[derive(Debug, Clone, PartialEq, Default, Serialize, Deserialize)]
+pub struct CheckInfo {
+    pub ok: bool,
+    /// Namen van de mislukte stappen (bijv. "build").
+    pub steps: Vec<String>,
+    /// Genormaliseerde vingerafdruk van de eerste fout (zonder getallen en paden).
+    pub signature: String,
+    /// Aantal foutregels; groter = slechter.
+    pub count: usize,
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum ChatEvent {
@@ -88,6 +100,9 @@ pub enum ChatEvent {
         ok: bool,
         fixed: bool,
         summary: String,
+        /// Alleen bij controles (run_checks, bouwen, testen).
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        check: Option<CheckInfo>,
     },
     Status {
         state: Status,

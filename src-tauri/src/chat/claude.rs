@@ -1,6 +1,6 @@
 //! Adapter voor Claude Code (`claude -p --input-format stream-json --output-format stream-json`).
 //! Schema: zie docs/cli-notes.md (bronnen: headless.md, agent-sdk/typescript.md).
-use super::events::{ActionKind, ChatEvent, ErrorCode, Status};
+use super::events::{ActionKind, ChatEvent, CheckInfo, ErrorCode, Status};
 use super::human;
 use super::tools;
 use super::{ChatAdapter, Launch, LaunchCtx};
@@ -11,7 +11,8 @@ use std::path::Path;
 
 #[derive(Default)]
 pub struct ClaudeAdapter {
-    pending: HashMap<String, ActionKind>,
+    /// tool_use-id → (soort, technische details zoals het commando)
+    pending: HashMap<String, (ActionKind, String)>,
     last_check_failed: bool,
     seen_valid: bool,
     junk: u32,
@@ -44,6 +45,130 @@ fn result_text(content: &Value) -> String {
             .join("\n"),
         _ => String::new(),
     }
+}
+
+/// Maakt een foutregel vergelijkbaar: kleine letters, getallen → #, paden → pad, korte lengte.
+pub fn normalize_signature(line: &str) -> String {
+    let words: Vec<String> = line
+        .split_whitespace()
+        .map(|w| {
+            if w.contains('/') || w.contains('\\') {
+                "pad".to_string()
+            } else {
+                w.to_lowercase()
+            }
+        })
+        .collect();
+    let joined = words.join(" ");
+    let mut out = String::new();
+    let mut prev_digit = false;
+    for c in joined.chars() {
+        if c.is_ascii_digit() {
+            if !prev_digit {
+                out.push('#');
+            }
+            prev_digit = true;
+        } else {
+            out.push(c);
+            prev_digit = false;
+        }
+    }
+    out.chars().take(160).collect()
+}
+
+fn bash_step(cmd: &str) -> &'static str {
+    let c = cmd.to_lowercase();
+    if c.contains("lint") || c.contains("eslint") || c.contains("clippy") {
+        "lint"
+    } else if c.contains("test")
+        || c.contains("vitest")
+        || c.contains("jest")
+        || c.contains("pytest")
+    {
+        "test"
+    } else if c.contains("build") || c.contains("tsc") {
+        "build"
+    } else {
+        "check"
+    }
+}
+
+/// Haalt uit het resultaat van een controle wat de bug-lus bewaker nodig heeft.
+/// Studio's `run_checks` geeft "CHECKS MISLUKT" + JSON; een gewoon commando (npm run build, vitest, …) alleen tekst.
+pub fn check_info(detail: &str, ok: bool, text: &str) -> Option<CheckInfo> {
+    if text.contains("CHECKS MISLUKT") || text.contains("ALLE CHECKS GESLAAGD") {
+        if !text.contains("CHECKS MISLUKT") {
+            return Some(CheckInfo {
+                ok: true,
+                ..Default::default()
+            });
+        }
+        let json: Option<Value> = text
+            .find('{')
+            .and_then(|i| serde_json::from_str(&text[i..]).ok());
+        let failed: Vec<&Value> = json
+            .as_ref()
+            .and_then(|j| j["steps"].as_array())
+            .map(|a| {
+                a.iter()
+                    .filter(|s| matches!(s["status"].as_str(), Some("failed") | Some("timeout")))
+                    .collect()
+            })
+            .unwrap_or_default();
+        let steps: Vec<String> = failed
+            .iter()
+            .filter_map(|s| s["name"].as_str().map(str::to_string))
+            .collect();
+        let first_line = failed
+            .first()
+            .and_then(|s| s["output"].as_array())
+            .and_then(|o| {
+                o.iter()
+                    .filter_map(Value::as_str)
+                    .find(|l| !l.trim().is_empty() && *l != "…")
+            })
+            .unwrap_or("");
+        let count: usize = failed
+            .iter()
+            .map(|s| s["output"].as_array().map(|o| o.len()).unwrap_or(1).max(1))
+            .sum();
+        let signature = format!(
+            "{}: {}",
+            steps.first().cloned().unwrap_or_default(),
+            normalize_signature(first_line)
+        );
+        return Some(CheckInfo {
+            ok: false,
+            steps,
+            signature,
+            count: count.max(1),
+        });
+    }
+    if ok {
+        return Some(CheckInfo {
+            ok: true,
+            ..Default::default()
+        });
+    }
+    let lines: Vec<&str> = text.lines().filter(|l| !l.trim().is_empty()).collect();
+    let is_err = |l: &str| {
+        let low = l.to_lowercase();
+        low.contains("error") || low.contains("fail") || low.contains("✖") || low.contains("×")
+    };
+    let first = lines
+        .iter()
+        .copied()
+        .find(|l| is_err(l))
+        .or(lines.first().copied())
+        .unwrap_or("");
+    let count = lines.iter().filter(|l| is_err(l)).count().max(1);
+    let step = bash_step(detail);
+    Some(CheckInfo {
+        ok: false,
+        steps: vec![step.to_string()],
+        signature: format!("{step}: {}", normalize_signature(first)),
+        count,
+    })
 }
 
 impl ChatAdapter for ClaudeAdapter {
@@ -183,7 +308,7 @@ impl ChatAdapter for ClaudeAdapter {
                             let name = b["name"].as_str().unwrap_or("");
                             let id = b["id"].as_str().unwrap_or("").to_string();
                             let c = tools::classify(name, &b["input"], Path::new(""));
-                            self.pending.insert(id.clone(), c.kind);
+                            self.pending.insert(id.clone(), (c.kind, c.detail.clone()));
                             out.push(ChatEvent::Action {
                                 id,
                                 kind: c.kind,
@@ -206,7 +331,7 @@ impl ChatAdapter for ClaudeAdapter {
                     let Some(id) = b["tool_use_id"].as_str() else {
                         continue;
                     };
-                    let Some(kind) = self.pending.remove(id) else {
+                    let Some((kind, detail)) = self.pending.remove(id) else {
                         continue;
                     }; // tool_result van een subagent
                     let text = result_text(&b["content"]);
@@ -228,6 +353,11 @@ impl ChatAdapter for ClaudeAdapter {
                         ok,
                         fixed,
                         summary: clip(&text, 600),
+                        check: if kind == ActionKind::RunChecks {
+                            check_info(&detail, ok, &text)
+                        } else {
+                            None
+                        },
                     });
                 }
             }
@@ -403,6 +533,7 @@ mod tests {
                         ok,
                         fixed,
                         summary,
+                        ..
                     } if i == id => Some((*ok, *fixed, summary.clone())),
                     _ => None,
                 })
@@ -634,5 +765,75 @@ mod tests {
             plan: false,
         });
         assert!(!fresh.args.join(" ").contains("--resume"));
+    }
+
+    #[test]
+    fn controle_info_uit_studio_run_checks_en_uit_gewone_commandos() {
+        let ev = run(BUILD);
+        let infos: Vec<(String, CheckInfo)> = ev
+            .iter()
+            .filter_map(|e| {
+                if let ChatEvent::ActionResult {
+                    id, check: Some(c), ..
+                } = e
+                {
+                    Some((id.clone(), c.clone()))
+                } else {
+                    None
+                }
+            })
+            .collect();
+        assert_eq!(infos.len(), 2, "alleen de twee run_checks-aanroepen");
+        let (id1, c1) = &infos[0];
+        assert_eq!(id1, "toolu_c1");
+        assert!(!c1.ok && c1.steps == vec!["links".to_string()] && c1.count == 1);
+        assert!(
+            c1.signature.starts_with("links: ") && c1.signature.contains("bestaat niet"),
+            "{}",
+            c1.signature
+        );
+        assert!(infos[1].1.ok);
+
+        let ev = run(BASH);
+        let bash: Vec<&CheckInfo> = ev
+            .iter()
+            .filter_map(|e| {
+                if let ChatEvent::ActionResult { check: Some(c), .. } = e {
+                    Some(c)
+                } else {
+                    None
+                }
+            })
+            .collect();
+        assert_eq!(
+            bash.len(),
+            2,
+            "npm run build (mislukt en gelukt); npm install en Edit tellen niet mee"
+        );
+        assert!(!bash[0].ok && bash[0].steps == vec!["build".to_string()]);
+        assert!(
+            bash[0].signature.contains("ts#") && bash[0].signature.contains("error"),
+            "{}",
+            bash[0].signature
+        );
+        assert!(bash[1].ok);
+    }
+
+    #[test]
+    fn vingerafdruk_negeert_getallen_en_paden_zodat_dezelfde_fout_gelijk_blijft() {
+        let a =
+            normalize_signature("src/main.ts(4,7): error TS2322: Type 'string' is not assignable");
+        let b = normalize_signature(
+            "/home/u/x/src/main.ts(12,3): error TS2322: Type 'string' is not assignable",
+        );
+        assert_eq!(a, b);
+        assert!(!a.chars().any(|c| c.is_ascii_digit()) || a.contains('#'));
+        assert!(normalize_signature(&"x ".repeat(500)).chars().count() <= 160);
+    }
+
+    #[test]
+    fn mislukte_studio_controle_zonder_leesbare_json_geeft_toch_een_mislukking() {
+        let c = check_info("", true, "CHECKS MISLUKT\n(kapotte uitvoer)").unwrap();
+        assert!(!c.ok && c.count == 1);
     }
 }

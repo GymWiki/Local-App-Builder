@@ -82,6 +82,25 @@ pub fn last_user_text(conn: &Connection, project_id: i64) -> Result<Option<Strin
         .and_then(|m| m.payload["text"].as_str().map(str::to_string)))
 }
 
+/// De nieuwste versie die is bewaard terwijl de controles slaagden (`working: true`).
+pub fn last_working_version(
+    conn: &Connection,
+    project_id: i64,
+) -> Result<Option<(String, String)>> {
+    let mut stmt = conn.prepare("SELECT payload FROM chat_messages WHERE project_id = ?1 AND kind = 'version' ORDER BY id DESC LIMIT 200")?;
+    let rows = stmt.query_map(params![project_id], |r| r.get::<_, String>(0))?;
+    for payload in rows.flatten() {
+        if let Ok(v) = serde_json::from_str::<Value>(&payload) {
+            if v["working"] == true {
+                if let (Some(h), Some(t)) = (v["hash"].as_str(), v["title"].as_str()) {
+                    return Ok(Some((h.to_string(), t.to_string())));
+                }
+            }
+        }
+    }
+    Ok(None)
+}
+
 pub fn session(conn: &Connection, project_id: i64) -> Result<Option<SessionRow>> {
     match conn.query_row(
         "SELECT provider, account_id, session_id FROM chat_sessions WHERE project_id = ?1",

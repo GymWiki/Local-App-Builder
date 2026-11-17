@@ -116,6 +116,11 @@ impl chat::Store for AppStore {
     fn set_setting(&self, key: &str, value: &str) {
         let _ = self.with(|c| db::set_setting(c, key, value));
     }
+    fn last_working(&self, project: i64) -> Option<(String, String)> {
+        self.with(|c| chat::store::last_working_version(c, project))
+            .ok()
+            .flatten()
+    }
 }
 
 /// Verbindt de preview met de rest van de app (runtime, instellingen).

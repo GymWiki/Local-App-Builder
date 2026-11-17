@@ -115,10 +115,17 @@ pub(super) fn finish_turn(inner: &Arc<Inner>, project: i64, ai_text: Option<Stri
             .filter(|h| Some(&h.hash) != head_before.as_ref())
     };
     if let Some(v) = version {
+        // "Werkend" = de controles van deze reeks slaagden: dat is de versie waar de bug-lus bewaker naar terug kan.
+        let working = inner
+            .guards
+            .lock()
+            .unwrap()
+            .get(&project)
+            .is_some_and(|g| g.healthy);
         inner.push(
             project,
             "version",
-            json!({ "hash": v.hash, "title": v.title }),
+            json!({ "hash": v.hash, "title": v.title, "working": working }),
         );
     }
 }

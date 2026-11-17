@@ -6,6 +6,8 @@ export type PermissionMode = "always" | "important";
 interface Props {
   communication: CommunicationMode;
   permission: PermissionMode;
+  loopThreshold?: number;
+  onLoopThreshold?: (n: number) => void;
   onCommunication: (v: CommunicationMode) => void;
   onPermission: (v: PermissionMode) => void;
 }
@@ -22,7 +24,7 @@ function Choice({ name, value, checked, title, text, onChange }: { name: string;
   );
 }
 
-export default function SettingsScreen({ communication, permission, onCommunication, onPermission }: Props) {
+export default function SettingsScreen({ communication, permission, loopThreshold = 3, onLoopThreshold, onCommunication, onPermission }: Props) {
   const { t } = useTranslation();
   return (
     <section className="flex-1 overflow-y-auto p-6">
@@ -41,6 +43,27 @@ export default function SettingsScreen({ communication, permission, onCommunicat
         <Choice name="toestemming" value="important" checked={permission === "important"} title={t("instellingen.toestemming.belangrijk")} text={t("instellingen.toestemming.belangrijkUitleg")} onChange={() => onPermission("important")} />
         <p className="text-base text-zinc-400">{t("instellingen.toestemming.toelichting")}</p>
       </fieldset>
+      {onLoopThreshold && (
+        <div className="mt-8 max-w-2xl space-y-2">
+          <h2 className="text-lg font-semibold">{t("instellingen.lus.titel")}</h2>
+          <label className="flex items-center gap-4 text-base" htmlFor="lus-drempel">
+            <span>{t("instellingen.lus.label")}</span>
+            <input
+              id="lus-drempel"
+              type="number"
+              min={2}
+              max={10}
+              value={loopThreshold}
+              onChange={(e) => {
+                const n = Math.round(Number(e.target.value));
+                if (Number.isFinite(n) && n >= 2 && n <= 10) onLoopThreshold(n);
+              }}
+              className="min-h-11 w-24 rounded-lg border border-zinc-600 bg-zinc-900 px-3 text-lg"
+            />
+          </label>
+          <p className="text-base text-zinc-400">{t("instellingen.lus.uitleg")}</p>
+        </div>
+      )}
     </section>
   );
 }

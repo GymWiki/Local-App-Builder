@@ -207,6 +207,9 @@ fn valid_setting(key: &str, value: &str) -> bool {
     match key {
         "communication_mode" => matches!(value, "simple" | "technical"),
         "permission_mode" => matches!(value, "always" | "important"),
+        "loop_threshold" => value
+            .parse::<usize>()
+            .is_ok_and(|n| (chat::guard::MIN_THRESHOLD..=chat::guard::MAX_THRESHOLD).contains(&n)),
         _ => value.len() <= 20,
     }
 }

@@ -83,6 +83,26 @@ echo '{"type":"system","subtype":"init","session_id":"sess-123"}'
 while IFS= read -r line; do
   printf '%s\n' "$line" >> "$FAKE_DIR/in.txt"
   if [ "$FAKE_MODE" = crash ]; then echo "Error: Invalid API key" 1>&2; exit 1; fi
+  case "$FAKE_MODE" in
+    loop_same|loop_diff|pass1)
+      n=3; [ "$FAKE_MODE" = pass1 ] && n=1
+      i=1
+      while [ $i -le $n ]; do
+        case $i in 1) N=lint;; 2) N=build;; *) N=test;; esac
+        [ "$FAKE_MODE" = loop_same ] && N=build
+        MSG="Error: build broke at src/app.ts:12"
+        [ "$FAKE_MODE" = loop_diff ] && MSG="Fout nummer $i in $N"
+        printf '{"type":"assistant","message":{"id":"m%s","content":[{"type":"tool_use","id":"c%s","name":"mcp__studio__run_checks","input":{}}]}}\n' $i $i
+        if [ "$FAKE_MODE" = pass1 ]; then
+          printf '{"type":"user","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"c%s","content":[{"type":"text","text":"ALLE CHECKS GESLAAGD"}]}]}}\n' $i
+        else
+          printf '{"type":"user","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"c%s","content":[{"type":"text","text":"CHECKS MISLUKT\\n{\\"ok\\":false,\\"steps\\":[{\\"name\\":\\"%s\\",\\"status\\":\\"failed\\",\\"output\\":[\\"%s\\"]}]}"}]}]}}\n' $i "$N" "$MSG"
+        fi
+        i=$((i+1))
+      done
+      echo '{"type":"result","subtype":"success","is_error":false,"session_id":"sess-123","result":"klaar"}'
+      continue;;
+  esac
   echo '{"type":"assistant","message":{"id":"m1","content":[{"type":"text","text":"Hallo!"},{"type":"tool_use","id":"t1","name":"Write","input":{"file_path":"/x/index.html","content":"x"}}]}}'
   echo '{"type":"user","message":{"role":"user","content":[{"type":"tool_result","tool_use_id":"t1","content":"ok"}]}}'
   echo '{"type":"result","subtype":"success","is_error":false,"session_id":"sess-123","result":"Hallo!"}'
@@ -930,4 +950,150 @@ fn plan_goedkeuren_vraagt_de_gebruiker_en_ja_zet_het_project_op_bouwen() {
     ask(&h, "plan2", "ExitPlanMode", json!({ "plan": "x" }));
     h.mgr.answer_permission(h.project, "plan2", false).unwrap();
     assert_eq!(h.mgr.mode(h.project), "plan");
+}
+
+// ---------- bug-lus bewaker ----------
+
+fn alerts(h: &H) -> Vec<StoredMessage> {
+    history(h)
+        .into_iter()
+        .filter(|m| m.kind == "loop_alert")
+        .collect()
+}
+
+#[cfg(unix)]
+#[test]
+fn dezelfde_fout_drie_keer_onderbreekt_de_ai_met_een_melding_zonder_versie_van_de_kapotte_staat() {
+    let h = harness();
+    let git = Arc::new(FakeGit::default());
+    *git.dirty.lock().unwrap() = true;
+    h.mgr.set_git(git.clone());
+    h.store
+        .insert(
+            h.project,
+            "version",
+            json!({ "hash": "goed1", "title": "Pagina werkt", "working": true }),
+        )
+        .unwrap();
+    let (l, fake) = launch(&h, "loop_same");
+    h.mgr.send(h.project, "maak het", true, &l).unwrap();
+    wait_for("melding", || !alerts(&h).is_empty());
+
+    let a = &alerts(&h)[0];
+    assert_eq!(
+        (
+            a.payload["reason"].as_str(),
+            a.payload["streak"].as_u64(),
+            a.payload["threshold"].as_u64()
+        ),
+        (Some("same_error"), Some(3), Some(3))
+    );
+    assert_eq!(
+        a.payload["last_working"]["hash"], "goed1",
+        "laatste werkende versie wordt meegegeven"
+    );
+    wait_for("niet meer bezig", || !h.mgr.busy(h.project));
+    let pid: i64 = std::fs::read_to_string(fake.join("pid"))
+        .unwrap()
+        .trim()
+        .parse()
+        .unwrap();
+    wait_for("proces gestopt", || !pid_alive(pid));
+    std::thread::sleep(Duration::from_millis(400));
+    assert_eq!(
+        versions(&h).len(),
+        1,
+        "alleen de al bestaande versie; geen nieuwe na ingrijpen"
+    );
+    assert!(git.made.lock().unwrap().is_empty());
+    assert!(h.out.lock().unwrap().iter().any(|o| matches!(
+        o,
+        ChatOut::Status {
+            busy: false,
+            state: Status::Idle,
+            ..
+        }
+    )));
+    assert_eq!(
+        kinds(&h).iter().filter(|k| *k == "loop_alert").count(),
+        1,
+        "maar één melding"
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn verschillende_fouten_in_verschillende_stappen_zijn_geen_lus_en_de_beurt_loopt_door() {
+    let h = harness();
+    let git = Arc::new(FakeGit::default());
+    *git.dirty.lock().unwrap() = true;
+    h.mgr.set_git(git.clone());
+    let (l, _f) = launch(&h, "loop_diff");
+    h.mgr.send(h.project, "maak het", true, &l).unwrap();
+    wait_for("versie", || !versions(&h).is_empty());
+    assert!(alerts(&h).is_empty());
+    assert_eq!(
+        versions(&h)[0].payload["working"],
+        false,
+        "de laatste controle faalde: niet 'werkend'"
+    );
+    h.mgr.close_all();
+}
+
+#[cfg(unix)]
+#[test]
+fn drempel_is_instelbaar() {
+    let h = harness();
+    h.store
+        .0
+        .lock()
+        .unwrap()
+        .execute(
+            "INSERT INTO settings (key, value) VALUES ('ui:loop_threshold', '2')",
+            [],
+        )
+        .unwrap();
+    let (l, _f) = launch(&h, "loop_same");
+    h.mgr.send(h.project, "maak het", true, &l).unwrap();
+    wait_for("melding", || !alerts(&h).is_empty());
+    assert_eq!(
+        (
+            alerts(&h)[0].payload["streak"].as_u64(),
+            alerts(&h)[0].payload["threshold"].as_u64()
+        ),
+        (Some(2), Some(2))
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn een_nieuw_bericht_begint_een_nieuwe_reeks_en_een_geslaagde_controle_maakt_de_versie_werkend() {
+    let h = harness();
+    let (l, _f) = launch(&h, "loop_same");
+    h.mgr.send(h.project, "maak het", true, &l).unwrap();
+    wait_for("eerste melding", || alerts(&h).len() == 1);
+    h.mgr
+        .send(h.project, "probeer het nog eens", true, &l)
+        .unwrap();
+    wait_for("tweede melding", || alerts(&h).len() == 2);
+    assert_eq!(
+        alerts(&h)[1].payload["streak"],
+        3,
+        "geteld vanaf het nieuwe bericht, niet 6"
+    );
+
+    // slaagt de controle, dan is de versie van die beurt "werkend"
+    let h2 = harness();
+    let git = Arc::new(FakeGit::default());
+    *git.dirty.lock().unwrap() = true;
+    h2.mgr.set_git(git);
+    let (l2, _f2) = launch(&h2, "pass1");
+    h2.mgr.send(h2.project, "maak het", true, &l2).unwrap();
+    wait_for("versie", || !versions(&h2).is_empty());
+    assert_eq!(versions(&h2)[0].payload["working"], true);
+    assert_eq!(
+        h2.store.last_working(h2.project).unwrap().0,
+        versions(&h2)[0].payload["hash"].as_str().unwrap()
+    );
+    h2.mgr.close_all();
 }

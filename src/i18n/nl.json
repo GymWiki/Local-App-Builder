@@ -395,6 +395,24 @@
       "buildUitleg": "De AI gaat meteen aan de slag en bouwt.",
       "banner": "Overleg-modus: de AI bespreekt een plan en past niets aan. Kies ‘Bouwen’ als je wilt dat hij begint.",
       "placeholderPlan": "Vertel wat je wilt; we bespreken eerst een plan..."
+    },
+    "lus": {
+      "titel": "Even pauzeren: dit lukt zo nog niet",
+      "uitleg": {
+        "same_error": "De AI loopt steeds tegen dezelfde fout aan, {{aantal}} keer na elkaar. Verder proberen helpt waarschijnlijk niet.",
+        "same_step": "Dezelfde controle mislukt steeds, {{aantal}} keer na elkaar, ook al probeert de AI iets anders.",
+        "worse": "Het wordt niet beter maar slechter: er gaan nu méér dingen mis dan eerst."
+      },
+      "vraag": "Wat wil je doen?",
+      "terug": "Terug naar laatste werkende versie",
+      "terugGeen": "Er is nog geen werkende versie om naar terug te gaan.",
+      "overleg": "Eerst overleggen",
+      "andere": "Andere AI proberen",
+      "terugBevestig": "Terug naar ‘{{titel}}’?",
+      "terugUitleg": "Je huidige werk wordt eerst bewaard als een versie, dus er gaat niets verloren.",
+      "terugJa": "Ja, ga terug",
+      "terugKlaar": "Klaar: je project staat weer bij ‘{{titel}}’.",
+      "overlegPrompt": "Stop even met bouwen. Leg in gewone woorden uit wat er misgaat en waarom, en stel een ander plan voor. Pas nog niets aan."
     }
   },
   "instellingen": {
@@ -415,7 +433,12 @@
       "belangrijkUitleg": "Gewoon bouwwerk (bestanden maken, controleren) gaat zonder vraag. Onbekende opdrachten vragen toestemming.",
       "toelichting": "Gevaarlijke acties, zoals verwijderen en publiceren, vragen altijd bevestiging, welke keuze je ook maakt."
     },
-    "opgeslagen": "Opgeslagen"
+    "opgeslagen": "Opgeslagen",
+    "lus": {
+      "titel": "Hulp als de AI vastloopt",
+      "label": "Waarschuw na zoveel keer dezelfde mislukte controle",
+      "uitleg": "Studio onderbreekt de AI als dezelfde fout of dezelfde stap zoveel keer na elkaar mislukt, of als het slechter wordt. Je krijgt dan keuzes. Standaard: 3."
+    }
   },
   "versies": {
     "titel": "Versies van je project",

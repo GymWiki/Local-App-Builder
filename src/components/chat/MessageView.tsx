@@ -3,6 +3,7 @@ import type { ChatMessage } from "../../lib/api";
 import ActionCard from "./ActionCard";
 import ErrorCard from "./ErrorCard";
 import FormattedText from "./formatText";
+import LoopAlertCard from "./LoopAlertCard";
 
 interface Props {
   message: ChatMessage;
@@ -11,9 +12,10 @@ interface Props {
   canRetry: boolean;
   onRetry: () => void;
   onOpenAccounts: () => void;
+  loop?: { active: boolean; onRestore: (hash: string, title: string) => Promise<void> | void; onDiscuss: () => void; onOtherAi: () => void };
 }
 
-export default function MessageView({ message, live, technical, canRetry, onRetry, onOpenAccounts }: Props) {
+export default function MessageView({ message, live, technical, canRetry, onRetry, onOpenAccounts, loop }: Props) {
   const { t } = useTranslation();
   const p = message.payload;
   switch (message.kind) {
@@ -51,6 +53,10 @@ export default function MessageView({ message, live, technical, canRetry, onRetr
           <span>{t("chat.versieOpgeslagen", { titel: p.title })}</span>
         </div>
       );
+    case "loop_alert":
+      return loop ? (
+        <LoopAlertCard message={message} active={loop.active} onRestore={loop.onRestore} onDiscuss={loop.onDiscuss} onOtherAi={loop.onOtherAi} />
+      ) : null;
     case "divider":
       return (
         <div role="separator" className="flex items-center gap-3 py-2 text-sm text-zinc-400">

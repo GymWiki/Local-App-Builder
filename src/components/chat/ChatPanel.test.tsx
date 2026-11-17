@@ -311,6 +311,66 @@ describe("ChatPanel: plan-modus (eerst overleggen)", () => {
   });
 });
 
+describe("ChatPanel: bug-lus bewaker", () => {
+  const alert = (payload: Partial<ChatMessage["payload"]> = {}) =>
+    msg("loop_alert", { reason: "same_error", streak: 3, threshold: 3, last_working: { hash: "g".repeat(40), title: "Pagina werkt" }, ...payload });
+
+  it("onderbreekt vriendelijk met drie knoppen en legt uit wat er aan de hand is", async () => {
+    setup([alert()]);
+    const card = await screen.findByTestId("loop-alert");
+    expect(card).toHaveTextContent("Even pauzeren");
+    expect(card).toHaveTextContent("dezelfde fout aan, 3 keer na elkaar");
+    for (const knop of ["Terug naar laatste werkende versie", "Eerst overleggen", "Andere AI proberen"]) {
+      expect(within(card).getByRole("button", { name: knop })).toBeInTheDocument();
+    }
+  });
+
+  it("andere redenen krijgen een eigen uitleg", async () => {
+    setup([alert({ reason: "worse" })]);
+    expect(await screen.findByTestId("loop-alert")).toHaveTextContent("slechter");
+  });
+
+  it("'Terug naar laatste werkende versie' vraagt bevestiging en zet daarna veilig terug", async () => {
+    (api.runtime as Mock).mockResolvedValue({ unchanged: false, safety: "s", hash: "n" });
+    setup([alert()]);
+    fireEvent.click(await screen.findByRole("button", { name: "Terug naar laatste werkende versie" }));
+    const dlg = await screen.findByRole("alertdialog", { name: "Terug naar laatste werkende versie" });
+    expect(dlg).toHaveTextContent("Pagina werkt");
+    expect(dlg).toHaveTextContent("niets verloren");
+    expect(api.runtime).not.toHaveBeenCalledWith(1, "git.restore", expect.anything());
+    fireEvent.click(within(dlg).getByRole("button", { name: "Ja, ga terug" }));
+    await waitFor(() => expect(api.runtime).toHaveBeenCalledWith(1, "git.restore", { hash: "g".repeat(40) }));
+    expect(within(screen.getByTestId("loop-alert")).getByRole("status")).toHaveTextContent("Klaar: je project staat weer bij ‘Pagina werkt’");
+  });
+
+  it("zonder werkende versie is die knop uitgeschakeld en staat er waarom", async () => {
+    setup([alert({ last_working: null })]);
+    expect(await screen.findByRole("button", { name: "Terug naar laatste werkende versie" })).toBeDisabled();
+    expect(screen.getByText(/nog geen werkende versie/)).toBeInTheDocument();
+  });
+
+  it("'Eerst overleggen' zet de plan-modus aan en vraagt de AI om uit te leggen wat er misgaat", async () => {
+    (api.chatModeSet as Mock).mockResolvedValue(undefined);
+    setup([alert()]);
+    const card = await screen.findByTestId("loop-alert");
+    fireEvent.click(within(card).getByRole("button", { name: "Eerst overleggen" }));
+    await waitFor(() => expect(api.chatModeSet).toHaveBeenCalledWith(1, "plan"));
+    await waitFor(() => expect(api.chatSend).toHaveBeenCalledWith(1, expect.stringContaining("Leg in gewone woorden uit wat er misgaat")));
+  });
+
+  it("'Andere AI proberen' opent het wisselscherm met overdracht via PROJECT.md", async () => {
+    setup([alert()]);
+    fireEvent.click(await screen.findByRole("button", { name: "Andere AI proberen" }));
+    expect(await screen.findByRole("dialog", { name: "Wissel van AI" })).toHaveTextContent("PROJECT.md");
+  });
+
+  it("oudere meldingen hebben geen knoppen meer; alleen de laatste", async () => {
+    setup([alert(), msg("assistant", { text: "tussendoor" }), alert({ streak: 4 })]);
+    await screen.findAllByTestId("loop-alert");
+    expect(screen.getAllByRole("button", { name: "Andere AI proberen" })).toHaveLength(1);
+  });
+});
+
 describe("ChatPanel: versies", () => {
   it("toont een automatisch opgeslagen versie als rustige regel in het gesprek en opent de tijdlijn", async () => {
     setup([msg("assistant", { text: "Klaar!" }), msg("version", { hash: "abc", title: "Bestelknop toegevoegd" })]);

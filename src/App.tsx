@@ -41,6 +41,7 @@ export default function App() {
   const [tab, setTab] = useState<Tab>("maken");
   const [communication, setCommunication] = useState<CommunicationMode>("simple");
   const [permission, setPermission] = useState<PermissionMode>("important");
+  const [loopThreshold, setLoopThreshold] = useState(3);
   const [autoSwitch, setAutoSwitch] = useState(false);
   const [notice, setNotice] = useState<number | null>(null);
   const [tick, setTick] = useState<Record<number, number>>({});
@@ -91,6 +92,9 @@ export default function App() {
       .catch(() => undefined);
     getUiSetting("communication_mode")
       .then((v) => setCommunication(v === "technical" ? "technical" : "simple"))
+      .catch(() => undefined);
+    getUiSetting("loop_threshold")
+      .then((v) => setLoopThreshold(v && Number(v) >= 2 && Number(v) <= 10 ? Number(v) : 3))
       .catch(() => undefined);
     getUiSetting("permission_mode")
       .then((v) => setPermission(v === "always" ? "always" : "important"))
@@ -194,6 +198,11 @@ export default function App() {
           <SettingsScreen
             communication={communication}
             permission={permission}
+            loopThreshold={loopThreshold}
+            onLoopThreshold={(n) => {
+              setLoopThreshold(n);
+              void setUiSetting("loop_threshold", String(n)).catch(fail);
+            }}
             onCommunication={(v) => {
               setCommunication(v);
               void setUiSetting("communication_mode", v).catch(fail);

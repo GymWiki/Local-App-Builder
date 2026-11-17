@@ -24,6 +24,20 @@ describe("Instellingen", () => {
   });
 });
 
+describe("Instellingen: drempel voor de bug-lus bewaker", () => {
+  it("toont de standaard (3), laat een andere waarde kiezen en negeert onzin", () => {
+    const onT = vi.fn();
+    render(<SettingsScreen communication="simple" permission="important" loopThreshold={3} onLoopThreshold={onT} onCommunication={vi.fn()} onPermission={vi.fn()} />);
+    const input = screen.getByLabelText(/Waarschuw na zoveel keer/);
+    expect(input).toHaveValue(3);
+    fireEvent.change(input, { target: { value: "5" } });
+    expect(onT).toHaveBeenCalledWith(5);
+    onT.mockClear();
+    for (const bad of ["1", "11", "", "abc"]) fireEvent.change(input, { target: { value: bad } });
+    expect(onT).not.toHaveBeenCalled();
+  });
+});
+
 describe("FormattedText", () => {
   it("rendert vet, code en genummerde lijsten, en voegt nooit HTML in", () => {
     const { container } = render(<FormattedText text={'Hallo **wereld** en `code`\n\n1. een\n2. twee\n\n<script>alert(1)</script><img src=x onerror=alert(1)>'} />);

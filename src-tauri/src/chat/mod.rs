@@ -2,6 +2,7 @@
 //! Per CLI zit het verschil in een adapter; CLI's zonder (geverifieerde) gestructureerde uitvoer vallen terug op de terminal.
 pub mod claude;
 pub mod events;
+pub mod guard;
 pub mod human;
 pub mod policy;
 pub mod store;
@@ -74,6 +75,7 @@ pub trait Store: Send + Sync {
     );
     fn setting(&self, key: &str) -> Option<String>;
     fn set_setting(&self, key: &str, value: &str);
+    fn last_working(&self, project: i64) -> Option<(String, String)>;
 }
 
 /// Store op een gewone SQLite-verbinding (tests en eenvoudig gebruik).
@@ -109,6 +111,11 @@ impl Store for ConnStore {
     }
     fn set_setting(&self, key: &str, value: &str) {
         let _ = crate::db::set_setting(&self.0.lock().unwrap(), key, value);
+    }
+    fn last_working(&self, project: i64) -> Option<(String, String)> {
+        store::last_working_version(&self.0.lock().unwrap(), project)
+            .ok()
+            .flatten()
     }
 }
 
@@ -191,6 +198,8 @@ struct Inner {
     git: Mutex<Option<Arc<dyn Git>>>,
     /// Per project: de situatie aan het begin van de lopende beurt.
     turns: Mutex<HashMap<i64, versions::TurnInfo>>,
+    /// Bug-lus bewaker per project.
+    guards: Mutex<HashMap<i64, guard::LoopGuard>>,
 }
 
 #[derive(Clone)]
@@ -231,6 +240,8 @@ impl Inner {
 struct TurnState {
     rows: HashMap<String, (i64, Value)>,
     last_text: Option<String>,
+    /// De bug-lus bewaker heeft ingegrepen: dit proces is gestopt en verdere uitvoer telt niet meer.
+    aborted: bool,
 }
 
 fn handle_event(
@@ -269,6 +280,7 @@ fn handle_event(
             ok,
             fixed,
             summary,
+            check,
         } => {
             if let Some((row, mut payload)) = st.rows.remove(&id) {
                 payload["state"] = json!(if ok { "done" } else { "error" });
@@ -282,6 +294,9 @@ fn handle_event(
                 }
             }
             inner.status(project, Status::Thinking, true);
+            if let Some(c) = check {
+                guard_check(inner, project, &c, pending, st);
+            }
         }
         ChatEvent::Status { state } => inner.status(project, state, true),
         ChatEvent::Error { code, technical } => inner.error(project, code, &technical),
@@ -292,6 +307,9 @@ fn handle_event(
                 inner.status(project, Status::Thinking, true);
             } else {
                 inner.status(project, Status::Done, false);
+            }
+            if st.aborted {
+                return;
             }
             // Na een geslaagde beurt automatisch een versie bewaren (op een eigen thread: git kan even duren).
             if ok && left == 0 {
@@ -315,6 +333,46 @@ fn handle_event(
     }
 }
 
+/// Laat de bug-lus bewaker de controle beoordelen en grijpt in (melding + proces stoppen) als de AI in cirkels draait.
+fn guard_check(
+    inner: &Arc<Inner>,
+    project: i64,
+    check: &events::CheckInfo,
+    pending: &AtomicUsize,
+    st: &mut TurnState,
+) {
+    let threshold = inner
+        .store
+        .setting("ui:loop_threshold")
+        .and_then(|v| v.parse::<usize>().ok())
+        .unwrap_or(guard::DEFAULT_THRESHOLD);
+    let (reason, streak) = {
+        let mut guards = inner.guards.lock().unwrap();
+        let g = guards.entry(project).or_default();
+        (g.record(check, threshold), g.streak())
+    };
+    let Some(reason) = reason else { return };
+    let last_working = inner
+        .store
+        .last_working(project)
+        .map(|(hash, title)| json!({ "hash": hash, "title": title }));
+    inner.push(
+        project,
+        "loop_alert",
+        json!({ "reason": reason.as_str(), "streak": streak, "threshold": threshold.clamp(guard::MIN_THRESHOLD, guard::MAX_THRESHOLD), "last_working": last_working }),
+    );
+    // De AI onderbreken: het proces stopt (het gesprek blijft hervatbaar) en er komt geen versie van deze kapotte staat.
+    st.aborted = true;
+    pending.store(0, Ordering::SeqCst);
+    inner.turns.lock().unwrap().remove(&project);
+    let live = inner.live.lock().unwrap().remove(&project);
+    if let Some(mut l) = live {
+        let _ = l.child.kill();
+        spawn_waiter(l.child);
+    }
+    inner.status(project, Status::Idle, false);
+}
+
 fn spawn_waiter(mut child: Child) {
     std::thread::spawn(move || {
         let _ = child.wait();
@@ -333,6 +391,7 @@ impl ChatManager {
                 perms: Mutex::new(HashMap::new()),
                 git: Mutex::new(None),
                 turns: Mutex::new(HashMap::new()),
+                guards: Mutex::new(HashMap::new()),
             }),
         }
     }
@@ -417,6 +476,7 @@ impl ChatManager {
                 let mut st = TurnState {
                     rows: HashMap::new(),
                     last_text: None,
+                    aborted: false,
                 };
                 for line in BufReader::new(stdout)
                     .lines()
@@ -425,6 +485,9 @@ impl ChatManager {
                     for ev in adapter.parse_line(&line) {
                         let fallback = matches!(ev, ChatEvent::Fallback { .. });
                         handle_event(&inner, project, provider, account, &pending, &mut st, ev);
+                        if st.aborted {
+                            return;
+                        }
                         if fallback {
                             // Geen bruikbare structuur: dit proces heeft geen zin meer.
                             if let Some(l) = inner
@@ -568,6 +631,14 @@ impl ChatManager {
                 "Deze AI heeft nog geen chatweergave; gebruik de technische weergave.".into(),
             ));
         }
+        // Een nieuw bericht van de gebruiker begint een nieuwe reeks voor de bug-lus bewaker.
+        self.inner
+            .guards
+            .lock()
+            .unwrap()
+            .entry(project)
+            .or_default()
+            .reset();
         if visible {
             self.inner.push(project, "user", json!({ "text": text }));
         }
