@@ -1,3 +1,4 @@
+import { securityCheck } from "./security.js";
 import { execFile } from "node:child_process";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -215,6 +216,21 @@ export function registerTools(server: McpServer, ctx: ProjectCtx, record: (r: Ca
         if (words > MAX_TITLE_WORDS) throw new Error(`Gebruik een titel van maximaal ${MAX_TITLE_WORDS} woorden in gewone taal (nu ${words}).`);
         const r = await rt.control("git.checkpoint", { message: bericht });
         return JSON.stringify(r, null, 2);
+      }),
+  );
+
+  server.registerTool(
+    "security_check",
+    {
+      description:
+        "Controleert het project op veiligheid vóór publiceren: API-sleutels of tokens in de code, .env- of geheime bestanden in git of in de uitvoermap (dist/build/public), vaste wachtwoorden en ontbrekende toegangsregels voor de database (Supabase row level security, Firebase-regels). Geeft per bevinding een veilige omschrijving (geheimen staan nooit volledig in de uitvoer). Verhelp bevindingen door geheimen naar een .env-bestand te verplaatsen dat niet in git staat; zeg de gebruiker dat een sleutel die in de code stond ook vernieuwd moet worden.",
+      inputSchema: {},
+    },
+    () =>
+      run("security_check", "", async () => {
+        const r = await securityCheck(rt.projectDir);
+        if (r.findings.length === 0) return `GEEN PROBLEMEN GEVONDEN (${r.scanned} bestanden gecontroleerd).`;
+        return [`${r.findings.length} BEVINDING(EN) in ${r.scanned} bestanden:`, ...r.findings.map((f) => `- [${f.severity}] ${f.code} — ${f.file}${f.line ? `:${f.line}` : ""} — ${f.detail}`)].join("\n");
       }),
   );
 

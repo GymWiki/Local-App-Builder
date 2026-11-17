@@ -45,6 +45,7 @@ describe("MCP-tools (fase 3)", () => {
       "project_status",
       "read_project_notes",
       "run_checks",
+      "security_check",
       "update_project_notes",
     ]);
   });

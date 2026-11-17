@@ -9,6 +9,7 @@ import { PreviewObserver } from "./preview.js";
 import { runCommand } from "./proc.js";
 import { checkHtml, checkLinks } from "./static-checks.js";
 import { relevantLines } from "./text.js";
+import { securityCheck } from "./security.js";
 import { checkProject, setStrictness } from "./kits/check.js";
 import { refreshCatalogIfStale } from "./kits/catalog.js";
 import { applyWithSafety, current as kitCurrent, listKits, runScripts, tailor as kitTailor, type KitHost } from "./kits/ops.js";
@@ -339,6 +340,8 @@ export class Runtime {
         return this.last;
       case "git.list":
         return this.git.list(Number(args.limit) || 30);
+      case "security.check":
+        return securityCheck(this.projectDir);
       case "git.diff":
         return this.git.lastChange();
       case "git.status":

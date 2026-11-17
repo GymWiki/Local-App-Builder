@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
-import { DownloadIcon } from "lucide-react";
-import { exportProject, kiesZipBestand, type Project } from "@/lib/api";
+import { DownloadIcon, ShieldCheckIcon } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { chatSend, exportProject, kiesZipBestand, runtime, type Project, type SecurityFinding, type SecurityReport } from "@/lib/api";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -18,6 +19,8 @@ export default function PublishPanel({ project, onError }: Props) {
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   const [notes, setNotes] = useState<string[]>([]);
+  const [report, setReport] = useState<SecurityReport | null>(null);
+  const [checking, setChecking] = useState(false);
 
   async function download() {
     try {
@@ -34,6 +37,28 @@ export default function PublishPanel({ project, onError }: Props) {
       onError(t("fout.algemeen", { bericht: String(e) }));
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function check() {
+    setChecking(true);
+    try {
+      setReport(await runtime<SecurityReport>(project.id, "security.check"));
+    } catch (e) {
+      onError(t("fout.algemeen", { bericht: String(e) }));
+    } finally {
+      setChecking(false);
+    }
+  }
+
+  async function fix(f: SecurityFinding) {
+    const params = { bestand: f.file, regel: f.line ? `, ${t("publiceren.veilig.regel", { regel: f.line })}` : "", detail: f.detail };
+    const key = f.code === "api_key" || f.code === "private_key" ? "geheim" : f.code === "env_in_git" || f.code === "secret_file_in_git" ? "gitbestand" : f.code === "secret_in_export" ? "uitvoer" : f.code === "password" ? "wachtwoord" : "regels";
+    try {
+      await chatSend(project.id, t(`publiceren.veilig.prompt.${key}`, params));
+      toast.success(t("publiceren.veilig.verstuurd"));
+    } catch (e) {
+      onError(t("fout.algemeen", { bericht: String(e) }));
     }
   }
 
@@ -59,6 +84,55 @@ export default function PublishPanel({ project, onError }: Props) {
             <Button disabled={busy} onClick={() => void download()}>
               <DownloadIcon aria-hidden="true" />
               {busy ? t("publiceren.export.bezig") : t("publiceren.export.knop")}
+            </Button>
+          </CardFooter>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">{t("publiceren.veilig.titel")}</CardTitle>
+            <CardDescription className="text-base">{t("publiceren.veilig.uitleg")}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3 text-base">
+            {report && (
+              <p role="status" className={report.findings.length ? "font-medium text-warning" : "font-medium text-success"}>
+                {report.findings.length === 0 ? t("publiceren.veilig.schoon", { aantal: report.scanned }) : t("publiceren.veilig.gevonden", { aantal: report.findings.length })}
+              </p>
+            )}
+            {report && report.findings.length > 0 && (
+              <>
+                <p className="text-muted-foreground">{t("publiceren.veilig.waarschuwing")}</p>
+                <ul className="space-y-3">
+                  {report.findings.map((f) => (
+                    <li key={`${f.code}:${f.file}:${f.line ?? ""}:${f.detail}`}>
+                      <Card size="sm">
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2 text-base">
+                            <Badge variant={f.severity === "hoog" ? "destructive" : "secondary"}>{t(`publiceren.veilig.${f.severity}`)}</Badge>
+                            {t(`publiceren.veilig.codes.${f.code}.titel`)}
+                          </CardTitle>
+                          <CardDescription className="text-base">{t(`publiceren.veilig.codes.${f.code}.uitleg`)}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="min-w-0 break-words text-sm text-muted-foreground">
+                            {f.file}
+                            {f.line ? ` (${t("publiceren.veilig.regel", { regel: f.line })})` : ""} · {f.detail}
+                          </span>
+                          <Button size="sm" onClick={() => void fix(f)}>
+                            {t("publiceren.veilig.oplossen")}
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+          </CardContent>
+          <CardFooter>
+            <Button variant="outline" disabled={checking} onClick={() => void check()}>
+              <ShieldCheckIcon aria-hidden="true" />
+              {checking ? t("publiceren.veilig.bezig") : t("publiceren.veilig.knop")}
             </Button>
           </CardFooter>
         </Card>

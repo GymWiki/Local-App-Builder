@@ -681,6 +681,61 @@
       "klaar": "Klaar: {{aantal}} bestanden opgeslagen in {{pad}}.",
       "geheimen": "Deze geheime bestanden zijn bewust niet meegenomen: {{lijst}}.",
       "groot": "Deze bestanden waren te groot en zijn overgeslagen: {{lijst}}."
+    },
+    "veilig": {
+      "titel": "Controleer veiligheid",
+      "uitleg": "Ik zoek naar dingen die niet openbaar mogen worden: geheime sleutels, wachtwoorden en een database die voor iedereen openstaat.",
+      "knop": "Controleer veiligheid",
+      "bezig": "Bezig met controleren…",
+      "schoon": "Alles ziet er goed uit: er zijn geen problemen gevonden in {{aantal}} bestanden.",
+      "gevonden": "{{aantal}} punt(en) gevonden. Je kunt nog steeds publiceren, maar los deze eerst op als je kunt.",
+      "waarschuwing": "Let op: dit zijn waarschuwingen. Studio houdt je niet tegen als je toch publiceert.",
+      "hoog": "Belangrijk",
+      "midden": "Goed om te weten",
+      "regel": "regel {{regel}}",
+      "oplossen": "Los dit op",
+      "verstuurd": "Ik heb de AI gevraagd dit op te lossen. Kijk in het tabblad Maken.",
+      "codes": {
+        "api_key": {
+          "titel": "Een geheime sleutel staat in je code",
+          "uitleg": "Iedereen die je code of website ziet, kan deze sleutel gebruiken."
+        },
+        "private_key": {
+          "titel": "Een privésleutel staat in je project",
+          "uitleg": "Een privésleutel hoort nooit in je code of op internet."
+        },
+        "env_in_git": {
+          "titel": "Een .env-bestand zit in je versiegeschiedenis",
+          "uitleg": "Daarin staan je geheimen. Ook als je het bestand later weghaalt, blijft het in oude versies staan."
+        },
+        "secret_file_in_git": {
+          "titel": "Een geheim bestand zit in je versiegeschiedenis",
+          "uitleg": "Sleutelbestanden horen niet in je versies."
+        },
+        "secret_in_export": {
+          "titel": "Een geheim staat in de map die online komt",
+          "uitleg": "Alles in die map kan door iedereen worden gelezen."
+        },
+        "password": {
+          "titel": "Een vast wachtwoord staat in je code",
+          "uitleg": "Zet wachtwoorden in een apart, geheim bestand."
+        },
+        "db_rules_missing": {
+          "titel": "Je database heeft geen toegangsregels",
+          "uitleg": "Zonder regels kan iedereen met je websiteadres de gegevens lezen of veranderen."
+        },
+        "db_rules_open": {
+          "titel": "Je database staat voor iedereen open",
+          "uitleg": "De regels laten iedereen lezen of schrijven."
+        }
+      },
+      "prompt": {
+        "geheim": "De veiligheidscheck vond een geheim in {{bestand}}{{regel}}: {{detail}}. Haal het uit de code, zet het in een .env-bestand dat niet in git staat (voeg .env toe aan .gitignore) en lees het via een omgevingsvariabele. Maak ook een .env.example zonder echte waarden. Zeg me daarna in gewone woorden dat ik deze sleutel moet vernieuwen of intrekken bij de aanbieder, omdat hij al in de code stond. Toon de sleutel zelf nergens. Draai daarna run_checks.",
+        "gitbestand": "De veiligheidscheck vond een geheim bestand in de versiegeschiedenis: {{bestand}}. Zet het in .gitignore en haal het uit het volgende versiepunt zonder bestanden van mij te wissen. Leg me uit dat de oude versies het bestand nog bevatten en dat ik de geheimen daarin moet vernieuwen. Draai daarna run_checks.",
+        "uitvoer": "De veiligheidscheck vond een geheim in een map die online komt: {{bestand}}. Zorg dat geheimen nooit in die map belanden, bijvoorbeeld door ze alleen op een server te gebruiken, en laat me weten welke sleutels ik moet vernieuwen. Draai daarna run_checks.",
+        "wachtwoord": "De veiligheidscheck vond een vast wachtwoord in {{bestand}}{{regel}}. Verplaats het naar een omgevingsvariabele in een .env-bestand dat niet in git staat. Draai daarna run_checks.",
+        "regels": "De veiligheidscheck meldt een probleem met de toegangsregels van de database in {{bestand}}: {{detail}} Maak veilige regels, zodat gebruikers alleen hun eigen gegevens kunnen lezen en veranderen (voor Supabase: row level security met policies). Leg in gewone woorden uit wat je veranderd hebt."
+      }
     }
   }
 }

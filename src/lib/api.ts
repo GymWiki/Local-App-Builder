@@ -365,3 +365,17 @@ export async function kiesZipBestand(defaultName: string): Promise<string | null
 
 // opdracht-verbeteraar (functie 7)
 export const improvePrompt = (projectId: number, text: string) => invoke<string>("improve_prompt", { projectId, text });
+
+// veiligheidscheck (functie 6)
+export type SecurityCode = "api_key" | "private_key" | "env_in_git" | "secret_file_in_git" | "secret_in_export" | "password" | "db_rules_missing" | "db_rules_open";
+export interface SecurityFinding {
+  code: SecurityCode;
+  severity: "hoog" | "midden";
+  file: string;
+  line?: number;
+  detail: string;
+}
+export interface SecurityReport {
+  scanned: number;
+  findings: SecurityFinding[];
+}

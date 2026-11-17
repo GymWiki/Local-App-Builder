@@ -44,3 +44,52 @@ describe("PublishPanel: Download je project", () => {
     await waitFor(() => expect(onError).toHaveBeenCalledWith("Er ging iets mis: Sla de zip buiten je projectmap op."));
   });
 });
+
+describe("PublishPanel: Controleer veiligheid", () => {
+  const rapport = {
+    scanned: 14,
+    findings: [
+      { code: "api_key", severity: "hoog", file: "src/api.ts", line: 3, detail: "Anthropic-sleutel: sk-a********" },
+      { code: "db_rules_missing", severity: "hoog", file: "supabase/migrations/001.sql", detail: "De tabel ‘klanten’ heeft geen toegangsregels (row level security)." },
+      { code: "password", severity: "midden", file: "src/db.ts", line: 1, detail: "Vast wachtwoord in de code: S3cu********" },
+    ],
+  };
+
+  it("toont de bevindingen in gewone taal, waarschuwt zonder te blokkeren, en elk punt heeft ‘Los dit op’", async () => {
+    (api.runtime as Mock).mockResolvedValue(rapport);
+    (api.chatSend as Mock).mockResolvedValue(undefined);
+    render(<PublishPanel project={project} onError={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Controleer veiligheid" }));
+    expect(await screen.findByText("3 punt(en) gevonden. Je kunt nog steeds publiceren, maar los deze eerst op als je kunt.")).toBeInTheDocument();
+    expect(api.runtime).toHaveBeenCalledWith(3, "security.check");
+    expect(screen.getByText("Een geheime sleutel staat in je code")).toBeInTheDocument();
+    expect(screen.getByText("Je database heeft geen toegangsregels")).toBeInTheDocument();
+    expect(screen.getByText(/Studio houdt je niet tegen/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Download je project" })).toBeEnabled(); // publiceren blijft mogelijk
+    expect(screen.getAllByRole("button", { name: "Los dit op" })).toHaveLength(3);
+    expect(screen.queryByText(/sk-ant-/)).not.toBeInTheDocument();
+  });
+
+  it("‘Los dit op’ stuurt een opdracht naar de AI met bestand en regel, zonder het geheim te noemen", async () => {
+    (api.runtime as Mock).mockResolvedValue(rapport);
+    (api.chatSend as Mock).mockResolvedValue(undefined);
+    render(<PublishPanel project={project} onError={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Controleer veiligheid" }));
+    const knoppen = await screen.findAllByRole("button", { name: "Los dit op" });
+    fireEvent.click(knoppen[0]);
+    await waitFor(() => expect(api.chatSend).toHaveBeenCalledWith(3, expect.stringContaining("src/api.ts, regel 3")));
+    const prompt = (api.chatSend as Mock).mock.calls[0][1] as string;
+    expect(prompt).toContain(".env");
+    expect(prompt).toContain("vernieuwen of intrekken");
+    expect(prompt).not.toMatch(/sk-ant-[A-Za-z0-9]{10}/);
+    fireEvent.click(knoppen[1]);
+    await waitFor(() => expect((api.chatSend as Mock).mock.calls[1][1]).toContain("row level security"));
+  });
+
+  it("meldt als alles goed is", async () => {
+    (api.runtime as Mock).mockResolvedValue({ scanned: 9, findings: [] });
+    render(<PublishPanel project={project} onError={vi.fn()} />);
+    fireEvent.click(screen.getByRole("button", { name: "Controleer veiligheid" }));
+    expect(await screen.findByText("Alles ziet er goed uit: er zijn geen problemen gevonden in 9 bestanden.")).toBeInTheDocument();
+  });
+});
