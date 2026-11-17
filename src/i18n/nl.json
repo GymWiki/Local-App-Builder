@@ -220,7 +220,7 @@
     },
     "kies": {
       "knop": "Kies een onderdeel",
-      "uitleg": "Klik op iets in het voorbeeld en vertel wat er anders moet.",
+      "uitleg": "Klik op iets in het voorbeeld, bijvoorbeeld een kop of een knop. Daarna typ je wat er anders moet en gaat die wens naar de AI.",
       "bezig": "Wijs een onderdeel aan in het voorbeeld… (Esc om te stoppen)",
       "titel": "Wat moet hier anders?",
       "gekozen": "Gekozen onderdeel: {{tag}}{{tekst}}",
@@ -497,7 +497,7 @@
   "instellingen": {
     "titel": "Instellingen",
     "taal": {
-      "titel": "Taal van de AI",
+      "titel": "Hoe de AI tegen je praat",
       "eenvoudig": "Eenvoudige taal",
       "eenvoudigUitleg": "De AI praat in gewone woorden, zonder vakjargon. Aanbevolen.",
       "technisch": "Technisch",

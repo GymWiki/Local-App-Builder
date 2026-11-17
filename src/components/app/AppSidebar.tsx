@@ -72,10 +72,10 @@ export default function AppSidebar({ projects, selectedId, accountsActive, setti
               {projects.length === 0 && <li className="px-2 py-2 text-base text-muted-foreground">{t("sidebar.leeg")}</li>}
               {projects.map((p) => (
                 <SidebarMenuItem key={p.id}>
-                  <SidebarMenuButton size="lg" isActive={p.id === selectedId} onClick={() => onSelect(p.id)} className="text-base">
+                  <SidebarMenuButton size="lg" isActive={p.id === selectedId} title={p.naam} onClick={() => onSelect(p.id)} className="text-base">
                     <span className="truncate">{p.naam}</span>
                   </SidebarMenuButton>
-                  <SidebarMenuAction showOnHover aria-label={`${t("sidebar.verwijder")}: ${p.naam}`} title={t("sidebar.verwijder")} onClick={() => setTarget(p)} className="top-3.5">
+                  <SidebarMenuAction showOnHover aria-label={`${t("sidebar.verwijder")}: ${p.naam}`} title={t("sidebar.verwijder")} onClick={() => setTarget(p)} className="top-1.5">
                     <XIcon aria-hidden="true" />
                   </SidebarMenuAction>
                 </SidebarMenuItem>

@@ -289,7 +289,7 @@ export default function App() {
           }}
         />
       )}
-      <Toaster position="bottom-right" richColors />
+      <Toaster position="top-center" richColors />
     </SidebarProvider>
     </TooltipProvider>
   );
