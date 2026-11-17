@@ -34,7 +34,7 @@ describe("MCP-probleemmelding", () => {
     render(<McpProblem info={nodeMissing} onRetry={vi.fn()} />);
     expect(screen.getByTestId("mcp-problem")).toHaveTextContent("Node.js niet gevonden");
     expect(screen.getByTestId("mcp-problem")).toHaveTextContent("nodejs.org");
-    expect(screen.getByTestId("mcp-problem")).toHaveTextContent("STUDIO_NODE_PATH");
+    expect(screen.getByTestId("mcp-problem")).toHaveTextContent("LTS");
   });
 
   it("terminalbalk toont de reden en probeert opnieuw", async () => {

@@ -84,20 +84,20 @@
     "running": "MCP: gereed, wacht op AI",
     "connected": "MCP: verbonden",
     "unavailable": "MCP: niet beschikbaar",
-    "nietGestart": "De projectruntime is niet gestart.",
-    "probleemTitel": "MCP-server niet beschikbaar",
+    "nietGestart": "Het onderdeel dat met de AI samenwerkt is niet gestart. Klik op ‘Opnieuw proberen’.",
+    "probleemTitel": "Studio kan de koppeling met de AI niet starten",
     "opnieuw": "Opnieuw proberen",
     "bezig": "Bezig…",
-    "logs": "Laatste logregels van de server",
+    "logs": "Technische details",
     "hint": {
-      "node_missing": "Installeer Node.js 20 of nieuwer van https://nodejs.org en start Studio opnieuw. Staat Node op een ongebruikelijke plek, zet dan de omgevingsvariabele STUDIO_NODE_PATH naar node.exe.",
-      "node_old": "Werk Node.js bij naar versie 20 of nieuwer en start Studio opnieuw.",
-      "node_broken": "Het gevonden node-bestand werkt niet. Herinstalleer Node.js of zet STUDIO_NODE_PATH naar een werkende node.exe.",
-      "script_missing": "Draai `npm run mcp:build` in de map van Studio (of start Studio via `npm run tauri dev`, dat bouwt het automatisch) en klik op Opnieuw proberen.",
-      "spawn_failed": "Het besturingssysteem liet Node niet starten (antivirus of rechten?). Kijk of node.exe handmatig start.",
-      "timeout": "De server werd niet op tijd klaar. Antivirus kan het eerste keer vertragen: probeer opnieuw.",
-      "crashed": "De server stopte meteen. Zie de logregels hieronder.",
-      "error": "De server meldde een fout. Zie de melding hierboven."
+      "node_missing": "Studio heeft het gratis programma Node.js nodig. Download het op https://nodejs.org (kies de ‘LTS’-versie), installeer het en open Studio daarna opnieuw.",
+      "node_old": "Het programma Node.js op deze computer is te oud. Installeer de nieuwste versie van https://nodejs.org en open Studio daarna opnieuw.",
+      "node_broken": "Node.js is gevonden, maar werkt niet. Installeer het opnieuw via https://nodejs.org en open Studio daarna opnieuw.",
+      "script_missing": "Een onderdeel van Studio is niet klaar. Als je Studio zelf bouwt: draai `npm run mcp:build` en klik daarna op ‘Opnieuw proberen’.",
+      "spawn_failed": "Je computer liet het onderdeel niet starten. Misschien blokkeert een virusscanner het. Probeer het opnieuw.",
+      "timeout": "Het duurde te lang voor het klaar was. De eerste keer kan een virusscanner dit vertragen. Probeer het opnieuw.",
+      "crashed": "Het onderdeel stopte meteen. Klik op ‘Technische details’ als je hulp zoekt.",
+      "error": "Er ging iets mis. Probeer het opnieuw of klik op ‘Technische details’ als je hulp zoekt."
     },
     "controleer": "Controleer in Claude",
     "controleBezig": "Controleren…",
@@ -112,11 +112,11 @@
     "goedkeuring": "Studio heeft de ‘studio’-server voor Claude goedgekeurd. Vraagt Claude bij de eerste start of hij deze map mag vertrouwen, kies dan Ja; daarna verschijnt hier ‘verbonden’."
   },
   "cli": {
-    "nietGevonden": "{{naam}} is niet geïnstalleerd",
-    "uitleg": "Installeer de CLI met een van onderstaande commando's in een gewone terminal.",
-    "herstart": "Is hij net geïnstalleerd? Klik dan op ‘Opnieuw controleren’. Lukt het niet, start Studio dan opnieuw.",
+    "nietGevonden": "{{naam}} is nog niet geïnstalleerd",
+    "uitleg": "Om met {{naam}} te werken moet het eerst één keer op deze computer worden gezet. Kopieer hieronder een regel, plak die in de Terminal (op Windows: PowerShell) en druk op Enter.",
+    "herstart": "Klaar met installeren? Klik dan op ‘Opnieuw controleren’. Lukt het niet, sluit Studio dan af en open het opnieuw.",
     "opnieuw": "Opnieuw controleren",
-    "docs": "Officiële installatiedocs",
+    "docs": "Hulp bij installeren",
     "nogSteedsNiet": "Nog steeds niet gevonden."
   },
   "wissel": {

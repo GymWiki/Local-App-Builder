@@ -32,7 +32,7 @@ export default function InstallGuide({ status, onInstalled }: Props) {
     <Card data-testid="install-guide" className="mx-auto my-6 max-w-xl">
       <CardHeader>
         <CardTitle className="text-lg">{t("cli.nietGevonden", { naam: t(`provider.${current.provider}`) })}</CardTitle>
-        <CardDescription className="text-base">{t("cli.uitleg")}</CardDescription>
+        <CardDescription className="text-base">{t("cli.uitleg", { naam: t(`provider.${current.provider}`) })}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 text-base">
         <ul className="space-y-2">
