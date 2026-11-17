@@ -82,6 +82,17 @@ pub fn last_user_text(conn: &Connection, project_id: i64) -> Result<Option<Strin
         .and_then(|m| m.payload["text"].as_str().map(str::to_string)))
 }
 
+/// Bijlagen van het laatste bericht van de gebruiker (voor "Probeer opnieuw").
+pub fn last_user_attachments(conn: &Connection, project_id: i64) -> Result<Vec<super::Attachment>> {
+    let msgs = history(conn, project_id, 200)?;
+    Ok(msgs
+        .iter()
+        .rev()
+        .find(|m| m.kind == "user")
+        .and_then(|m| serde_json::from_value(m.payload["attachments"].clone()).ok())
+        .unwrap_or_default())
+}
+
 /// De nieuwste versie die is bewaard terwijl de controles slaagden (`working: true`).
 pub fn last_working_version(
     conn: &Connection,

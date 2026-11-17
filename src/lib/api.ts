@@ -251,7 +251,19 @@ export interface ChatTarget {
 export const chatTarget = (projectId: number) => invoke<ChatTarget>("chat_target", { projectId });
 export const chatHistory = (projectId: number, limit = 200) => invoke<ChatMessage[]>("chat_history", { projectId, limit });
 export const chatBusy = (projectId: number) => invoke<boolean>("chat_busy", { projectId });
-export const chatSend = (projectId: number, text: string) => invoke<void>("chat_send", { projectId, text });
+export const chatSend = (projectId: number, text: string, attachments?: string[]) =>
+  invoke<void>("chat_send", attachments?.length ? { projectId, text, attachments } : { projectId, text });
+
+export interface SavedAsset {
+  path: string;
+  name: string;
+  kind: "image" | "document";
+  size: number;
+}
+export const chatAttach = (projectId: number, name: string, data: string) =>
+  invoke<SavedAsset>("chat_attach", { projectId, name, data });
+export const chatAssetData = (projectId: number, path: string) =>
+  invoke<string | null>("chat_asset_data", { projectId, path });
 export const chatRetry = (projectId: number) => invoke<void>("chat_retry", { projectId });
 export const chatStop = (projectId: number) => invoke<void>("chat_stop", { projectId });
 export const chatSwitch = (projectId: number, provider: Provider, accountId: number | null) =>

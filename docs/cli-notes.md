@@ -125,3 +125,9 @@ Bronnen: code.claude.com/docs/en/permission-modes.md, cli-reference.md; geverifi
 
 ## Eenmalige AI-aanroep zonder tools (opdracht-verbeteraar) — Claude Code
 Bron: cli-reference.md. `--tools ""` schakelt alle ingebouwde tools uit; `-p` werkt met `--output-format text`. (Wordt gebruikt bij functie 7.)
+
+## Bestanden in de chat (functie 4) — Claude Code
+- Geverifieerd met een echte run (`claude -p --allowedTools Read -- "<vraag> … - assets/rood.png"`): een relatief pad in de opdracht is genoeg; Claude leest de afbeelding met zijn eigen leestool en beschrijft de kleur correct. Er is dus geen speciale CLI-optie voor bijlagen nodig (geen `--image` o.i.d.).
+- Studio zet daarom alleen een lijstje "Bijgevoegde bestanden … - assets/…" achter de opdracht (`assets::prompt_suffix`). Alleen relatieve paden binnen het project gaan mee.
+- Tauri 2 vangt bestanden slepen standaard zelf af; `dragDropEnabled: false` in `tauri.conf.json` laat de gewone HTML5-sleepgebeurtenissen van de webview door (nodig voor Windows).
+- Niet geverifieerd voor Gemini/Codex (nog geen chatadapter); dezelfde padaanpak is daar niet getest.

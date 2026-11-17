@@ -398,3 +398,109 @@ describe("ChatPanel: wisselen van AI en terugvallen", () => {
     expect(await screen.findByRole("separator")).toHaveTextContent("Gewisseld naar claude · Werk");
   });
 });
+
+describe("ChatPanel: bestanden in de chat", () => {
+  const saved = { path: "assets/logo.png", name: "logo.png", kind: "image" as const, size: 5 };
+  const png = () => new File([new Uint8Array([0x89, 0x50, 0x4e, 0x47])], "logo.png", { type: "image/png" });
+
+  beforeEach(() => {
+    (api.chatAttach as Mock).mockResolvedValue(saved);
+    (api.chatAssetData as Mock).mockResolvedValue("data:image/png;base64,AAAA");
+  });
+
+  it("een gesleept plaatje wordt opgeslagen, krijgt een miniatuur en gaat met de opdracht mee", async () => {
+    setup();
+    const input = await screen.findByLabelText("Wat wil je maken of veranderen?");
+    const panel = screen.getByRole("region", { name: "Gesprek met de AI" });
+    fireEvent.dragOver(panel, { dataTransfer: { types: ["Files"], files: [] } });
+    expect(screen.getByTestId("drop-hint")).toBeInTheDocument();
+    fireEvent.drop(panel, { dataTransfer: { files: [png()] } });
+    const lijst = await screen.findByRole("list", { name: "Bijlagen bij je bericht" });
+    expect(await within(lijst).findByAltText("Bijgevoegde afbeelding: logo.png")).toBeInTheDocument();
+    expect(api.chatAttach).toHaveBeenCalledWith(1, "logo.png", expect.any(String));
+    expect(screen.queryByTestId("drop-hint")).not.toBeInTheDocument();
+    fireEvent.change(input, { target: { value: "Gebruik dit logo" } });
+    fireEvent.click(screen.getByRole("button", { name: "Versturen" }));
+    await waitFor(() => expect(api.chatSend).toHaveBeenCalledWith(1, "Gebruik dit logo", ["assets/logo.png"]));
+    expect(screen.queryByRole("list", { name: "Bijlagen bij je bericht" })).not.toBeInTheDocument();
+  });
+
+  it("een geplakt plaatje werkt hetzelfde, gewone tekst plakken blijft ongemoeid", async () => {
+    setup();
+    const input = await screen.findByLabelText("Wat wil je maken of veranderen?");
+    const tekst = fireEvent.paste(input, { clipboardData: { files: [] } });
+    expect(tekst).toBe(true); // niet geannuleerd
+    expect(api.chatAttach).not.toHaveBeenCalled();
+    const gestopt = !fireEvent.paste(input, { clipboardData: { files: [new File(["x"], "image.png", { type: "image/png" })] } });
+    expect(gestopt).toBe(true);
+    await waitFor(() => expect(api.chatAttach).toHaveBeenCalledWith(1, expect.stringMatching(/^plaatje-\d+\.png$/), expect.any(String)));
+  });
+
+  it("alleen bijlagen zonder tekst kan verstuurd worden; verwijderen haalt het weer weg", async () => {
+    setup();
+    await screen.findByLabelText("Wat wil je maken of veranderen?");
+    expect(screen.getByRole("button", { name: "Versturen" })).toBeDisabled();
+    fireEvent.change(screen.getByTestId("file-input"), { target: { files: [png()] } });
+    await screen.findByAltText("Bijgevoegde afbeelding: logo.png");
+    expect(screen.getByRole("button", { name: "Versturen" })).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: "Verwijder logo.png" }));
+    expect(screen.queryByAltText("Bijgevoegde afbeelding: logo.png")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Versturen" })).toBeDisabled();
+  });
+
+  it("weigert verkeerde types en te grote bestanden met een duidelijke melding, zonder iets op te slaan", async () => {
+    const onError = vi.fn();
+    setup([], claude, { onError });
+    await screen.findByLabelText("Wat wil je maken of veranderen?");
+    const groot = new File(["x"], "groot.png", { type: "image/png" });
+    Object.defineProperty(groot, "size", { value: 11 * 1024 * 1024 });
+    fireEvent.change(screen.getByTestId("file-input"), { target: { files: [new File(["x"], "virus.exe"), groot] } });
+    await waitFor(() => expect(onError).toHaveBeenCalledTimes(2));
+    expect(onError.mock.calls[0][0]).toMatch(/virus\.exe.*bestandstype/);
+    expect(onError.mock.calls[1][0]).toMatch(/groot\.png is te groot \(maximaal 10 MB\)/);
+    expect(api.chatAttach).not.toHaveBeenCalled();
+  });
+
+  it("toont een foutmelding van de backend en laat niets in de bijlagenlijst staan", async () => {
+    (api.chatAttach as Mock).mockRejectedValue("De inhoud van dit bestand past niet bij het type.");
+    const onError = vi.fn();
+    setup([], claude, { onError });
+    await screen.findByLabelText("Wat wil je maken of veranderen?");
+    fireEvent.change(screen.getByTestId("file-input"), { target: { files: [png()] } });
+    await waitFor(() => expect(onError).toHaveBeenCalled());
+    expect(onError.mock.calls[0][0]).toContain("past niet bij het type");
+    expect(screen.queryByRole("list", { name: "Bijlagen bij je bericht" })).not.toBeInTheDocument();
+  });
+
+  it("maximaal zes bestanden per bericht", async () => {
+    const onError = vi.fn();
+    setup([], claude, { onError });
+    await screen.findByLabelText("Wat wil je maken of veranderen?");
+    let n = 0;
+    (api.chatAttach as Mock).mockImplementation(async () => ({ ...saved, path: `assets/f${n}.png`, name: `f${n++}.png` }));
+    const files = Array.from({ length: 7 }, (_, i) => new File(["x"], `f${i}.png`, { type: "image/png" }));
+    fireEvent.change(screen.getByTestId("file-input"), { target: { files } });
+    await waitFor(() => expect(onError).toHaveBeenCalled());
+    expect(onError.mock.calls[0][0]).toContain("maximaal 6 bestanden");
+    expect(api.chatAttach).toHaveBeenCalledTimes(6);
+  });
+
+  it("toont bijlagen als miniatuur in de tekstballon van de gebruiker", async () => {
+    setup([msg("user", { text: "Gebruik dit", attachments: [{ path: "assets/logo.png", name: "logo.png", kind: "image" }, { path: "assets/menu.pdf", name: "menu.pdf", kind: "document" }] })]);
+    const ballon = await screen.findByTestId("bubble-user");
+    expect(await within(ballon).findByAltText("Bijgevoegde afbeelding: logo.png")).toBeInTheDocument();
+    expect(within(ballon).getByText("menu.pdf")).toBeInTheDocument();
+    expect(api.chatAssetData).toHaveBeenCalledWith(1, "assets/logo.png");
+    expect(api.chatAssetData).not.toHaveBeenCalledWith(1, "assets/menu.pdf");
+  });
+
+  it("zonder chatweergave is slepen uitgeschakeld", async () => {
+    setup([], { ...claude, structured: false });
+    await screen.findByTestId("terminal-fallback");
+    const panel = screen.getByRole("region", { name: "Gesprek met de AI" });
+    fireEvent.dragOver(panel, { dataTransfer: { types: ["Files"], files: [] } });
+    expect(screen.queryByTestId("drop-hint")).not.toBeInTheDocument();
+    fireEvent.drop(panel, { dataTransfer: { files: [png()] } });
+    expect(api.chatAttach).not.toHaveBeenCalled();
+  });
+});

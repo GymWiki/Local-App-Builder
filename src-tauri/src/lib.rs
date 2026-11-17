@@ -1,4 +1,5 @@
 mod accounts;
+mod assets;
 mod chat;
 mod claude_approval;
 mod cli;
@@ -354,6 +355,8 @@ pub fn run() {
             commands::chat_target,
             commands::chat_history,
             commands::chat_send,
+            commands::chat_attach,
+            commands::chat_asset_data,
             commands::chat_retry,
             commands::chat_busy,
             commands::chat_mode_set,

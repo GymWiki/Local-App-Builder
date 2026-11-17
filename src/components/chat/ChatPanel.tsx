@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useRef, useState, type FormEvent, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type ClipboardEvent, type DragEvent, type FormEvent, type KeyboardEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { listen } from "@tauri-apps/api/event";
 import {
+  chatAttach,
   chatBusy,
   chatHistory,
   chatModeSet,
@@ -19,6 +20,7 @@ import {
   type ChatOut,
   type ChatStatus,
   type ChatTarget,
+  type SavedAsset,
   type CliStatus,
   type Project,
   type Provider,
@@ -28,6 +30,8 @@ import InstallGuide from "../InstallGuide";
 import ChatSwitchDialog from "./ChatSwitchDialog";
 import VersionsDialog from "./VersionsDialog";
 import MessageView from "./MessageView";
+import AssetThumb from "./AssetThumb";
+import { checkFile, MAX_FILES, pastedName, readBase64 } from "./files";
 import PermissionDialog from "./PermissionDialog";
 
 interface Props {
@@ -55,7 +59,11 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
   const [missing, setMissing] = useState<CliStatus | null>(null);
   const [switching, setSwitching] = useState(false);
   const [showVersions, setShowVersions] = useState(false);
+  const [pending, setPending] = useState<SavedAsset[]>([]);
+  const [uploading, setUploading] = useState(0);
+  const [dragging, setDragging] = useState(false);
   const end = useRef<HTMLDivElement>(null);
+  const picker = useRef<HTMLInputElement>(null);
 
   const fail = useCallback((e: unknown) => onError(t("fout.algemeen", { bericht: String(e) })), [onError, t]);
 
@@ -100,16 +108,60 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
 
   async function send(body: string) {
     const trimmed = body.trim();
-    if (!trimmed || !target?.structured) return;
+    const files = body === text ? pending : [];
+    if ((!trimmed && files.length === 0) || !target?.structured || uploading > 0) return;
     try {
       const st = await cliStatus(target.provider);
       if (!st.installed) return setMissing(st);
       setMissing(null);
       setText("");
-      await chatSend(id, trimmed);
+      setPending([]);
+      if (files.length > 0) await chatSend(id, trimmed, files.map((f) => f.path));
+      else await chatSend(id, trimmed);
     } catch (e) {
       fail(e);
     }
+  }
+
+  // Bestanden toevoegen (slepen, plakken of kiezen): elk wordt eerst gecontroleerd en dan in assets/ van het project bewaard.
+  async function addFiles(files: File[]) {
+    let count = pending.length;
+    for (const file of files) {
+      const name = pastedName(file, Date.now() % 100000);
+      if (count >= MAX_FILES) {
+        onError(t("chat.bijlage.teVeel", { max: MAX_FILES }));
+        break;
+      }
+      const c = checkFile(name, file.size);
+      if (!c.ok) {
+        onError(c.reason === "size" ? t("chat.bijlage.teGroot", { naam: name, max: c.max }) : t("chat.bijlage.typeNiet", { naam: name }));
+        continue;
+      }
+      count++;
+      setUploading((n) => n + 1);
+      try {
+        const saved = await chatAttach(id, name, await readBase64(file));
+        setPending((p) => [...p, saved]);
+      } catch (e) {
+        count--;
+        onError(t("chat.bijlage.mislukt", { naam: name, reden: String(e) }));
+      } finally {
+        setUploading((n) => n - 1);
+      }
+    }
+  }
+
+  function onDrop(e: DragEvent<HTMLElement>) {
+    e.preventDefault();
+    setDragging(false);
+    void addFiles(Array.from(e.dataTransfer?.files ?? []));
+  }
+
+  function onPaste(e: ClipboardEvent<HTMLTextAreaElement>) {
+    const files = Array.from(e.clipboardData?.files ?? []);
+    if (files.length === 0) return; // gewone tekst plakken werkt zoals altijd
+    e.preventDefault();
+    void addFiles(files);
   }
 
   async function chooseMode(m: ChatMode) {
@@ -161,7 +213,24 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
   const unavailable = target && (!target.structured || fallback);
 
   return (
-    <section aria-label={t("chat.titel")} className="flex h-full min-h-0 flex-col bg-zinc-950">
+    <section
+      aria-label={t("chat.titel")}
+      className={`relative flex h-full min-h-0 flex-col bg-zinc-950 ${dragging ? "outline outline-4 -outline-offset-4 outline-indigo-400" : ""}`}
+      onDragOver={(e) => {
+        if (unavailable || !e.dataTransfer?.types?.includes("Files")) return;
+        e.preventDefault();
+        setDragging(true);
+      }}
+      onDragLeave={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setDragging(false);
+      }}
+      onDrop={(e) => (unavailable ? e.preventDefault() : onDrop(e))}
+    >
+      {dragging && (
+        <div role="note" data-testid="drop-hint" className="pointer-events-none absolute inset-x-0 top-1/3 z-10 mx-auto w-fit rounded-xl bg-indigo-700 px-6 py-4 text-lg font-semibold text-white shadow-lg">
+          {t("chat.bijlage.sleep")}
+        </div>
+      )}
       <header className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800 px-5 py-3">
         <h2 className="text-lg font-semibold">
           {t("chat.titel")}
@@ -262,7 +331,49 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
           </span>
         )}
       </div>
+      {(pending.length > 0 || uploading > 0) && (
+        <div className="flex flex-wrap items-center gap-3 px-4 pt-3">
+          <ul aria-label={t("chat.bijlage.lijst")} className="flex flex-wrap gap-3">
+            {pending.map((a) => (
+              <li key={a.path} className="relative">
+                <AssetThumb projectId={id} path={a.path} name={a.name} kind={a.kind} />
+                <button
+                  type="button"
+                  aria-label={t("chat.bijlage.verwijder", { naam: a.name })}
+                  onClick={() => setPending((p) => p.filter((x) => x.path !== a.path))}
+                  className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-zinc-700 text-sm hover:bg-zinc-600"
+                >
+                  ✕
+                </button>
+              </li>
+            ))}
+          </ul>
+          {uploading > 0 && <span role="status" className="text-base text-zinc-300">{t("chat.bijlage.bezig")}</span>}
+        </div>
+      )}
       <form onSubmit={onSubmit} className="flex items-end gap-3 p-4">
+        <input
+          ref={picker}
+          type="file"
+          multiple
+          hidden
+          data-testid="file-input"
+          accept=".png,.jpg,.jpeg,.gif,.webp,.pdf,.txt,.md,.csv,.json"
+          onChange={(e) => {
+            void addFiles(Array.from(e.target.files ?? []));
+            e.target.value = "";
+          }}
+        />
+        <button
+          type="button"
+          aria-label={t("chat.bijlage.kies")}
+          title={t("chat.bijlage.kies")}
+          disabled={!!unavailable}
+          onClick={() => picker.current?.click()}
+          className="min-h-12 rounded-xl border border-zinc-600 px-4 text-base hover:bg-zinc-800 disabled:opacity-40"
+        >
+          📎 {t("chat.bijlage.knop")}
+        </button>
         <label className="sr-only" htmlFor="chat-input">
           {t("chat.invoerLabel")}
         </label>
@@ -271,6 +382,7 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={onKey}
+          onPaste={onPaste}
           disabled={!!unavailable}
           rows={3}
           placeholder={mode === "plan" ? t("chat.modus.placeholderPlan") : t("chat.placeholder")}
@@ -278,7 +390,7 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
         />
         <button
           type="submit"
-          disabled={!text.trim() || !!unavailable}
+          disabled={(!text.trim() && pending.length === 0) || uploading > 0 || !!unavailable}
           className="min-h-12 rounded-xl bg-indigo-600 px-6 text-lg font-semibold hover:bg-indigo-500 disabled:opacity-40"
         >
           {t("chat.verstuur")}

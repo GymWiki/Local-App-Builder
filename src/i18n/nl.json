@@ -413,6 +413,20 @@
       "terugJa": "Ja, ga terug",
       "terugKlaar": "Klaar: je project staat weer bij ‘{{titel}}’.",
       "overlegPrompt": "Stop even met bouwen. Leg in gewone woorden uit wat er misgaat en waarom, en stel een ander plan voor. Pas nog niets aan."
+    },
+    "bijlage": {
+      "knop": "Bestand toevoegen",
+      "kies": "Kies een afbeelding of document",
+      "sleep": "Laat het bestand hier los om het mee te sturen",
+      "verwijder": "Verwijder {{naam}}",
+      "lijst": "Bijlagen bij je bericht",
+      "bezig": "Bestand wordt opgeslagen…",
+      "teGroot": "{{naam}} is te groot (maximaal {{max}} MB).",
+      "typeNiet": "{{naam}}: dit bestandstype kan ik niet gebruiken. Kies een afbeelding (png, jpg, gif, webp) of een document (pdf, txt, md, csv, json).",
+      "teVeel": "Je kunt maximaal {{max}} bestanden tegelijk meesturen.",
+      "mislukt": "{{naam}} kon niet worden toegevoegd: {{reden}}",
+      "alt": "Bijgevoegde afbeelding: {{naam}}",
+      "document": "Document: {{naam}}"
     }
   },
   "instellingen": {

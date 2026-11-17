@@ -1097,3 +1097,57 @@ fn een_nieuw_bericht_begint_een_nieuwe_reeks_en_een_geslaagde_controle_maakt_de_
     );
     h2.mgr.close_all();
 }
+
+#[cfg(unix)]
+#[test]
+fn bijlagen_staan_in_het_bericht_en_in_de_opdracht_aan_de_ai() {
+    let h = harness();
+    let (l, fake) = launch(&h, "ok");
+    let att = vec![Attachment {
+        path: "assets/foto.png".into(),
+        name: "foto.png".into(),
+        kind: "image".into(),
+    }];
+    h.mgr
+        .send_with(h.project, "Gebruik dit logo", true, &l, &att)
+        .unwrap();
+    wait_for("klaar", || {
+        h.out.lock().unwrap().iter().any(|o| {
+            matches!(
+                o,
+                ChatOut::Status {
+                    state: Status::Done,
+                    ..
+                }
+            )
+        })
+    });
+    let hist = history(&h);
+    assert_eq!(hist[0].payload["text"], "Gebruik dit logo");
+    assert_eq!(hist[0].payload["attachments"][0]["path"], "assets/foto.png");
+    assert_eq!(hist[0].payload["attachments"][0]["kind"], "image");
+    let input = std::fs::read_to_string(fake.join("in.txt")).unwrap();
+    assert!(
+        input.contains("Gebruik dit logo") && input.contains("assets/foto.png"),
+        "{input}"
+    );
+}
+
+#[cfg(unix)]
+#[test]
+fn alleen_bijlagen_zonder_tekst_mag_maar_helemaal_niets_niet() {
+    let h = harness();
+    let (l, fake) = launch(&h, "ok");
+    assert!(h.mgr.send_with(h.project, "  ", true, &l, &[]).is_err());
+    let att = vec![Attachment {
+        path: "assets/a.pdf".into(),
+        name: "a.pdf".into(),
+        kind: "document".into(),
+    }];
+    h.mgr.send_with(h.project, "", true, &l, &att).unwrap();
+    wait_for("invoer", || fake.join("in.txt").exists());
+    assert_eq!(
+        history(&h)[0].payload["text"],
+        "Kijk naar de bijgevoegde bestanden."
+    );
+}

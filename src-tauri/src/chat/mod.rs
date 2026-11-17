@@ -149,6 +149,14 @@ pub enum ChatOut {
 /// Instructie voor CLI's zonder eigen planmodus.
 pub const PLAN_INSTRUCTION: &str = "[Overleg-modus] Je mag in deze beurt GEEN bestanden maken, aanpassen of verwijderen en geen opdrachten uitvoeren die iets veranderen. Bespreek in gewone woorden wat je zou doen en stel een kort plan voor.";
 
+/// Een bijlage bij een bericht: relatief pad in de projectmap (zie `assets`).
+#[derive(Debug, Clone, serde::Serialize, serde::Deserialize, PartialEq)]
+pub struct Attachment {
+    pub path: String,
+    pub name: String,
+    pub kind: String,
+}
+
 pub fn plan_text(text: &str, with_instruction: bool) -> String {
     if with_instruction {
         format!("{PLAN_INSTRUCTION}\n\n{text}")
@@ -622,10 +630,27 @@ impl ChatManager {
 
     /// Stuurt een bericht naar de AI. `visible = false`: onzichtbare opdracht (bijv. overdracht bij wisselen van AI).
     pub fn send(&self, project: i64, text: &str, visible: bool, launch: &ChatLaunch) -> Result<()> {
+        self.send_with(project, text, visible, launch, &[])
+    }
+
+    /// Zoals `send`, met bijlagen (paden binnen de projectmap, al gecontroleerd door `assets`). Alleen bijlagen zonder tekst mag ook.
+    pub fn send_with(
+        &self,
+        project: i64,
+        text: &str,
+        visible: bool,
+        launch: &ChatLaunch,
+        attachments: &[Attachment],
+    ) -> Result<()> {
         let text = text.trim();
-        if text.is_empty() {
+        if text.is_empty() && attachments.is_empty() {
             return Err(AppError::Invalid("Typ eerst een bericht.".into()));
         }
+        let text = if text.is_empty() {
+            "Kijk naar de bijgevoegde bestanden."
+        } else {
+            text
+        };
         if !supports_structured(launch.provider) {
             return Err(AppError::Invalid(
                 "Deze AI heeft nog geen chatweergave; gebruik de technische weergave.".into(),
@@ -640,7 +665,12 @@ impl ChatManager {
             .or_default()
             .reset();
         if visible {
-            self.inner.push(project, "user", json!({ "text": text }));
+            let payload = if attachments.is_empty() {
+                json!({ "text": text })
+            } else {
+                json!({ "text": text, "attachments": attachments })
+            };
+            self.inner.push(project, "user", payload);
         }
         if !self.busy(project) {
             let head = self
@@ -663,7 +693,16 @@ impl ChatManager {
         let adapter = adapter_for(launch.provider).unwrap();
         let plan = self.mode(project) == "plan";
         // Heeft de CLI geen eigen planmodus, dan krijgt de AI in plaats daarvan een instructie om niets te wijzigen.
-        let line = adapter.encode_user(&plan_text(text, plan && !adapter.supports_plan_mode()));
+        let prompt = format!(
+            "{text}{}",
+            crate::assets::prompt_suffix(
+                &attachments
+                    .iter()
+                    .map(|a| a.path.clone())
+                    .collect::<Vec<_>>()
+            )
+        );
+        let line = adapter.encode_user(&plan_text(&prompt, plan && !adapter.supports_plan_mode()));
         let attempt = |this: &Self| -> Result<()> {
             this.ensure_live(project, launch, plan && adapter.supports_plan_mode())?;
             this.write_line(project, &line)

@@ -1,4 +1,5 @@
 use crate::accounts::{self, Account};
+use crate::assets;
 use crate::chat::events::ErrorCode;
 use crate::chat::store::StoredMessage;
 use crate::chat::{self, ChatLaunch, ChatManager};
@@ -581,9 +582,69 @@ pub fn chat_send(
     project_id: i64,
     text: String,
     visible: Option<bool>,
+    attachments: Option<Vec<String>>,
 ) -> Result<()> {
+    let dir = project_dir(&projects::get(&*db.conn()?, project_id)?)?;
+    let attachments = attachments_from_paths(&dir, attachments.unwrap_or_default())?;
     let launch = prepare_chat(&app, &db, &mcp, &chat, &profiles, project_id)?;
-    chat.send(project_id, &text, visible.unwrap_or(true), &launch)
+    chat.send_with(
+        project_id,
+        &text,
+        visible.unwrap_or(true),
+        &launch,
+        &attachments,
+    )
+}
+
+/// Maximaal aantal bijlagen per bericht.
+const MAX_ATTACHMENTS: usize = 6;
+
+/// Controleert elk pad (alleen `assets/`, gewoon bestand) en maakt er bijlagen van.
+fn attachments_from_paths(dir: &Path, paths: Vec<String>) -> Result<Vec<chat::Attachment>> {
+    if paths.len() > MAX_ATTACHMENTS {
+        return Err(AppError::Invalid(format!(
+            "Je kunt maximaal {MAX_ATTACHMENTS} bestanden tegelijk meesturen."
+        )));
+    }
+    paths
+        .into_iter()
+        .map(|p| {
+            let full = assets::resolve_asset(dir, &p)?;
+            let name = full
+                .file_name()
+                .map(|n| n.to_string_lossy().to_string())
+                .unwrap_or_default();
+            let ext = full
+                .extension()
+                .and_then(|e| e.to_str())
+                .unwrap_or("")
+                .to_lowercase();
+            Ok(chat::Attachment {
+                path: p.replace('\\', "/"),
+                name,
+                kind: assets::kind_of(&ext).into(),
+            })
+        })
+        .collect()
+}
+
+/// Slaat een gesleept of geplakt bestand op in `assets/` van het project.
+#[tauri::command(async)]
+pub fn chat_attach(
+    db: State<Db>,
+    project_id: i64,
+    name: String,
+    data: String,
+) -> Result<assets::Saved> {
+    let dir = project_dir(&projects::get(&*db.conn()?, project_id)?)?;
+    assets::save_base64(&dir, &name, &data)
+}
+
+/// Miniatuur (data-URL) van een bijlage, of `None` als het geen kleine afbeelding is.
+#[tauri::command(async)]
+pub fn chat_asset_data(db: State<Db>, project_id: i64, path: String) -> Result<Option<String>> {
+    let dir = project_dir(&projects::get(&*db.conn()?, project_id)?)?;
+    assets::thumbnail(&dir, &path)
 }
 
 /// "Probeer opnieuw": stuurt het laatste bericht van de gebruiker nog eens (zonder een nieuwe ballon).
@@ -598,8 +659,9 @@ pub fn chat_retry(
 ) -> Result<()> {
     let text = chat::store::last_user_text(&*db.conn()?, project_id)?
         .ok_or_else(|| AppError::Invalid("Er is nog niets om opnieuw te proberen.".into()))?;
+    let atts = chat::store::last_user_attachments(&*db.conn()?, project_id)?;
     let launch = prepare_chat(&app, &db, &mcp, &chat, &profiles, project_id)?;
-    chat.send(project_id, &text, false, &launch)
+    chat.send_with(project_id, &text, false, &launch, &atts)
 }
 
 #[tauri::command]
@@ -886,4 +948,29 @@ pub fn pty_snapshot(term: State<TerminalManager>, id: String) -> Result<Snapshot
 #[tauri::command]
 pub fn pty_close(term: State<TerminalManager>, id: String) -> Result<()> {
     term.close(&id)
+}
+
+#[cfg(test)]
+mod attachment_tests {
+    use super::*;
+
+    #[test]
+    fn bijlagepaden_worden_gecontroleerd_en_beperkt() {
+        let d = tempfile::tempdir().unwrap();
+        let png = [0x89u8, b'P', b'N', b'G', 0, 0, 0, 0];
+        let s = assets::save(d.path(), "foto.png", &png).unwrap();
+        let ok = attachments_from_paths(d.path(), vec![s.path.clone()]).unwrap();
+        assert_eq!(
+            (ok[0].path.as_str(), ok[0].kind.as_str()),
+            ("assets/foto.png", "image")
+        );
+        assert!(attachments_from_paths(d.path(), vec!["../buiten.png".into()]).is_err());
+        assert!(attachments_from_paths(d.path(), vec!["index.html".into()]).is_err());
+        assert!(
+            attachments_from_paths(d.path(), vec![s.path.clone(); MAX_ATTACHMENTS + 1])
+                .unwrap_err()
+                .to_string()
+                .contains("maximaal")
+        );
+    }
 }

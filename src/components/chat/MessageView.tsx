@@ -1,3 +1,4 @@
+import AssetThumb from "./AssetThumb";
 import { useTranslation } from "react-i18next";
 import type { ChatMessage } from "../../lib/api";
 import ActionCard from "./ActionCard";
@@ -23,6 +24,15 @@ export default function MessageView({ message, live, technical, canRetry, onRetr
       return (
         <div className="flex justify-end">
           <div data-testid="bubble-user" className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-sm bg-indigo-700 px-5 py-3 text-lg leading-relaxed text-white">
+            {Array.isArray(p.attachments) && p.attachments.length > 0 && (
+              <ul aria-label={t("chat.bijlage.lijst")} className="mb-2 flex flex-wrap gap-2">
+                {p.attachments.map((a: { path: string; name: string; kind: string }) => (
+                  <li key={a.path}>
+                    <AssetThumb projectId={message.project_id} path={a.path} name={a.name} kind={a.kind} size="groot" />
+                  </li>
+                ))}
+              </ul>
+            )}
             {p.text}
           </div>
         </div>
