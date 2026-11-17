@@ -25,8 +25,6 @@ export default function ImproveDialog({ projectId, original, onSend, onUse, onCl
 
   useEffect(() => {
     let off = false;
-    setProposal(null);
-    setError(null);
     improvePrompt(projectId, original)
       .then((p) => !off && setProposal(p))
       .catch((e) => !off && setError(String(e)));
@@ -69,7 +67,11 @@ export default function ImproveDialog({ projectId, original, onSend, onUse, onCl
             {t("chat.verbeter.annuleer")}
           </Button>
           {error && (
-            <Button variant="outline" onClick={() => setAttempt((n) => n + 1)}>
+            <Button variant="outline" onClick={() => {
+                setProposal(null);
+                setError(null);
+                setAttempt((n) => n + 1);
+              }}>
               {t("chat.verbeter.opnieuw")}
             </Button>
           )}
