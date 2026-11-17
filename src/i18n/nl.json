@@ -162,7 +162,7 @@
     },
     "start": "Start",
     "stop": "Stop",
-    "herstart": "Herstart",
+    "herstart": "Opnieuw starten",
     "ververs": "Vernieuwen",
     "vertrouwTitel": "studio.json goedkeuren",
     "vertrouwUitleg": "Studio voert onderstaande commando's op jouw computer uit (ook wanneer de AI ze via run_checks aanroept). Controleer ze en keur ze alleen goed als je ze herkent. Wijzigt het bestand, dan vraagt Studio opnieuw om goedkeuring.",

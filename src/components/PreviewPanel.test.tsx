@@ -88,7 +88,7 @@ describe("PreviewPanel (zero-config)", () => {
     expect(screen.getByTestId("dev-badge")).toHaveTextContent("Fout");
     expect(screen.getByTestId("preview-problem")).toHaveTextContent("al in gebruik");
     expect(screen.getByTestId("problem-log")).toHaveTextContent("Error: EADDRINUSE");
-    fireEvent.click(screen.getByRole("button", { name: "Herstart" }));
+    fireEvent.click(screen.getByRole("button", { name: "Opnieuw starten" }));
     await waitFor(() => expect(api.previewRestart).toHaveBeenCalledWith(1));
     expect(screen.queryByTitle("Preview")).not.toBeInTheDocument();
   });

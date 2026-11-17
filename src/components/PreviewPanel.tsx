@@ -240,7 +240,7 @@ export default function PreviewPanel({ project, mcp, preview, visible, reloadNon
         </Badge>
         {t(`preview.modus.${mode}`, { defaultValue: "" }) && <span className="text-sm text-muted-foreground">{t(`preview.modus.${mode}`)}</span>}
         {preview?.url && <span className="truncate text-sm text-muted-foreground">{preview.url}</span>}
-        <div className="ml-auto flex gap-2">
+        <div className="ml-auto flex flex-wrap gap-2">
           {canStart && (
             <Button size="sm" disabled={busy} onClick={() => void run(() => previewStart(id))}>
               {t("preview.start")}
