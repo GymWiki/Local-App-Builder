@@ -116,7 +116,7 @@ pub fn export_zip(project: &Path, dest: &Path) -> Result<ExportResult> {
         skipped_secrets: vec![],
         skipped_large: vec![],
     };
-    let mut build = || -> Result<()> {
+    let build = || -> Result<()> {
         for entry in walker {
             let entry = entry
                 .map_err(|e| AppError::Invalid(format!("Lezen van de projectmap mislukte: {e}")))?;
