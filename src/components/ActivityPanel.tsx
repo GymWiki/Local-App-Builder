@@ -77,7 +77,7 @@ export default function ActivityPanel({ project, mcp, tick, onError }: Props) {
             <ul className="mt-1 space-y-0.5">
               {run.steps.map((s) => (
                 <li key={s.name} className="flex justify-between">
-                  <span>{s.name}</span>
+                  <span>{t(`activiteit.staplabel.${s.name}`, { defaultValue: s.name })}</span>
                   <span className={COLOR[s.status]}>
                     {ICON[s.status]} {t(`activiteit.stap.${s.status}`)}
                   </span>

@@ -8,15 +8,51 @@ mod instructions;
 mod mcp;
 mod mcp_config;
 mod node;
+mod preview;
 mod projects;
 mod provider;
 mod terminal;
 
 use mcp::{McpEvent, McpManager};
+use preview::{Bridge, PreviewEvent, PreviewManager};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use tauri::{Emitter, Manager};
 use terminal::{PtyEvent, TerminalManager};
+
+/// Verbindt de preview met de rest van de app (runtime, instellingen).
+struct AppBridge {
+    handle: tauri::AppHandle,
+}
+
+impl Bridge for AppBridge {
+    fn call(
+        &self,
+        id: i64,
+        cmd: &str,
+        args: serde_json::Value,
+        timeout: std::time::Duration,
+    ) -> error::Result<serde_json::Value> {
+        self.handle
+            .state::<McpManager>()
+            .call(id, cmd, args, timeout)
+    }
+    fn runtime_info(&self, id: i64) -> Option<mcp::McpInfo> {
+        self.handle.state::<McpManager>().info(id)
+    }
+    fn get_setting(&self, key: &str) -> Option<String> {
+        let db = self.handle.state::<commands::Db>();
+        let conn = db.conn().ok()?;
+        db::get_setting(&conn, key).ok().flatten()
+    }
+    fn set_setting(&self, key: &str, value: &str) {
+        let db = self.handle.state::<commands::Db>();
+        let conn = db.conn();
+        if let Ok(conn) = conn {
+            let _ = db::set_setting(&conn, key, value);
+        }
+    }
+}
 
 fn mcp_scripts(app: &tauri::App) -> Vec<PathBuf> {
     let mut v = Vec::new();
@@ -74,6 +110,13 @@ pub fn run() {
                     project_id,
                     payload,
                 } => {
+                    if payload["event"] == "dev" {
+                        // Op een eigen thread: de verwerking kan de runtime zelf bevragen, en die antwoorden komen via deze lezer binnen.
+                        let (h, p) = (handle.clone(), payload.clone());
+                        std::thread::spawn(move || {
+                            h.state::<PreviewManager>().on_dev_event(project_id, &p)
+                        });
+                    }
                     if payload["event"] == "checks" {
                         let db = handle.state::<commands::Db>();
                         let conn = db.conn();
@@ -93,6 +136,34 @@ pub fn run() {
                 }
             });
             app.manage(McpManager::new(mcp::new_token(), mcp_scripts(app), sink));
+
+            let handle = app.handle().clone();
+            let bridge = Arc::new(AppBridge {
+                handle: app.handle().clone(),
+            });
+            app.manage(PreviewManager::new(
+                bridge,
+                Arc::new(move |ev| match ev {
+                    PreviewEvent::State { project_id, info } => {
+                        let _ = handle.emit(
+                            "preview-state",
+                            serde_json::json!({ "project_id": project_id, "info": info }),
+                        );
+                    }
+                    PreviewEvent::Available { project_id } => {
+                        let _ = handle.emit(
+                            "preview-available",
+                            serde_json::json!({ "project_id": project_id }),
+                        );
+                    }
+                    PreviewEvent::Reload { project_id } => {
+                        let _ = handle.emit(
+                            "preview-reload",
+                            serde_json::json!({ "project_id": project_id }),
+                        );
+                    }
+                }),
+            ));
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -111,6 +182,14 @@ pub fn run() {
             commands::trust_studio_config,
             commands::last_checks,
             commands::verify_claude_mcp,
+            commands::preview_info,
+            commands::preview_start,
+            commands::preview_stop,
+            commands::preview_restart,
+            commands::preview_trust_scripts,
+            commands::preview_install,
+            commands::get_ui_setting,
+            commands::set_ui_setting,
             commands::start_shell,
             commands::start_ai,
             commands::start_login,
@@ -123,6 +202,7 @@ pub fn run() {
         .expect("Studio kon niet starten")
         .run(|app, event| {
             if let tauri::RunEvent::Exit = event {
+                app.state::<PreviewManager>().close_all();
                 app.state::<TerminalManager>().close_all();
                 app.state::<McpManager>().stop_all();
             }

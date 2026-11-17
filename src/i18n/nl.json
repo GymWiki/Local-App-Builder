@@ -119,29 +119,64 @@
     "bevestigVerwijder": "Account “{{label}}” uit de lijst verwijderen? De profielmap met de login blijft staan op:\\n{{pad}}"
   },
   "preview": {
-    "geenRuntime": "De projectruntime draait niet. Open het project (en installeer Node.js) om de preview, checks en tijdlijn te gebruiken.",
     "status": {
       "running": "Draait",
       "starting": "Starten…",
       "stopping": "Stoppen…",
       "error": "Fout",
-      "stopped": "Gestopt"
+      "stopped": "Gestopt",
+      "idle": "Niet actief"
     },
     "start": "Start",
     "stop": "Stop",
     "herstart": "Herstart",
     "ververs": "Vernieuwen",
-    "geenConfig": "Dit project heeft nog geen studio.json. Daarin staan de commando's voor preview, lint, build en test, bijvoorbeeld:",
-    "maakConfig": "Voorbeeld-studio.json aanmaken",
-    "configFout": "studio.json is ongeldig: {{fout}}",
     "vertrouwTitel": "studio.json goedkeuren",
     "vertrouwUitleg": "Studio voert onderstaande commando's op jouw computer uit (ook wanneer de AI ze via run_checks aanroept). Controleer ze en keur ze alleen goed als je ze herkent. Wijzigt het bestand, dan vraagt Studio opnieuw om goedkeuring.",
     "vertrouwStart": "Vertrouwen en starten",
     "vertrouw": "Vertrouwen",
     "wachten": "Wachten tot de preview bereikbaar is…",
-    "nietActief": "De preview draait niet. Klik op Start.",
     "logs": "Logs van het dev-proces",
-    "geenLogs": "Nog geen uitvoer."
+    "geenLogs": "Nog geen uitvoer.",
+    "geenRuntime": "De projectruntime draait niet; sommige onderdelen (dev-server, checks, tijdlijn) zijn daardoor niet beschikbaar.",
+    "modus": {
+      "static": "Statische preview",
+      "node": "Dev-server",
+      "config": "studio.json",
+      "empty": "",
+      "flutter": "",
+      "unsupported": ""
+    },
+    "nietActief": "De preview draait niet.",
+    "startKnop": "Start",
+    "autoWissel": "Automatisch naar de preview wisselen als die beschikbaar komt",
+    "probleem": {
+      "empty": "Nog niets om te tonen",
+      "flutter": "Flutter-project",
+      "unsupported": "Niet automatisch te tonen",
+      "config_invalid": "studio.json is ongeldig",
+      "node_missing": "Node.js ontbreekt",
+      "node_old": "Node.js is te oud",
+      "node_broken": "Node.js werkt niet",
+      "runtime_unavailable": "Projectruntime niet beschikbaar",
+      "deps_missing": "Afhankelijkheden nog niet geïnstalleerd",
+      "untrusted_scripts": "Scripts wijzigden: goedkeuring nodig",
+      "untrusted_config": "studio.json goedkeuren",
+      "dev_crashed": "De dev-server is gecrasht",
+      "static_failed": "De statische preview kon niet starten",
+      "watch_failed": "Bestandswijzigingen worden niet gevolgd"
+    },
+    "uitleg": {
+      "node_missing": "Dit project heeft Node.js nodig. Installeer Node.js 20 of nieuwer (https://nodejs.org) en klik op Opnieuw proberen.",
+      "deps_missing": "Draai npm install (of laat de AI dat doen). Zodra de installatie klaar is, start de preview vanzelf.",
+      "untrusted_scripts": "Studio voert alleen scripts uit die jij hebt goedgekeurd. Controleer ze en klik op Vertrouwen.",
+      "dev_crashed": "Zie de laatste logregels hieronder. Los het op en klik op Herstart."
+    },
+    "installeer": "npm install uitvoeren",
+    "installeren": "Installeren…",
+    "vertrouwScripts": "Vertrouwen en starten",
+    "opnieuwProberen": "Opnieuw proberen",
+    "laatsteRegels": "Laatste logregels"
   },
   "activiteit": {
     "checks": "Laatste checks",
@@ -165,6 +200,19 @@
     "bevestigKnop": "Ja, terugzetten",
     "teruggezet": "Teruggezet.",
     "teruggezetMetBackup": "Teruggezet. Je laatste wijzigingen staan veilig in een back-upcheckpoint.",
-    "alGelijk": "Het project staat al in die versie."
+    "alGelijk": "Het project staat al in die versie.",
+    "staplabel": {
+      "lint": "lint",
+      "build": "build",
+      "test": "test",
+      "html": "HTML aanwezig",
+      "links": "links",
+      "console": "console"
+    }
+  },
+  "notice": {
+    "beschikbaar": "Preview beschikbaar voor ‘{{naam}}’",
+    "bekijk": "Bekijk preview",
+    "sluit": "Sluiten"
   }
 }

@@ -1,26 +1,33 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import type { Account, DevStatus, McpInfo, Project } from "../lib/api";
+import type { Account, McpInfo, PreviewInfo, Project } from "../lib/api";
 import PreviewPanel from "./PreviewPanel";
 import TerminalPanel, { type Session } from "./TerminalPanel";
 
-const TABS = ["terminal", "preview", "publiceren"] as const;
-type Tab = (typeof TABS)[number];
+export const TABS = ["terminal", "preview", "publiceren"] as const;
+export type Tab = (typeof TABS)[number];
 
 interface Props {
   project: Project | null;
   accounts?: Account[];
   sessions?: Session[];
   mcp?: McpInfo | null;
-  dev?: DevStatus | null;
+  preview?: PreviewInfo | null;
+  reloadNonce?: number;
+  autoSwitch?: boolean;
+  onAutoSwitch?: (v: boolean) => void;
+  tab?: Tab;
+  onTab?: (t: Tab) => void;
   onSessionsChange?: (updater: (prev: Session[]) => Session[]) => void;
   onError?: (msg: string) => void;
   onRetryMcp?: () => Promise<void> | void;
 }
 
-export default function Workspace({ project, accounts = [], sessions = [], mcp = null, dev = null, onSessionsChange, onError, onRetryMcp }: Props) {
+export default function Workspace({ project, accounts = [], sessions = [], mcp = null, preview = null, reloadNonce = 0, autoSwitch = false, onAutoSwitch, tab: tabProp, onTab, onSessionsChange, onError, onRetryMcp }: Props) {
   const { t } = useTranslation();
-  const [tab, setTab] = useState<Tab>("terminal");
+  const [innerTab, setInnerTab] = useState<Tab>("terminal");
+  const tab = tabProp ?? innerTab;
+  const setTab = onTab ?? setInnerTab;
 
   return (
     <section className="flex min-h-0 flex-1 flex-col">
@@ -59,7 +66,17 @@ export default function Workspace({ project, accounts = [], sessions = [], mcp =
             />
           </div>
           <div role="tabpanel" className={`min-h-0 flex-1 flex-col ${tab === "preview" ? "flex" : "hidden"}`}>
-            <PreviewPanel project={project} mcp={mcp} dev={dev} visible={tab === "preview"} onError={onError ?? (() => undefined)} onRetryMcp={onRetryMcp} />
+            <PreviewPanel
+              project={project}
+              mcp={mcp}
+              preview={preview}
+              visible={tab === "preview"}
+              reloadNonce={reloadNonce}
+              autoSwitch={autoSwitch}
+              onAutoSwitch={onAutoSwitch}
+              onError={onError ?? (() => undefined)}
+              onRetryMcp={onRetryMcp}
+            />
           </div>
           {tab === "publiceren" && (
             <div role="tabpanel" className="flex flex-1 items-center justify-center text-zinc-500">

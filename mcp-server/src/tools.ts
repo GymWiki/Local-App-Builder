@@ -114,8 +114,8 @@ export function registerTools(server: McpServer, ctx: ProjectCtx, record: (r: Ca
     "run_checks",
     {
       description:
-        "Draait lint, build en tests uit studio.json (in die volgorde) en geeft per stap geslaagd/mislukt met de relevante foutregels (max 200). Roep dit aan na elke wijziging.",
-      inputSchema: { steps: z.array(z.enum(["lint", "build", "test"])).optional() },
+        "Draait de checks van het project en geeft per stap geslaagd/mislukt met de relevante foutregels (max 200). Bij een project met lint-/build-/test-scripts (package.json of studio.json) draaien die; bij een statisch project (index.html) controleert het: html (aanwezig), links (geen kapotte lokale verwijzingen) en console (geen console- of netwerkfouten in de preview). Roep dit aan na elke wijziging.",
+      inputSchema: { steps: z.array(z.enum(["lint", "build", "test", "html", "links", "console"])).optional() },
     },
     ({ steps }) =>
       run("run_checks", `steps=${(steps ?? ["lint", "build", "test"]).join(",")}`, async () => {
@@ -129,7 +129,7 @@ export function registerTools(server: McpServer, ctx: ProjectCtx, record: (r: Ca
     "get_preview_screenshot",
     {
       description:
-        "Screenshot (JPEG) van de preview, genomen met een onzichtbare browser. De dev-server moet draaien. Optioneel viewport (desktop 1280x800 of mobile 390x844), een pad binnen de preview (bijv. /over) en fullPage.",
+        "Screenshot (JPEG) van de preview, genomen met een onzichtbare browser. Werkt voor statische projecten (index.html) en dev-servers; de preview moet draaien (Studio start hem vanzelf). Optioneel viewport (desktop 1280x800 of mobile 390x844), een pad binnen de preview (bijv. /over) en fullPage.",
       inputSchema: {
         viewport: z.enum(["desktop", "mobile"]).default("desktop"),
         path: z.string().max(500).optional(),
@@ -170,6 +170,10 @@ export function registerTools(server: McpServer, ctx: ProjectCtx, record: (r: Ca
       run("get_dev_logs", `lines=${lines}`, async () => {
         const st = rt.dev.status();
         const logs = rt.dev.logs.last(lines);
+        const plan = rt.getPlan();
+        if (!logs.length && plan?.kind === "static") {
+          return `Statische preview${plan.staticUrl ? ` op ${plan.staticUrl}` : ""}: er is geen dev-proces en dus geen dev-logs. Gebruik get_console_errors voor fouten in de browser.`;
+        }
         const head = `dev-server: ${st.state}${st.error ? ` (${st.error})` : ""}`;
         if (!logs.length) return `${head}\n(nog geen uitvoer; start de dev-server via de Preview-tab)`;
         return `${head}\n${logs.join("\n")}`;

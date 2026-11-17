@@ -19,6 +19,8 @@ type Page = any;
 type Browser = any;
 
 const MAX_ENTRIES = 200;
+/** Browsers vragen zelf om /favicon.ico; een ontbrekend icoon is geen fout van het project. */
+const isFavicon = (url?: string) => !!url && /\/favicon\.ico(?:[?#].*)?$/i.test(url);
 const NAV_TIMEOUT = 15_000;
 
 async function launchBrowser(): Promise<Browser> {
@@ -76,16 +78,17 @@ export class PreviewObserver {
 
   private attach(page: Page, origin: string): void {
     page.on("console", (m: any) => {
-      if (m.type() === "error") this.add({ kind: "console", text: m.text().slice(0, 1000), url: m.location()?.url });
+      const loc = m.location()?.url;
+      if (m.type() === "error" && !isFavicon(loc)) this.add({ kind: "console", text: m.text().slice(0, 1000), url: loc });
     });
     page.on("pageerror", (e: Error) => this.add({ kind: "pageerror", text: String(e.stack ?? e.message).slice(0, 1500) }));
     page.on("requestfailed", (r: any) => {
       const failure = r.failure()?.errorText ?? "mislukt";
-      if (failure.includes("ERR_ABORTED")) return; // genegeerde navigatie/annulering
+      if (failure.includes("ERR_ABORTED") || isFavicon(r.url())) return; // genegeerde navigatie/annulering
       this.add({ kind: "network", text: `${r.method()} ${r.url()} → ${failure}`, url: r.url() });
     });
     page.on("response", (r: any) => {
-      if (r.status() >= 400 && r.url().startsWith(origin)) {
+      if (r.status() >= 400 && r.url().startsWith(origin) && !isFavicon(r.url())) {
         this.add({ kind: "network", text: `${r.request().method()} ${r.url()} → HTTP ${r.status()}`, url: r.url() });
       }
     });

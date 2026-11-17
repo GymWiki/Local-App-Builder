@@ -5,6 +5,7 @@ use crate::error::{AppError, Result};
 use crate::instructions;
 use crate::mcp::{self, McpInfo, McpManager};
 use crate::mcp_config;
+use crate::preview::{PreviewInfo, PreviewManager};
 use crate::projects::{self, Project};
 use crate::provider::Provider;
 use crate::terminal::{Snapshot, SpawnSpec, TerminalManager};
@@ -103,7 +104,12 @@ fn trust_key(project_id: i64) -> String {
 }
 
 #[tauri::command(async)]
-pub fn open_project(db: State<Db>, mcp: State<McpManager>, id: i64) -> Result<McpInfo> {
+pub fn open_project(
+    db: State<Db>,
+    mcp: State<McpManager>,
+    previews: State<PreviewManager>,
+    id: i64,
+) -> Result<McpInfo> {
     let (p, trusted) = {
         let c = db.conn()?;
         (
@@ -122,11 +128,64 @@ pub fn open_project(db: State<Db>, mcp: State<McpManager>, id: i64) -> Result<Mc
             Duration::from_secs(5),
         );
     }
+    // Zero-config preview: detecteren, statische server starten en bestanden gaan volgen (werkt ook zonder Node-runtime).
+    previews.open(p.id, PathBuf::from(&p.pad));
     Ok(info)
 }
 
+// ---------- preview ----------
+
+#[tauri::command]
+pub fn preview_info(previews: State<PreviewManager>, id: i64) -> Option<PreviewInfo> {
+    previews.info(id)
+}
+
 #[tauri::command(async)]
-pub fn close_project(mcp: State<McpManager>, id: i64) {
+pub fn preview_start(previews: State<PreviewManager>, id: i64) -> Result<PreviewInfo> {
+    previews.start(id)
+}
+
+#[tauri::command(async)]
+pub fn preview_stop(previews: State<PreviewManager>, id: i64) -> Result<PreviewInfo> {
+    previews.stop(id)
+}
+
+#[tauri::command(async)]
+pub fn preview_restart(previews: State<PreviewManager>, id: i64) -> Result<PreviewInfo> {
+    previews.restart(id)
+}
+
+#[tauri::command(async)]
+pub fn preview_trust_scripts(previews: State<PreviewManager>, id: i64) -> Result<PreviewInfo> {
+    previews.trust_scripts(id)
+}
+
+#[tauri::command(async)]
+pub fn preview_install(previews: State<PreviewManager>, id: i64) -> Result<PreviewInfo> {
+    previews.install(id)
+}
+
+const UI_SETTINGS: &[&str] = &["preview_auto_switch"];
+
+#[tauri::command]
+pub fn get_ui_setting(db: State<Db>, key: String) -> Result<Option<String>> {
+    if !UI_SETTINGS.contains(&key.as_str()) {
+        return Err(AppError::Invalid("Onbekende instelling.".into()));
+    }
+    crate::db::get_setting(&*db.conn()?, &format!("ui:{key}"))
+}
+
+#[tauri::command]
+pub fn set_ui_setting(db: State<Db>, key: String, value: String) -> Result<()> {
+    if !UI_SETTINGS.contains(&key.as_str()) || value.len() > 20 {
+        return Err(AppError::Invalid("Onbekende instelling.".into()));
+    }
+    crate::db::set_setting(&*db.conn()?, &format!("ui:{key}"), &value)
+}
+
+#[tauri::command(async)]
+pub fn close_project(mcp: State<McpManager>, previews: State<PreviewManager>, id: i64) {
+    previews.close(id);
     mcp.stop(id);
 }
 

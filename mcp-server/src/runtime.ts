@@ -1,13 +1,30 @@
 import { mkdir } from "node:fs/promises";
+import { existsSync } from "node:fs";
+import path from "node:path";
 import { DevServer, type DevStatus } from "./dev.js";
 import { initConfig, loadConfig, type StudioConfig } from "./config.js";
 import { Git } from "./git.js";
 import { PreviewObserver } from "./preview.js";
 import { runCommand } from "./proc.js";
+import { checkHtml, checkLinks } from "./static-checks.js";
 import { relevantLines } from "./text.js";
 
-export type CheckName = "lint" | "build" | "test";
-export const CHECK_ORDER: CheckName[] = ["lint", "build", "test"];
+export type CheckName = "lint" | "build" | "test" | "html" | "links" | "console";
+export const CHECK_ORDER: CheckName[] = ["lint", "build", "test", "html", "links", "console"];
+const COMMAND_CHECKS = ["lint", "build", "test"] as const;
+
+/** Wat Studio (de app) over het project heeft gedetecteerd. Wordt bij elke wijziging opnieuw doorgegeven. */
+export interface PlanPush {
+  kind: "empty" | "static" | "node" | "config" | "flutter" | "unsupported";
+  entry?: string | null;
+  staticRoot?: string | null;
+  devScript?: "dev" | "start" | null;
+  scripts?: { dev?: string | null; start?: string | null; lint?: string | null; build?: string | null; test?: string | null };
+  /** De gebruiker (of de eerste keer: Studio) heeft precies deze package.json-scripts goedgekeurd. */
+  trusted?: boolean;
+  staticUrl?: string | null;
+  needsInstall?: boolean;
+}
 
 export interface StepResult {
   name: CheckName;
@@ -40,6 +57,7 @@ export class Runtime {
   readonly dev: DevServer;
   readonly observer: PreviewObserver;
   private trustedHash: string | null = null;
+  private plan: PlanPush | null = null;
   private last: ChecksResult | null = null;
   private checking: AbortController | null = null;
   private readonly emit: Emit;
@@ -53,63 +71,162 @@ export class Runtime {
       cwd: o.projectDir,
       readyTimeoutMs: o.readyTimeoutMs,
       resolve: async () => {
-        const c = await this.trustedConfig();
-        if (!c.dev) throw new Error('Geen "dev"-commando ingesteld in studio.json.');
-        return { command: c.dev, url: c.previewUrl };
+        const command = await this.commandFor("dev");
+        if (!command) throw new Error("Er is geen dev-commando: geen ‘dev’/‘start’-script en geen \"dev\" in studio.json.");
+        const url = (await this.configUrl()) ?? undefined;
+        return { command, url };
       },
       onChange: (s) => this.emit({ event: "dev", ...s }),
     });
-    this.observer = new PreviewObserver(async () => {
-      const { config } = await this.requireConfig();
-      if (!config.previewUrl) throw new Error('Geen "previewUrl" ingesteld in studio.json.');
-      return config.previewUrl;
-    });
+    this.observer = new PreviewObserver(() => this.previewUrl());
   }
 
   setTrustedHash(hash: string | null): void {
     this.trustedHash = hash;
   }
 
-  private async requireConfig(): Promise<{ config: StudioConfig; hash: string }> {
-    const l = await loadConfig(this.projectDir);
-    if (!l.exists) throw new Error("studio.json ontbreekt in de projectmap. Maak het aan (zie de Preview-tab).");
-    if (!l.config || !l.hash) throw new Error(`studio.json is ongeldig: ${l.error ?? "onbekende fout"}`);
-    return { config: l.config, hash: l.hash };
+  getPlan(): PlanPush | null {
+    return this.plan;
   }
 
-  /** Commando's uit studio.json draaien alleen als de gebruiker precies deze versie van het bestand heeft goedgekeurd. */
-  async trustedConfig(): Promise<StudioConfig> {
-    const { config, hash } = await this.requireConfig();
-    if (hash !== this.trustedHash) {
+  setPlan(plan: PlanPush | null): void {
+    this.plan = plan;
+  }
+
+  /** studio.json (indien aanwezig en geldig). Een kapot bestand is een fout, een ontbrekend bestand niet. */
+  private async studioConfig(): Promise<{ config: StudioConfig; hash: string | null }> {
+    const l = await loadConfig(this.projectDir);
+    if (l.exists && !l.config) throw new Error(`studio.json is ongeldig: ${l.error ?? "onbekende fout"}`);
+    return { config: l.config ?? {}, hash: l.hash };
+  }
+
+  private async configUrl(): Promise<string | null> {
+    return (await this.studioConfig()).config.previewUrl ?? null;
+  }
+
+  /** De URL waar de preview draait: studio.json, anders de statische server of de poort die uit de dev-uitvoer kwam. */
+  async previewUrl(): Promise<string> {
+    const url = (await this.configUrl()) ?? this.plan?.staticUrl ?? this.dev.status().url;
+    if (!url) throw new Error("De preview draait niet (er is geen URL). Open de Preview-tab in Studio of maak een index.html / dev-script aan.");
+    return url;
+  }
+
+  /**
+   * Het commando voor `dev`, `lint`, `build` of `test`: studio.json is leidend, anders het npm-script uit package.json.
+   * Het commando draait alleen als de bron is goedgekeurd (studio.json: exacte inhoud; package.json: door Studio bijgehouden).
+   */
+  private async commandFor(name: "dev" | CheckName): Promise<string | null> {
+    if (name !== "dev" && !(COMMAND_CHECKS as readonly string[]).includes(name)) return null;
+    const { config, hash } = await this.studioConfig();
+    const own = (config as Record<string, unknown>)[name];
+    if (typeof own === "string") {
+      if (!hash || hash !== this.trustedHash) {
+        throw new Error(
+          "studio.json is nieuw of gewijzigd en nog niet goedgekeurd door de gebruiker. Vraag de gebruiker om in de Preview-tab op ‘Vertrouwen’ te klikken.",
+        );
+      }
+      return own;
+    }
+    const p = this.plan;
+    const script = name === "dev" ? p?.devScript : p?.scripts?.[name as "lint" | "build" | "test"] ? name : null;
+    if (!script || (p?.kind !== "node" && p?.kind !== "static")) return null;
+    if (!p.trusted) {
       throw new Error(
-        "studio.json is nieuw of gewijzigd en nog niet goedgekeurd door de gebruiker. Vraag de gebruiker om in de Preview-tab op ‘Vertrouwen’ te klikken.",
+        "De scripts in package.json zijn gewijzigd en nog niet goedgekeurd door de gebruiker. Vraag de gebruiker om in de Preview-tab op ‘Vertrouwen’ te klikken.",
       );
     }
-    return config;
+    return `npm run ${script}`;
+  }
+
+  private staticRoot(): string | null {
+    const p = this.plan;
+    return p?.kind === "static" ? path.join(this.projectDir, p.staticRoot ?? "") : null;
+  }
+
+  /** Start de dev-server als dat kan en mag; geeft anders de reden terug (voor een duidelijke melding in de UI). */
+  async autostart(): Promise<{ started: boolean; reason?: string; detail?: string }> {
+    const st = this.dev.status().state;
+    if (st === "starting" || st === "running") return { started: false, reason: "already_running" };
+    if (this.plan?.needsInstall) return { started: false, reason: "deps_missing" };
+    try {
+      const command = await this.commandFor("dev");
+      if (!command) return { started: false, reason: "no_dev" };
+      await this.dev.start();
+      return { started: true };
+    } catch (e) {
+      const msg = (e as Error).message;
+      if (/goedgekeurd/.test(msg)) return { started: false, reason: "untrusted", detail: msg };
+      throw e;
+    }
+  }
+
+  async installDeps(): Promise<{ ok: boolean; output: string[] }> {
+    const has = (f: string) => existsSync(path.join(this.projectDir, f));
+    const cmd = has("pnpm-lock.yaml") ? "pnpm install" : has("yarn.lock") ? "yarn install" : "npm install";
+    const r = await runCommand(cmd, this.projectDir, 10 * 60 * 1000);
+    const output = relevantLines(r.output, 60);
+    if (r.exitCode !== 0) throw new Error(`${cmd} mislukte${r.timedOut ? " (time-out)" : ""}:\n${output.join("\n")}`);
+    return { ok: true, output };
   }
 
   async runChecks(steps?: CheckName[]): Promise<ChecksResult> {
     if (this.checking) throw new Error("Er loopt al een check-run. Wacht tot die klaar is.");
-    const config = await this.trustedConfig();
-    const wanted = CHECK_ORDER.filter((n) => !steps || steps.includes(n));
-    if (!wanted.some((n) => config[n])) throw new Error("Geen lint, build of test ingesteld in studio.json.");
+    const sRoot = this.staticRoot();
+    const { config } = await this.studioConfig();
+    const hasCommand = (n: CheckName) => typeof (config as Record<string, unknown>)[n] === "string" || !!this.plan?.scripts?.[n as "lint" | "build" | "test"];
+    const anyCommand = COMMAND_CHECKS.some(hasCommand);
+    // Standaard: lint/build/test; in een statisch project zonder eigen scripts: html, links en console.
+    const defaults: CheckName[] = anyCommand ? [...COMMAND_CHECKS] : sRoot ? ["html", "links", "console"] : [...COMMAND_CHECKS];
+    const wanted = CHECK_ORDER.filter((n) => (steps ?? defaults).includes(n));
+    const runnable = wanted.some((n) => (COMMAND_CHECKS as readonly string[]).includes(n) ? hasCommand(n) : n === "console" ? true : !!sRoot);
+    if (!runnable) {
+      throw new Error("Geen checks beschikbaar: er is geen lint-, build- of test-script, en dit is geen statisch project (index.html).");
+    }
     const ac = new AbortController();
     this.checking = ac;
     const timeoutMs = (config.timeoutSec ?? 300) * 1000;
     const results: StepResult[] = [];
+    const skip = (name: CheckName, why: string) =>
+      results.push({ name, status: "skipped", exitCode: null, durationMs: 0, output: [why] });
     try {
       for (const name of wanted) {
-        const command = config[name];
-        if (!command) {
-          results.push({ name, status: "skipped", exitCode: null, durationMs: 0, output: ["Niet ingesteld in studio.json."] });
+        if ((COMMAND_CHECKS as readonly string[]).includes(name)) {
+          if (!hasCommand(name)) {
+            skip(name, "Niet ingesteld (geen script in package.json of studio.json).");
+            continue;
+          }
+          const command = (await this.commandFor(name))!;
+          const r = await runCommand(command, this.projectDir, timeoutMs, ac.signal);
+          const status = r.timedOut ? "timeout" : r.exitCode === 0 ? "passed" : "failed";
+          const output = status === "passed" ? [] : relevantLines(r.output, 200).concat(r.timedOut ? [`[time-out na ${timeoutMs / 1000} s]`] : []);
+          results.push({ name, command, status, exitCode: r.exitCode, durationMs: r.durationMs, output });
+          if (r.aborted) break;
           continue;
         }
-        const r = await runCommand(command, this.projectDir, timeoutMs, ac.signal);
-        const status = r.timedOut ? "timeout" : r.exitCode === 0 ? "passed" : "failed";
-        const output =
-          status === "passed" ? [] : relevantLines(r.output, 200).concat(r.timedOut ? [`[time-out na ${timeoutMs / 1000} s]`] : []);
-        results.push({ name, command, status, exitCode: r.exitCode, durationMs: r.durationMs, output });
-        if (r.aborted) break;
+        const t0 = Date.now();
+        if (name !== "console" && !sRoot) {
+          skip(name, "Alleen voor statische projecten (index.html).");
+          continue;
+        }
+        let outcome: { ok: boolean; lines: string[]; skipped?: boolean };
+        try {
+          if (name === "html") outcome = await checkHtml(sRoot!, this.plan?.entry ?? "index.html");
+          else if (name === "links") outcome = await checkLinks(sRoot!);
+          else {
+            const errors = await this.observer.consoleErrors(true);
+            outcome = { ok: errors.length === 0, lines: errors.map((e) => `[${e.kind}] ${e.text}`).slice(0, 100) };
+          }
+        } catch (e) {
+          const msg = (e as Error).message;
+          outcome = /^Geen browser/.test(msg) ? { ok: true, skipped: true, lines: [msg] } : { ok: false, lines: [msg] };
+        }
+        results.push({
+          name,
+          status: outcome.skipped ? "skipped" : outcome.ok ? "passed" : "failed",
+          exitCode: null,
+          durationMs: Date.now() - t0,
+          output: outcome.ok && !outcome.skipped ? [] : outcome.lines,
+        });
       }
     } finally {
       this.checking = null;
@@ -131,6 +248,15 @@ export class Runtime {
         const l = await loadConfig(this.projectDir);
         return { ...l, trusted: !!l.hash && l.hash === this.trustedHash };
       }
+      case "plan.set":
+        this.plan = (args && typeof args === "object" ? (args as unknown as PlanPush) : null) ?? null;
+        return { ok: true };
+      case "plan.get":
+        return this.plan;
+      case "dev.autostart":
+        return this.autostart();
+      case "deps.install":
+        return this.installDeps();
       case "config.init":
         await mkdir(this.projectDir, { recursive: true });
         return { created: await initConfig(this.projectDir) };

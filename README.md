@@ -32,8 +32,18 @@ De database (`studio.db`) staat in de app-datamap van het besturingssysteem (`nl
 - Bronnen en verificatie: `docs/cli-notes.md`.
 - Claude vraagt bij de eerste start om goedkeuring van de projectserver uit `.mcp.json`; dat is bedoeld gedrag.
 
+## Zero-config preview (fase 4)
+Studio detecteert bij het openen van een project én bij elke bestandswijziging (file watcher) wat het is:
+- **Alleen `index.html`** (root of `public/`): ingebouwde statische server in Rust, alleen `127.0.0.1` op een willekeurige poort, zonder Node.js. Wijzigingen verversen de pagina automatisch (Server-Sent Events + een klein script dat in de HTML wordt geplakt). Dotfiles (`.env`, `.git`), `..` en symlinks naar buiten de map worden niet geserveerd.
+- **`package.json` met `dev`- of `start`-script**: Studio draait het script (via de Node-runtime), leest de poort uit de uitvoer (Vite, Next, Astro, CRA, …) en toont die URL. Ontbreken de dependencies, dan meldt Studio dat (met knop **npm install uitvoeren**) en start de preview zodra ze er zijn. Frameworks zonder eigen hot reload worden bij een wijziging herladen.
+- **Flutter / overig**: een duidelijke melding met wat er nodig is.
+- **`studio.json` met `dev`** blijft leidend.
+- **Vertrouwen**: de eerste keer dat Studio scripts uit `package.json` ziet, worden die vertrouwd (het is jouw project); wijzigen ze daarna, dan vraagt Studio eerst opnieuw om goedkeuring. Dit voorkomt dat een AI-wijziging in package.json ongezien commando's laat draaien.
+- **Preview beschikbaar**: zodra er voor het eerst iets draait, toont Studio een melding met knop, of wisselt automatisch naar de preview-tab (instelbaar onderaan de Preview-tab).
+- **MCP**: `get_preview_screenshot`, `get_console_errors` en `run_checks` werken ook voor de statische modus (checks: html aanwezig, geen kapotte lokale links, geen console-fouten).
+
 ## Fase 3: de feedbackloop
-Zet in de projectmap een `studio.json` (de Preview-tab maakt een voorbeeld aan):
+Alleen voor afwijkende situaties: zet in de projectmap een `studio.json` (leidend boven de detectie):
 ```json
 { "dev": "npm run dev", "build": "npm run build", "lint": "npm run lint", "test": "npm test",
   "previewUrl": "http://localhost:5173", "timeoutSec": 300 }

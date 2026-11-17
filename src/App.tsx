@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { listen } from "@tauri-apps/api/event";
 import {
@@ -9,9 +9,11 @@ import {
   ptyClose,
   setDefaultAccount,
   type Account,
-  type DevStatus,
   type McpInfo,
-  runtime,
+  type PreviewInfo,
+  getUiSetting,
+  previewInfo,
+  setUiSetting,
   type Project,
 } from "./lib/api";
 import Sidebar from "./components/Sidebar";
@@ -19,6 +21,8 @@ import Workspace from "./components/Workspace";
 import InfoPanel from "./components/InfoPanel";
 import NewProjectDialog from "./components/NewProjectDialog";
 import AccountsScreen from "./components/AccountsScreen";
+import PreviewNotice from "./components/PreviewNotice";
+import type { Tab } from "./components/Workspace";
 import type { Session } from "./components/TerminalPanel";
 
 export default function App() {
@@ -31,7 +35,11 @@ export default function App() {
   const [error, setError] = useState<string | null>(null);
   const [sessions, setSessions] = useState<Record<number, Session[]>>({});
   const [mcp, setMcp] = useState<Record<number, McpInfo | null>>({});
-  const [dev, setDev] = useState<Record<number, DevStatus | null>>({});
+  const [preview, setPreview] = useState<Record<number, PreviewInfo | null>>({});
+  const [reloadNonce, setReloadNonce] = useState<Record<number, number>>({});
+  const [tab, setTab] = useState<Tab>("terminal");
+  const [autoSwitch, setAutoSwitch] = useState(false);
+  const [notice, setNotice] = useState<number | null>(null);
   const [tick, setTick] = useState<Record<number, number>>({});
 
   const fail = useCallback((e: unknown) => setError(t("fout.algemeen", { bericht: String(e) })), [t]);
@@ -75,15 +83,27 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const un = listen<{ project_id: number; payload: { event: string } & Partial<DevStatus> }>("runtime-event", (e) => {
+    getUiSetting("preview_auto_switch")
+      .then((v) => setAutoSwitch(v === "1"))
+      .catch(() => undefined);
+  }, []);
+
+  useEffect(() => {
+    // Checks en git-gebeurtenissen verversen de zijbalk.
+    const un = listen<{ project_id: number; payload: { event: string } }>("runtime-event", (e) => {
       const { project_id: id, payload } = e.payload;
-      if (payload.event === "dev") {
-        setDev((m) => ({ ...m, [id]: payload as DevStatus }));
-      } else {
-        setTick((m) => ({ ...m, [id]: (m[id] ?? 0) + 1 }));
-      }
+      if (payload.event !== "dev") setTick((m) => ({ ...m, [id]: (m[id] ?? 0) + 1 }));
     });
-    return () => void un.then((f) => f());
+    const st = listen<{ project_id: number; info: PreviewInfo }>("preview-state", (e) =>
+      setPreview((m) => ({ ...m, [e.payload.project_id]: e.payload.info })),
+    );
+    const rl = listen<{ project_id: number }>("preview-reload", (e) =>
+      setReloadNonce((m) => ({ ...m, [e.payload.project_id]: (m[e.payload.project_id] ?? 0) + 1 })),
+    );
+    const av = listen<{ project_id: number }>("preview-available", (e) => availableRef.current(e.payload.project_id));
+    return () => {
+      for (const u of [un, st, rl, av]) void u.then((f) => f());
+    };
   }, []);
 
   // Een project "openen" = selecteren + zijn MCP-server starten.
@@ -93,11 +113,9 @@ export default function App() {
     try {
       const info = await openProject(id);
       setMcp((m) => ({ ...m, [id]: info }));
-      if (info.state === "running" || info.state === "connected") {
-        runtime<DevStatus>(id, "dev.status")
-          .then((d) => setDev((m) => ({ ...m, [id]: d })))
-          .catch(() => undefined);
-      }
+      previewInfo(id)
+        .then((p) => setPreview((m) => ({ ...m, [id]: p })))
+        .catch(() => undefined);
     } catch (e) {
       // De echte reden tonen in plaats van alleen "niet beschikbaar".
       setMcp((m) => ({ ...m, [id]: { state: "unavailable", port: null, error: String(e), kind: "error", log: [] } }));
@@ -110,11 +128,24 @@ export default function App() {
     await closeProject(id).catch(() => undefined);
     setSessions((s) => ({ ...s, [id]: [] }));
     setMcp((m) => ({ ...m, [id]: null }));
-    setDev((m) => ({ ...m, [id]: null }));
+    setPreview((m) => ({ ...m, [id]: null }));
     if (selectedId === id) setSelectedId(null);
   }
 
   const selected = projects.find((p) => p.id === selectedId) ?? null;
+
+  // "Preview beschikbaar": automatisch wisselen (instelbaar) of een melding met knop.
+  const availableRef = useRef<(id: number) => void>(() => undefined);
+  useEffect(() => {
+    availableRef.current = (id: number) => {
+      if (autoSwitch) {
+        void select(id).then(() => setTab("preview"));
+      } else {
+        setNotice(id);
+      }
+    };
+  });
+  const noticeProject = notice != null ? projects.find((p) => p.id === notice) : null;
 
   return (
     <div className="flex h-full">
@@ -137,6 +168,17 @@ export default function App() {
             {error}
           </div>
         )}
+        {noticeProject && (
+          <PreviewNotice
+            projectName={noticeProject.naam}
+            onClose={() => setNotice(null)}
+            onView={() => {
+              const id = noticeProject.id;
+              setNotice(null);
+              void select(id).then(() => setTab("preview"));
+            }}
+          />
+        )}
         {view === "accounts" ? (
           <AccountsScreen accounts={accounts} onChanged={refreshAccounts} onError={setError} />
         ) : (
@@ -145,7 +187,15 @@ export default function App() {
             accounts={accounts}
             sessions={selected ? (sessions[selected.id] ?? []) : []}
             mcp={selected ? (mcp[selected.id] ?? null) : null}
-            dev={selected ? (dev[selected.id] ?? null) : null}
+            preview={selected ? (preview[selected.id] ?? null) : null}
+            reloadNonce={selected ? (reloadNonce[selected.id] ?? 0) : 0}
+            autoSwitch={autoSwitch}
+            onAutoSwitch={(v) => {
+              setAutoSwitch(v);
+              void setUiSetting("preview_auto_switch", v ? "1" : "0").catch(() => undefined);
+            }}
+            tab={tab}
+            onTab={setTab}
             onSessionsChange={(fn) => selected && setSessions((s) => ({ ...s, [selected.id]: fn(s[selected.id] ?? []) }))}
             onError={setError}
             onRetryMcp={() => (selected ? select(selected.id) : undefined)}

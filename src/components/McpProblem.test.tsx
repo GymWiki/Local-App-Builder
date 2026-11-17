@@ -3,7 +3,7 @@ import { vi, type Mock } from "vitest";
 import McpProblem from "./McpProblem";
 import TerminalPanel from "./TerminalPanel";
 import PreviewPanel from "./PreviewPanel";
-import type { McpInfo, Project } from "../lib/api";
+import type { McpInfo, PreviewInfo, Project } from "../lib/api";
 import * as api from "../lib/api";
 
 vi.mock("../lib/api");
@@ -46,10 +46,19 @@ describe("MCP-probleemmelding", () => {
     await waitFor(() => expect(retry).toHaveBeenCalled());
   });
 
-  it("preview-tab toont dezelfde reden in plaats van alleen 'draait niet'", () => {
-    render(<PreviewPanel project={project} mcp={crashed} dev={null} visible onError={vi.fn()} onRetryMcp={vi.fn()} />);
-    expect(screen.getByTestId("mcp-problem")).toHaveTextContent("exitcode 3");
-    expect(screen.getByText(/projectruntime draait niet/)).toBeInTheDocument();
+  it("preview-tab toont bij een Node-project dezelfde reden en een knop om opnieuw te proberen", () => {
+    const preview: PreviewInfo = {
+      mode: "node",
+      status: "idle",
+      url: null,
+      hmr: false,
+      problem: { kind: "runtime_unavailable", message: "De MCP-server is gestopt (exitcode 3).", log: ["Error: kapot!"] },
+      plan: { entry: null, dev_script: "dev", needs_install: false },
+    };
+    render(<PreviewPanel project={project} mcp={crashed} preview={preview} visible onError={vi.fn()} onRetryMcp={vi.fn()} />);
+    expect(screen.getByTestId("preview-problem")).toHaveTextContent("exitcode 3");
+    expect(screen.getByTestId("problem-log")).toHaveTextContent("Error: kapot!");
+    expect(screen.getByRole("button", { name: "Opnieuw proberen" })).toBeInTheDocument();
   });
 
   it("'Controleer in Claude' toont de uitkomst, ook als Claude op goedkeuring wacht", async () => {

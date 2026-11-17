@@ -42,7 +42,7 @@ describe("procesleven van de gebundelde server", () => {
     await ask("trust.set", { hash: cfg.hash });
     expect((await ask("config.get")).trusted).toBe(true);
     await ask("dev.start");
-    await waitFor("running", async () => (await ask("dev.status")).state === "running");
+    await waitFor("gestart", async () => (await ask("dev.status")).pid != null);
     const devPid = ((await ask("dev.status")).pid as number) ?? 0;
     await waitFor("kindproces-pid", async () => {
       try {

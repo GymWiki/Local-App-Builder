@@ -158,7 +158,7 @@ export interface Checkpoint {
 }
 
 export interface StepResult {
-  name: "lint" | "build" | "test";
+  name: "lint" | "build" | "test" | "html" | "links" | "console";
   command?: string;
   status: "passed" | "failed" | "timeout" | "skipped";
   exitCode: number | null;
@@ -183,3 +183,31 @@ export const runtime = <T>(projectId: number, cmd: string, args: Record<string, 
   invoke<T>("runtime_call", { projectId, cmd, args });
 export const trustStudioConfig = (projectId: number) => invoke<void>("trust_studio_config", { projectId });
 export const lastChecks = (projectId: number, limit = 3) => invoke<CheckRun[]>("last_checks", { projectId, limit });
+
+// zero-config preview
+export type PreviewMode = "empty" | "static" | "node" | "config" | "flutter" | "unsupported";
+export type PreviewStatus = "idle" | "starting" | "running" | "stopping" | "error";
+
+export interface PreviewProblem {
+  kind: string;
+  message: string;
+  log: string[];
+}
+
+export interface PreviewInfo {
+  mode: PreviewMode;
+  status: PreviewStatus;
+  url: string | null;
+  hmr: boolean;
+  problem: PreviewProblem | null;
+  plan: { entry: string | null; dev_script: string | null; needs_install: boolean };
+}
+
+export const previewInfo = (id: number) => invoke<PreviewInfo | null>("preview_info", { id });
+export const previewStart = (id: number) => invoke<PreviewInfo>("preview_start", { id });
+export const previewStop = (id: number) => invoke<PreviewInfo>("preview_stop", { id });
+export const previewRestart = (id: number) => invoke<PreviewInfo>("preview_restart", { id });
+export const previewTrustScripts = (id: number) => invoke<PreviewInfo>("preview_trust_scripts", { id });
+export const previewInstall = (id: number) => invoke<PreviewInfo>("preview_install", { id });
+export const getUiSetting = (key: string) => invoke<string | null>("get_ui_setting", { key });
+export const setUiSetting = (key: string, value: string) => invoke<void>("set_ui_setting", { key, value });

@@ -1,6 +1,6 @@
 import type { ChildProcess } from "node:child_process";
 import { killTree, spawnTree } from "./proc.js";
-import { LineBuffer } from "./text.js";
+import { LineBuffer, stripAnsi as stripAnsiLocal } from "./text.js";
 
 export type DevState = "stopped" | "starting" | "running" | "stopping" | "error";
 
@@ -14,11 +14,28 @@ export interface DevStatus {
 
 export interface DevDeps {
   cwd: string;
-  /** Geeft het (vertrouwde) dev-commando en de preview-URL terug, of gooit een fout. */
+  /** Geeft het (vertrouwde) dev-commando terug. Zonder `url` wordt de poort uit de uitvoer van het dev-proces gehaald. */
   resolve: () => Promise<{ command: string; url?: string }>;
   onChange: (s: DevStatus) => void;
   readyTimeoutMs?: number;
 }
+
+const URL_RE = /\bhttps?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0|\[::1?\]):(\d{2,5})(\/[^\s'")\]]*)?/i;
+const PORT_RE = /\b(?:listening|running|started|serving|ready)\b[^\n]*?(?:port|:)\s*(\d{4,5})\b/i;
+
+/** Haalt de lokale preview-URL uit een regel dev-uitvoer (Vite, Next, CRA, Astro, Express, …). Netwerk-URL's (LAN) negeren we. */
+export function detectUrl(line: string): string | null {
+  const m = URL_RE.exec(line);
+  if (m) {
+    const host = m[1] === "0.0.0.0" ? "127.0.0.1" : m[1] === "[::]" || m[1] === "[::1]" ? "localhost" : m[1];
+    return `http://${host}:${m[2]}/`;
+  }
+  if (/ws:\/\/|debugger|inspector/i.test(line)) return null;
+  const p = PORT_RE.exec(line);
+  return p ? `http://localhost:${p[1]}/` : null;
+}
+
+const BUSY_RE = /EADDRINUSE|address already in use|port \d+ is (?:already )?in use|port is already (?:allocated|in use)/i;
 
 async function reachable(url: string): Promise<boolean> {
   try {
@@ -55,8 +72,21 @@ export class DevServer {
     this.logs.add(`--- ${new Date().toISOString()} · ${command} ---`);
     const child = spawnTree(command, this.deps.cwd);
     this.child = child;
-    child.stdout?.on("data", (b: Buffer) => this.logs.push(b.toString("utf8")));
-    child.stderr?.on("data", (b: Buffer) => this.logs.push(b.toString("utf8")));
+    const onData = (b: Buffer) => {
+      const text = b.toString("utf8");
+      this.logs.push(text);
+      if (!this.s.url && this.child === child) {
+        for (const line of text.split(/\r?\n/)) {
+          const found = detectUrl(stripAnsiLocal(line));
+          if (found) {
+            this.set({ url: found });
+            break;
+          }
+        }
+      }
+    };
+    child.stdout?.on("data", onData);
+    child.stderr?.on("data", onData);
     child.on("error", (e) => {
       this.logs.add(`[fout] ${e.message}`);
       if (this.child === child) this.finish(child, null, e.message);
@@ -76,18 +106,32 @@ export class DevServer {
     if (this.stopping || (code === 0 && !err)) {
       this.set({ state: "stopped", pid: null, exitCode: code, error: null });
     } else {
-      this.set({ state: "error", pid: null, exitCode: code, error: err ?? `Dev-server stopte onverwacht (code ${code ?? "?"}).` });
+      const recent = this.logs.last(40).join("\n");
+      const busy = BUSY_RE.test(recent);
+      const port = /(?:port|:)\s*(\d{2,5})\b[^\n]*(?:in use|EADDRINUSE)|EADDRINUSE[^\n]*?:(\d{2,5})/i.exec(recent);
+      const which = port ? port[1] ?? port[2] : null;
+      this.set({
+        state: "error",
+        pid: null,
+        exitCode: code,
+        error: err ?? (busy ? `${which ? `Poort ${which}` : "De poort"} is al in gebruik door een ander programma.` : `Dev-server stopte onverwacht (code ${code ?? "?"}).`),
+      });
     }
   }
 
-  private watchReady(child: ChildProcess, url?: string): void {
+  private watchReady(child: ChildProcess, configuredUrl?: string): void {
     const started = Date.now();
     const limit = this.deps.readyTimeoutMs ?? 60_000;
     let timedOut = false;
     const tick = async () => {
       if (this.child !== child) return;
+      const url = this.s.url;
       if (!url) {
-        if (Date.now() - started > 1500) return this.set({ state: "running" });
+        // Poort nog niet bekend: wachten op de uitvoer van het dev-proces.
+        if (!configuredUrl && Date.now() - started > limit && !timedOut) {
+          timedOut = true;
+          this.set({ state: "error", error: "De poort van de dev-server staat niet in de uitvoer. Zet \"previewUrl\" in studio.json." });
+        }
       } else if (await reachable(url)) {
         if (this.child === child) this.set({ state: "running", error: null });
         return;
@@ -95,7 +139,7 @@ export class DevServer {
         timedOut = true;
         if (this.child === child) this.set({ state: "error", error: `Preview niet bereikbaar op ${url} binnen ${Math.round(limit / 1000)} s.` });
       }
-      if (this.child === child) this.poll = setTimeout(() => void tick(), timedOut ? 2000 : 500);
+      if (this.child === child) this.poll = setTimeout(() => void tick(), timedOut ? 2000 : 400);
     };
     this.poll = setTimeout(() => void tick(), 300);
   }
