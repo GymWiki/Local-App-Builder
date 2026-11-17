@@ -266,15 +266,9 @@
     },
     "snel": {
       "titel": "Snelle acties",
-      "mooier": "Maak het mooier",
-      "mobiel": "Maak het mobielvriendelijk",
-      "klopt": "Er klopt iets niet",
       "veranderd": "Wat is er veranderd?"
     },
     "snelPrompt": {
-      "mooier": "Maak het ontwerp mooier en rustiger: let op kleuren, ruimte tussen onderdelen en een prettig lettertype. Verander niets aan de inhoud.",
-      "mobiel": "Zorg dat alles er ook op een telefoon goed uitziet en makkelijk te bedienen is. Controleer het daarna met een schermafbeelding op telefoonformaat.",
-      "klopt": "Er klopt iets niet. Kijk eerst zelf in de preview en naar eventuele foutmeldingen, zoek wat er mis is en los het op. Leg daarna in gewone woorden uit wat er aan de hand was.",
       "veranderd": "Wat is er sinds de vorige versie veranderd? Vat het in gewone woorden samen, zonder technische details."
     },
     "details": "Details",
@@ -452,6 +446,11 @@
       "mislukt": "{{naam}} kon niet worden toegevoegd: {{reden}}",
       "alt": "Bijgevoegde afbeelding: {{naam}}",
       "document": "Document: {{naam}}"
+    },
+    "start": {
+      "titel": "Begin met een voorbeeld",
+      "uitleg": "Kies een voorbeeld, of typ hieronder in je eigen woorden wat je wilt maken.",
+      "knop": "Gebruik dit voorbeeld"
     }
   },
   "instellingen": {

@@ -504,3 +504,29 @@ describe("ChatPanel: bestanden in de chat", () => {
     expect(api.chatAttach).not.toHaveBeenCalled();
   });
 });
+
+describe("ChatPanel: startvoorbeelden", () => {
+  it("een leeg project toont zes voorbeelden uit src/data/starter.json; een klik stuurt de opdracht", async () => {
+    setup();
+    const lijst = await screen.findByRole("list", {}, { timeout: 2000 }).catch(() => null);
+    expect(lijst).not.toBeNull();
+    const knoppen = screen.getAllByRole("button", { name: /^Gebruik dit voorbeeld:/ });
+    expect(knoppen).toHaveLength(6);
+    fireEvent.click(screen.getByRole("button", { name: "Gebruik dit voorbeeld: Website voor een kapper" }));
+    await waitFor(() => expect(api.chatSend).toHaveBeenCalledWith(1, expect.stringContaining("kapsalon")));
+  });
+
+  it("zodra er een gesprek is, zijn de voorbeelden weg maar blijven de vaste snelle acties", async () => {
+    setup([msg("user", { text: "Hoi" })]);
+    await screen.findByTestId("bubble-user");
+    expect(screen.queryByRole("button", { name: /^Gebruik dit voorbeeld:/ })).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Maak het mooier" })).toBeInTheDocument();
+  });
+
+  it("alle voorbeelden en acties hebben een titel en een opdracht in gewoon Nederlands", async () => {
+    const starter = (await import("@/data/starter.json")).default;
+    expect(starter.voorbeelden).toHaveLength(6);
+    expect(starter.snelleActies.map((a) => a.label)).toEqual(["Maak het mooier", "Maak het mobielvriendelijk", "Er klopt iets niet"]);
+    for (const v of [...starter.voorbeelden, ...starter.snelleActies]) expect(v.prompt.length).toBeGreaterThan(40);
+  });
+});

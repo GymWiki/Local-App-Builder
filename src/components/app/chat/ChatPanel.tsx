@@ -50,7 +50,10 @@ interface Props {
   onError: (msg: string) => void;
 }
 
-const QUICK = ["mooier", "mobiel", "klopt", "veranderd"] as const;
+import starter from "@/data/starter.json";
+
+/** Vaste snelle acties onder het gesprek; de teksten staan in src/data/starter.json. */
+const QUICK = starter.snelleActies;
 
 export default function ChatPanel({ project, accounts, technical, onOpenAdvanced, onOpenAccounts, onError }: Props) {
   const { t } = useTranslation();
@@ -262,7 +265,23 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
 
       <ScrollArea role="log" aria-live="polite" aria-label={t("chat.geschiedenis")} className="min-h-0 flex-1">
         <div className="space-y-3 px-5 py-4">
-          {messages.length === 0 && !unavailable && <p className="text-lg text-muted-foreground">{t("chat.leeg")}</p>}
+          {messages.length === 0 && !unavailable && (
+            <section aria-label={t("chat.start.titel")} className="space-y-3">
+              <p className="text-lg text-muted-foreground">{t("chat.leeg")}</p>
+              <h3 className="text-lg font-semibold">{t("chat.start.titel")}</h3>
+              <p className="text-base text-muted-foreground">{t("chat.start.uitleg")}</p>
+              <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {starter.voorbeelden.map((v) => (
+                  <li key={v.id}>
+                    <Button variant="outline" className="h-auto w-full flex-col items-start gap-1 py-3 text-left whitespace-normal" aria-label={`${t("chat.start.knop")}: ${v.titel}`} onClick={() => void send(v.prompt)}>
+                      <span className="font-semibold">{v.titel}</span>
+                      <span className="text-sm font-normal text-muted-foreground">{v.uitleg}</span>
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
           {messages.map((m) => (
             <MessageView
               key={m.id}
@@ -308,11 +327,14 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
       </div>
 
       <div className="flex flex-wrap gap-2 px-5 pb-2" role="group" aria-label={t("chat.snel.titel")}>
-        {QUICK.map((k) => (
-          <Button key={k} variant="outline" size="sm" className="rounded-full" disabled={!!unavailable} onClick={() => void send(t(`chat.snelPrompt.${k}`))}>
-            {t(`chat.snel.${k}`)}
+        {QUICK.map((a) => (
+          <Button key={a.id} variant="outline" size="sm" className="rounded-full" disabled={!!unavailable} onClick={() => void send(a.prompt)}>
+            {a.label}
           </Button>
         ))}
+        <Button variant="outline" size="sm" className="rounded-full" disabled={!!unavailable} onClick={() => void send(t("chat.snelPrompt.veranderd"))}>
+          {t("chat.snel.veranderd")}
+        </Button>
       </div>
 
       <div className="flex flex-wrap items-center gap-3 border-t border-border px-4 pt-3">
