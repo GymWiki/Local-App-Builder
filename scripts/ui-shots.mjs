@@ -3,7 +3,7 @@
 // De afbeeldingen komen in docs/ui/<voorvoegsel>-<scherm>-<thema>.png
 import { spawn } from "node:child_process";
 import { createServer } from "node:http";
-import { existsSync, mkdirSync } from "node:fs";
+import { mkdirSync } from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
