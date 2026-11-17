@@ -46,3 +46,12 @@ Lokale desktop-app (Tauri 2 + React/TypeScript/Vite + Tailwind, Rust-backend, SQ
 - UI-tekst voor acties/vragen/fouten zit in `src/i18n/nl.json` (`chat.*`), niet in Rust: de backend levert alleen codes + parameters.
 - Gevaarlijke acties (`danger`) en schrijven buiten de projectmap vragen altijd toestemming, in elke stand (`chat/policy.rs`).
 - Instructieblokken in CLAUDE.md/GEMINI.md/AGENTS.md zijn afgebakend per naam (`instructions.rs`); alleen eigen blokken toevoegen/verversen/verwijderen.
+
+## Studio-UI (shadcn/ui)
+- De interface van Studio zelf gebruikt **uitsluitend shadcn-componenten en de thematokens**. Nieuwe, samengestelde onderdelen bouw je uit shadcn-onderdelen in `src/components/app/` (de chat staat in `src/components/app/chat/`).
+- Voeg shadcn-componenten toe via de **CLI of de shadcn MCP**, nooit met de hand: `npx shadcn@latest add <naam>` (antwoord "nee" op een vraag om `button.tsx` te overschrijven; die is bewust groter gemaakt voor grote klikdoelen). Instellingen staan in `components.json` (stijl `radix-nova`, alias `@/…`). `src/components/ui/` is gegenereerde code: pas dat alleen aan voor het thema of de klikdoelen en noteer het in `docs/ui.md`.
+- **Geen losse kleuren of pixelwaarden.** Kleuren, radius, spacing en lettertypes staan op één plek: `src/index.css` (CSS-variabelen; licht en donker). Gebruik tokens als `bg-primary`, `text-muted-foreground`, `rounded-lg`. Een nieuwe kleur? Voeg eerst een token toe aan beide thema's en breid `src/theme.test.ts` uit (WCAG AA is verplicht).
+- Teksten altijd via de i18n-structuur (`src/i18n/nl.json`), in eenvoudig Nederlands.
+- **Lint-regels** (eslint.config.js, geldt voor `src/`, behalve `src/components/ui/` en tests): geen `#hex`, `rgb()`, `hsl()` of `oklch()` in code en geen gewone `<button>`, `<input>`, `<select>`, `<textarea>` of `<dialog>`; gebruik de shadcn-onderdelen. Alleen de verborgen bestandskiezer in de chat heeft een gemotiveerde uitzondering.
+- Thema: de klasse `dark` staat op `<html>` (ThemeProvider, instelling `ui:theme`: system/light/dark). De terminal (xterm) leest zijn kleuren uit dezelfde variabelen (`src/lib/terminal-theme.ts`, `--term-*`) en wisselt mee.
+- Screenshots van de belangrijkste schermen maak je met `node scripts/ui-shots.mjs <voorvoegsel> [licht,donker]` (Tauri-aanroepen worden nagebootst); ze komen in `docs/ui/`.

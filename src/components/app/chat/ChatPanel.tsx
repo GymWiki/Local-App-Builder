@@ -319,7 +319,7 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
         <ToggleGroup
           type="single"
           variant="outline"
-          size="sm"
+          size="default"
           role="radiogroup"
           aria-label={t("chat.modus.label")}
           value={mode}
@@ -366,6 +366,8 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
         </div>
       )}
       <form onSubmit={onSubmit} className="flex items-end gap-3 p-4">
+        {/* Verborgen bestandskiezer: shadcn heeft hiervoor geen onderdeel; de zichtbare knop is een <Button>. */}
+        {/* eslint-disable-next-line no-restricted-syntax */}
         <input
           ref={picker}
           type="file"
@@ -394,7 +396,7 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
           disabled={!!unavailable}
           rows={3}
           placeholder={mode === "plan" ? t("chat.modus.placeholderPlan") : t("chat.placeholder")}
-          className="min-h-24 flex-1 resize-y text-lg leading-relaxed"
+          className="min-h-24 min-w-0 flex-1 resize-y text-lg leading-relaxed"
         />
         <Button type="submit" size="lg" disabled={(!text.trim() && pending.length === 0) || uploading > 0 || !!unavailable}>
           <SendIcon aria-hidden="true" />

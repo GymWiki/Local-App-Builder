@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
@@ -34,13 +34,13 @@ export default function NewProjectDialog({ onClose, onCreated }: Props) {
   );
   type Values = z.infer<typeof schema>;
 
-  const { register, control, handleSubmit, setValue, watch, formState } = useForm<Values>({
+  const { register, control, handleSubmit, setValue, formState } = useForm<Values>({
     resolver: zodResolver(schema),
     defaultValues: { naam: "", map: "", soort: "leeg" },
   });
   const { errors, isSubmitting } = formState;
-  const naam = watch("naam");
-  const map = watch("map");
+  const naam = useWatch({ control, name: "naam" });
+  const map = useWatch({ control, name: "map" });
 
   async function submit(v: Values) {
     setError(null);

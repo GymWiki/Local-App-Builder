@@ -56,6 +56,14 @@ describe.each([[":root", "licht"], [".dark", "donker"]])("thema %s (%s)", (selec
   });
 });
 
+const ANSI = ["black", "red", "green", "yellow", "blue", "magenta", "cyan", "white"];
+describe.each([[":root", "licht"], [".dark", "donker"]])("terminalkleuren %s (%s)", (selector) => {
+  const tokens = block(selector);
+  it.each(ANSI.flatMap((n) => [[`term-${n}`], [`term-bright-${n}`]]))("%s is goed leesbaar op de achtergrond (4,5:1)", (name) => {
+    expect(contrast(name, "background", tokens)).toBeGreaterThanOrEqual(4.5);
+  });
+});
+
 describe("opbouw van het thema", () => {
   it("heeft een afronding van ongeveer 0,75rem en alle kleuren staan als variabelen in dit ene bestand", () => {
     expect(block(":root").radius).toBe("0.75rem");

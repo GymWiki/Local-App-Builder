@@ -2,8 +2,9 @@ import { useEffect, useRef } from "react";
 import { Terminal } from "@xterm/xterm";
 import { FitAddon } from "@xterm/addon-fit";
 import "@xterm/xterm/css/xterm.css";
-import { ptyResize, ptySnapshot, ptyWrite } from "../lib/api";
-import { decode, subscribe, type OutputEv } from "../lib/ptyEvents";
+import { ptyResize, ptySnapshot, ptyWrite } from "@/lib/api";
+import { decode, subscribe, type OutputEv } from "@/lib/ptyEvents";
+import { readTerminalFont, readTerminalTheme } from "@/lib/terminal-theme";
 
 interface Props {
   sessionId: string;
@@ -26,8 +27,8 @@ export default function TerminalView({ sessionId, active, exitText, onExit }: Pr
       cursorBlink: true,
       fontSize: 13,
       scrollback: 5000,
-      fontFamily: "ui-monospace, Menlo, Consolas, 'DejaVu Sans Mono', monospace",
-      theme: { background: "#09090b" },
+      fontFamily: readTerminalFont(),
+      theme: readTerminalTheme(),
     });
     const fitAddon = new FitAddon();
     term.loadAddon(fitAddon);
@@ -43,6 +44,12 @@ export default function TerminalView({ sessionId, active, exitText, onExit }: Pr
       }
     };
     api.current = { fit, focus: () => term.focus() };
+
+    // De terminal volgt het thema van Studio: wisselt <html> tussen licht en donker, dan krijgt xterm direct de nieuwe kleuren.
+    const themeWatcher = new MutationObserver(() => {
+      term.options.theme = readTerminalTheme();
+    });
+    themeWatcher.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
 
     let disposed = false;
     let live = false;
@@ -93,6 +100,7 @@ export default function TerminalView({ sessionId, active, exitText, onExit }: Pr
       disposed = true;
       unsubscribe?.();
       ro.disconnect();
+      themeWatcher.disconnect();
       d1.dispose();
       d2.dispose();
       term.dispose();

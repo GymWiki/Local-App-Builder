@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
@@ -49,11 +49,11 @@ export default function SettingsScreen({ communication, permission, loopThreshol
 
   const schema = z.object({ drempel: z.coerce.number<number>().int(t("instellingen.lus.fout")).min(2, t("instellingen.lus.fout")).max(10, t("instellingen.lus.fout")) });
   type Values = z.input<typeof schema>;
-  const { register, watch, reset, formState } = useForm<Values>({ resolver: zodResolver(schema), mode: "onChange", defaultValues: { drempel: loopThreshold } });
+  const { register, control, reset, formState } = useForm<Values>({ resolver: zodResolver(schema), mode: "onChange", defaultValues: { drempel: loopThreshold } });
   useEffect(() => reset({ drempel: loopThreshold }), [loopThreshold, reset]);
 
   // Alleen een geldige waarde wordt doorgegeven en bewaard.
-  const draft = watch("drempel");
+  const draft = useWatch({ control, name: "drempel" });
   useEffect(() => {
     const parsed = schema.safeParse({ drempel: draft });
     if (parsed.success && parsed.data.drempel !== loopThreshold) onLoopThreshold?.(parsed.data.drempel);
