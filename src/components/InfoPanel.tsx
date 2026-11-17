@@ -10,9 +10,11 @@ interface Props {
   mcp?: McpInfo | null;
   tick?: number;
   onError?: (msg: string) => void;
+  /** Op de rustige Maken-weergave alleen tonen op brede schermen. */
+  quietUnlessWide?: boolean;
 }
 
-export default function InfoPanel({ project, accounts, onDefaultAccount, onClose, mcp = null, tick = 0, onError }: Props) {
+export default function InfoPanel({ project, accounts, onDefaultAccount, onClose, mcp = null, tick = 0, onError, quietUnlessWide = false }: Props) {
   const { t } = useTranslation();
   const rows: [string, string][] = project
     ? [
@@ -24,7 +26,7 @@ export default function InfoPanel({ project, accounts, onDefaultAccount, onClose
     : [];
 
   return (
-    <aside className="w-72 shrink-0 overflow-y-auto border-l border-zinc-800 bg-zinc-900 p-4">
+    <aside className={`w-72 shrink-0 overflow-y-auto border-l border-zinc-800 bg-zinc-900 p-4 ${quietUnlessWide ? "hidden 2xl:block" : ""}`}>
       <h2 className="mb-3 text-xs uppercase tracking-wide text-zinc-500">{t("info.titel")}</h2>
       {project ? (
         <div className="space-y-5">

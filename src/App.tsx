@@ -244,6 +244,7 @@ export default function App() {
         mcp={selected ? (mcp[selected.id] ?? null) : null}
         tick={selected ? (tick[selected.id] ?? 0) : 0}
         onError={setError}
+        quietUnlessWide={view === "project" && tab === "maken"}
       />
       {dialogOpen && (
         <NewProjectDialog
