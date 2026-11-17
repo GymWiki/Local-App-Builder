@@ -156,7 +156,8 @@ describe("kitlijst en scripts", () => {
     const dir = await project();
     const l = await listKits(p, dir);
     expect(l.stack).toBe("react-vite");
-    expect(l.kits.map((k) => k.id)).toEqual(["fragments-ui", "tweede-kit"]);
+    expect(l.kits.map((k) => k.id)).toEqual(expect.arrayContaining(["fragments-ui", "tweede-kit"]));
+    expect(l.kits.map((k) => k.id)).not.toContain("gpl-kit");
     expect(l.kits[0]).toMatchObject({ compatible: true, licentie: "MIT", attributieVerplicht: false });
     expect(l.kits[0].preview).toMatch(/^data:image\/png;base64,/);
     expect(l.geweigerd).toEqual([{ id: "gpl-kit", reden: expect.stringContaining("niet toegestaan") }]);

@@ -172,6 +172,12 @@ async function exportsFromFiles(dir: string): Promise<{ name: string; file: stri
         const src = await readFile(full, "utf8");
         for (const m of src.matchAll(/export\s+(?:default\s+)?function\s+([A-Z][A-Za-z0-9]*)/g)) out.push({ name: m[1], file: path.relative(dir, full).split(path.sep).join("/") });
         for (const m of src.matchAll(/export\s+const\s+([A-Z][A-Za-z0-9]*)\s*=/g)) out.push({ name: m[1], file: path.relative(dir, full).split(path.sep).join("/") });
+        for (const m of src.matchAll(/export\s*\{([^}]*)\}/g)) {
+          for (const part of m[1].split(",")) {
+            const n = part.trim().split(/\s+as\s+/).pop()!.trim();
+            if (/^[A-Z][A-Za-z0-9]*$/.test(n) && !out.some((o) => o.name === n)) out.push({ name: n, file: path.relative(dir, full).split(path.sep).join("/") });
+          }
+        }
       }
     }
   }

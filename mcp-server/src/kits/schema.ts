@@ -39,6 +39,10 @@ export const KitSchema = z
         /** CSS-variabele → tokenpad (donker). */
         tokenMapDonker: z.record(z.string(), z.string()).default({}),
         rootAttributen: z.record(z.string(), z.string()).default({}),
+        /** Vite-plugins die de kit nodig heeft (bijv. Tailwind): komen in vite.config.ts. */
+        vitePlugins: z.array(z.object({ pakket: npmName, naam: z.string().regex(/^[A-Za-z][A-Za-z0-9]*$/), aanroep: z.string().regex(/^[A-Za-z][A-Za-z0-9]*\(\)$/) }).strict()).default([]),
+        /** Importalias, bijv. { "@": "./src" } in vite.config.ts en tsconfig.json. */
+        alias: z.record(z.string().regex(/^[@A-Za-z][A-Za-z0-9_-]*$/), z.string().regex(/^\.\/[A-Za-z0-9_./-]+$/)).default({}),
       })
       .strict(),
     tokens: z.string().default("tokens.json"),

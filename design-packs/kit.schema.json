@@ -183,6 +183,45 @@
           "additionalProperties": {
             "type": "string"
           }
+        },
+        "vitePlugins": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "pakket": {
+                "type": "string",
+                "pattern": "^(?:@[a-z0-9][a-z0-9._-]*\\/)?[a-z0-9][a-z0-9._-]*$"
+              },
+              "naam": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9]*$"
+              },
+              "aanroep": {
+                "type": "string",
+                "pattern": "^[A-Za-z][A-Za-z0-9]*\\(\\)$"
+              }
+            },
+            "required": [
+              "pakket",
+              "naam",
+              "aanroep"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "alias": {
+          "default": {},
+          "type": "object",
+          "propertyNames": {
+            "type": "string",
+            "pattern": "^[@A-Za-z][A-Za-z0-9_-]*$"
+          },
+          "additionalProperties": {
+            "type": "string",
+            "pattern": "^\\.\\/[A-Za-z0-9_./-]+$"
+          }
         }
       },
       "required": [

@@ -71,7 +71,10 @@ export async function planApply(packsDir: string, kitId: string, projectDir: str
   if (!kit.stacks.includes(stack)) {
     throw new KitError(`Deze kit past niet bij dit project. Hij is gemaakt voor: ${kit.stacks.join(", ")}. Dit project is: ${stack}.`);
   }
-  if (stack === "react-vite") await checkMainPatchable(projectDir);
+  if (stack === "react-vite") {
+    await checkMainPatchable(projectDir);
+    await checkConfigPatchable(projectDir, kit);
+  }
   const before = await currentKit(projectDir);
   const pakketten = kit.type === "npm" ? [`${kit.pakketnaam}@${kit.versie}`, ...kit.extraPakketten.map((p) => `${p.naam}@${p.versie}`)] : kit.extraPakketten.map((p) => `${p.naam}@${p.versie}`);
   const verwijderen = before?.pakketnaam && before.kit !== kit.id && before.pakketnaam !== kit.pakketnaam ? [before.pakketnaam] : [];
@@ -94,6 +97,84 @@ async function checkMainPatchable(dir: string): Promise<void> {
   const src = await readFile(main, "utf8");
   if (src.includes("./kit/KitProvider")) return;
   if (!/<App\s*\/>/.test(src)) throw new KitError("Ik kan het uiterlijk niet veilig aansluiten: in src/main.tsx staat geen <App />. Vraag de AI om <KitProvider> om je app heen te zetten.");
+}
+
+const VITE_FILES = ["vite.config.ts", "vite.config.mts", "vite.config.js", "vite.config.mjs"];
+
+async function viteConfigFile(dir: string): Promise<string | null> {
+  return VITE_FILES.map((f) => path.join(dir, f)).find((f) => exists(f)) ?? null;
+}
+
+/** Kan Studio de Vite-plugins en de alias van de kit veilig toevoegen? Zo niet: weigeren in plaats van gokken. */
+async function checkConfigPatchable(dir: string, kit: Kit): Promise<void> {
+  const { vitePlugins, alias } = kit.setup;
+  if (vitePlugins.length === 0 && Object.keys(alias).length === 0) return;
+  const file = await viteConfigFile(dir);
+  if (!file) throw new KitError("Ik vind vite.config.ts niet, dus ik kan de instellingen van dit uiterlijk niet toevoegen.");
+  const src = await readFile(file, "utf8");
+  if (!/defineConfig\(\{/.test(src)) throw new KitError("Ik kan vite.config.ts niet veilig aanpassen (geen defineConfig({ … }) gevonden). Vraag de AI om de instellingen van dit uiterlijk toe te voegen.");
+  if (vitePlugins.length > 0 && !/plugins:\s*\[/.test(src)) throw new KitError("In vite.config.ts staat geen plugins-lijst; ik kan de plugin van dit uiterlijk niet veilig toevoegen.");
+  if (Object.keys(alias).length > 0 && /resolve:\s*\{/.test(src) && !src.includes("alias")) throw new KitError("vite.config.ts heeft al een eigen ‘resolve’; ik pas dat niet aan.");
+  if (Object.keys(alias).length > 0) {
+    const ts = path.join(dir, "tsconfig.json");
+    try {
+      JSON.parse(await readFile(ts, "utf8"));
+    } catch {
+      throw new KitError("tsconfig.json is geen gewone JSON (bijvoorbeeld door opmerkingen), dus ik kan de importalias niet veilig toevoegen.");
+    }
+  }
+}
+
+/** Voegt de plugins en de alias van de kit toe aan vite.config.ts en tsconfig.json (alleen wat er nog niet staat). */
+async function patchConfigs(dir: string, kit: Kit): Promise<string[]> {
+  const { vitePlugins, alias } = kit.setup;
+  const changed: string[] = [];
+  if (vitePlugins.length === 0 && Object.keys(alias).length === 0) return changed;
+  const file = (await viteConfigFile(dir))!;
+  let src = await readFile(file, "utf8");
+  const before = src;
+  const addImport = (line: string) => {
+    if (src.includes(line)) return;
+    const lines = src.split("\n");
+    let last = -1;
+    lines.forEach((l, i) => {
+      if (/^import\s/.test(l)) last = i;
+    });
+    lines.splice(last + 1, 0, line);
+    src = lines.join("\n");
+  };
+  for (const p of vitePlugins) {
+    addImport(`import ${p.naam} from "${p.pakket}";`);
+    if (!src.includes(p.aanroep)) src = src.replace(/plugins:\s*\[/, (m) => `${m}${p.aanroep}, `);
+  }
+  if (Object.keys(alias).length > 0 && !/alias:/.test(src)) {
+    addImport('import { fileURLToPath } from "node:url";');
+    const entries = Object.entries(alias).map(([k, v]) => `"${k}": fileURLToPath(new URL("${v}", import.meta.url))`).join(", ");
+    src = src.replace(/defineConfig\(\{/, (m) => `${m}\n  resolve: { alias: { ${entries} } },`);
+  }
+  if (src !== before) {
+    await writeFile(file, src);
+    changed.push(path.basename(file));
+  }
+  if (Object.keys(alias).length > 0) {
+    const ts = path.join(dir, "tsconfig.json");
+    const cfg = JSON.parse(await readFile(ts, "utf8")) as { compilerOptions?: { paths?: Record<string, string[]> } };
+    cfg.compilerOptions = { ...cfg.compilerOptions };
+    const paths = { ...cfg.compilerOptions.paths };
+    let dirty = false;
+    for (const [k, v] of Object.entries(alias)) {
+      if (!paths[`${k}/*`]) {
+        paths[`${k}/*`] = [`${v}/*`];
+        dirty = true;
+      }
+    }
+    if (dirty) {
+      cfg.compilerOptions.paths = paths;
+      await writeFile(ts, JSON.stringify(cfg, null, 2) + "\n");
+      changed.push("tsconfig.json");
+    }
+  }
+  return changed;
 }
 
 function providerFile(kit: Kit): string {
@@ -257,6 +338,7 @@ export async function applyKit(o: ApplyOptions): Promise<ApplyResult> {
       files.push("src/kit/components/");
     }
     await patchMain(dir);
+    files.push(...(await patchConfigs(dir, kit)));
   } else {
     await write("lib/theme/app_theme.dart", toFlutter(tokens));
   }
