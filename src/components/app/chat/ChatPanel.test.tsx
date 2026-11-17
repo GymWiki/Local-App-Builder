@@ -530,3 +530,50 @@ describe("ChatPanel: startvoorbeelden", () => {
     for (const v of [...starter.voorbeelden, ...starter.snelleActies]) expect(v.prompt.length).toBeGreaterThan(40);
   });
 });
+
+describe("ChatPanel: opdracht-verbeteraar", () => {
+  beforeEach(() => {
+    (api.improvePrompt as Mock).mockResolvedValue("Doel: een site voor de bakker.\n- Startpagina\n- Bestellen");
+  });
+
+  it("de knop is uit bij een leeg veld en toont een bewerkbaar voorstel; er wordt niets verstuurd zonder bevestiging", async () => {
+    setup();
+    const veld = await screen.findByPlaceholderText("Beschrijf wat je wilt maken...");
+    expect(screen.getByRole("button", { name: "Verbeter mijn opdracht" })).toBeDisabled();
+    fireEvent.change(veld, { target: { value: "  site voor mijn bakker " } });
+    fireEvent.click(screen.getByRole("button", { name: "Verbeter mijn opdracht" }));
+    const voorstel = await screen.findByLabelText("Verbeterde opdracht");
+    expect(api.improvePrompt).toHaveBeenCalledWith(1, "site voor mijn bakker");
+    expect(voorstel).toHaveValue("Doel: een site voor de bakker.\n- Startpagina\n- Bestellen");
+    expect(api.chatSend).not.toHaveBeenCalled();
+    fireEvent.change(voorstel, { target: { value: "Mijn eigen aanpassing" } });
+    fireEvent.click(screen.getByRole("button", { name: "Versturen" }));
+    await waitFor(() => expect(api.chatSend).toHaveBeenCalledWith(1, "Mijn eigen aanpassing"));
+  });
+
+  it("‘Zet in mijn tekstvak’ en ‘Annuleren’ versturen niets", async () => {
+    setup();
+    const veld = await screen.findByPlaceholderText("Beschrijf wat je wilt maken...");
+    fireEvent.change(veld, { target: { value: "site" } });
+    fireEvent.click(screen.getByRole("button", { name: "Verbeter mijn opdracht" }));
+    await screen.findByLabelText("Verbeterde opdracht");
+    fireEvent.click(screen.getByRole("button", { name: "Zet in mijn tekstvak" }));
+    await waitFor(() => expect(veld).toHaveValue("Doel: een site voor de bakker.\n- Startpagina\n- Bestellen"));
+    fireEvent.click(screen.getByRole("button", { name: "Verbeter mijn opdracht" }));
+    await screen.findByLabelText("Verbeterde opdracht");
+    fireEvent.click(screen.getByRole("button", { name: "Annuleren" }));
+    await waitFor(() => expect(screen.queryByLabelText("Verbeterde opdracht")).not.toBeInTheDocument());
+    expect(api.chatSend).not.toHaveBeenCalled();
+  });
+
+  it("toont een fout in gewone taal met ‘Probeer opnieuw’", async () => {
+    (api.improvePrompt as Mock).mockRejectedValueOnce("De AI deed er te lang over.").mockResolvedValueOnce("Beter");
+    setup();
+    const veld = await screen.findByPlaceholderText("Beschrijf wat je wilt maken...");
+    fireEvent.change(veld, { target: { value: "site" } });
+    fireEvent.click(screen.getByRole("button", { name: "Verbeter mijn opdracht" }));
+    expect(await screen.findByText("De AI deed er te lang over.")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Probeer opnieuw" }));
+    expect(await screen.findByLabelText("Verbeterde opdracht")).toHaveValue("Beter");
+  });
+});

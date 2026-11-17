@@ -7,6 +7,7 @@ mod commands;
 mod db;
 mod error;
 mod export;
+mod improve;
 mod instructions;
 mod mcp;
 mod mcp_config;
@@ -357,6 +358,7 @@ pub fn run() {
             commands::chat_target,
             commands::chat_history,
             commands::export_project,
+            commands::improve_prompt,
             commands::kit_list,
             commands::kit_current,
             commands::kit_apply,

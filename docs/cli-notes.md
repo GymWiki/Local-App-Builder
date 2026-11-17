@@ -124,7 +124,7 @@ Bronnen: code.claude.com/docs/en/permission-modes.md, cli-reference.md; geverifi
 - Ook relevant: `--append-system-prompt` (cli-reference.md) hadden we kunnen gebruiken, maar de instructie in het bericht werkt voor elke CLI en niet alleen voor Claude.
 
 ## Eenmalige AI-aanroep zonder tools (opdracht-verbeteraar) — Claude Code
-Bron: cli-reference.md. `--tools ""` schakelt alle ingebouwde tools uit; `-p` werkt met `--output-format text`. (Wordt gebruikt bij functie 7.)
+Bron: cli-reference.md. `--tools ""` schakelt alle ingebouwde tools uit; `-p` werkt met `--output-format text`. Geverifieerd met een echte run (functie 7): `claude -p --tools "" --output-format text -- "<opdracht>" </dev/null` in een lege tijdelijke map geeft in ±9 s een tekstantwoord zonder tools. De tekst van de gebruiker staat tussen `<<<`/`>>>` als gegevens; stdin is null; time-out 120 s (Rust: `improve.rs`). Alleen Claude (Gemini/Codex hebben hier nog geen geverifieerde variant).
 
 ## Bestanden in de chat (functie 4) — Claude Code
 - Geverifieerd met een echte run (`claude -p --allowedTools Read -- "<vraag> … - assets/rood.png"`): een relatief pad in de opdracht is genoeg; Claude leest de afbeelding met zijn eigen leestool en beschrijft de kleur correct. Er is dus geen speciale CLI-optie voor bijlagen nodig (geen `--image` o.i.d.).

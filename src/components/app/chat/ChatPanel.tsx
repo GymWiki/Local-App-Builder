@@ -31,6 +31,8 @@ import ChatSwitchDialog from "./ChatSwitchDialog";
 import VersionsDialog from "./VersionsDialog";
 import MessageView from "./MessageView";
 import AssetThumb from "./AssetThumb";
+import ImproveDialog from "./ImproveDialog";
+import { WandSparklesIcon } from "lucide-react";
 import { CircleDotIcon, LoaderIcon, PaperclipIcon, SendIcon, SquareIcon, XIcon } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -68,6 +70,7 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
   const [missing, setMissing] = useState<CliStatus | null>(null);
   const [switching, setSwitching] = useState(false);
   const [showVersions, setShowVersions] = useState(false);
+  const [improving, setImproving] = useState<string | null>(null);
   const [pending, setPending] = useState<SavedAsset[]>([]);
   const [uploading, setUploading] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -115,9 +118,9 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
     end.current?.scrollIntoView?.({ block: "end" });
   }, [messages.length, status]);
 
-  async function send(body: string) {
+  async function send(body: string, fromProposal = false) {
     const trimmed = body.trim();
-    const files = body === text ? pending : [];
+    const files = body === text || fromProposal ? pending : [];
     if ((!trimmed && files.length === 0) || !target?.structured || uploading > 0) return;
     try {
       const st = await cliStatus(target.provider);
@@ -420,6 +423,10 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
           placeholder={mode === "plan" ? t("chat.modus.placeholderPlan") : t("chat.placeholder")}
           className="min-h-24 min-w-0 flex-1 resize-y text-lg leading-relaxed"
         />
+        <Button type="button" variant="outline" size="lg" title={t("chat.verbeter.knopUitleg")} disabled={!text.trim() || !!unavailable || !target?.structured} onClick={() => setImproving(text.trim())}>
+          <WandSparklesIcon aria-hidden="true" />
+          {t("chat.verbeter.knop")}
+        </Button>
         <Button type="submit" size="lg" disabled={(!text.trim() && pending.length === 0) || uploading > 0 || !!unavailable}>
           <SendIcon aria-hidden="true" />
           {t("chat.verstuur")}
@@ -427,6 +434,21 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
       </form>
 
       {asked && <PermissionDialog message={asked} technical={technical} onAnswer={(allow) => void permissionAnswer(id, asked.payload.req_id, allow).catch(fail)} />}
+      {improving !== null && (
+        <ImproveDialog
+          projectId={id}
+          original={improving}
+          onClose={() => setImproving(null)}
+          onUse={(v) => {
+            setText(v);
+            setImproving(null);
+          }}
+          onSend={(v) => {
+            setImproving(null);
+            void send(v, true);
+          }}
+        />
+      )}
       {showVersions && <VersionsDialog projectId={id} onClose={() => setShowVersions(false)} onError={onError} />}
       {switching && <ChatSwitchDialog accounts={accounts} onCancel={() => setSwitching(false)} onPick={(p, a) => void switchTo(p, a)} />}
     </section>

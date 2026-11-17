@@ -458,6 +458,18 @@
       "titel": "Begin met een voorbeeld",
       "uitleg": "Kies een voorbeeld, of typ hieronder in je eigen woorden wat je wilt maken.",
       "knop": "Gebruik dit voorbeeld"
+    },
+    "verbeter": {
+      "knop": "Verbeter mijn opdracht",
+      "knopUitleg": "De AI schrijft je zin om tot een duidelijke opdracht. Je ziet eerst een voorstel.",
+      "titel": "Voorstel voor je opdracht",
+      "uitleg": "Dit is een voorstel. Pas het gerust aan. Er wordt pas iets verstuurd als jij op ‘Versturen’ drukt.",
+      "bezig": "De AI schrijft een voorstel…",
+      "label": "Verbeterde opdracht",
+      "versturen": "Versturen",
+      "gebruik": "Zet in mijn tekstvak",
+      "annuleer": "Annuleren",
+      "opnieuw": "Probeer opnieuw"
     }
   },
   "instellingen": {

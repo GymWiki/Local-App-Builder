@@ -362,3 +362,6 @@ export async function kiesZipBestand(defaultName: string): Promise<string | null
   const result = await save({ defaultPath: defaultName, filters: [{ name: "Zip", extensions: ["zip"] }] });
   return typeof result === "string" ? result : null;
 }
+
+// opdracht-verbeteraar (functie 7)
+export const improvePrompt = (projectId: number, text: string) => invoke<string>("improve_prompt", { projectId, text });

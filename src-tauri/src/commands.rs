@@ -1169,3 +1169,36 @@ pub fn export_project(
     let dir = project_dir(&projects::get(&*db.conn()?, project_id)?)?;
     crate::export::export_zip(&dir, Path::new(&dest))
 }
+
+/// Opdracht-verbeteraar: de AI schrijft een duidelijker voorstel. Er wordt niets verstuurd of opgeslagen.
+#[tauri::command(async)]
+pub fn improve_prompt(db: State<Db>, project_id: i64, text: String) -> Result<String> {
+    let (_project, provider, account) = {
+        let c = db.conn()?;
+        let p = projects::get(&c, project_id)?;
+        let (prov, acc) = resolve_target(&c, &p)?;
+        (p, prov, acc)
+    };
+    if provider != Provider::Claude {
+        return Err(AppError::Invalid(
+            "De opdracht-verbeteraar werkt nu alleen met Claude. Kies Claude voor dit project."
+                .into(),
+        ));
+    }
+    let binary = cli::resolve(provider.binary()).ok_or_else(|| {
+        AppError::Invalid(format!("{} is niet geïnstalleerd.", provider.binary()))
+    })?;
+    let mut env = base_env();
+    let profile = account.as_ref().map(|a| PathBuf::from(&a.profile_dir));
+    if let Some(p) = &profile {
+        std::fs::create_dir_all(p)?;
+    }
+    env.extend(cli::profile_env(provider, profile.as_deref()));
+    crate::improve::run(
+        &binary,
+        &env,
+        &std::env::temp_dir(),
+        &text,
+        Duration::from_secs(120),
+    )
+}
