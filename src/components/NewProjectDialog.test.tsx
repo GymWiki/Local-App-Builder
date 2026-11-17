@@ -51,7 +51,7 @@ describe("NewProjectDialog", () => {
     fireEvent.change(screen.getByLabelText("Projectnaam"), { target: { value: "Site" } });
     fireEvent.click(screen.getByRole("button", { name: "Map kiezen…" }));
     await screen.findByText("/p");
-    fireEvent.click(screen.getByRole("radio", { name: /Web-app met React/ }));
+    fireEvent.click(screen.getByRole("radio", { name: /Startklare website/ }));
     fireEvent.click(screen.getByRole("button", { name: "Project aanmaken" }));
     await waitFor(() => expect(api.createProject).toHaveBeenCalledWith("Site", "/p", "web-react-vite"));
   });

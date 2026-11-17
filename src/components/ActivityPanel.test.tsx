@@ -43,7 +43,7 @@ describe("ActivityPanel", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Ja, terugzetten" }));
     await waitFor(() => expect(api.runtime).toHaveBeenCalledWith(1, "git.restore", { hash: "a".repeat(40) }));
-    expect(await screen.findByRole("status")).toHaveTextContent("back-upcheckpoint");
+    expect(await screen.findByRole("status")).toHaveTextContent("back-upversie");
   });
 
   it("annuleren zet niets terug", async () => {

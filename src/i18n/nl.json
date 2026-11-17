@@ -32,11 +32,11 @@
     "titel": "Projectinfo",
     "naam": "Naam",
     "pad": "Map",
-    "template": "Template",
+    "template": "Soort project",
     "aangemaakt": "Aangemaakt",
     "geenSelectie": "Geen project geselecteerd.",
     "standaardAccount": "Standaardaccount",
-    "sluit": "Project sluiten (stopt terminals en MCP)",
+    "sluit": "Project sluiten",
     "technischWeergave": "Technische weergave"
   },
   "nieuw": {
@@ -52,8 +52,8 @@
     "soort": "Soort project",
     "soortLeeg": "Leeg project",
     "soortLeegUitleg": "Je begint met een lege map. De AI bepaalt wat erin komt.",
-    "soortWeb": "Web-app met React",
-    "soortWebUitleg": "Een startklare website met React. Straks kies je hoe hij eruitziet.",
+    "soortWeb": "Startklare website",
+    "soortWebUitleg": "Je krijgt meteen een werkende website om op voort te bouwen. Straks kies je hoe hij eruitziet.",
     "fout": {
       "naamLeeg": "Geef je project een naam.",
       "naamLang": "Kies een kortere naam (maximaal 60 tekens).",
@@ -170,7 +170,7 @@
     "wachten": "Wachten tot de preview bereikbaar is…",
     "logs": "Logs van het dev-proces",
     "geenLogs": "Nog geen uitvoer.",
-    "geenRuntime": "De projectruntime draait niet; sommige onderdelen (dev-server, checks, tijdlijn) zijn daardoor niet beschikbaar.",
+    "geenRuntime": "Een onderdeel van Studio draait niet; daardoor werken de preview, de controles en de eerdere versies nu niet.",
     "modus": {
       "static": "Statische preview",
       "node": "Dev-server",
@@ -233,10 +233,10 @@
     }
   },
   "activiteit": {
-    "checks": "Laatste checks",
+    "checks": "Laatste controle",
     "geslaagd": "Alles geslaagd",
     "mislukt": "Mislukt",
-    "nogGeenChecks": "Nog geen checks gedraaid. De AI doet dat via run_checks.",
+    "nogGeenChecks": "Nog niets gecontroleerd. De AI doet dat zelf als hij klaar is met een wijziging.",
     "stap": {
       "passed": "geslaagd",
       "failed": "mislukt",
@@ -244,17 +244,17 @@
       "skipped": "overgeslagen",
       "warned": "waarschuwing"
     },
-    "tijdlijn": "Tijdlijn",
-    "nogGeenCheckpoints": "Nog geen checkpoints.",
+    "tijdlijn": "Eerdere versies",
+    "nogGeenCheckpoints": "Nog geen eerdere versies. Die komen vanzelf als de AI klaar is.",
     "terug": "Terug naar vorige versie",
     "zetTerug": "Terugzetten",
     "bevestig": "Terugzetten naar “{{bericht}}” ({{datum}})?",
-    "uitleg1": "Niet-opgeslagen wijzigingen worden eerst automatisch bewaard als checkpoint.",
-    "uitleg2": "Het terugzetten wordt zelf een nieuw checkpoint; je geschiedenis blijft intact.",
-    "uitleg3": "Je kunt altijd terug naar de huidige versie via de tijdlijn.",
+    "uitleg1": "Niet-opgeslagen wijzigingen worden eerst automatisch bewaard als een versie.",
+    "uitleg2": "Het terugzetten wordt zelf ook een nieuwe versie; je eerdere versies blijven bewaard.",
+    "uitleg3": "Je kunt altijd terug naar de huidige versie via de lijst met eerdere versies.",
     "bevestigKnop": "Ja, terugzetten",
     "teruggezet": "Teruggezet.",
-    "teruggezetMetBackup": "Teruggezet. Je laatste wijzigingen staan veilig in een back-upcheckpoint.",
+    "teruggezetMetBackup": "Teruggezet. Je laatste wijzigingen staan veilig in een back-upversie.",
     "alGelijk": "Het project staat al in die versie.",
     "staplabel": {
       "lint": "lint",
