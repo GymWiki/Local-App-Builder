@@ -44,40 +44,40 @@ export default function VersionsDialog({ projectId, onClose, onError }: Props) {
   }, [projectId, target, onError, t]);
 
   return (
-    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/70 p-4">
-      <div role="dialog" aria-modal="true" aria-label={t("versies.titel")} className="flex max-h-[85vh] w-full max-w-xl flex-col gap-4 rounded-xl bg-zinc-900 p-6 shadow-2xl">
+    <div className="fixed inset-0 z-20 flex items-center justify-center bg-foreground/50 p-4">
+      <div role="dialog" aria-modal="true" aria-label={t("versies.titel")} className="flex max-h-[85vh] w-full max-w-xl flex-col gap-4 rounded-xl bg-card p-6 shadow-2xl">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold">{t("versies.titel")}</h2>
-          <button onClick={onClose} className="min-h-10 rounded-lg border border-zinc-600 px-4 hover:bg-zinc-800">
+          <button onClick={onClose} className="min-h-10 rounded-lg border border-input px-4 hover:bg-muted">
             {t("versies.sluit")}
           </button>
         </div>
-        <p className="text-base text-zinc-300">{t("versies.uitleg")}</p>
+        <p className="text-base text-muted-foreground">{t("versies.uitleg")}</p>
         {done && (
-          <p role="status" className="rounded-lg bg-emerald-950 p-3 text-base text-emerald-200">
+          <p role="status" className="rounded-lg bg-success/15 p-3 text-base text-success">
             {done}
           </p>
         )}
         <div className="min-h-0 flex-1 overflow-y-auto">
           {versions === null ? (
-            <p className="text-zinc-400">{t("versies.laden")}</p>
+            <p className="text-muted-foreground">{t("versies.laden")}</p>
           ) : versions.length === 0 ? (
-            <p data-testid="versions-empty" className="text-zinc-300">
+            <p data-testid="versions-empty" className="text-muted-foreground">
               {t("versies.leeg")}
             </p>
           ) : (
             <ol data-testid="versions-list" className="space-y-2">
               {versions.map((v, i) => (
-                <li key={v.hash} className="flex items-center justify-between gap-3 rounded-lg border border-zinc-700 px-4 py-3">
+                <li key={v.hash} className="flex items-center justify-between gap-3 rounded-lg border border-border px-4 py-3">
                   <div className="min-w-0">
                     <div className="truncate text-lg">{friendlyTitle(v.message)}</div>
-                    <div className="text-sm text-zinc-400">
+                    <div className="text-sm text-muted-foreground">
                       {timeAgo(v.date)}
                       {i === 0 && ` · ${t("versies.huidig")}`}
                     </div>
                   </div>
                   {i > 0 && (
-                    <button onClick={() => setTarget(v)} className="min-h-10 shrink-0 rounded-lg border border-indigo-500 px-3 text-base text-indigo-200 hover:bg-indigo-950">
+                    <button onClick={() => setTarget(v)} className="min-h-10 shrink-0 rounded-lg border border-primary px-3 text-base text-primary hover:bg-primary/90">
                       {t("versies.terug")}
                     </button>
                   )}
@@ -89,15 +89,15 @@ export default function VersionsDialog({ projectId, onClose, onError }: Props) {
       </div>
 
       {target && (
-        <div className="fixed inset-0 z-30 flex items-center justify-center bg-black/60 p-4">
-          <div role="alertdialog" aria-modal="true" aria-label={t("versies.terug")} className="w-full max-w-md space-y-4 rounded-xl border-2 border-indigo-500 bg-zinc-900 p-6">
+        <div className="fixed inset-0 z-30 flex items-center justify-center bg-foreground/50 p-4">
+          <div role="alertdialog" aria-modal="true" aria-label={t("versies.terug")} className="w-full max-w-md space-y-4 rounded-xl border-2 border-primary bg-card p-6">
             <h3 className="text-xl font-semibold">{t("versies.bevestigTitel", { titel: friendlyTitle(target.message) })}</h3>
-            <p className="text-base text-zinc-200">{t("versies.bevestigUitleg")}</p>
+            <p className="text-base text-foreground">{t("versies.bevestigUitleg")}</p>
             <div className="flex justify-end gap-3">
-              <button onClick={() => setTarget(null)} className="min-h-11 rounded-lg border border-zinc-500 px-5 hover:bg-zinc-800">
+              <button onClick={() => setTarget(null)} className="min-h-11 rounded-lg border border-input px-5 hover:bg-muted">
                 {t("nieuw.annuleer")}
               </button>
-              <button disabled={busy} onClick={() => void restore()} className="min-h-11 rounded-lg bg-indigo-600 px-5 font-semibold hover:bg-indigo-500 disabled:opacity-50">
+              <button disabled={busy} onClick={() => void restore()} className="min-h-11 rounded-lg bg-primary text-primary-foreground px-5 font-semibold hover:bg-primary/90 disabled:opacity-50">
                 {t("versies.ja")}
               </button>
             </div>

@@ -136,28 +136,28 @@ export default function TerminalPanel({ project, accounts, sessions, mcp, onSess
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex flex-wrap items-center gap-2 border-b border-zinc-800 px-3 py-2 text-sm">
-        <button onClick={() => void launch("claude", defaultAccountFor("claude"))} className="rounded bg-indigo-600 px-3 py-1 hover:bg-indigo-500">
+      <div className="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2 text-sm">
+        <button onClick={() => void launch("claude", defaultAccountFor("claude"))} className="rounded bg-primary text-primary-foreground px-3 py-1 hover:bg-primary/90">
           {t("provider.claude")}
         </button>
-        <button onClick={() => void launch("gemini", defaultAccountFor("gemini"))} className="rounded bg-indigo-600 px-3 py-1 hover:bg-indigo-500">
+        <button onClick={() => void launch("gemini", defaultAccountFor("gemini"))} className="rounded bg-primary text-primary-foreground px-3 py-1 hover:bg-primary/90">
           {t("provider.gemini")}
         </button>
-        <button disabled title={t("terminal.codexUitgeschakeld")} className="rounded border border-zinc-700 px-3 py-1 text-zinc-500">
+        <button disabled title={t("terminal.codexUitgeschakeld")} className="rounded border border-border px-3 py-1 text-muted-foreground">
           {t("provider.codex")}
         </button>
-        <button onClick={() => void newShell()} className="rounded border border-zinc-700 px-3 py-1 hover:bg-zinc-800">
+        <button onClick={() => void newShell()} className="rounded border border-border px-3 py-1 hover:bg-muted">
           {t("terminal.nieuweShell")}
         </button>
         <button
           onClick={() => setSwitching(true)}
           disabled={!activeAi}
-          className="rounded border border-zinc-700 px-3 py-1 hover:bg-zinc-800 disabled:opacity-40"
+          className="rounded border border-border px-3 py-1 hover:bg-muted disabled:opacity-40"
         >
           {t("terminal.wissel")}
         </button>
         <div className="ml-auto flex items-center gap-3 text-xs">
-          <span data-testid="account-badge" className="rounded bg-zinc-800 px-2 py-1">
+          <span data-testid="account-badge" className="rounded bg-muted px-2 py-1">
             {activeAi ? t("terminal.actiefAccount", { naam: accountName }) : t("terminal.geenAi")}
           </span>
           <span
@@ -165,18 +165,18 @@ export default function TerminalPanel({ project, accounts, sessions, mcp, onSess
             title={mcp?.error ?? undefined}
             className={`rounded px-2 py-1 ${
               mcpState === "connected"
-                ? "bg-emerald-900 text-emerald-200"
+                ? "bg-success/15 text-success"
                 : mcpState === "running"
-                  ? "bg-sky-900 text-sky-200"
+                  ? "bg-accent text-accent-foreground"
                   : mcpState === "unavailable"
-                    ? "bg-red-900 text-red-200"
-                    : "bg-zinc-800 text-zinc-400"
+                    ? "bg-destructive/15 text-destructive"
+                    : "bg-muted text-muted-foreground"
             }`}
           >
             {t(`mcp.${mcpState}`)}
           </span>
           {(mcpState === "running" || mcpState === "connected") && (
-            <button onClick={() => void verify()} disabled={checking} className="text-indigo-400 hover:underline disabled:opacity-50">
+            <button onClick={() => void verify()} disabled={checking} className="text-primary hover:underline disabled:opacity-50">
               {checking ? t("mcp.controleBezig") : t("mcp.controleer")}
             </button>
           )}
@@ -185,22 +185,22 @@ export default function TerminalPanel({ project, accounts, sessions, mcp, onSess
 
       {mcpState === "unavailable" && <McpProblem info={mcp} busy={retrying} onRetry={() => void retry()} />}
       {check && (
-        <div role="status" data-testid="mcp-check" className="space-y-1 border-b border-zinc-800 bg-zinc-900 px-4 py-2 text-sm">
-          <div className={check.verdict === "connected" ? "text-emerald-300" : "text-amber-300"}>{t(`mcp.controle.${check.verdict}`)}</div>
-          {check.output && <pre className="max-h-32 overflow-auto whitespace-pre-wrap font-mono text-xs text-zinc-400">{check.output}</pre>}
+        <div role="status" data-testid="mcp-check" className="space-y-1 border-b border-border bg-card px-4 py-2 text-sm">
+          <div className={check.verdict === "connected" ? "text-success" : "text-warning"}>{t(`mcp.controle.${check.verdict}`)}</div>
+          {check.output && <pre className="max-h-32 overflow-auto whitespace-pre-wrap font-mono text-xs text-muted-foreground">{check.output}</pre>}
         </div>
       )}
       {activeAi?.provider === "claude" && mcpState === "running" && !check && (
-        <div className="border-b border-zinc-800 bg-sky-950/40 px-4 py-2 text-xs text-sky-200">{t("mcp.goedkeuring")}</div>
+        <div className="border-b border-border bg-accent/40 px-4 py-2 text-xs text-accent-foreground">{t("mcp.goedkeuring")}</div>
       )}
-      <div role="tablist" className="flex gap-1 overflow-x-auto border-b border-zinc-800 px-3 pt-1">
+      <div role="tablist" className="flex gap-1 overflow-x-auto border-b border-border px-3 pt-1">
         {sessions.map((s) => (
-          <div key={s.id} className={`flex items-center rounded-t text-sm ${s.id === active?.id ? "bg-zinc-800" : "text-zinc-400"}`}>
+          <div key={s.id} className={`flex items-center rounded-t text-sm ${s.id === active?.id ? "bg-muted" : "text-muted-foreground"}`}>
             <button role="tab" aria-selected={s.id === active?.id} className="px-3 py-1.5" onClick={() => { setActiveId(s.id); setMissing(null); }}>
               {s.title}
               {s.ended ? " ✕" : ""}
             </button>
-            <button aria-label={t("terminal.sluitTab")} className="pr-2 text-zinc-500 hover:text-red-400" onClick={() => void close(s.id)}>
+            <button aria-label={t("terminal.sluitTab")} className="pr-2 text-muted-foreground hover:text-destructive" onClick={() => void close(s.id)}>
               ×
             </button>
           </div>
@@ -211,7 +211,7 @@ export default function TerminalPanel({ project, accounts, sessions, mcp, onSess
         {missing ? (
           <InstallGuide key={missing.provider} status={missing} onInstalled={(s) => void launch(s.provider, defaultAccountFor(s.provider), {}, true)} />
         ) : sessions.length === 0 ? (
-          <div className="flex h-full items-center justify-center text-zinc-500">{t("terminal.leeg")}</div>
+          <div className="flex h-full items-center justify-center text-muted-foreground">{t("terminal.leeg")}</div>
         ) : null}
         {sessions.map((s) => (
           <div key={s.id} className={`absolute inset-0 ${!missing && s.id === active?.id ? "" : "invisible"}`}>

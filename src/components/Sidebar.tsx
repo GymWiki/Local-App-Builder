@@ -28,24 +28,24 @@ export default function Sidebar({ projects, selectedId, accountsActive, settings
   }
 
   return (
-    <aside className="flex w-64 shrink-0 flex-col border-r border-zinc-800 bg-zinc-900">
+    <aside className="flex w-64 shrink-0 flex-col border-r border-border bg-card">
       <div className="px-4 py-3 text-lg font-semibold">{t("app.naam")}</div>
       <div className="px-3 pb-3">
         <button
           onClick={onNew}
-          className="w-full rounded bg-indigo-600 px-3 py-2 text-sm font-medium hover:bg-indigo-500"
+          className="w-full rounded bg-primary text-primary-foreground px-3 py-2 text-sm font-medium hover:bg-primary/90"
         >
           {t("sidebar.nieuwProject")}
         </button>
       </div>
-      <h2 className="px-4 pb-1 text-xs uppercase tracking-wide text-zinc-500">{t("sidebar.projecten")}</h2>
+      <h2 className="px-4 pb-1 text-xs uppercase tracking-wide text-muted-foreground">{t("sidebar.projecten")}</h2>
       <ul className="flex-1 overflow-y-auto">
-        {projects.length === 0 && <li className="px-4 py-2 text-sm text-zinc-500">{t("sidebar.leeg")}</li>}
+        {projects.length === 0 && <li className="px-4 py-2 text-sm text-muted-foreground">{t("sidebar.leeg")}</li>}
         {projects.map((p) => (
           <li
             key={p.id}
             className={`group flex items-center justify-between px-4 py-2 text-sm ${
-              p.id === selectedId ? "bg-zinc-800" : "hover:bg-zinc-800/60"
+              p.id === selectedId ? "bg-muted" : "hover:bg-muted/60"
             }`}
           >
             <button className="min-w-0 flex-1 truncate text-left" onClick={() => onSelect(p.id)}>
@@ -54,7 +54,7 @@ export default function Sidebar({ projects, selectedId, accountsActive, settings
             <button
               aria-label={t("sidebar.verwijder")}
               title={t("sidebar.verwijder")}
-              className="ml-2 hidden text-zinc-500 hover:text-red-400 group-hover:block"
+              className="ml-2 hidden text-muted-foreground hover:text-destructive group-hover:block"
               onClick={() => void remove(p)}
             >
               ×
@@ -62,11 +62,11 @@ export default function Sidebar({ projects, selectedId, accountsActive, settings
           </li>
         ))}
       </ul>
-      <div className="border-t border-zinc-800 p-3">
+      <div className="border-t border-border p-3">
         <button
           onClick={onAccounts}
           aria-current={accountsActive}
-          className={`w-full rounded px-3 py-2 text-left text-sm ${accountsActive ? "bg-zinc-800" : "hover:bg-zinc-800/60"}`}
+          className={`w-full rounded px-3 py-2 text-left text-sm ${accountsActive ? "bg-muted" : "hover:bg-muted/60"}`}
         >
           {t("accounts.titel")}
         </button>
@@ -74,7 +74,7 @@ export default function Sidebar({ projects, selectedId, accountsActive, settings
           <button
             onClick={onSettings}
             aria-current={settingsActive}
-            className={`mt-1 w-full rounded px-3 py-2 text-left text-sm ${settingsActive ? "bg-zinc-800" : "hover:bg-zinc-800/60"}`}
+            className={`mt-1 w-full rounded px-3 py-2 text-left text-sm ${settingsActive ? "bg-muted" : "hover:bg-muted/60"}`}
           >
             {t("sidebar.instellingen")}
           </button>

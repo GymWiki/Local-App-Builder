@@ -215,12 +215,15 @@ const UI_SETTINGS: &[&str] = &[
     "preview_auto_switch",
     "communication_mode",
     "permission_mode",
+    "loop_threshold",
+    "theme",
 ];
 
 fn valid_setting(key: &str, value: &str) -> bool {
     match key {
         "communication_mode" => matches!(value, "simple" | "technical"),
         "permission_mode" => matches!(value, "always" | "important"),
+        "theme" => matches!(value, "system" | "light" | "dark"),
         "loop_threshold" => value
             .parse::<usize>()
             .is_ok_and(|n| (chat::guard::MIN_THRESHOLD..=chat::guard::MAX_THRESHOLD).contains(&n)),
@@ -1118,4 +1121,19 @@ pub fn kit_strictness(
     level: String,
 ) -> Result<Value> {
     kit_call(&app, &db, &mcp, project_id, "kit.strictness", json!({ "level": level }))
+}
+
+#[cfg(test)]
+mod setting_tests {
+    use super::*;
+
+    #[test]
+    fn alle_instellingen_van_de_ui_zijn_toegestaan_en_waarden_worden_gecontroleerd() {
+        for key in ["preview_auto_switch", "communication_mode", "permission_mode", "loop_threshold", "theme"] {
+            assert!(UI_SETTINGS.contains(&key), "{key} ontbreekt in UI_SETTINGS");
+        }
+        assert!(valid_setting("theme", "system") && valid_setting("theme", "light") && valid_setting("theme", "dark"));
+        assert!(!valid_setting("theme", "paars"));
+        assert!(valid_setting("loop_threshold", "3") && !valid_setting("loop_threshold", "1") && !valid_setting("loop_threshold", "abc"));
+    }
 }

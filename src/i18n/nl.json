@@ -460,6 +460,15 @@
       "titel": "Hulp als de AI vastloopt",
       "label": "Waarschuw na zoveel keer dezelfde mislukte controle",
       "uitleg": "Studio onderbreekt de AI als dezelfde fout of dezelfde stap zoveel keer na elkaar mislukt, of als het slechter wordt. Je krijgt dan keuzes. Standaard: 3."
+    },
+    "thema": {
+      "titel": "Weergave",
+      "system": "Volgens mijn computer",
+      "systemUitleg": "Studio is licht of donker, zoals je computer is ingesteld.",
+      "light": "Licht",
+      "lightUitleg": "Een lichte achtergrond met donkere tekst.",
+      "dark": "Donker",
+      "darkUitleg": "Een donkere achtergrond met lichte tekst. Rustiger voor de ogen in een donkere ruimte."
     }
   },
   "versies": {

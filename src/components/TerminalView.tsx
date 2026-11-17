@@ -107,5 +107,5 @@ export default function TerminalView({ sessionId, active, exitText, onExit }: Pr
     }
   }, [active]);
 
-  return <div ref={host} className={`h-full w-full bg-zinc-950 p-2 ${active ? "" : "hidden"}`} />;
+  return <div ref={host} className={`h-full w-full bg-background p-2 ${active ? "" : "hidden"}`} />;
 }

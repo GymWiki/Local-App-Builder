@@ -29,12 +29,12 @@ export default function NewProjectDialog({ onClose, onCreated }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/60">
+    <div className="fixed inset-0 flex items-center justify-center bg-foreground/50">
       <form
         onSubmit={(e) => void submit(e)}
         role="dialog"
         aria-label={t("nieuw.titel")}
-        className="w-[28rem] space-y-4 rounded-lg bg-zinc-900 p-6 shadow-xl"
+        className="w-[28rem] space-y-4 rounded-lg bg-card p-6 shadow-xl"
       >
         <h2 className="text-lg font-semibold">{t("nieuw.titel")}</h2>
         <label className="block text-sm">
@@ -43,7 +43,7 @@ export default function NewProjectDialog({ onClose, onCreated }: Props) {
             autoFocus
             value={naam}
             onChange={(e) => setNaam(e.target.value)}
-            className="mt-1 w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2"
+            className="mt-1 w-full rounded border border-border bg-background px-3 py-2"
           />
         </label>
         <div role="radiogroup" aria-label={t("nieuw.soort")} className="space-y-2 text-sm">
@@ -54,10 +54,10 @@ export default function NewProjectDialog({ onClose, onCreated }: Props) {
               role="radio"
               aria-checked={soort === k}
               onClick={() => setSoort(k)}
-              className={`block w-full rounded border px-3 py-2 text-left ${soort === k ? "border-indigo-400 bg-indigo-950" : "border-zinc-700 hover:bg-zinc-800"}`}
+              className={`block w-full rounded border px-3 py-2 text-left ${soort === k ? "border-primary bg-accent" : "border-border hover:bg-muted"}`}
             >
               <span className="font-medium">{t(k === "leeg" ? "nieuw.soortLeeg" : "nieuw.soortWeb")}</span>
-              <span className="block text-zinc-400">{t(k === "leeg" ? "nieuw.soortLeegUitleg" : "nieuw.soortWebUitleg")}</span>
+              <span className="block text-muted-foreground">{t(k === "leeg" ? "nieuw.soortLeegUitleg" : "nieuw.soortWebUitleg")}</span>
             </button>
           ))}
         </div>
@@ -67,27 +67,27 @@ export default function NewProjectDialog({ onClose, onCreated }: Props) {
             <button
               type="button"
               onClick={() => void kiesMap().then((m) => m && setMap(m))}
-              className="rounded border border-zinc-700 px-3 py-1.5 hover:bg-zinc-800"
+              className="rounded border border-border px-3 py-1.5 hover:bg-muted"
             >
               {t("nieuw.kiesMap")}
             </button>
-            <span className="min-w-0 truncate text-zinc-400">{map ?? t("nieuw.geenMap")}</span>
+            <span className="min-w-0 truncate text-muted-foreground">{map ?? t("nieuw.geenMap")}</span>
           </div>
-          {map && naam.trim() && <p className="mt-2 text-zinc-500">{t("nieuw.resultaat", { naam: naam.trim() })}</p>}
+          {map && naam.trim() && <p className="mt-2 text-muted-foreground">{t("nieuw.resultaat", { naam: naam.trim() })}</p>}
         </div>
         {error && (
-          <p role="alert" className="text-sm text-red-400">
+          <p role="alert" className="text-sm text-destructive">
             {error}
           </p>
         )}
         <div className="flex justify-end gap-2">
-          <button type="button" onClick={onClose} className="rounded px-3 py-2 text-sm hover:bg-zinc-800">
+          <button type="button" onClick={onClose} className="rounded px-3 py-2 text-sm hover:bg-muted">
             {t("nieuw.annuleer")}
           </button>
           <button
             type="submit"
             disabled={busy || !naam.trim() || !map}
-            className="rounded bg-indigo-600 px-3 py-2 text-sm font-medium hover:bg-indigo-500 disabled:opacity-50"
+            className="rounded bg-primary text-primary-foreground px-3 py-2 text-sm font-medium hover:bg-primary/90 disabled:opacity-50"
           >
             {busy ? t("nieuw.bezig") : t("nieuw.maak")}
           </button>

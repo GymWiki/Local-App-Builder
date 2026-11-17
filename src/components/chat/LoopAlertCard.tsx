@@ -34,45 +34,45 @@ export default function LoopAlertCard({ message, active, onRestore, onDiscuss, o
   }
 
   return (
-    <div role="alert" data-testid="loop-alert" className="space-y-3 rounded-xl border-2 border-amber-500 bg-amber-950/30 p-5 text-lg">
+    <div role="alert" data-testid="loop-alert" className="space-y-3 rounded-xl border-2 border-warning bg-warning/10 p-5 text-lg">
       <div className="text-xl font-semibold">⏸ {t("chat.lus.titel")}</div>
       <p>{t(`chat.lus.uitleg.${reason}`, { aantal: p.streak })}</p>
       {done ? (
-        <p role="status" className="rounded-lg bg-emerald-950 p-3 text-base text-emerald-200">
+        <p role="status" className="rounded-lg bg-success/15 p-3 text-base text-success">
           {done}
         </p>
       ) : (
         active && (
           <>
-            <p className="text-base text-zinc-300">{t("chat.lus.vraag")}</p>
+            <p className="text-base text-muted-foreground">{t("chat.lus.vraag")}</p>
             <div className="flex flex-wrap gap-3">
               <button
                 disabled={!working}
                 onClick={() => setConfirm(true)}
-                className="min-h-12 rounded-lg bg-indigo-600 px-5 font-semibold hover:bg-indigo-500 disabled:opacity-40"
+                className="min-h-12 rounded-lg bg-primary text-primary-foreground px-5 font-semibold hover:bg-primary/90 disabled:opacity-40"
               >
                 {t("chat.lus.terug")}
               </button>
-              <button onClick={onDiscuss} className="min-h-12 rounded-lg border border-zinc-500 px-5 hover:bg-zinc-800">
+              <button onClick={onDiscuss} className="min-h-12 rounded-lg border border-input px-5 hover:bg-muted">
                 {t("chat.lus.overleg")}
               </button>
-              <button onClick={onOtherAi} className="min-h-12 rounded-lg border border-zinc-500 px-5 hover:bg-zinc-800">
+              <button onClick={onOtherAi} className="min-h-12 rounded-lg border border-input px-5 hover:bg-muted">
                 {t("chat.lus.andere")}
               </button>
             </div>
-            {!working && <p className="text-sm text-zinc-400">{t("chat.lus.terugGeen")}</p>}
+            {!working && <p className="text-sm text-muted-foreground">{t("chat.lus.terugGeen")}</p>}
           </>
         )
       )}
       {confirm && working && (
-        <div role="alertdialog" aria-label={t("chat.lus.terug")} className="space-y-3 rounded-lg border border-indigo-500 bg-zinc-900 p-4">
+        <div role="alertdialog" aria-label={t("chat.lus.terug")} className="space-y-3 rounded-lg border border-primary bg-card p-4">
           <div className="font-semibold">{t("chat.lus.terugBevestig", { titel: working.title })}</div>
-          <p className="text-base text-zinc-300">{t("chat.lus.terugUitleg")}</p>
+          <p className="text-base text-muted-foreground">{t("chat.lus.terugUitleg")}</p>
           <div className="flex gap-3">
-            <button disabled={busy} onClick={() => void restore()} className="min-h-11 rounded-lg bg-indigo-600 px-4 font-semibold hover:bg-indigo-500 disabled:opacity-50">
+            <button disabled={busy} onClick={() => void restore()} className="min-h-11 rounded-lg bg-primary text-primary-foreground px-4 font-semibold hover:bg-primary/90 disabled:opacity-50">
               {t("chat.lus.terugJa")}
             </button>
-            <button onClick={() => setConfirm(false)} className="min-h-11 rounded-lg border border-zinc-500 px-4 hover:bg-zinc-800">
+            <button onClick={() => setConfirm(false)} className="min-h-11 rounded-lg border border-input px-4 hover:bg-muted">
               {t("nieuw.annuleer")}
             </button>
           </div>

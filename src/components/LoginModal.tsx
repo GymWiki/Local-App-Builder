@@ -36,21 +36,21 @@ export default function LoginModal({ account, onClose }: { account: Account; onC
   }, [account.id, account.provider, attempt]);
 
   return (
-    <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/70">
-      <div role="dialog" aria-label={t("accounts.inloggen")} className="flex h-[32rem] w-[48rem] flex-col rounded-lg bg-zinc-900 shadow-xl">
-        <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
+    <div className="fixed inset-0 z-10 flex items-center justify-center bg-foreground/50">
+      <div role="dialog" aria-label={t("accounts.inloggen")} className="flex h-[32rem] w-[48rem] flex-col rounded-lg bg-card shadow-xl">
+        <div className="flex items-center justify-between border-b border-border px-4 py-3">
           <div>
             <div className="font-semibold">
               {t("accounts.inloggenBij", { provider: t(`provider.${account.provider}`), label: account.label })}
             </div>
-            <div className="text-xs text-zinc-500">{t("accounts.inlogUitleg")}</div>
+            <div className="text-xs text-muted-foreground">{t("accounts.inlogUitleg")}</div>
           </div>
-          <button onClick={onClose} className="rounded border border-zinc-700 px-3 py-1 text-sm hover:bg-zinc-800">
+          <button onClick={onClose} className="rounded border border-border px-3 py-1 text-sm hover:bg-muted">
             {t("accounts.klaar")}
           </button>
         </div>
         <div className="min-h-0 flex-1">
-          {error && <p className="p-4 text-red-400">{error}</p>}
+          {error && <p className="p-4 text-destructive">{error}</p>}
           {missing && <InstallGuide status={missing} onInstalled={() => setAttempt((n) => n + 1)} />}
           {sessionId && !missing && <TerminalView sessionId={sessionId} active exitText={(c) => t("terminal.beeindigd", { code: c ?? "?" })} />}
         </div>

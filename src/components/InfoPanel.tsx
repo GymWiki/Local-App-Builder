@@ -26,24 +26,24 @@ export default function InfoPanel({ project, accounts, onDefaultAccount, onClose
     : [];
 
   return (
-    <aside className={`w-72 shrink-0 overflow-y-auto border-l border-zinc-800 bg-zinc-900 p-4 ${quietUnlessWide ? "hidden 2xl:block" : ""}`}>
-      <h2 className="mb-3 text-xs uppercase tracking-wide text-zinc-500">{t("info.titel")}</h2>
+    <aside className={`w-72 shrink-0 overflow-y-auto border-l border-border bg-card p-4 ${quietUnlessWide ? "hidden 2xl:block" : ""}`}>
+      <h2 className="mb-3 text-xs uppercase tracking-wide text-muted-foreground">{t("info.titel")}</h2>
       {project ? (
         <div className="space-y-5">
           <dl className="space-y-3 text-sm">
             {rows.map(([k, v]) => (
               <div key={k}>
-                <dt className="text-zinc-500">{k}</dt>
+                <dt className="text-muted-foreground">{k}</dt>
                 <dd className="break-all">{v}</dd>
               </div>
             ))}
           </dl>
           <label className="block text-sm">
-            <span className="text-zinc-500">{t("info.standaardAccount")}</span>
+            <span className="text-muted-foreground">{t("info.standaardAccount")}</span>
             <select
               value={project.default_account_id ?? ""}
               onChange={(e) => void onDefaultAccount(e.target.value ? Number(e.target.value) : null)}
-              className="mt-1 block w-full rounded border border-zinc-700 bg-zinc-950 px-2 py-2"
+              className="mt-1 block w-full rounded border border-border bg-background px-2 py-2"
             >
               <option value="">{t("terminal.systeemstandaard")}</option>
               {accounts.map((a) => (
@@ -54,12 +54,12 @@ export default function InfoPanel({ project, accounts, onDefaultAccount, onClose
             </select>
           </label>
           <ActivityPanel project={project} mcp={mcp} tick={tick} onError={onError ?? (() => undefined)} />
-          <button onClick={onClose} className="w-full rounded border border-zinc-700 px-3 py-2 text-sm hover:bg-zinc-800">
+          <button onClick={onClose} className="w-full rounded border border-border px-3 py-2 text-sm hover:bg-muted">
             {t("info.sluit")}
           </button>
         </div>
       ) : (
-        <p className="text-sm text-zinc-500">{t("info.geenSelectie")}</p>
+        <p className="text-sm text-muted-foreground">{t("info.geenSelectie")}</p>
       )}
     </aside>
   );

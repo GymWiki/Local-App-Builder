@@ -53,28 +53,28 @@ export default function Workspace({
 
   return (
     <section className="flex min-h-0 flex-1 flex-col">
-      <div role="tablist" aria-label={t("app.naam")} className="flex gap-1 border-b border-zinc-800 px-3 pt-2">
+      <div role="tablist" aria-label={t("app.naam")} className="flex gap-1 border-b border-border px-3 pt-2">
         {TABS.map((id) => (
           <button
             key={id}
             role="tab"
             aria-selected={tab === id}
             onClick={() => setTab(id)}
-            className={`min-h-11 rounded-t-lg px-6 text-lg ${tab === id ? "bg-zinc-800 font-semibold text-white" : "text-zinc-300 hover:text-white"}`}
+            className={`min-h-11 rounded-t-lg px-6 text-lg ${tab === id ? "bg-muted font-semibold text-foreground" : "text-muted-foreground hover:text-foreground"}`}
           >
             {t(`tabs.${id}`)}
           </button>
         ))}
       </div>
       {!project ? (
-        <div role="tabpanel" className="flex flex-1 items-center justify-center text-lg text-zinc-300">
+        <div role="tabpanel" className="flex flex-1 items-center justify-center text-lg text-muted-foreground">
           {t("tabs.geenProject")}
         </div>
       ) : (
         <>
           {/* Blijft gemount (verborgen) zodat gesprek, preview en lopende terminals hun toestand houden. */}
           <div role="tabpanel" hidden={tab !== "maken"} className={`min-h-0 flex-1 ${tab === "maken" ? "grid grid-cols-1 lg:grid-cols-2" : "hidden"}`}>
-            <div className="min-h-0 min-w-0 border-r border-zinc-800">
+            <div className="min-h-0 min-w-0 border-r border-border">
               <ChatPanel
                 key={project.id}
                 project={project}
@@ -101,7 +101,7 @@ export default function Workspace({
           </div>
           {tab === "uiterlijk" && (
             <div role="tabpanel" className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-2">
-              <div className="min-h-0 min-w-0 overflow-y-auto border-r border-zinc-800">
+              <div className="min-h-0 min-w-0 overflow-y-auto border-r border-border">
                 <AppearancePanel key={project.id} projectId={project.id} firstRun={project.template !== "leeg"} onError={fail} />
               </div>
               <div className="hidden min-h-0 min-w-0 flex-col lg:flex">
@@ -132,7 +132,7 @@ export default function Workspace({
             />
           </div>
           {tab === "publiceren" && (
-            <div role="tabpanel" className="flex flex-1 items-center justify-center text-lg text-zinc-300">
+            <div role="tabpanel" className="flex flex-1 items-center justify-center text-lg text-muted-foreground">
               {t("tabs.binnenkort")}
             </div>
           )}

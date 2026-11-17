@@ -13,7 +13,7 @@ function inline(text: string, keyPrefix: string): ReactNode[] {
       tok.startsWith("**") ? (
         <strong key={`${keyPrefix}-${i++}`}>{tok.slice(2, -2)}</strong>
       ) : (
-        <code key={`${keyPrefix}-${i++}`} className="rounded bg-zinc-800 px-1.5 py-0.5 text-[0.95em]">
+        <code key={`${keyPrefix}-${i++}`} className="rounded bg-muted px-1.5 py-0.5 text-[0.95em]">
           {tok.slice(1, -1)}
         </code>
       ),

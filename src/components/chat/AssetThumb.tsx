@@ -25,9 +25,9 @@ export default function AssetThumb({ projectId, path, name, kind, size = "klein"
     };
   }, [projectId, path, kind]);
   const box = size === "groot" ? "h-24 w-24" : "h-16 w-16";
-  if (src) return <img src={src} alt={t("chat.bijlage.alt", { naam: name })} className={`${box} rounded-lg border border-zinc-600 object-cover`} />;
+  if (src) return <img src={src} alt={t("chat.bijlage.alt", { naam: name })} className={`${box} rounded-lg border border-input object-cover`} />;
   return (
-    <span title={name} className={`flex ${box} flex-col items-center justify-center gap-1 rounded-lg border border-zinc-600 bg-zinc-800 px-1 text-center text-xs text-zinc-200`}>
+    <span title={name} className={`flex ${box} flex-col items-center justify-center gap-1 rounded-lg border border-input bg-muted px-1 text-center text-xs text-foreground`}>
       <span aria-hidden="true">{kind === "image" ? "🖼" : "📄"}</span>
       <span className="w-full truncate">{name}</span>
     </span>

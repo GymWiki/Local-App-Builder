@@ -23,7 +23,7 @@ export default function MessageView({ message, live, technical, canRetry, onRetr
     case "user":
       return (
         <div className="flex justify-end">
-          <div data-testid="bubble-user" className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-sm bg-indigo-700 px-5 py-3 text-lg leading-relaxed text-white">
+          <div data-testid="bubble-user" className="max-w-[85%] whitespace-pre-wrap rounded-2xl rounded-br-sm bg-primary px-5 py-3 text-lg leading-relaxed text-primary-foreground">
             {Array.isArray(p.attachments) && p.attachments.length > 0 && (
               <ul aria-label={t("chat.bijlage.lijst")} className="mb-2 flex flex-wrap gap-2">
                 {p.attachments.map((a: { path: string; name: string; kind: string }) => (
@@ -40,7 +40,7 @@ export default function MessageView({ message, live, technical, canRetry, onRetr
     case "assistant":
       return (
         <div className="flex justify-start">
-          <div data-testid="bubble-ai" className="max-w-[90%] rounded-2xl rounded-bl-sm bg-zinc-800 px-5 py-3 text-lg leading-relaxed text-zinc-100">
+          <div data-testid="bubble-ai" className="max-w-[90%] rounded-2xl rounded-bl-sm bg-muted px-5 py-3 text-lg leading-relaxed text-foreground">
             <FormattedText text={p.text ?? ""} />
           </div>
         </div>
@@ -49,7 +49,7 @@ export default function MessageView({ message, live, technical, canRetry, onRetr
       return <ActionCard message={message} live={live} technical={technical} />;
     case "permission":
       return (
-        <div data-testid="permission-record" className="px-2 text-sm text-zinc-400">
+        <div data-testid="permission-record" className="px-2 text-sm text-muted-foreground">
           🔒 {t(`chat.toestemming.${p.state === "allowed" ? "toegestaan" : p.state === "denied" ? "geweigerd" : p.state === "expired" ? "verlopen" : "titel"}`)}
           {technical && p.detail ? ` — ${String(p.detail).slice(0, 80)}` : ""}
         </div>
@@ -58,7 +58,7 @@ export default function MessageView({ message, live, technical, canRetry, onRetr
       return <ErrorCard message={message} technical={technical} canRetry={canRetry} onRetry={onRetry} onOpenAccounts={onOpenAccounts} />;
     case "version":
       return (
-        <div data-testid="version-line" className="flex items-center gap-2 px-2 text-sm text-zinc-300">
+        <div data-testid="version-line" className="flex items-center gap-2 px-2 text-sm text-muted-foreground">
           <span aria-hidden="true">💾</span>
           <span>{t("chat.versieOpgeslagen", { titel: p.title })}</span>
         </div>
@@ -69,10 +69,10 @@ export default function MessageView({ message, live, technical, canRetry, onRetr
       ) : null;
     case "divider":
       return (
-        <div role="separator" className="flex items-center gap-3 py-2 text-sm text-zinc-400">
-          <span className="h-px flex-1 bg-zinc-700" />
+        <div role="separator" className="flex items-center gap-3 py-2 text-sm text-muted-foreground">
+          <span className="h-px flex-1 bg-secondary" />
           <span>{p.kind === "switched" ? t("chat.scheiding.gewisseld", { ai: `${p.provider}${p.label ? ` · ${p.label}` : ""}` }) : t("chat.scheiding.nieuw")}</span>
-          <span className="h-px flex-1 bg-zinc-700" />
+          <span className="h-px flex-1 bg-secondary" />
         </div>
       );
     default:

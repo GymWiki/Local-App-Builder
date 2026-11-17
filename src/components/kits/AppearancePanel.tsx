@@ -95,12 +95,12 @@ export default function AppearancePanel({ projectId, firstRun = false, onError }
     }
   }
 
-  if (!cur) return <p role="status" className="p-5 text-lg text-zinc-300">{t("uiterlijk.laden")}</p>;
+  if (!cur) return <p role="status" className="p-5 text-lg text-muted-foreground">{t("uiterlijk.laden")}</p>;
   if (!cur.kit || choosing) {
     return (
       <div>
         {choosing && cur.kit && (
-          <button onClick={() => setChoosing(false)} className="m-5 mb-0 min-h-11 rounded-lg border border-zinc-500 px-4 text-base hover:bg-zinc-800">
+          <button onClick={() => setChoosing(false)} className="m-5 mb-0 min-h-11 rounded-lg border border-input px-4 text-base hover:bg-muted">
             {t("uiterlijk.annuleer")}
           </button>
         )}
@@ -130,15 +130,15 @@ export default function AppearancePanel({ projectId, firstRun = false, onError }
       </header>
 
       {cur.attributie.required && !cur.attributie.ok && (
-        <p role="alert" className="rounded-lg border border-amber-600 bg-amber-950/30 p-3 text-base">
+        <p role="alert" className="rounded-lg border border-warning bg-warning/10 p-3 text-base">
           {t("uiterlijk.attributie.mist")}
         </p>
       )}
 
-      <div className="space-y-4 rounded-xl border border-zinc-700 p-4">
+      <div className="space-y-4 rounded-xl border border-border p-4">
         <div>
           <h3 className="text-lg font-semibold">{t("uiterlijk.aanpassen.titel")}</h3>
-          <p className="text-base text-zinc-300">{t("uiterlijk.aanpassen.uitleg")}</p>
+          <p className="text-base text-muted-foreground">{t("uiterlijk.aanpassen.uitleg")}</p>
         </div>
 
         <label className="flex items-center gap-3">
@@ -152,7 +152,7 @@ export default function AppearancePanel({ projectId, firstRun = false, onError }
               setCur((c) => (c && c.tokens ? { ...c, tokens: { ...c.tokens, kleuren: { ...c.tokens.kleuren, licht: { ...c.tokens.kleuren.licht, primair: v } } } } : c));
               void tailor({ hoofdkleur: v }, 300);
             }}
-            className="h-11 w-16 rounded border border-zinc-600 bg-zinc-900"
+            className="h-11 w-16 rounded border border-input bg-card"
           />
         </label>
 
@@ -168,7 +168,7 @@ export default function AppearancePanel({ projectId, firstRun = false, onError }
                 role="radio"
                 aria-checked={selected === o}
                 onClick={() => void tailor({ [key]: o } as KitTailor)}
-                className={`min-h-11 rounded-lg border px-4 text-base ${selected === o ? "border-indigo-400 bg-indigo-800 font-semibold" : "border-zinc-600 hover:bg-zinc-800"}`}
+                className={`min-h-11 rounded-lg border px-4 text-base ${selected === o ? "border-primary bg-primary text-primary-foreground font-semibold" : "border-input hover:bg-muted"}`}
               >
                 {t(`uiterlijk.aanpassen.${key === "afronding" ? "afrondingen" : "ruimtes"}.${o}`)}
               </button>
@@ -181,7 +181,7 @@ export default function AppearancePanel({ projectId, firstRun = false, onError }
           <select
             value={fontKey(tok?.typografie.lettertype)}
             onChange={(e) => void tailor({ lettertype: FONTS[e.target.value as FontKey] })}
-            className="min-h-11 rounded-lg border border-zinc-600 bg-zinc-900 px-3 text-base"
+            className="min-h-11 rounded-lg border border-input bg-card px-3 text-base"
           >
             {fontKey(tok?.typografie.lettertype) === "" && <option value="">{tok?.typografie.lettertype}</option>}
             {(Object.keys(FONTS) as FontKey[]).map((k) => (
@@ -193,28 +193,28 @@ export default function AppearancePanel({ projectId, firstRun = false, onError }
         </label>
 
         <div className="flex flex-wrap gap-2">
-          <button onClick={() => void save()} className="min-h-11 rounded-lg bg-indigo-600 px-4 text-base font-medium hover:bg-indigo-500">
+          <button onClick={() => void save()} className="min-h-11 rounded-lg bg-primary text-primary-foreground px-4 text-base font-medium hover:bg-primary/90">
             {t("uiterlijk.aanpassen.bewaar")}
           </button>
-          <button onClick={() => void tailor({ reset: true })} className="min-h-11 rounded-lg border border-zinc-500 px-4 text-base hover:bg-zinc-800">
+          <button onClick={() => void tailor({ reset: true })} className="min-h-11 rounded-lg border border-input px-4 text-base hover:bg-muted">
             {t("uiterlijk.aanpassen.standaard")}
           </button>
         </div>
-        {msg && <p role="status" className="text-base text-emerald-300">{msg}</p>}
+        {msg && <p role="status" className="text-base text-success">{msg}</p>}
       </div>
 
-      <div className="space-y-3 rounded-xl border border-zinc-700 p-4">
+      <div className="space-y-3 rounded-xl border border-border p-4">
         <div>
           <h3 className="text-lg font-semibold">{t("uiterlijk.controle.titel")}</h3>
-          <p className="text-base text-zinc-300">{t("uiterlijk.controle.uitleg")}</p>
+          <p className="text-base text-muted-foreground">{t("uiterlijk.controle.uitleg")}</p>
         </div>
-        <button onClick={() => void runCheck()} disabled={checking} className="min-h-11 rounded-lg border border-zinc-500 px-4 text-base hover:bg-zinc-800 disabled:opacity-50">
+        <button onClick={() => void runCheck()} disabled={checking} className="min-h-11 rounded-lg border border-input px-4 text-base hover:bg-muted disabled:opacity-50">
           {checking ? t("uiterlijk.controle.bezig") : t("uiterlijk.controle.knop")}
         </button>
         {check && <CheckResult check={check} onFix={(p) => void askAi(p)} onStrictness={(l) => void strictness(l)} />}
       </div>
 
-      <button onClick={() => setChoosing(true)} className="min-h-11 rounded-lg border border-zinc-500 px-4 text-base hover:bg-zinc-800">
+      <button onClick={() => setChoosing(true)} className="min-h-11 rounded-lg border border-input px-4 text-base hover:bg-muted">
         {t("uiterlijk.huidig.andere")}
       </button>
     </section>
@@ -229,25 +229,25 @@ function CheckResult({ check, onFix, onStrictness }: { check: KitCheck; onFix: (
   const spot = (f: KitFinding) => `${f.file} (${t("uiterlijk.controle.regel", { regel: f.line })}): ${f.message}`;
   return (
     <div className="space-y-4">
-      <p role="status" className={check.findings.length ? "text-amber-300" : "text-emerald-300"}>
+      <p role="status" className={check.findings.length ? "text-warning" : "text-success"}>
         {check.findings.length === 0 ? t("uiterlijk.controle.alles", { aantal: check.scanned }) : t("uiterlijk.controle.gevonden", { aantal: check.findings.length, bestanden: files })}
       </p>
       {RULES.map((rule) => {
         const list = check.findings.filter((f) => f.rule === rule);
         if (list.length === 0) return null;
         return (
-          <section key={rule} aria-label={t(`uiterlijk.controle.regels.${rule}.titel`)} className="space-y-2 rounded-lg border border-zinc-700 p-3">
+          <section key={rule} aria-label={t(`uiterlijk.controle.regels.${rule}.titel`)} className="space-y-2 rounded-lg border border-border p-3">
             <h4 className="font-semibold">
               {t(`uiterlijk.controle.regels.${rule}.titel`)} ({list.length})
             </h4>
-            <p className="text-base text-zinc-300">{t(`uiterlijk.controle.regels.${rule}.uitleg`)}</p>
+            <p className="text-base text-muted-foreground">{t(`uiterlijk.controle.regels.${rule}.uitleg`)}</p>
             <ul className="space-y-2 text-base">
               {list.slice(0, 20).map((f) => (
                 <li key={`${f.file}:${f.line}:${f.col}`} className="flex flex-wrap items-center justify-between gap-2">
                   <span className="min-w-0 break-words">{spot(f)}</span>
                   <button
                     onClick={() => onFix(t("uiterlijk.controle.prompt", { bestand: f.file, regel: f.line, melding: f.message, tip: f.fix }))}
-                    className="min-h-10 rounded-lg border border-zinc-500 px-3 text-sm hover:bg-zinc-800"
+                    className="min-h-10 rounded-lg border border-input px-3 text-sm hover:bg-muted"
                   >
                     {t("uiterlijk.controle.herstel")}
                   </button>
@@ -257,7 +257,7 @@ function CheckResult({ check, onFix, onStrictness }: { check: KitCheck; onFix: (
             {list.length > 1 && (
               <button
                 onClick={() => onFix(t("uiterlijk.controle.promptAlles", { titel: t(`uiterlijk.controle.regels.${rule}.titel`), plekken: list.slice(0, 20).map((f) => `- ${f.file}:${f.line} ${f.message} ${f.fix}`).join("\n") }))}
-                className="min-h-11 rounded-lg bg-indigo-600 px-4 text-base font-medium hover:bg-indigo-500"
+                className="min-h-11 rounded-lg bg-primary text-primary-foreground px-4 text-base font-medium hover:bg-primary/90"
               >
                 {t("uiterlijk.controle.herstelAlles")}
               </button>
@@ -273,13 +273,13 @@ function CheckResult({ check, onFix, onStrictness }: { check: KitCheck; onFix: (
             role="radio"
             aria-checked={check.strengheid === l}
             onClick={() => onStrictness(l)}
-            className={`mr-2 min-h-11 rounded-lg border px-4 text-base ${check.strengheid === l ? "border-indigo-400 bg-indigo-800 font-semibold" : "border-zinc-600 hover:bg-zinc-800"}`}
+            className={`mr-2 min-h-11 rounded-lg border px-4 text-base ${check.strengheid === l ? "border-primary bg-primary text-primary-foreground font-semibold" : "border-input hover:bg-muted"}`}
             title={t(`uiterlijk.controle.strengheid.${l}Uitleg`)}
           >
             {t(`uiterlijk.controle.strengheid.${l}`)}
           </button>
         ))}
-        <p className="text-sm text-zinc-400">{t(`uiterlijk.controle.strengheid.${check.strengheid}Uitleg`)}</p>
+        <p className="text-sm text-muted-foreground">{t(`uiterlijk.controle.strengheid.${check.strengheid}Uitleg`)}</p>
       </div>
     </div>
   );

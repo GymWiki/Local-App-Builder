@@ -179,7 +179,7 @@ export default function App() {
       />
       <main className="flex min-w-0 flex-1 flex-col">
         {error && (
-          <div role="alert" className="cursor-pointer bg-red-900/60 px-4 py-2 text-sm" onClick={() => setError(null)}>
+          <div role="alert" className="cursor-pointer bg-destructive/60 px-4 py-2 text-sm" onClick={() => setError(null)}>
             {error}
           </div>
         )}

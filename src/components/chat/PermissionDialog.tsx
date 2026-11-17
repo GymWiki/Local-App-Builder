@@ -27,39 +27,39 @@ export default function PermissionDialog({ message, technical, onAnswer }: Props
   const explain = String(t(`chat.toestemming.uitleg.${kind}`, { ...params, defaultValue: t("chat.toestemming.uitleg.generic") }));
 
   return (
-    <div className="fixed inset-0 z-20 flex items-center justify-center bg-black/70 p-4">
+    <div className="fixed inset-0 z-20 flex items-center justify-center bg-foreground/50 p-4">
       <div
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="perm-title"
         aria-describedby="perm-explain"
-        className={`w-full max-w-lg space-y-4 rounded-xl border-2 bg-zinc-900 p-6 shadow-2xl ${danger ? "border-red-500" : "border-indigo-500"}`}
+        className={`w-full max-w-lg space-y-4 rounded-xl border-2 bg-card p-6 shadow-2xl ${danger ? "border-destructive" : "border-primary"}`}
       >
-        <div className="text-sm uppercase tracking-wide text-zinc-400">{t("chat.toestemming.titel")}</div>
+        <div className="text-sm uppercase tracking-wide text-muted-foreground">{t("chat.toestemming.titel")}</div>
         <h2 id="perm-title" className="text-xl font-semibold">
           {isPlan ? t("chat.toestemming.planTitel") : question}
         </h2>
-        <p id="perm-explain" className="text-lg text-zinc-200">
+        <p id="perm-explain" className="text-lg text-foreground">
           {isPlan ? t("chat.toestemming.planUitleg") : explain}
         </p>
         {isPlan && (
-          <div data-testid="plan-text" className="max-h-64 overflow-y-auto rounded-lg bg-zinc-950 p-4 text-base text-zinc-100">
+          <div data-testid="plan-text" className="max-h-64 overflow-y-auto rounded-lg bg-background p-4 text-base text-foreground">
             <FormattedText text={String(p.detail ?? "")} />
           </div>
         )}
-        {p.outside_project && <p className="text-base text-amber-300">{t("chat.toestemming.buitenProject")}</p>}
+        {p.outside_project && <p className="text-base text-warning">{t("chat.toestemming.buitenProject")}</p>}
         {danger && (
-          <p role="note" className="rounded-lg bg-red-950 p-3 text-base text-red-100">
+          <p role="note" className="rounded-lg bg-destructive/15 p-3 text-base text-destructive">
             ⚠ {t("chat.toestemming.gevaar")}
           </p>
         )}
         {p.detail && !isPlan && (
           <div>
-            <button onClick={() => setOpen((v) => !v)} aria-expanded={open} className="text-sm text-indigo-300 hover:underline">
+            <button onClick={() => setOpen((v) => !v)} aria-expanded={open} className="text-sm text-primary hover:underline">
               {t("chat.toestemming.details")}
             </button>
             {open && (
-              <pre data-testid="perm-details" className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap rounded bg-zinc-950 p-3 font-mono text-sm text-zinc-300">
+              <pre data-testid="perm-details" className="mt-2 max-h-40 overflow-auto whitespace-pre-wrap rounded bg-background p-3 font-mono text-sm text-muted-foreground">
                 {p.detail}
               </pre>
             )}
@@ -69,14 +69,14 @@ export default function PermissionDialog({ message, technical, onAnswer }: Props
           <button
             ref={danger ? first : undefined}
             onClick={() => onAnswer(false)}
-            className="min-h-12 min-w-24 rounded-lg border border-zinc-500 px-6 text-lg hover:bg-zinc-800"
+            className="min-h-12 min-w-24 rounded-lg border border-input px-6 text-lg hover:bg-muted"
           >
             {isPlan ? t("chat.toestemming.planNee") : t("chat.toestemming.nee")}
           </button>
           <button
             ref={danger ? undefined : first}
             onClick={() => onAnswer(true)}
-            className={`min-h-12 min-w-24 rounded-lg px-6 text-lg font-semibold ${danger ? "bg-red-700 hover:bg-red-600" : "bg-indigo-600 hover:bg-indigo-500"}`}
+            className={`min-h-12 min-w-24 rounded-lg px-6 text-lg font-semibold ${danger ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : "bg-primary text-primary-foreground hover:bg-primary/90"}`}
           >
             {isPlan ? t("chat.toestemming.planJa") : t("chat.toestemming.ja")}
           </button>

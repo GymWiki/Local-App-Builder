@@ -26,7 +26,7 @@ export default function ActionCard({ message, live, technical }: Props) {
   else title = String(t(`chat.actie.${kind}`, { ...params, defaultValue: t("chat.actie.other") }));
 
   const icon = state === "running" ? "⏳" : state === "error" ? "⚠" : p.fixed ? "✔" : "✔";
-  const tone = state === "error" ? "border-amber-600 bg-amber-950/40" : p.fixed ? "border-emerald-700 bg-emerald-950/30" : "border-zinc-700 bg-zinc-900";
+  const tone = state === "error" ? "border-warning bg-warning/10" : p.fixed ? "border-success/50 bg-success/10" : "border-border bg-card";
   const hasDetails = !!(p.detail || p.summary);
 
   return (
@@ -43,15 +43,15 @@ export default function ActionCard({ message, live, technical }: Props) {
           <button
             onClick={() => setOpen((v) => !v)}
             aria-expanded={open}
-            className="rounded px-2 py-1 text-sm text-indigo-300 hover:bg-zinc-800"
+            className="rounded px-2 py-1 text-sm text-primary hover:bg-muted"
           >
             {open ? t("chat.verberg") : t("chat.details")}
           </button>
         )}
       </div>
-      {state === "error" && !p.fixed && <p className="mt-1 text-sm text-amber-200">{t("chat.actieMislukt")}</p>}
+      {state === "error" && !p.fixed && <p className="mt-1 text-sm text-warning">{t("chat.actieMislukt")}</p>}
       {open && hasDetails && (
-        <pre data-testid="action-details" className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap rounded bg-zinc-950 p-3 font-mono text-sm text-zinc-300">
+        <pre data-testid="action-details" className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap rounded bg-background p-3 font-mono text-sm text-muted-foreground">
           {[p.detail, p.summary].filter(Boolean).join("\n\n")}
         </pre>
       )}

@@ -215,7 +215,7 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
   return (
     <section
       aria-label={t("chat.titel")}
-      className={`relative flex h-full min-h-0 flex-col bg-zinc-950 ${dragging ? "outline outline-4 -outline-offset-4 outline-indigo-400" : ""}`}
+      className={`relative flex h-full min-h-0 flex-col bg-background ${dragging ? "outline outline-4 -outline-offset-4 outline-primary" : ""}`}
       onDragOver={(e) => {
         if (unavailable || !e.dataTransfer?.types?.includes("Files")) return;
         e.preventDefault();
@@ -227,30 +227,30 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
       onDrop={(e) => (unavailable ? e.preventDefault() : onDrop(e))}
     >
       {dragging && (
-        <div role="note" data-testid="drop-hint" className="pointer-events-none absolute inset-x-0 top-1/3 z-10 mx-auto w-fit rounded-xl bg-indigo-700 px-6 py-4 text-lg font-semibold text-white shadow-lg">
+        <div role="note" data-testid="drop-hint" className="pointer-events-none absolute inset-x-0 top-1/3 z-10 mx-auto w-fit rounded-xl bg-primary px-6 py-4 text-lg font-semibold text-primary-foreground shadow-lg">
           {t("chat.bijlage.sleep")}
         </div>
       )}
-      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-800 px-5 py-3">
+      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-5 py-3">
         <h2 className="text-lg font-semibold">
           {t("chat.titel")}
-          {target && <span className="ml-2 text-base font-normal text-zinc-400">{aiName}{target.account_label ? ` · ${target.account_label}` : ""}</span>}
+          {target && <span className="ml-2 text-base font-normal text-muted-foreground">{aiName}{target.account_label ? ` · ${target.account_label}` : ""}</span>}
         </h2>
         <div className="flex gap-2">
-          <button onClick={() => setShowVersions(true)} className="min-h-10 rounded-lg border border-zinc-600 px-3 text-base hover:bg-zinc-800">
+          <button onClick={() => setShowVersions(true)} className="min-h-10 rounded-lg border border-input px-3 text-base hover:bg-muted">
             {t("versies.knop")}
           </button>
-          <button onClick={() => setSwitching(true)} className="min-h-10 rounded-lg border border-zinc-600 px-3 text-base hover:bg-zinc-800">
+          <button onClick={() => setSwitching(true)} className="min-h-10 rounded-lg border border-input px-3 text-base hover:bg-muted">
             {t("chat.wissel")}
           </button>
-          <button onClick={onOpenAdvanced} className="min-h-10 rounded-lg border border-zinc-600 px-3 text-base hover:bg-zinc-800">
+          <button onClick={onOpenAdvanced} className="min-h-10 rounded-lg border border-input px-3 text-base hover:bg-muted">
             {t("chat.technisch")}
           </button>
         </div>
       </header>
 
       <div role="log" aria-live="polite" aria-label={t("chat.geschiedenis")} className="min-h-0 flex-1 space-y-3 overflow-y-auto px-5 py-4">
-        {messages.length === 0 && !unavailable && <p className="text-lg text-zinc-300">{t("chat.leeg")}</p>}
+        {messages.length === 0 && !unavailable && <p className="text-lg text-muted-foreground">{t("chat.leeg")}</p>}
         {messages.map((m) => (
           <MessageView
             key={m.id}
@@ -272,10 +272,10 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
         ))}
         {missing && <InstallGuide status={missing} onInstalled={() => setMissing(null)} />}
         {unavailable && (
-          <div role="note" data-testid="terminal-fallback" className="space-y-3 rounded-xl border border-amber-600 bg-amber-950/30 p-5 text-lg">
+          <div role="note" data-testid="terminal-fallback" className="space-y-3 rounded-xl border border-warning bg-warning/10 p-5 text-lg">
             <div className="font-semibold">{t("chat.terugval.titel")}</div>
             <p>{fallback && target?.structured ? t("chat.terugval.uitlegFout") : t("chat.terugval.uitleg", { ai: aiName })}</p>
-            <button onClick={onOpenAdvanced} className="min-h-11 rounded-lg bg-indigo-600 px-5 font-medium hover:bg-indigo-500">
+            <button onClick={onOpenAdvanced} className="min-h-11 rounded-lg bg-primary text-primary-foreground px-5 font-medium hover:bg-primary/90">
               {t("chat.technisch")}
             </button>
           </div>
@@ -283,13 +283,13 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
         <div ref={end} />
       </div>
 
-      <div role="status" aria-live="polite" data-testid="status-line" className="flex items-center gap-3 border-t border-zinc-800 px-5 py-2 text-base text-zinc-300">
+      <div role="status" aria-live="polite" data-testid="status-line" className="flex items-center gap-3 border-t border-border px-5 py-2 text-base text-muted-foreground">
         <span aria-hidden="true" className={busy ? "animate-pulse" : ""}>
           {busy ? "●" : "○"}
         </span>
         <span>{t(`chat.status.${busy ? status : status === "done" ? "done" : "idle"}`)}</span>
         {busy && (
-          <button onClick={() => void chatStop(id)} className="ml-auto min-h-9 rounded-lg border border-zinc-600 px-3 text-sm hover:bg-zinc-800">
+          <button onClick={() => void chatStop(id)} className="ml-auto min-h-9 rounded-lg border border-input px-3 text-sm hover:bg-muted">
             {t("chat.stop")}
           </button>
         )}
@@ -301,15 +301,15 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
             key={k}
             disabled={!!unavailable}
             onClick={() => void send(t(`chat.snelPrompt.${k}`))}
-            className="min-h-10 rounded-full border border-zinc-600 px-4 text-base hover:bg-zinc-800 disabled:opacity-40"
+            className="min-h-10 rounded-full border border-input px-4 text-base hover:bg-muted disabled:opacity-40"
           >
             {t(`chat.snel.${k}`)}
           </button>
         ))}
       </div>
 
-      <div className="flex flex-wrap items-center gap-3 border-t border-zinc-800 px-4 pt-3">
-        <div role="radiogroup" aria-label={t("chat.modus.label")} className="inline-flex overflow-hidden rounded-lg border border-zinc-600">
+      <div className="flex flex-wrap items-center gap-3 border-t border-border px-4 pt-3">
+        <div role="radiogroup" aria-label={t("chat.modus.label")} className="inline-flex overflow-hidden rounded-lg border border-input">
           {(["plan", "build"] as const).map((m) => (
             <button
               key={m}
@@ -319,14 +319,14 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
               title={t(`chat.modus.${m}Uitleg`)}
               disabled={!!unavailable}
               onClick={() => void chooseMode(m)}
-              className={`min-h-10 px-4 text-base ${mode === m ? "bg-indigo-700 font-semibold text-white" : "text-zinc-200 hover:bg-zinc-800"}`}
+              className={`min-h-10 px-4 text-base ${mode === m ? "bg-primary font-semibold text-primary-foreground" : "text-foreground hover:bg-muted"}`}
             >
               {t(`chat.modus.${m}`)}
             </button>
           ))}
         </div>
         {mode === "plan" && (
-          <span data-testid="plan-banner" className="text-sm text-amber-200">
+          <span data-testid="plan-banner" className="text-sm text-warning">
             {t("chat.modus.banner")}
           </span>
         )}
@@ -341,14 +341,14 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
                   type="button"
                   aria-label={t("chat.bijlage.verwijder", { naam: a.name })}
                   onClick={() => setPending((p) => p.filter((x) => x.path !== a.path))}
-                  className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-zinc-700 text-sm hover:bg-zinc-600"
+                  className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-secondary text-sm hover:bg-muted"
                 >
                   ✕
                 </button>
               </li>
             ))}
           </ul>
-          {uploading > 0 && <span role="status" className="text-base text-zinc-300">{t("chat.bijlage.bezig")}</span>}
+          {uploading > 0 && <span role="status" className="text-base text-muted-foreground">{t("chat.bijlage.bezig")}</span>}
         </div>
       )}
       <form onSubmit={onSubmit} className="flex items-end gap-3 p-4">
@@ -370,7 +370,7 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
           title={t("chat.bijlage.kies")}
           disabled={!!unavailable}
           onClick={() => picker.current?.click()}
-          className="min-h-12 rounded-xl border border-zinc-600 px-4 text-base hover:bg-zinc-800 disabled:opacity-40"
+          className="min-h-12 rounded-xl border border-input px-4 text-base hover:bg-muted disabled:opacity-40"
         >
           📎 {t("chat.bijlage.knop")}
         </button>
@@ -386,12 +386,12 @@ export default function ChatPanel({ project, accounts, technical, onOpenAdvanced
           disabled={!!unavailable}
           rows={3}
           placeholder={mode === "plan" ? t("chat.modus.placeholderPlan") : t("chat.placeholder")}
-          className="min-h-24 flex-1 resize-y rounded-xl border border-zinc-600 bg-zinc-900 px-4 py-3 text-lg leading-relaxed placeholder:text-zinc-400 disabled:opacity-50"
+          className="min-h-24 flex-1 resize-y rounded-xl border border-input bg-card px-4 py-3 text-lg leading-relaxed placeholder:text-muted-foreground disabled:opacity-50"
         />
         <button
           type="submit"
           disabled={(!text.trim() && pending.length === 0) || uploading > 0 || !!unavailable}
-          className="min-h-12 rounded-xl bg-indigo-600 px-6 text-lg font-semibold hover:bg-indigo-500 disabled:opacity-40"
+          className="min-h-12 rounded-xl bg-primary text-primary-foreground px-6 text-lg font-semibold hover:bg-primary/90 disabled:opacity-40"
         >
           {t("chat.verstuur")}
         </button>

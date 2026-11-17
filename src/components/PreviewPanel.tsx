@@ -28,11 +28,11 @@ interface Props {
 }
 
 const BADGE: Record<string, string> = {
-  running: "bg-emerald-900 text-emerald-200",
-  starting: "bg-sky-900 text-sky-200",
-  stopping: "bg-amber-900 text-amber-200",
-  error: "bg-red-900 text-red-200",
-  idle: "bg-zinc-800 text-zinc-300",
+  running: "bg-success/15 text-success",
+  starting: "bg-accent text-accent-foreground",
+  stopping: "bg-warning/20 text-warning",
+  error: "bg-destructive/15 text-destructive",
+  idle: "bg-muted text-muted-foreground",
 };
 
 export default function PreviewPanel({ project, mcp, preview, visible, reloadNonce = 0, autoSwitch = false, onAutoSwitch, onError, onRetryMcp }: Props) {
@@ -95,38 +95,38 @@ export default function PreviewPanel({ project, mcp, preview, visible, reloadNon
     if (!problem) return null;
     const k = problem.kind;
     return (
-      <div role="alert" data-testid="preview-problem" className="space-y-3 border-b border-zinc-800 bg-zinc-900 px-5 py-4 text-sm">
-        <div className="font-medium text-amber-200">{t(`preview.probleem.${k}`, { defaultValue: t("preview.probleem.unsupported") })}</div>
-        <div className="break-words text-zinc-300">{problem.message}</div>
-        {t(`preview.uitleg.${k}`, { defaultValue: "" }) && <div className="text-zinc-400">{t(`preview.uitleg.${k}`)}</div>}
+      <div role="alert" data-testid="preview-problem" className="space-y-3 border-b border-border bg-card px-5 py-4 text-sm">
+        <div className="font-medium text-warning">{t(`preview.probleem.${k}`, { defaultValue: t("preview.probleem.unsupported") })}</div>
+        <div className="break-words text-muted-foreground">{problem.message}</div>
+        {t(`preview.uitleg.${k}`, { defaultValue: "" }) && <div className="text-muted-foreground">{t(`preview.uitleg.${k}`)}</div>}
         {k === "untrusted_scripts" && (
-          <ul className="space-y-0.5 font-mono text-xs text-zinc-300">
+          <ul className="space-y-0.5 font-mono text-xs text-muted-foreground">
             {problem.log.filter((l) => !l.endsWith("=")).map((l) => (
               <li key={l}>{l}</li>
             ))}
           </ul>
         )}
         {k === "untrusted_config" && config?.config && (
-          <ul className="space-y-0.5 font-mono text-xs text-zinc-300" data-testid="config-commands">
+          <ul className="space-y-0.5 font-mono text-xs text-muted-foreground" data-testid="config-commands">
             {(["dev", "build", "lint", "test"] as const).map((c) => (config.config?.[c] ? <li key={c}>{c}: {config.config[c]}</li> : null))}
           </ul>
         )}
         {(k === "dev_crashed" || k === "node_missing" || k === "node_old" || k === "node_broken" || k === "runtime_unavailable") && problem.log.length > 0 && (
           <details open={k === "dev_crashed"}>
-            <summary className="cursor-pointer text-xs text-zinc-400">{t("preview.laatsteRegels")}</summary>
-            <pre data-testid="problem-log" className="mt-1 max-h-48 overflow-auto whitespace-pre-wrap rounded bg-zinc-950 p-2 font-mono text-xs text-zinc-300">
+            <summary className="cursor-pointer text-xs text-muted-foreground">{t("preview.laatsteRegels")}</summary>
+            <pre data-testid="problem-log" className="mt-1 max-h-48 overflow-auto whitespace-pre-wrap rounded bg-background p-2 font-mono text-xs text-muted-foreground">
               {problem.log.join("\n")}
             </pre>
           </details>
         )}
         <div className="flex gap-2">
           {k === "deps_missing" && (
-            <button disabled={busy} onClick={() => void run(() => previewInstall(id))} className="rounded bg-indigo-600 px-3 py-1.5 font-medium hover:bg-indigo-500 disabled:opacity-50">
+            <button disabled={busy} onClick={() => void run(() => previewInstall(id))} className="rounded bg-primary text-primary-foreground px-3 py-1.5 font-medium hover:bg-primary/90 disabled:opacity-50">
               {busy ? t("preview.installeren") : t("preview.installeer")}
             </button>
           )}
           {k === "untrusted_scripts" && (
-            <button disabled={busy} onClick={() => void run(() => previewTrustScripts(id))} className="rounded bg-amber-600 px-3 py-1.5 font-medium hover:bg-amber-500 disabled:opacity-50">
+            <button disabled={busy} onClick={() => void run(() => previewTrustScripts(id))} className="rounded bg-warning text-warning-foreground px-3 py-1 font-medium hover:bg-warning/90 disabled:opacity-50">
               {t("preview.vertrouwScripts")}
             </button>
           )}
@@ -134,18 +134,18 @@ export default function PreviewPanel({ project, mcp, preview, visible, reloadNon
             <button
               disabled={busy}
               onClick={() => void run(async () => { await trustStudioConfig(id); await previewStart(id); })}
-              className="rounded bg-amber-600 px-3 py-1.5 font-medium hover:bg-amber-500 disabled:opacity-50"
+              className="rounded bg-warning text-warning-foreground px-3 py-1 font-medium hover:bg-warning/90 disabled:opacity-50"
             >
               {t("preview.vertrouwStart")}
             </button>
           )}
           {(k === "node_missing" || k === "node_old" || k === "node_broken" || k === "runtime_unavailable") && (
-            <button disabled={busy} onClick={() => void run(async () => { await onRetryMcp?.(); })} className="rounded bg-indigo-600 px-3 py-1.5 font-medium hover:bg-indigo-500 disabled:opacity-50">
+            <button disabled={busy} onClick={() => void run(async () => { await onRetryMcp?.(); })} className="rounded bg-primary text-primary-foreground px-3 py-1.5 font-medium hover:bg-primary/90 disabled:opacity-50">
               {t("preview.opnieuwProberen")}
             </button>
           )}
           {k === "static_failed" && (
-            <button disabled={busy} onClick={() => void run(() => previewStart(id))} className="rounded bg-indigo-600 px-3 py-1.5 font-medium hover:bg-indigo-500 disabled:opacity-50">
+            <button disabled={busy} onClick={() => void run(() => previewStart(id))} className="rounded bg-primary text-primary-foreground px-3 py-1.5 font-medium hover:bg-primary/90 disabled:opacity-50">
               {t("preview.opnieuwProberen")}
             </button>
           )}
@@ -156,30 +156,30 @@ export default function PreviewPanel({ project, mcp, preview, visible, reloadNon
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex flex-wrap items-center gap-2 border-b border-zinc-800 px-3 py-2 text-sm">
+      <div className="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2 text-sm">
         <span data-testid="dev-badge" className={`rounded px-2 py-1 text-xs ${BADGE[status]}`}>
           {t(`preview.status.${status}`)}
         </span>
-        {t(`preview.modus.${mode}`, { defaultValue: "" }) && <span className="text-xs text-zinc-400">{t(`preview.modus.${mode}`)}</span>}
-        {preview?.url && <span className="truncate text-xs text-zinc-500">{preview.url}</span>}
+        {t(`preview.modus.${mode}`, { defaultValue: "" }) && <span className="text-xs text-muted-foreground">{t(`preview.modus.${mode}`)}</span>}
+        {preview?.url && <span className="truncate text-xs text-muted-foreground">{preview.url}</span>}
         <div className="ml-auto flex gap-2">
           {canStart && (
-            <button disabled={busy} onClick={() => void run(() => previewStart(id))} className="rounded bg-indigo-600 px-3 py-1 hover:bg-indigo-500 disabled:opacity-50">
+            <button disabled={busy} onClick={() => void run(() => previewStart(id))} className="rounded bg-primary text-primary-foreground px-3 py-1 hover:bg-primary/90 disabled:opacity-50">
               {t("preview.start")}
             </button>
           )}
           {active && (
-            <button disabled={busy} onClick={() => void run(() => previewStop(id))} className="rounded border border-zinc-700 px-3 py-1 hover:bg-zinc-800 disabled:opacity-50">
+            <button disabled={busy} onClick={() => void run(() => previewStop(id))} className="rounded border border-border px-3 py-1 hover:bg-muted disabled:opacity-50">
               {t("preview.stop")}
             </button>
           )}
           {(active || status === "error") && (
-            <button disabled={busy} onClick={() => void run(() => previewRestart(id))} className="rounded border border-zinc-700 px-3 py-1 hover:bg-zinc-800 disabled:opacity-50">
+            <button disabled={busy} onClick={() => void run(() => previewRestart(id))} className="rounded border border-border px-3 py-1 hover:bg-muted disabled:opacity-50">
               {t("preview.herstart")}
             </button>
           )}
           {status === "running" && (
-            <button onClick={() => setManualReload((n) => n + 1)} className="rounded border border-zinc-700 px-3 py-1 hover:bg-zinc-800">
+            <button onClick={() => setManualReload((n) => n + 1)} className="rounded border border-border px-3 py-1 hover:bg-muted">
               {t("preview.ververs")}
             </button>
           )}
@@ -187,36 +187,36 @@ export default function PreviewPanel({ project, mcp, preview, visible, reloadNon
       </div>
 
       {usesRuntime && !runtimeUp && !problem && (
-        <div className="border-b border-zinc-800 px-5 py-2 text-xs text-zinc-400">{t("preview.geenRuntime")}</div>
+        <div className="border-b border-border px-5 py-2 text-xs text-muted-foreground">{t("preview.geenRuntime")}</div>
       )}
       {body()}
 
-      <div className="relative min-h-0 flex-1 bg-zinc-950">
+      <div className="relative min-h-0 flex-1 bg-background">
         {status === "running" && preview?.url ? (
           <iframe
             key={frameKey}
             title={t("tabs.preview")}
             src={preview.url}
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
-            className="h-full w-full bg-white"
+            className="h-full w-full bg-background"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-sm text-zinc-500">
+          <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
             {status === "starting" ? t("preview.wachten") : t("preview.nietActief")}
           </div>
         )}
       </div>
 
       {usesRuntime && (
-        <details className="max-h-56 overflow-auto border-t border-zinc-800 text-xs">
-          <summary className="cursor-pointer px-3 py-2 text-zinc-400">{t("preview.logs")}</summary>
-          <pre data-testid="dev-logs" className="whitespace-pre-wrap px-3 pb-3 font-mono text-zinc-300">
+        <details className="max-h-56 overflow-auto border-t border-border text-xs">
+          <summary className="cursor-pointer px-3 py-2 text-muted-foreground">{t("preview.logs")}</summary>
+          <pre data-testid="dev-logs" className="whitespace-pre-wrap px-3 pb-3 font-mono text-muted-foreground">
             {logs.length ? logs.join("\n") : t("preview.geenLogs")}
           </pre>
         </details>
       )}
       {onAutoSwitch && (
-        <label className="flex items-center gap-2 border-t border-zinc-800 px-3 py-2 text-xs text-zinc-400">
+        <label className="flex items-center gap-2 border-t border-border px-3 py-2 text-xs text-muted-foreground">
           <input type="checkbox" checked={autoSwitch} onChange={(e) => onAutoSwitch(e.target.checked)} />
           {t("preview.autoWissel")}
         </label>

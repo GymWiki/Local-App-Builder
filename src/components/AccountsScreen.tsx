@@ -39,7 +39,7 @@ export default function AccountsScreen({ accounts, onChanged, onError }: Props) 
   return (
     <section className="flex-1 overflow-y-auto p-6">
       <h1 className="mb-1 text-xl font-semibold">{t("accounts.titel")}</h1>
-      <p className="mb-6 max-w-2xl text-sm text-zinc-400">{t("accounts.privacy")}</p>
+      <p className="mb-6 max-w-2xl text-sm text-muted-foreground">{t("accounts.privacy")}</p>
 
       <form onSubmit={(e) => void add(e)} className="mb-8 flex max-w-2xl flex-wrap items-end gap-3 text-sm">
         <label>
@@ -47,7 +47,7 @@ export default function AccountsScreen({ accounts, onChanged, onError }: Props) 
           <select
             value={provider}
             onChange={(e) => setProvider(e.target.value as Provider)}
-            className="mt-1 block rounded border border-zinc-700 bg-zinc-950 px-3 py-2"
+            className="mt-1 block rounded border border-border bg-background px-3 py-2"
           >
             <option value="claude">{t("provider.claude")}</option>
             <option value="gemini">{t("provider.gemini")}</option>
@@ -63,37 +63,37 @@ export default function AccountsScreen({ accounts, onChanged, onError }: Props) 
             onChange={(e) => setLabel(e.target.value)}
             placeholder={t("accounts.labelVoorbeeld")}
             maxLength={60}
-            className="mt-1 block w-full rounded border border-zinc-700 bg-zinc-950 px-3 py-2"
+            className="mt-1 block w-full rounded border border-border bg-background px-3 py-2"
           />
         </label>
         <button
           type="submit"
           disabled={!label.trim()}
-          className="rounded bg-indigo-600 px-3 py-2 font-medium hover:bg-indigo-500 disabled:opacity-50"
+          className="rounded bg-primary text-primary-foreground px-3 py-2 font-medium hover:bg-primary/90 disabled:opacity-50"
         >
           {t("accounts.toevoegen")}
         </button>
       </form>
 
       {accounts.length === 0 ? (
-        <p className="text-sm text-zinc-500">{t("accounts.leeg")}</p>
+        <p className="text-sm text-muted-foreground">{t("accounts.leeg")}</p>
       ) : (
-        <ul className="max-w-2xl divide-y divide-zinc-800 rounded border border-zinc-800">
+        <ul className="max-w-2xl divide-y divide-border rounded border border-border">
           {accounts.map((a) => (
             <li key={a.id} className="flex items-center justify-between gap-3 p-3 text-sm">
               <div className="min-w-0">
                 <div className="font-medium">
                   {t(`provider.${a.provider}`)} · {a.label}
                 </div>
-                <div className="truncate text-xs text-zinc-500" title={a.profile_dir}>
+                <div className="truncate text-xs text-muted-foreground" title={a.profile_dir}>
                   {a.profile_dir}
                 </div>
               </div>
               <div className="flex shrink-0 gap-2">
-                <button onClick={() => setLoginFor(a)} className="rounded bg-indigo-600 px-3 py-1 hover:bg-indigo-500">
+                <button onClick={() => setLoginFor(a)} className="rounded bg-primary text-primary-foreground px-3 py-1 hover:bg-primary/90">
                   {t("accounts.inloggen")}
                 </button>
-                <button onClick={() => void remove(a)} className="rounded border border-zinc-700 px-3 py-1 hover:bg-zinc-800">
+                <button onClick={() => void remove(a)} className="rounded border border-border px-3 py-1 hover:bg-muted">
                   {t("sidebar.verwijder")}
                 </button>
               </div>
