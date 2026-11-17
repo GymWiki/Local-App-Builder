@@ -41,7 +41,7 @@
   "notitie": "",
   "vw": 900,
   "vh": 600,
-  "paginaScroltHorizontaal": true,
+  "paginaScroltHorizontaal": false,
   "paginaScroltVerticaal": false,
   "afgekapt": [
    "Wat wil je maken of veranderen?"
@@ -49,13 +49,10 @@
   "klein": [
    "Verwijderen uit lijst: Hovenier Joke (23x23)"
   ],
-  "buitenBeeld": [
-   "Versturen"
-  ],
+  "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 606x45",
-   "textarea[textarea] 30x110"
+   "div[scroll-area-viewport] 606x97"
   ]
  },
  {
@@ -64,7 +61,7 @@
   "notitie": "",
   "vw": 900,
   "vh": 600,
-  "paginaScroltHorizontaal": true,
+  "paginaScroltHorizontaal": false,
   "paginaScroltVerticaal": true,
   "afgekapt": [
    "— Klaar",
@@ -74,12 +71,10 @@
    "Verwijderen uit lijst: Hovenier Joke (23x23)"
   ],
   "buitenBeeld": [
-   "Versturen"
+   "Wat is er veranderd?"
   ],
   "engels": [],
-  "dubbeleScroll": [
-   "textarea[textarea] 30x110"
-  ]
+  "dubbeleScroll": []
  },
  {
   "stap": "e-versies",
@@ -87,7 +82,7 @@
   "notitie": "",
   "vw": 900,
   "vh": 600,
-  "paginaScroltHorizontaal": true,
+  "paginaScroltHorizontaal": false,
   "paginaScroltVerticaal": true,
   "afgekapt": [
    "— Klaar",
@@ -98,14 +93,12 @@
    "Verwijderen uit lijst: Hovenier Joke (23x23)"
   ],
   "buitenBeeld": [
-   "Versturen"
+   "Wat is er veranderd?"
   ],
   "engels": [
    "Close"
   ],
-  "dubbeleScroll": [
-   "textarea[textarea] 30x110"
-  ]
+  "dubbeleScroll": []
  },
  {
   "stap": "f-geavanceerd",

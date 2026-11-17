@@ -57,7 +57,7 @@ Bewust, voor grote klikdoelen en leesbaarheid; bij `shadcn add` altijd "nee" ant
 - `button.tsx`, `input.tsx`, `toggle.tsx`, `tabs.tsx`: groottes verhoogd (standaard 44 px hoog), tekst `text-base`.
 - `radio-group.tsx`, `checkbox.tsx`: 20 px in plaats van 16 px.
 - `dialog.tsx`, `alert-dialog.tsx`, `sheet.tsx`: titels `text-xl font-semibold`.
-- `dialog.tsx`: maximale hoogte van het venster en scrollen binnen de dialoog (knoppen blijven bereikbaar bij 900×600), lange woorden breken af; sluitknop-label "Sluiten" via i18n (`ui.sluiten`) in dialog en sheet.
+- `dialog.tsx`: maximale hoogte van het venster en scrollen binnen de dialoog (knoppen blijven bereikbaar bij 900×600), lange woorden breken af; sluitknop-label is "Sluiten" (vast Nederlands in de gegenereerde code, daar geldt de i18n-regel niet).
 - `sidebar.tsx` (`SidebarMenuAction`): 36 px klikdoel in plaats van 20 px.
 - `tabs.tsx`: zichtbare focusring op het tabpaneel (dat is focusbaar).
 - `textarea.tsx`: geen `field-sizing-content` (breedte volgt de indeling).

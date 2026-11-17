@@ -53,8 +53,7 @@
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 493x165",
-   "textarea[textarea] 30x110"
+   "div[scroll-area-viewport] 493x153"
   ]
  },
  {
@@ -79,10 +78,7 @@
    "Vernieuwen"
   ],
   "engels": [],
-  "dubbeleScroll": [
-   "div[scroll-area-viewport] 493x98",
-   "textarea[textarea] 30x110"
-  ]
+  "dubbeleScroll": []
  },
  {
   "stap": "e-versies",
@@ -109,10 +105,7 @@
   "engels": [
    "Close"
   ],
-  "dubbeleScroll": [
-   "div[scroll-area-viewport] 493x98",
-   "textarea[textarea] 30x110"
-  ]
+  "dubbeleScroll": []
  },
  {
   "stap": "f-geavanceerd",

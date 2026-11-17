@@ -1,5 +1,4 @@
 import * as React from "react"
-import i18n from "@/i18n"
 import { cn } from "cn"
 import { Dialog as DialogPrimitive } from "radix-ui"
 
@@ -75,7 +74,7 @@ function DialogContent({
             >
               <XIcon
               />
-              <span className="sr-only">{i18n.t("ui.sluiten")}</span>
+              <span className="sr-only">Sluiten</span>
             </Button>
           </DialogPrimitive.Close>
         )}
@@ -114,7 +113,7 @@ function DialogFooter({
       {children}
       {showCloseButton && (
         <DialogPrimitive.Close asChild>
-          <Button variant="outline">{i18n.t("ui.sluiten")}</Button>
+          <Button variant="outline">Sluiten</Button>
         </DialogPrimitive.Close>
       )}
     </div>

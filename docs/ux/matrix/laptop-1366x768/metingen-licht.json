@@ -53,8 +53,7 @@
   "buitenBeeld": [],
   "engels": [],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 536x213",
-   "textarea[textarea] 30x110"
+   "div[scroll-area-viewport] 536x201"
   ]
  },
  {
@@ -79,8 +78,7 @@
   ],
   "engels": [],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 536x146",
-   "textarea[textarea] 30x110"
+   "div[scroll-area-viewport] 536x78"
   ]
  },
  {
@@ -108,8 +106,7 @@
    "Close"
   ],
   "dubbeleScroll": [
-   "div[scroll-area-viewport] 536x146",
-   "textarea[textarea] 30x110"
+   "div[scroll-area-viewport] 536x78"
   ]
  },
  {
