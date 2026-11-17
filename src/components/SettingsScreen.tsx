@@ -30,10 +30,10 @@ function ChoiceGroup<T extends string>({ legend, name, value, onChange, options,
           <FieldLabel key={o.value} htmlFor={`${name}-${o.value}`} className="cursor-pointer rounded-xl border-2 border-input p-4 has-data-checked:border-primary has-data-checked:bg-accent">
             <Field orientation="horizontal">
               <FieldContent>
-                <FieldTitle className="text-lg">{o.title}</FieldTitle>
+                <FieldTitle id={`${name}-${o.value}-titel`} className="text-lg">{o.title}</FieldTitle>
                 <FieldDescription className="text-base">{o.text}</FieldDescription>
               </FieldContent>
-              <RadioGroupItem id={`${name}-${o.value}`} value={o.value} />
+              <RadioGroupItem id={`${name}-${o.value}`} value={o.value} aria-labelledby={`${name}-${o.value}-titel`} />
             </Field>
           </FieldLabel>
         ))}

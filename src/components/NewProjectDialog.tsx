@@ -76,9 +76,9 @@ export default function NewProjectDialog({ onClose, onCreated }: Props) {
                     {SOORTEN.map((k) => (
                       <FieldLabel key={k} htmlFor={`soort-${k}`} className="cursor-pointer rounded-lg border border-input p-3 has-data-checked:border-primary has-data-checked:bg-accent">
                         <Field orientation="horizontal">
-                          <RadioGroupItem id={`soort-${k}`} value={k} />
+                          <RadioGroupItem id={`soort-${k}`} value={k} aria-labelledby={`soort-${k}-titel`} />
                           <div>
-                            <div className="font-medium">{t(k === "leeg" ? "nieuw.soortLeeg" : "nieuw.soortWeb")}</div>
+                            <div id={`soort-${k}-titel`} className="font-medium">{t(k === "leeg" ? "nieuw.soortLeeg" : "nieuw.soortWeb")}</div>
                             <FieldDescription>{t(k === "leeg" ? "nieuw.soortLeegUitleg" : "nieuw.soortWebUitleg")}</FieldDescription>
                           </div>
                         </Field>

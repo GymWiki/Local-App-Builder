@@ -75,7 +75,8 @@
     "actiefAccount": "Account: {{naam}}",
     "leeg": "Start een AI of open een terminal om te beginnen.",
     "beeindigd": "[proces beëindigd, code {{code}}]",
-    "codexUitgeschakeld": "Codex is nog niet beschikbaar: de documentatie kon niet worden geverifieerd (zie docs/cli-notes.md)."
+    "codexUitgeschakeld": "Codex is nog niet beschikbaar: de documentatie kon niet worden geverifieerd (zie docs/cli-notes.md).",
+    "tabs": "Open terminals"
   },
   "mcp": {
     "uit": "MCP: uit",

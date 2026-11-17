@@ -196,15 +196,17 @@ export default function TerminalPanel({ project, accounts, sessions, mcp, onSess
       {activeAi?.provider === "claude" && mcpState === "running" && !check && (
         <div className="border-b border-border bg-accent/40 px-4 py-2 text-sm text-accent-foreground">{t("mcp.goedkeuring")}</div>
       )}
-      <ScrollArea className="border-b border-border">
-        <div role="tablist" className="flex gap-1 px-3 pt-1">
-          {sessions.map((s) => (
-            <div key={s.id} className={`flex items-center rounded-t-lg ${s.id === active?.id ? "bg-muted" : "text-muted-foreground"}`}>
+      <div className="flex items-end justify-between gap-2 border-b border-border px-3 pt-1">
+        <ScrollArea className="min-w-0 flex-1">
+          <div role="tablist" aria-label={t("terminal.tabs")} className="flex gap-1">
+            {sessions.map((s) => (
               <Button
+                key={s.id}
                 role="tab"
                 aria-selected={s.id === active?.id}
-                variant="ghost"
+                variant={s.id === active?.id ? "secondary" : "ghost"}
                 size="sm"
+                className="rounded-b-none"
                 onClick={() => {
                   setActiveId(s.id);
                   setMissing(null);
@@ -213,14 +215,17 @@ export default function TerminalPanel({ project, accounts, sessions, mcp, onSess
                 {s.title}
                 {s.ended ? " ✕" : ""}
               </Button>
-              <Button variant="ghost" size="icon-xs" aria-label={t("terminal.sluitTab")} onClick={() => void close(s.id)}>
-                <XIcon aria-hidden="true" />
-              </Button>
-            </div>
-          ))}
-        </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+            ))}
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+        {active && (
+          <Button variant="ghost" size="sm" aria-label={t("terminal.sluitTab")} onClick={() => void close(active.id)}>
+            <XIcon aria-hidden="true" />
+            {t("terminal.sluitTab")}
+          </Button>
+        )}
+      </div>
 
       <div className="relative min-h-0 flex-1">
         {missing ? (

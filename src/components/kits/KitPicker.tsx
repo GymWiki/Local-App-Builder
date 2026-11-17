@@ -145,7 +145,7 @@ export default function KitPicker({ projectId, firstRun = false, onApplied, onEr
               onMouseEnter={() => setHover(k)}
               onMouseLeave={() => setHover(null)}
               onFocus={() => setHover(k)}
-              className={`h-full ${k.compatible ? "" : "opacity-60"}`}
+              className={`h-full ${k.compatible ? "" : "border-dashed"}`}
             >
               <CardHeader>
                 <CardTitle className="text-lg">{k.naam}</CardTitle>
