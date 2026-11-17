@@ -1,5 +1,8 @@
 import { useTranslation } from "react-i18next";
-import type { Account, Provider } from "../../lib/api";
+import type { Account, Provider } from "@/lib/api";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 interface Props {
   accounts: Account[];
@@ -13,26 +16,30 @@ export default function ChatSwitchDialog({ accounts, onCancel, onPick }: Props) 
   const { t } = useTranslation();
   const options = PROVIDERS.flatMap((p) => [{ provider: p, account: null as Account | null }, ...accounts.filter((a) => a.provider === p).map((a) => ({ provider: p, account: a }))]);
   return (
-    <div className="fixed inset-0 z-20 flex items-center justify-center bg-foreground/50 p-4">
-      <div role="dialog" aria-modal="true" aria-label={t("chat.wisselDialoog.titel")} className="w-full max-w-md space-y-4 rounded-xl bg-card p-6 shadow-2xl">
-        <h2 className="text-xl font-semibold">{t("chat.wisselDialoog.titel")}</h2>
-        <p className="text-base text-muted-foreground">{t("chat.wisselDialoog.uitleg")}</p>
-        <p className="rounded-lg bg-warning/10 p-3 text-base text-warning">{t("chat.wisselDialoog.tip")}</p>
+    <Dialog open onOpenChange={(o) => !o && onCancel()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t("chat.wisselDialoog.titel")}</DialogTitle>
+          <DialogDescription>{t("chat.wisselDialoog.uitleg")}</DialogDescription>
+        </DialogHeader>
+        <Alert className="border-warning/40 bg-warning/10">
+          <AlertDescription className="text-warning">{t("chat.wisselDialoog.tip")}</AlertDescription>
+        </Alert>
         <ul className="space-y-1">
           {options.map((o) => (
             <li key={`${o.provider}-${o.account?.id ?? "sys"}`}>
-              <button onClick={() => onPick(o.provider, o.account?.id ?? null)} className="min-h-11 w-full rounded-lg px-4 text-left text-lg hover:bg-muted">
+              <Button variant="ghost" size="lg" className="w-full justify-start" onClick={() => onPick(o.provider, o.account?.id ?? null)}>
                 {t(`provider.${o.provider}`)} · {o.account?.label ?? t("chat.geenAccount")}
-              </button>
+              </Button>
             </li>
           ))}
         </ul>
-        <div className="flex justify-end">
-          <button onClick={onCancel} className="min-h-11 rounded-lg px-4 hover:bg-muted">
+        <DialogFooter>
+          <Button variant="outline" onClick={onCancel}>
             {t("nieuw.annuleer")}
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

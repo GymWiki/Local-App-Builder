@@ -48,7 +48,13 @@
     "soortLeeg": "Leeg project",
     "soortLeegUitleg": "Je begint met een lege map. De AI bepaalt wat erin komt.",
     "soortWeb": "Web-app met React",
-    "soortWebUitleg": "Een startklare website met React. Straks kies je hoe hij eruitziet."
+    "soortWebUitleg": "Een startklare website met React. Straks kies je hoe hij eruitziet.",
+    "fout": {
+      "naamLeeg": "Geef je project een naam.",
+      "naamLang": "Kies een kortere naam (maximaal 60 tekens).",
+      "naamTekens": "Gebruik geen tekens als / \\ : * ? \" < > | in de naam.",
+      "mapLeeg": "Kies eerst een map waarin het project komt."
+    }
   },
   "fout": {
     "algemeen": "Er ging iets mis: {{bericht}}"
