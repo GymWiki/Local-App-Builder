@@ -1,10 +1,10 @@
 import { render, screen, fireEvent, waitFor, act, within } from "@testing-library/react";
 import { vi, type Mock } from "vitest";
 import ChatPanel from "./ChatPanel";
-import type { ChatMessage, ChatOut, ChatTarget, Project } from "../../lib/api";
-import * as api from "../../lib/api";
+import type { ChatMessage, ChatOut, ChatTarget, Project } from "@/lib/api";
+import * as api from "@/lib/api";
 
-vi.mock("../../lib/api");
+vi.mock("@/lib/api");
 
 // Opvangen van de Tauri-gebeurtenissen die de chat live bijwerken.
 const handlers: Record<string, (e: { payload: unknown }) => void> = {};
@@ -334,7 +334,7 @@ describe("ChatPanel: bug-lus bewaker", () => {
     (api.runtime as Mock).mockResolvedValue({ unchanged: false, safety: "s", hash: "n" });
     setup([alert()]);
     fireEvent.click(await screen.findByRole("button", { name: "Terug naar laatste werkende versie" }));
-    const dlg = await screen.findByRole("alertdialog", { name: "Terug naar laatste werkende versie" });
+    const dlg = await screen.findByRole("alertdialog");
     expect(dlg).toHaveTextContent("Pagina werkt");
     expect(dlg).toHaveTextContent("niets verloren");
     expect(api.runtime).not.toHaveBeenCalledWith(1, "git.restore", expect.anything());

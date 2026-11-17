@@ -1,9 +1,9 @@
 import { render, screen, fireEvent, waitFor, within } from "@testing-library/react";
 import { vi, type Mock } from "vitest";
 import VersionsDialog from "./VersionsDialog";
-import * as api from "../../lib/api";
+import * as api from "@/lib/api";
 
-vi.mock("../../lib/api");
+vi.mock("@/lib/api");
 
 const ago = (min: number) => new Date(Date.now() - min * 60_000).toISOString();
 const versions = [

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { Account, McpInfo, PreviewInfo, Project } from "../lib/api";
-import ChatPanel from "./chat/ChatPanel";
+import ChatPanel from "./app/chat/ChatPanel";
 import PreviewPanel from "./PreviewPanel";
 import AppearancePanel from "./kits/AppearancePanel";
 import SplitView from "./app/SplitView";

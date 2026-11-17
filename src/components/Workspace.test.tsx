@@ -3,7 +3,7 @@ import { vi } from "vitest";
 import Workspace from "./Workspace";
 import type { Project } from "../lib/api";
 
-vi.mock("./chat/ChatPanel", () => ({
+vi.mock("./app/chat/ChatPanel", () => ({
   default: ({ onOpenAdvanced }: { onOpenAdvanced: () => void }) => (
     <div data-testid="chat">
       <button onClick={onOpenAdvanced}>Technische weergave</button>

@@ -25,8 +25,8 @@ import {
   type Project,
   type Provider,
   type RestoreResult,
-} from "../../lib/api";
-import InstallGuide from "../InstallGuide";
+} from "@/lib/api";
+import InstallGuide from "@/components/InstallGuide";
 import ChatSwitchDialog from "./ChatSwitchDialog";
 import VersionsDialog from "./VersionsDialog";
 import MessageView from "./MessageView";

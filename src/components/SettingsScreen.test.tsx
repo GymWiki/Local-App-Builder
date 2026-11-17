@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { vi } from "vitest";
 import SettingsScreen from "./SettingsScreen";
-import FormattedText from "./chat/formatText";
+import FormattedText from "./app/chat/formatText";
 
 describe("Instellingen", () => {
   it("toont 'Eenvoudige taal' (aan) naast 'Technisch' en schakelt om", () => {
