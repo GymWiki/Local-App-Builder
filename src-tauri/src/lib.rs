@@ -360,6 +360,8 @@ pub fn run() {
             commands::kit_apply,
             commands::kit_scripts,
             commands::kit_tailor,
+            commands::kit_check,
+            commands::kit_strictness,
             commands::chat_send,
             commands::chat_attach,
             commands::chat_asset_data,

@@ -1,4 +1,4 @@
-import { readdir, readFile, stat } from "node:fs/promises";
+import { readdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { scanSource, SCAN_EXT, SKIP, RULE_TITLES } from "../../../design-packs/_tools/kit-scan.mjs";
 import type { ScanFinding, ScanConfig } from "../../../design-packs/_tools/kit-scan.mjs";
@@ -70,4 +70,17 @@ export async function checkProject(projectDir: string): Promise<KitCheckResult> 
     findings.push(...scanSource(path.relative(projectDir, f).split(path.sep).join("/"), await readFile(f, "utf8"), cfg));
   }
   return { enabled: true, strengheid: cfg.strengheid, scanned, findings };
+}
+
+/** Stelt in of de kit-check alleen waarschuwt of ook blokkeert (zet het in design/kit-check.json). */
+export async function setStrictness(projectDir: string, level: Strengheid): Promise<{ strengheid: Strengheid }> {
+  const file = path.join(projectDir, "design", "kit-check.json");
+  let raw: Record<string, unknown>;
+  try {
+    raw = JSON.parse(await readFile(file, "utf8")) as Record<string, unknown>;
+  } catch {
+    throw new Error("Dit project heeft nog geen uiterlijk gekozen.");
+  }
+  await writeFile(file, JSON.stringify({ ...raw, strengheid: level }, null, 2) + "\n");
+  return { strengheid: level };
 }

@@ -213,6 +213,13 @@
         },
         "importPad": {
           "type": "string"
+        },
+        "kern": {
+          "default": [],
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": [

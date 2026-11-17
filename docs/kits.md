@@ -36,6 +36,11 @@ Elke kit staat in `design-packs/<id>/`:
 
 Toegestane licenties: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC. Versies zijn exact (geen `^`/`~`/`latest`).
 
+## De AI laten aansluiten op de kit (deel 3)
+- **Catalogus `docs/ui-kit.md`** (in het project): wordt gemaakt bij het toepassen van een kit, uit `fragments.json` van het pakket (bij andere kits uit `index.d.ts` of de componentbestanden). Inhoud: importpad, tokens van het project, regels van de kit, componenten met delen (`Card.Header`), belangrijkste props en een voorbeeld. Budget: `kitcontext.maxTokens` (6000, geschat op 3,5 tekens per token). Past het niet, dan krijgen gewone componenten minder detail; de `kitcontext.kern`-componenten houden hun details. Gemeten voor Fragments UI: ±5600 tokens voor 71 componenten. Wordt vernieuwd als de geïnstalleerde versie afwijkt van de kop `<!-- studio:catalogus kit=… versie=… -->` (gecontroleerd bij het openen van het tabblad Uiterlijk).
+- **Bouwregels:** afgebakend blok `use-kit` in CLAUDE.md, GEMINI.md en AGENTS.md (zelfde markeringen als `instructions.rs`) en de skill `.claude/skills/use-kit/SKILL.md`. Bij wisselen van kit wordt het blok vervangen; een eigen skill met dezelfde naam (zonder onze markering) blijft ongemoeid.
+- **Kit-check:** `design/kit-scan.mjs` (één bestand, geen afhankelijkheden) draait zowel in Studio (stap `kit` van `run_checks`) als in het project via ESLint (`design/eslint-kit.mjs`, regel `kit/gebruik-kit`). Regels: losse kleuren (#hex, rgb/hsl/oklch), losse pixelwaarden (behalve 0px/1px en in mediaqueries), losse lettertypes, gewone `<button> <input> <select> <textarea> <dialog>` waar de kit een component heeft (`kitCheck.vervangNative`), imports uit andere UI-bibliotheken (`kitCheck.verbodenImports`). De map `src/kit/`, `design/`, tests en `.d.ts` worden niet gecontroleerd. Strengheid in `design/kit-check.json`: `waarschuwen` (stap-status `warned`, run blijft geslaagd) of `blokkeren` (stap `failed`).
+
 ## Register
 <!-- kit-register -->
 | Kit | Bron | Licentie | Versie | Datum | Bevindingen |

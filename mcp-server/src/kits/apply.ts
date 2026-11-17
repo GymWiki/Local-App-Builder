@@ -4,6 +4,8 @@ import path from "node:path";
 import { loadKit, KitError, type LoadedKit } from "./registry.js";
 import type { Kit, Tokens } from "./schema.js";
 import { tailorTokens, toCss, toFlutter, type Tailor } from "./tokens.js";
+import { writeCatalog, CATALOG_FILE, type CatalogResult } from "./catalog.js";
+import { writeKitInstructions } from "./instructions.js";
 
 export type Stack = "react-vite" | "flutter";
 
@@ -177,6 +179,7 @@ export interface ApplyResult {
   /** Pakketten met installatiescripts die NIET zijn uitgevoerd (wachten op bevestiging). */
   scriptsSkipped: string[];
   files: string[];
+  catalog: Pick<CatalogResult, "tokens" | "components" | "source">;
 }
 
 async function lockScripts(dir: string): Promise<Set<string>> {
@@ -257,7 +260,13 @@ export async function applyKit(o: ApplyOptions): Promise<ApplyResult> {
   } else {
     await write("lib/theme/app_theme.dart", toFlutter(tokens));
   }
-  return { plan, scriptsSkipped, files };
+  // De AI laten aansluiten: catalogus (docs/ui-kit.md) en bouwregels (CLAUDE.md/GEMINI.md/AGENTS.md + skill use-kit).
+  const rules = await readFile(path.join(loaded.dir, kit.regels), "utf8").catch(() => "");
+  const cat = await writeCatalog(dir, kit, tokens, rules);
+  files.push(CATALOG_FILE);
+  const ins = await writeKitInstructions(dir, kit, rules);
+  files.push(...ins.files);
+  return { plan, scriptsSkipped, files, catalog: { tokens: cat.tokens, components: cat.components, source: cat.source } };
 }
 
 /** Blijft de gekozen strengheid behouden als je van kit wisselt? Ja. */

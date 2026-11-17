@@ -10,12 +10,13 @@ interface Props {
   onError: (msg: string) => void;
 }
 
-const ICON: Record<string, string> = { passed: "✓", failed: "✗", timeout: "⏱", skipped: "–" };
+const ICON: Record<string, string> = { passed: "✓", failed: "✗", timeout: "⏱", skipped: "–", warned: "!" };
 const COLOR: Record<string, string> = {
   passed: "text-emerald-400",
   failed: "text-red-400",
   timeout: "text-amber-400",
   skipped: "text-zinc-500",
+  warned: "text-amber-400",
 };
 
 function fmt(date: string): string {

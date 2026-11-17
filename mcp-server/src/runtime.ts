@@ -9,11 +9,13 @@ import { PreviewObserver } from "./preview.js";
 import { runCommand } from "./proc.js";
 import { checkHtml, checkLinks } from "./static-checks.js";
 import { relevantLines } from "./text.js";
+import { checkProject, setStrictness } from "./kits/check.js";
+import { refreshCatalogIfStale } from "./kits/catalog.js";
 import { applyWithSafety, current as kitCurrent, listKits, runScripts, tailor as kitTailor, type KitHost } from "./kits/ops.js";
 import type { Tailor } from "./kits/tokens.js";
 
-export type CheckName = "lint" | "build" | "test" | "html" | "links" | "console";
-export const CHECK_ORDER: CheckName[] = ["lint", "build", "test", "html", "links", "console"];
+export type CheckName = "lint" | "build" | "test" | "kit" | "html" | "links" | "console";
+export const CHECK_ORDER: CheckName[] = ["lint", "build", "test", "kit", "html", "links", "console"];
 const COMMAND_CHECKS = ["lint", "build", "test"] as const;
 
 /** Wat Studio (de app) over het project heeft gedetecteerd. Wordt bij elke wijziging opnieuw doorgegeven. */
@@ -32,7 +34,7 @@ export interface PlanPush {
 export interface StepResult {
   name: CheckName;
   command?: string;
-  status: "passed" | "failed" | "timeout" | "skipped";
+  status: "passed" | "failed" | "timeout" | "skipped" | "warned";
   exitCode: number | null;
   durationMs: number;
   output: string[];
@@ -184,9 +186,11 @@ export class Runtime {
     const hasCommand = (n: CheckName) => typeof (config as Record<string, unknown>)[n] === "string" || !!this.plan?.scripts?.[n as "lint" | "build" | "test"];
     const anyCommand = COMMAND_CHECKS.some(hasCommand);
     // Standaard: lint/build/test; in een statisch project zonder eigen scripts: html, links en console.
-    const defaults: CheckName[] = anyCommand ? [...COMMAND_CHECKS] : sRoot ? ["html", "links", "console"] : [...COMMAND_CHECKS];
+    const kitOn = existsSync(path.join(this.projectDir, "design", "kit-check.json"));
+    const base: CheckName[] = anyCommand ? [...COMMAND_CHECKS] : sRoot ? ["html", "links", "console"] : [...COMMAND_CHECKS];
+    const defaults: CheckName[] = kitOn ? [...base, "kit"] : base;
     const wanted = CHECK_ORDER.filter((n) => (steps ?? defaults).includes(n));
-    const runnable = wanted.some((n) => (COMMAND_CHECKS as readonly string[]).includes(n) ? hasCommand(n) : n === "console" ? true : !!sRoot);
+    const runnable = wanted.some((n) => (COMMAND_CHECKS as readonly string[]).includes(n) ? hasCommand(n) : n === "console" ? true : n === "kit" ? kitOn : !!sRoot);
     if (!runnable) {
       throw new Error("Geen checks beschikbaar: er is geen lint-, build- of test-script, en dit is geen statisch project (index.html).");
     }
@@ -212,6 +216,18 @@ export class Runtime {
           continue;
         }
         const t0 = Date.now();
+        if (name === "kit") {
+          if (!kitOn) {
+            skip(name, "Nog geen uiterlijk (UI-kit) gekozen.");
+            continue;
+          }
+          const r = await checkProject(this.projectDir);
+          const lines = r.findings.slice(0, 50).map((f) => `${f.file}:${f.line} [${f.rule}] ${f.message} ${f.fix}`);
+          if (r.findings.length > 50) lines.push(`… en ${r.findings.length - 50} meer`);
+          const status = r.findings.length === 0 ? "passed" : r.strengheid === "blokkeren" ? "failed" : "warned";
+          results.push({ name, status, exitCode: null, durationMs: Date.now() - t0, output: lines });
+          continue;
+        }
         if (name !== "console" && !sRoot) {
           skip(name, "Alleen voor statische projecten (index.html).");
           continue;
@@ -239,7 +255,7 @@ export class Runtime {
     } finally {
       this.checking = null;
     }
-    const res: ChecksResult = { ok: results.every((s) => s.status === "passed" || s.status === "skipped"), at: new Date().toISOString(), steps: results };
+    const res: ChecksResult = { ok: results.every((s) => s.status === "passed" || s.status === "skipped" || s.status === "warned"), at: new Date().toISOString(), steps: results };
     this.last = res;
     this.emit({ event: "checks", ok: res.ok, at: res.at, steps: res.steps.map((s) => ({ ...s, output: s.output.slice(0, 40) })) });
     return res;
@@ -337,8 +353,16 @@ export class Runtime {
       }
       case "kit.list":
         return listKits(this.packsDir(args), this.projectDir, args.stack === "react-vite" || args.stack === "flutter" ? args.stack : undefined);
-      case "kit.current":
-        return kitCurrent(this.projectDir);
+      case "kit.current": {
+        const cur = await kitCurrent(this.projectDir);
+        // Is het pakket bijgewerkt sinds de catalogus werd gemaakt? Dan vernieuwen.
+        if (cur.kit && typeof args.packs === "string") await refreshCatalogIfStale(this.projectDir, this.packsDir(args), cur.kit.kit).catch(() => false);
+        return cur;
+      }
+      case "kit.check":
+        return checkProject(this.projectDir);
+      case "kit.strictness":
+        return setStrictness(this.projectDir, args.level === "blokkeren" ? "blokkeren" : "waarschuwen");
       case "kit.apply": {
         const out = await applyWithSafety(this.kitHost(args), String(args.kit ?? ""), (args.tailor as Tailor | undefined) ?? undefined);
         this.emit({ event: "git" });

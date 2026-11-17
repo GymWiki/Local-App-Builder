@@ -160,7 +160,7 @@ export interface Checkpoint {
 export interface StepResult {
   name: "lint" | "build" | "test" | "html" | "links" | "console";
   command?: string;
-  status: "passed" | "failed" | "timeout" | "skipped";
+  status: "passed" | "failed" | "timeout" | "skipped" | "warned";
   exitCode: number | null;
   durationMs: number;
   output: string[];
@@ -332,3 +332,19 @@ export const kitCurrent = (projectId: number) => invoke<KitCurrent>("kit_current
 export const kitApply = (projectId: number, kit: string, tailor?: KitTailor) => invoke<KitApplyOutcome>("kit_apply", { projectId, kit, tailor });
 export const kitScripts = (projectId: number, packages: string[]) => invoke<{ ok: boolean; detail?: string }>("kit_scripts", { projectId, packages });
 export const kitTailor = (projectId: number, tailor: KitTailor) => invoke<KitTokens>("kit_tailor", { projectId, tailor });
+export interface KitFinding {
+  file: string;
+  line: number;
+  col: number;
+  rule: "kleur" | "pixels" | "lettertype" | "native" | "bibliotheek";
+  message: string;
+  fix: string;
+}
+export interface KitCheck {
+  enabled: boolean;
+  strengheid: "waarschuwen" | "blokkeren";
+  scanned: number;
+  findings: KitFinding[];
+}
+export const kitCheck = (projectId: number) => invoke<KitCheck>("kit_check", { projectId });
+export const kitStrictness = (projectId: number, level: "waarschuwen" | "blokkeren") => invoke<{ strengheid: string }>("kit_strictness", { projectId, level });

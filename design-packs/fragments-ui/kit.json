@@ -9,8 +9,13 @@
   "extraPakketten": [],
   "bron": "https://github.com/fragments-sdk/ui",
   "licentie": "MIT",
-  "attributie": { "verplicht": false, "tekst": "" },
-  "stacks": ["react-vite"],
+  "attributie": {
+    "verplicht": false,
+    "tekst": ""
+  },
+  "stacks": [
+    "react-vite"
+  ],
   "installatiestappen": [
     "Het pakket @usefragments/ui (versie 4.5.0) wordt aan je project toegevoegd.",
     "Studio zet je kleuren, afronding, ruimte en lettertype in design/tokens.json en maakt daar src/kit/tokens.css van.",
@@ -19,8 +24,14 @@
   "installatiescripts": false,
   "setup": {
     "uitvoer": "css",
-    "stijlImports": ["@usefragments/ui/styles"],
-    "provider": { "pakket": "@usefragments/ui", "naam": "Theme", "props": {} },
+    "stijlImports": [
+      "@usefragments/ui/styles"
+    ],
+    "provider": {
+      "pakket": "@usefragments/ui",
+      "naam": "Theme",
+      "props": {}
+    },
     "tokenMap": {
       "--fui-seed-brand": "kleuren.licht.primair",
       "--fui-radius": "rondingen.midden",
@@ -31,12 +42,61 @@
     "rootAttributen": {}
   },
   "tokens": "tokens.json",
-  "kitcontext": { "catalogus": "fragments-json", "maxTokens": 6000, "importPad": "@usefragments/ui" },
+  "kitcontext": {
+    "catalogus": "fragments-json",
+    "maxTokens": 6000,
+    "importPad": "@usefragments/ui",
+    "kern": [
+      "Button",
+      "Card",
+      "Field",
+      "Form",
+      "Input",
+      "Textarea",
+      "Select",
+      "Checkbox",
+      "RadioGroup",
+      "Switch",
+      "Stack",
+      "Grid",
+      "Box",
+      "Text",
+      "Dialog",
+      "Tabs",
+      "Header",
+      "AppShell",
+      "Alert",
+      "Badge",
+      "Link",
+      "List",
+      "Menu",
+      "Toast",
+      "EmptyState",
+      "Separator"
+    ]
+  },
   "regels": "rules.md",
   "preview": "preview.png",
   "voorbeeld": "voorbeeld.tsx",
   "kitCheck": {
-    "vervangNative": { "button": "Button", "input": "Input", "select": "Select", "textarea": "Textarea", "dialog": "Dialog" },
-    "verbodenImports": ["@mui/", "@chakra-ui/", "antd", "@mantine/", "react-bootstrap", "@radix-ui/", "@headlessui/", "@nextui-org/", "@ark-ui/", "@heroui/"]
+    "vervangNative": {
+      "button": "Button",
+      "input": "Input",
+      "select": "Select",
+      "textarea": "Textarea",
+      "dialog": "Dialog"
+    },
+    "verbodenImports": [
+      "@mui/",
+      "@chakra-ui/",
+      "antd",
+      "@mantine/",
+      "react-bootstrap",
+      "@radix-ui/",
+      "@headlessui/",
+      "@nextui-org/",
+      "@ark-ui/",
+      "@heroui/"
+    ]
   }
 }

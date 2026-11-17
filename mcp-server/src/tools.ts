@@ -135,8 +135,8 @@ export function registerTools(server: McpServer, ctx: ProjectCtx, record: (r: Ca
     "run_checks",
     {
       description:
-        "Draait de checks van het project en geeft per stap geslaagd/mislukt met de relevante foutregels (max 200). Bij een project met lint-/build-/test-scripts (package.json of studio.json) draaien die; bij een statisch project (index.html) controleert het: html (aanwezig), links (geen kapotte lokale verwijzingen) en console (geen console- of netwerkfouten in de preview). Roep dit aan na elke wijziging.",
-      inputSchema: { steps: z.array(z.enum(["lint", "build", "test", "html", "links", "console"])).optional() },
+        "Draait de checks van het project en geeft per stap geslaagd/mislukt met de relevante foutregels (max 200). Heeft het project een gekozen UI-kit, dan draait ook de stap ‘kit’: die meldt losse kleuren, losse pixelwaarden, gewone HTML-onderdelen waar de kit een component voor heeft en imports uit andere UI-bibliotheken (status ‘warned’ = waarschuwing, ‘failed’ = geblokkeerd; herstel ze). Bij een project met lint-/build-/test-scripts (package.json of studio.json) draaien die; bij een statisch project (index.html) controleert het: html (aanwezig), links (geen kapotte lokale verwijzingen) en console (geen console- of netwerkfouten in de preview). Roep dit aan na elke wijziging.",
+      inputSchema: { steps: z.array(z.enum(["lint", "build", "test", "kit", "html", "links", "console"])).optional() },
     },
     ({ steps }) =>
       run("run_checks", `steps=${(steps ?? ["lint", "build", "test"]).join(",")}`, async () => {

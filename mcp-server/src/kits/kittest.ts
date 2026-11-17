@@ -8,6 +8,7 @@ import { applyKit, type Run } from "./apply.js";
 import { loadKit } from "./registry.js";
 import { launchBrowser } from "../preview.js";
 import { checkProject } from "./check.js";
+import { estimateTokens } from "./catalog.js";
 
 export interface StepReport {
   naam: string;
@@ -107,6 +108,19 @@ export async function kitTest(o: KitTestOptions): Promise<StepReport[]> {
       const res = await checkProject(tmp);
       if (res.findings.length) throw new Error(res.findings.slice(0, 10).map((f) => `${f.file}:${f.line} ${f.message}`).join("\n"));
       return `${res.scanned} bestanden gecontroleerd`;
+    });
+    await step("catalogus en bouwregels", async () => {
+      const cat = await readFile(path.join(tmp, "docs", "ui-kit.md"), "utf8");
+      const tokens = estimateTokens(cat);
+      if (tokens > kit.kitcontext.maxTokens) throw new Error(`docs/ui-kit.md is te groot: ±${tokens} tokens (max ${kit.kitcontext.maxTokens}).`);
+      if (!cat.includes(kit.kitcontext.importPad)) throw new Error("docs/ui-kit.md noemt het importpad niet.");
+      const comps = (cat.match(/^- \*\*/gm) ?? []).length;
+      if (comps < 5) throw new Error(`docs/ui-kit.md bevat maar ${comps} componenten.`);
+      for (const f of ["CLAUDE.md", "GEMINI.md", "AGENTS.md"]) {
+        if (!(await readFile(path.join(tmp, f), "utf8").catch(() => "")).includes("studio:use-kit:start")) throw new Error(`${f} mist het blok met bouwregels.`);
+      }
+      if (!existsSync(path.join(tmp, ".claude", "skills", "use-kit", "SKILL.md"))) throw new Error("De skill use-kit ontbreekt.");
+      return `±${tokens} tokens, ${comps} componenten`;
     });
     await step("tokens in de browser", async () => {
       const dist = path.join(tmp, "dist");

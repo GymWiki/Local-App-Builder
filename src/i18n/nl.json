@@ -198,7 +198,8 @@
       "passed": "geslaagd",
       "failed": "mislukt",
       "timeout": "time-out",
-      "skipped": "overgeslagen"
+      "skipped": "overgeslagen",
+      "warned": "waarschuwing"
     },
     "tijdlijn": "Tijdlijn",
     "nogGeenCheckpoints": "Nog geen checkpoints.",
@@ -218,7 +219,8 @@
       "test": "test",
       "html": "HTML aanwezig",
       "links": "links",
-      "console": "console"
+      "console": "console",
+      "kit": "Uiterlijk"
     }
   },
   "notice": {
@@ -575,6 +577,49 @@
       "standaard": "Terug naar de standaard van de kit",
       "mislukt": "Aanpassen lukte niet: {{reden}}"
     },
-    "laden": "Even laden…"
+    "laden": "Even laden…",
+    "controle": {
+      "titel": "Klopt je app met het uiterlijk?",
+      "uitleg": "Ik zoek naar plekken waar iets niet bij het gekozen uiterlijk past. Dat zie je ook als de AI zijn werk controleert.",
+      "knop": "Controleer nu",
+      "bezig": "Bezig met controleren…",
+      "alles": "Alles klopt: er zijn geen afwijkingen gevonden in {{aantal}} bestanden.",
+      "gevonden": "{{aantal}} afwijkingen gevonden in {{bestanden}} bestanden.",
+      "regel": "regel {{regel}}",
+      "herstel": "Laat de AI dit herstellen",
+      "herstelAlles": "Laat de AI alles in dit rijtje herstellen",
+      "prompt": "De kit-check meldt een afwijking van het gekozen uiterlijk in {{bestand}}, regel {{regel}}: {{melding}} {{tip}} Herstel dit volgens docs/ui-kit.md en draai daarna run_checks.",
+      "promptAlles": "De kit-check meldt afwijkingen van het gekozen uiterlijk ({{titel}}). Herstel ze volgens docs/ui-kit.md en draai daarna run_checks. Plekken:\\n{{plekken}}",
+      "verstuurd": "Ik heb de AI gevraagd dit te herstellen. Kijk in het tabblad Maken.",
+      "regels": {
+        "kleur": {
+          "titel": "Losse kleuren",
+          "uitleg": "Kleuren moeten uit de kit komen, zodat alles bij elkaar past en je het uiterlijk later kunt wisselen."
+        },
+        "pixels": {
+          "titel": "Losse maten",
+          "uitleg": "Ruimte en afmetingen horen uit de kit te komen, zodat alles even ruim en gelijk is."
+        },
+        "lettertype": {
+          "titel": "Los lettertype",
+          "uitleg": "Het lettertype hoort uit de kit te komen."
+        },
+        "native": {
+          "titel": "Gewone knoppen en velden",
+          "uitleg": "Waar de kit een eigen onderdeel heeft, moet dat gebruikt worden. Dan werken hover, focus en uitgeschakeld overal hetzelfde."
+        },
+        "bibliotheek": {
+          "titel": "Andere uiterlijk-bibliotheken",
+          "uitleg": "Een tweede bibliotheek maakt je app rommelig en zwaarder. Gebruik alleen de gekozen kit."
+        }
+      },
+      "strengheid": {
+        "titel": "Hoe streng moet de controle zijn?",
+        "waarschuwen": "Waarschuwen",
+        "blokkeren": "Blokkeren",
+        "waarschuwenUitleg": "Afwijkingen worden gemeld, maar de controle slaagt nog.",
+        "blokkerenUitleg": "Afwijkingen laten de controle mislukken. De AI moet ze eerst herstellen."
+      }
+    }
   }
 }

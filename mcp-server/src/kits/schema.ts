@@ -47,6 +47,8 @@ export const KitSchema = z
         catalogus: z.enum(["fragments-json", "typings", "bestanden"]),
         maxTokens: z.number().int().min(500).max(20000).default(6000),
         importPad: z.string(),
+        /** Componenten die een pagina of formulier het vaakst nodig heeft: die krijgen in de catalogus altijd de meeste details. */
+        kern: z.array(z.string()).default([]),
       })
       .strict(),
     /** Alleen bij type "bestanden": map met componenten, relatief aan design-packs/. */

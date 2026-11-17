@@ -212,3 +212,52 @@ describe("AppearancePanel", () => {
     expect(await screen.findByTestId("kit-current")).toBeInTheDocument();
   });
 });
+
+describe("kit-check in het Uiterlijk-paneel", () => {
+  const findings = [
+    { file: "src/components/app/A.tsx", line: 4, col: 3, rule: "kleur" as const, message: "Losse kleur #ff0000. Gebruik een kleur uit de kit.", fix: "Vervang door een token." },
+    { file: "src/components/app/A.tsx", line: 9, col: 3, rule: "kleur" as const, message: "Losse kleur rgb(…). Gebruik een kleur uit de kit.", fix: "Vervang door een token." },
+    { file: "src/components/app/B.tsx", line: 2, col: 5, rule: "native" as const, message: "Gewone <button> terwijl de kit <Button> heeft.", fix: "Gebruik <Button> uit de kit." },
+  ];
+
+  it("toont afwijkingen in gewone taal per soort, met per punt een knop die de AI vraagt het te herstellen", async () => {
+    (api.kitCurrent as Mock).mockResolvedValue(current());
+    (api.kitCheck as Mock).mockResolvedValue({ enabled: true, strengheid: "waarschuwen", scanned: 5, findings });
+    (api.chatSend as Mock).mockResolvedValue(undefined);
+    render(<AppearancePanel projectId={4} onError={vi.fn()} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Controleer nu" }));
+    expect(await screen.findByText("3 afwijkingen gevonden in 2 bestanden.")).toBeInTheDocument();
+    const kleur = screen.getByRole("region", { name: "Losse kleuren" });
+    expect(within(kleur).getByText(/Kleuren moeten uit de kit komen/)).toBeInTheDocument();
+    expect(within(kleur).getAllByRole("button", { name: "Laat de AI dit herstellen" })).toHaveLength(2);
+    expect(screen.getByRole("region", { name: "Gewone knoppen en velden" })).toBeInTheDocument();
+    fireEvent.click(within(kleur).getAllByRole("button", { name: "Laat de AI dit herstellen" })[0]);
+    await waitFor(() => expect(api.chatSend).toHaveBeenCalledWith(4, expect.stringContaining("A.tsx, regel 4")));
+    expect((api.chatSend as Mock).mock.calls[0][1]).toContain("run_checks");
+    fireEvent.click(within(kleur).getByRole("button", { name: "Laat de AI alles in dit rijtje herstellen" }));
+    await waitFor(() => expect(api.chatSend).toHaveBeenCalledTimes(2));
+    expect((api.chatSend as Mock).mock.calls[1][1]).toContain("src/components/app/A.tsx:9");
+  });
+
+  it("meldt dat alles klopt als er niets is gevonden", async () => {
+    (api.kitCurrent as Mock).mockResolvedValue(current());
+    (api.kitCheck as Mock).mockResolvedValue({ enabled: true, strengheid: "waarschuwen", scanned: 7, findings: [] });
+    render(<AppearancePanel projectId={4} onError={vi.fn()} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Controleer nu" }));
+    expect(await screen.findByText("Alles klopt: er zijn geen afwijkingen gevonden in 7 bestanden.")).toBeInTheDocument();
+  });
+
+  it("stelt de strengheid in op waarschuwen of blokkeren", async () => {
+    (api.kitCurrent as Mock).mockResolvedValue(current());
+    (api.kitCheck as Mock).mockResolvedValue({ enabled: true, strengheid: "waarschuwen", scanned: 1, findings: [] });
+    (api.kitStrictness as Mock).mockResolvedValue({ strengheid: "blokkeren" });
+    render(<AppearancePanel projectId={4} onError={vi.fn()} />);
+    fireEvent.click(await screen.findByRole("button", { name: "Controleer nu" }));
+    const group = await screen.findByRole("radiogroup", { name: "Hoe streng moet de controle zijn?" });
+    expect(within(group).getByRole("radio", { name: "Waarschuwen" })).toBeChecked();
+    fireEvent.click(within(group).getByRole("radio", { name: "Blokkeren" }));
+    await waitFor(() => expect(api.kitStrictness).toHaveBeenCalledWith(4, "blokkeren"));
+    expect(within(group).getByRole("radio", { name: "Blokkeren" })).toBeChecked();
+    expect(screen.getByText(/laten de controle mislukken/)).toBeInTheDocument();
+  });
+});

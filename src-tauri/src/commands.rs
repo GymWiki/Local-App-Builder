@@ -1096,3 +1096,26 @@ pub fn kit_tailor(
         json!({ "tailor": tailor }),
     )
 }
+
+/// Scant de broncode op afwijkingen van het gekozen uiterlijk (losse kleuren, gewone knoppen, andere bibliotheken, …).
+#[tauri::command(async)]
+pub fn kit_check(
+    app: tauri::AppHandle,
+    db: State<Db>,
+    mcp: State<McpManager>,
+    project_id: i64,
+) -> Result<Value> {
+    kit_call(&app, &db, &mcp, project_id, "kit.check", json!({}))
+}
+
+/// Stelt in of de kit-check alleen waarschuwt of ook blokkeert ("waarschuwen" of "blokkeren").
+#[tauri::command(async)]
+pub fn kit_strictness(
+    app: tauri::AppHandle,
+    db: State<Db>,
+    mcp: State<McpManager>,
+    project_id: i64,
+    level: String,
+) -> Result<Value> {
+    kit_call(&app, &db, &mcp, project_id, "kit.strictness", json!({ "level": level }))
+}

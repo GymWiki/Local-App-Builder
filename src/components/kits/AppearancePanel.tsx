@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { kitCurrent, kitTailor, runtime, type KitCurrent, type KitTailor } from "../../lib/api";
+import { chatSend, kitCheck, kitCurrent, kitStrictness, kitTailor, runtime, type KitCheck, type KitCurrent, type KitFinding, type KitTailor } from "../../lib/api";
 import KitPicker from "./KitPicker";
 
 interface Props {
@@ -31,6 +31,8 @@ export default function AppearancePanel({ projectId, firstRun = false, onError }
   const [cur, setCur] = useState<KitCurrent | null>(null);
   const [choosing, setChoosing] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [check, setCheck] = useState<KitCheck | null>(null);
+  const [checking, setChecking] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const fail = useCallback((e: unknown) => onError(t("fout.algemeen", { bericht: String(e) })), [onError, t]);
@@ -53,6 +55,35 @@ export default function AppearancePanel({ projectId, firstRun = false, onError }
     };
     if (delay) timer.current = setTimeout(() => void go(), delay);
     else await go();
+  }
+
+  async function runCheck() {
+    setChecking(true);
+    try {
+      setCheck(await kitCheck(projectId));
+    } catch (e) {
+      fail(e);
+    } finally {
+      setChecking(false);
+    }
+  }
+
+  async function strictness(level: "waarschuwen" | "blokkeren") {
+    try {
+      await kitStrictness(projectId, level);
+      setCheck((c) => (c ? { ...c, strengheid: level } : c));
+    } catch (e) {
+      fail(e);
+    }
+  }
+
+  async function askAi(prompt: string) {
+    try {
+      await chatSend(projectId, prompt);
+      setMsg(t("uiterlijk.controle.verstuurd"));
+    } catch (e) {
+      fail(e);
+    }
   }
 
   async function save() {
@@ -172,9 +203,84 @@ export default function AppearancePanel({ projectId, firstRun = false, onError }
         {msg && <p role="status" className="text-base text-emerald-300">{msg}</p>}
       </div>
 
+      <div className="space-y-3 rounded-xl border border-zinc-700 p-4">
+        <div>
+          <h3 className="text-lg font-semibold">{t("uiterlijk.controle.titel")}</h3>
+          <p className="text-base text-zinc-300">{t("uiterlijk.controle.uitleg")}</p>
+        </div>
+        <button onClick={() => void runCheck()} disabled={checking} className="min-h-11 rounded-lg border border-zinc-500 px-4 text-base hover:bg-zinc-800 disabled:opacity-50">
+          {checking ? t("uiterlijk.controle.bezig") : t("uiterlijk.controle.knop")}
+        </button>
+        {check && <CheckResult check={check} onFix={(p) => void askAi(p)} onStrictness={(l) => void strictness(l)} />}
+      </div>
+
       <button onClick={() => setChoosing(true)} className="min-h-11 rounded-lg border border-zinc-500 px-4 text-base hover:bg-zinc-800">
         {t("uiterlijk.huidig.andere")}
       </button>
     </section>
+  );
+}
+
+const RULES = ["kleur", "pixels", "lettertype", "native", "bibliotheek"] as const;
+
+function CheckResult({ check, onFix, onStrictness }: { check: KitCheck; onFix: (prompt: string) => void; onStrictness: (l: "waarschuwen" | "blokkeren") => void }) {
+  const { t } = useTranslation();
+  const files = new Set(check.findings.map((f) => f.file)).size;
+  const spot = (f: KitFinding) => `${f.file} (${t("uiterlijk.controle.regel", { regel: f.line })}): ${f.message}`;
+  return (
+    <div className="space-y-4">
+      <p role="status" className={check.findings.length ? "text-amber-300" : "text-emerald-300"}>
+        {check.findings.length === 0 ? t("uiterlijk.controle.alles", { aantal: check.scanned }) : t("uiterlijk.controle.gevonden", { aantal: check.findings.length, bestanden: files })}
+      </p>
+      {RULES.map((rule) => {
+        const list = check.findings.filter((f) => f.rule === rule);
+        if (list.length === 0) return null;
+        return (
+          <section key={rule} aria-label={t(`uiterlijk.controle.regels.${rule}.titel`)} className="space-y-2 rounded-lg border border-zinc-700 p-3">
+            <h4 className="font-semibold">
+              {t(`uiterlijk.controle.regels.${rule}.titel`)} ({list.length})
+            </h4>
+            <p className="text-base text-zinc-300">{t(`uiterlijk.controle.regels.${rule}.uitleg`)}</p>
+            <ul className="space-y-2 text-base">
+              {list.slice(0, 20).map((f) => (
+                <li key={`${f.file}:${f.line}:${f.col}`} className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="min-w-0 break-words">{spot(f)}</span>
+                  <button
+                    onClick={() => onFix(t("uiterlijk.controle.prompt", { bestand: f.file, regel: f.line, melding: f.message, tip: f.fix }))}
+                    className="min-h-10 rounded-lg border border-zinc-500 px-3 text-sm hover:bg-zinc-800"
+                  >
+                    {t("uiterlijk.controle.herstel")}
+                  </button>
+                </li>
+              ))}
+            </ul>
+            {list.length > 1 && (
+              <button
+                onClick={() => onFix(t("uiterlijk.controle.promptAlles", { titel: t(`uiterlijk.controle.regels.${rule}.titel`), plekken: list.slice(0, 20).map((f) => `- ${f.file}:${f.line} ${f.message} ${f.fix}`).join("\n") }))}
+                className="min-h-11 rounded-lg bg-indigo-600 px-4 text-base font-medium hover:bg-indigo-500"
+              >
+                {t("uiterlijk.controle.herstelAlles")}
+              </button>
+            )}
+          </section>
+        );
+      })}
+      <div role="radiogroup" aria-label={t("uiterlijk.controle.strengheid.titel")} className="space-y-2">
+        <p className="font-semibold">{t("uiterlijk.controle.strengheid.titel")}</p>
+        {(["waarschuwen", "blokkeren"] as const).map((l) => (
+          <button
+            key={l}
+            role="radio"
+            aria-checked={check.strengheid === l}
+            onClick={() => onStrictness(l)}
+            className={`mr-2 min-h-11 rounded-lg border px-4 text-base ${check.strengheid === l ? "border-indigo-400 bg-indigo-800 font-semibold" : "border-zinc-600 hover:bg-zinc-800"}`}
+            title={t(`uiterlijk.controle.strengheid.${l}Uitleg`)}
+          >
+            {t(`uiterlijk.controle.strengheid.${l}`)}
+          </button>
+        ))}
+        <p className="text-sm text-zinc-400">{t(`uiterlijk.controle.strengheid.${check.strengheid}Uitleg`)}</p>
+      </div>
+    </div>
   );
 }
