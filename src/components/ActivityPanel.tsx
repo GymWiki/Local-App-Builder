@@ -1,6 +1,11 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { lastChecks, runtime, type Checkpoint, type CheckRun, type McpInfo, type Project, type RestoreResult } from "../lib/api";
+import { lastChecks, runtime, type Checkpoint, type CheckRun, type McpInfo, type Project, type RestoreResult } from "@/lib/api";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 
 interface Props {
   project: Project;
@@ -69,31 +74,35 @@ export default function ActivityPanel({ project, mcp, tick, onError }: Props) {
   const previous = points[1] ?? null;
 
   return (
-    <div className="space-y-5 text-sm">
+    <div className="space-y-5 text-base">
       <section>
-        <h3 className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">{t("activiteit.checks")}</h3>
+        <h3 className="mb-2 text-sm tracking-wide text-muted-foreground uppercase">{t("activiteit.checks")}</h3>
         {run ? (
-          <div data-testid="last-checks">
-            <div className={run.ok ? "text-success" : "text-destructive"}>{run.ok ? t("activiteit.geslaagd") : t("activiteit.mislukt")}</div>
-            <ul className="mt-1 space-y-0.5">
-              {run.steps.map((s) => (
-                <li key={s.name} className="flex justify-between">
-                  <span>{t(`activiteit.staplabel.${s.name}`, { defaultValue: s.name })}</span>
-                  <span className={COLOR[s.status]}>
-                    {ICON[s.status]} {t(`activiteit.stap.${s.status}`)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-            <div className="mt-1 text-xs text-muted-foreground">{fmt(run.created_at.endsWith("Z") ? run.created_at : run.created_at + "Z")}</div>
-          </div>
+          <Card size="sm" data-testid="last-checks">
+            <CardContent className="space-y-1">
+              <div className={run.ok ? "font-medium text-success" : "font-medium text-destructive"}>{run.ok ? t("activiteit.geslaagd") : t("activiteit.mislukt")}</div>
+              <ul className="mt-1 space-y-1">
+                {run.steps.map((s) => (
+                  <li key={s.name} className="flex items-center justify-between gap-2">
+                    <span>{t(`activiteit.staplabel.${s.name}`, { defaultValue: s.name })}</span>
+                    <span className={`${COLOR[s.status]} whitespace-nowrap`}>
+                      {ICON[s.status]} {t(`activiteit.stap.${s.status}`)}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+              <div className="text-sm text-muted-foreground">{fmt(run.created_at.endsWith("Z") ? run.created_at : run.created_at + "Z")}</div>
+            </CardContent>
+          </Card>
         ) : (
           <p className="text-muted-foreground">{t("activiteit.nogGeenChecks")}</p>
         )}
       </section>
 
+      <Separator />
+
       <section>
-        <h3 className="mb-2 text-xs uppercase tracking-wide text-muted-foreground">{t("activiteit.tijdlijn")}</h3>
+        <h3 className="mb-2 text-sm tracking-wide text-muted-foreground uppercase">{t("activiteit.tijdlijn")}</h3>
         {!up ? (
           <p className="text-muted-foreground">{t("preview.geenRuntime")}</p>
         ) : points.length === 0 ? (
@@ -103,55 +112,52 @@ export default function ActivityPanel({ project, mcp, tick, onError }: Props) {
             {points.map((p, i) => (
               <li key={p.hash} className="group">
                 <div className="break-words">{p.message}</div>
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <div className="flex items-center justify-between gap-2 text-sm text-muted-foreground">
                   <span>
-                    {p.short} · {fmt(p.date)}
+                    <Badge variant="outline" className="mr-1 font-mono">
+                      {p.short}
+                    </Badge>
+                    {fmt(p.date)}
                   </span>
                   {i > 0 && (
-                    <button className="hidden text-primary hover:underline group-hover:inline" onClick={() => setTarget(p)}>
+                    <Button variant="link" size="xs" className="opacity-0 group-focus-within:opacity-100 group-hover:opacity-100" onClick={() => setTarget(p)}>
                       {t("activiteit.zetTerug")}
-                    </button>
+                    </Button>
                   )}
                 </div>
               </li>
             ))}
           </ol>
         )}
-        <button
-          disabled={!previous || busy}
-          onClick={() => setTarget(previous)}
-          className="mt-3 w-full rounded border border-border px-3 py-2 hover:bg-muted disabled:opacity-40"
-        >
+        <Button variant="outline" className="mt-3 w-full" disabled={!previous || busy} onClick={() => setTarget(previous)}>
           {t("activiteit.terug")}
-        </button>
+        </Button>
         {message && (
-          <p role="status" className="mt-2 text-xs text-success">
+          <p role="status" className="mt-2 text-sm text-success">
             {message}
           </p>
         )}
       </section>
 
-      {target && (
-        <div className="fixed inset-0 z-10 flex items-center justify-center bg-foreground/50">
-          <div role="dialog" aria-label={t("activiteit.terug")} className="w-[28rem] space-y-3 rounded-lg bg-card p-6 shadow-xl">
-            <h2 className="text-lg font-semibold">{t("activiteit.terug")}</h2>
-            <p>{t("activiteit.bevestig", { bericht: target.message, datum: fmt(target.date) })}</p>
-            <ul className="list-disc space-y-1 pl-5 text-muted-foreground">
-              <li>{t("activiteit.uitleg1")}</li>
-              <li>{t("activiteit.uitleg2")}</li>
-              <li>{t("activiteit.uitleg3")}</li>
-            </ul>
-            <div className="flex justify-end gap-2">
-              <button onClick={() => setTarget(null)} className="rounded px-3 py-2 hover:bg-muted">
-                {t("nieuw.annuleer")}
-              </button>
-              <button disabled={busy} onClick={() => void restore()} className="rounded bg-warning text-warning-foreground px-3 py-2 font-medium hover:bg-warning/90 disabled:opacity-50">
-                {t("activiteit.bevestigKnop")}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <AlertDialog open={target !== null} onOpenChange={(o) => !o && setTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t("activiteit.terug")}</AlertDialogTitle>
+            <AlertDialogDescription>{target ? t("activiteit.bevestig", { bericht: target.message, datum: fmt(target.date) }) : ""}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <ul className="list-disc space-y-1 pl-5 text-base text-muted-foreground">
+            <li>{t("activiteit.uitleg1")}</li>
+            <li>{t("activiteit.uitleg2")}</li>
+            <li>{t("activiteit.uitleg3")}</li>
+          </ul>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t("nieuw.annuleer")}</AlertDialogCancel>
+            <AlertDialogAction disabled={busy} onClick={() => void restore()}>
+              {t("activiteit.bevestigKnop")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

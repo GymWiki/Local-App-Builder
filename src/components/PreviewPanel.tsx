@@ -12,7 +12,15 @@ import {
   type McpInfo,
   type PreviewInfo,
   type Project,
-} from "../lib/api";
+} from "@/lib/api";
+import { ChevronDownIcon, RotateCwIcon } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Props {
   project: Project;
@@ -28,11 +36,11 @@ interface Props {
 }
 
 const BADGE: Record<string, string> = {
-  running: "bg-success/15 text-success",
-  starting: "bg-accent text-accent-foreground",
-  stopping: "bg-warning/20 text-warning",
-  error: "bg-destructive/15 text-destructive",
-  idle: "bg-muted text-muted-foreground",
+  running: "border-transparent bg-success/15 text-success",
+  starting: "border-transparent bg-accent text-accent-foreground",
+  stopping: "border-transparent bg-warning/20 text-warning",
+  error: "border-transparent bg-destructive/15 text-destructive",
+  idle: "border-transparent bg-muted text-muted-foreground",
 };
 
 export default function PreviewPanel({ project, mcp, preview, visible, reloadNonce = 0, autoSwitch = false, onAutoSwitch, onError, onRetryMcp }: Props) {
@@ -94,101 +102,110 @@ export default function PreviewPanel({ project, mcp, preview, visible, reloadNon
   const body = () => {
     if (!problem) return null;
     const k = problem.kind;
+    const logOpenByDefault = k === "dev_crashed";
     return (
-      <div role="alert" data-testid="preview-problem" className="space-y-3 border-b border-border bg-card px-5 py-4 text-sm">
-        <div className="font-medium text-warning">{t(`preview.probleem.${k}`, { defaultValue: t("preview.probleem.unsupported") })}</div>
-        <div className="break-words text-muted-foreground">{problem.message}</div>
-        {t(`preview.uitleg.${k}`, { defaultValue: "" }) && <div className="text-muted-foreground">{t(`preview.uitleg.${k}`)}</div>}
-        {k === "untrusted_scripts" && (
-          <ul className="space-y-0.5 font-mono text-xs text-muted-foreground">
-            {problem.log.filter((l) => !l.endsWith("=")).map((l) => (
-              <li key={l}>{l}</li>
-            ))}
-          </ul>
-        )}
-        {k === "untrusted_config" && config?.config && (
-          <ul className="space-y-0.5 font-mono text-xs text-muted-foreground" data-testid="config-commands">
-            {(["dev", "build", "lint", "test"] as const).map((c) => (config.config?.[c] ? <li key={c}>{c}: {config.config[c]}</li> : null))}
-          </ul>
-        )}
-        {(k === "dev_crashed" || k === "node_missing" || k === "node_old" || k === "node_broken" || k === "runtime_unavailable") && problem.log.length > 0 && (
-          <details open={k === "dev_crashed"}>
-            <summary className="cursor-pointer text-xs text-muted-foreground">{t("preview.laatsteRegels")}</summary>
-            <pre data-testid="problem-log" className="mt-1 max-h-48 overflow-auto whitespace-pre-wrap rounded bg-background p-2 font-mono text-xs text-muted-foreground">
-              {problem.log.join("\n")}
-            </pre>
-          </details>
-        )}
-        <div className="flex gap-2">
-          {k === "deps_missing" && (
-            <button disabled={busy} onClick={() => void run(() => previewInstall(id))} className="rounded bg-primary text-primary-foreground px-3 py-1.5 font-medium hover:bg-primary/90 disabled:opacity-50">
-              {busy ? t("preview.installeren") : t("preview.installeer")}
-            </button>
-          )}
+      <Alert role="alert" data-testid="preview-problem" className="rounded-none border-0 border-b border-border bg-card px-5 py-4 text-base">
+        <AlertTitle className="font-semibold text-warning">{t(`preview.probleem.${k}`, { defaultValue: t("preview.probleem.unsupported") })}</AlertTitle>
+        <AlertDescription className="space-y-3 text-base">
+          <div className="break-words text-muted-foreground">{problem.message}</div>
+          {t(`preview.uitleg.${k}`, { defaultValue: "" }) && <div className="text-muted-foreground">{t(`preview.uitleg.${k}`)}</div>}
           {k === "untrusted_scripts" && (
-            <button disabled={busy} onClick={() => void run(() => previewTrustScripts(id))} className="rounded bg-warning text-warning-foreground px-3 py-1 font-medium hover:bg-warning/90 disabled:opacity-50">
-              {t("preview.vertrouwScripts")}
-            </button>
+            <ul className="space-y-0.5 font-mono text-sm text-muted-foreground">
+              {problem.log.filter((l) => !l.endsWith("=")).map((l) => (
+                <li key={l}>{l}</li>
+              ))}
+            </ul>
           )}
-          {k === "untrusted_config" && (
-            <button
-              disabled={busy}
-              onClick={() => void run(async () => { await trustStudioConfig(id); await previewStart(id); })}
-              className="rounded bg-warning text-warning-foreground px-3 py-1 font-medium hover:bg-warning/90 disabled:opacity-50"
-            >
-              {t("preview.vertrouwStart")}
-            </button>
+          {k === "untrusted_config" && config?.config && (
+            <ul className="space-y-0.5 font-mono text-sm text-muted-foreground" data-testid="config-commands">
+              {(["dev", "build", "lint", "test"] as const).map((c) => (config.config?.[c] ? <li key={c}>{c}: {config.config[c]}</li> : null))}
+            </ul>
           )}
-          {(k === "node_missing" || k === "node_old" || k === "node_broken" || k === "runtime_unavailable") && (
-            <button disabled={busy} onClick={() => void run(async () => { await onRetryMcp?.(); })} className="rounded bg-primary text-primary-foreground px-3 py-1.5 font-medium hover:bg-primary/90 disabled:opacity-50">
-              {t("preview.opnieuwProberen")}
-            </button>
+          {(k === "dev_crashed" || k === "node_missing" || k === "node_old" || k === "node_broken" || k === "runtime_unavailable") && problem.log.length > 0 && (
+            <Collapsible defaultOpen={logOpenByDefault}>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="sm" className="px-0">
+                  {t("preview.laatsteRegels")}
+                  <ChevronDownIcon aria-hidden="true" />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent forceMount>
+                <pre data-testid="problem-log" className="mt-1 max-h-48 overflow-auto rounded-lg bg-muted p-3 font-mono text-sm whitespace-pre-wrap text-muted-foreground">
+                  {problem.log.join("\n")}
+                </pre>
+              </CollapsibleContent>
+            </Collapsible>
           )}
-          {k === "static_failed" && (
-            <button disabled={busy} onClick={() => void run(() => previewStart(id))} className="rounded bg-primary text-primary-foreground px-3 py-1.5 font-medium hover:bg-primary/90 disabled:opacity-50">
-              {t("preview.opnieuwProberen")}
-            </button>
-          )}
-        </div>
-      </div>
+          <div className="flex gap-2">
+            {k === "deps_missing" && (
+              <Button disabled={busy} onClick={() => void run(() => previewInstall(id))}>
+                {busy ? t("preview.installeren") : t("preview.installeer")}
+              </Button>
+            )}
+            {k === "untrusted_scripts" && (
+              <Button disabled={busy} onClick={() => void run(() => previewTrustScripts(id))} className="bg-warning text-warning-foreground hover:bg-warning/90">
+                {t("preview.vertrouwScripts")}
+              </Button>
+            )}
+            {k === "untrusted_config" && (
+              <Button
+                disabled={busy}
+                onClick={() => void run(async () => { await trustStudioConfig(id); await previewStart(id); })}
+                className="bg-warning text-warning-foreground hover:bg-warning/90"
+              >
+                {t("preview.vertrouwStart")}
+              </Button>
+            )}
+            {(k === "node_missing" || k === "node_old" || k === "node_broken" || k === "runtime_unavailable") && (
+              <Button disabled={busy} onClick={() => void run(async () => { await onRetryMcp?.(); })}>
+                {t("preview.opnieuwProberen")}
+              </Button>
+            )}
+            {k === "static_failed" && (
+              <Button disabled={busy} onClick={() => void run(() => previewStart(id))}>
+                {t("preview.opnieuwProberen")}
+              </Button>
+            )}
+          </div>
+        </AlertDescription>
+      </Alert>
     );
   };
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2 text-sm">
-        <span data-testid="dev-badge" className={`rounded px-2 py-1 text-xs ${BADGE[status]}`}>
+        <Badge data-testid="dev-badge" className={BADGE[status]}>
           {t(`preview.status.${status}`)}
-        </span>
-        {t(`preview.modus.${mode}`, { defaultValue: "" }) && <span className="text-xs text-muted-foreground">{t(`preview.modus.${mode}`)}</span>}
-        {preview?.url && <span className="truncate text-xs text-muted-foreground">{preview.url}</span>}
+        </Badge>
+        {t(`preview.modus.${mode}`, { defaultValue: "" }) && <span className="text-sm text-muted-foreground">{t(`preview.modus.${mode}`)}</span>}
+        {preview?.url && <span className="truncate text-sm text-muted-foreground">{preview.url}</span>}
         <div className="ml-auto flex gap-2">
           {canStart && (
-            <button disabled={busy} onClick={() => void run(() => previewStart(id))} className="rounded bg-primary text-primary-foreground px-3 py-1 hover:bg-primary/90 disabled:opacity-50">
+            <Button size="sm" disabled={busy} onClick={() => void run(() => previewStart(id))}>
               {t("preview.start")}
-            </button>
+            </Button>
           )}
           {active && (
-            <button disabled={busy} onClick={() => void run(() => previewStop(id))} className="rounded border border-border px-3 py-1 hover:bg-muted disabled:opacity-50">
+            <Button size="sm" variant="outline" disabled={busy} onClick={() => void run(() => previewStop(id))}>
               {t("preview.stop")}
-            </button>
+            </Button>
           )}
           {(active || status === "error") && (
-            <button disabled={busy} onClick={() => void run(() => previewRestart(id))} className="rounded border border-border px-3 py-1 hover:bg-muted disabled:opacity-50">
+            <Button size="sm" variant="outline" disabled={busy} onClick={() => void run(() => previewRestart(id))}>
               {t("preview.herstart")}
-            </button>
+            </Button>
           )}
           {status === "running" && (
-            <button onClick={() => setManualReload((n) => n + 1)} className="rounded border border-border px-3 py-1 hover:bg-muted">
+            <Button size="sm" variant="outline" onClick={() => setManualReload((n) => n + 1)}>
+              <RotateCwIcon aria-hidden="true" />
               {t("preview.ververs")}
-            </button>
+            </Button>
           )}
         </div>
       </div>
 
-      {usesRuntime && !runtimeUp && !problem && (
-        <div className="border-b border-border px-5 py-2 text-xs text-muted-foreground">{t("preview.geenRuntime")}</div>
-      )}
+      {usesRuntime && !runtimeUp && !problem && <div className="border-b border-border px-5 py-2 text-sm text-muted-foreground">{t("preview.geenRuntime")}</div>}
       {body()}
 
       <div className="relative min-h-0 flex-1 bg-background">
@@ -200,26 +217,38 @@ export default function PreviewPanel({ project, mcp, preview, visible, reloadNon
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
             className="h-full w-full bg-background"
           />
-        ) : (
-          <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
-            {status === "starting" ? t("preview.wachten") : t("preview.nietActief")}
+        ) : status === "starting" ? (
+          <div role="status" className="flex h-full flex-col items-center justify-center gap-4 p-8 text-base text-muted-foreground">
+            <Skeleton className="h-40 w-full max-w-md" />
+            <span>{t("preview.wachten")}</span>
           </div>
+        ) : (
+          <div className="flex h-full items-center justify-center text-base text-muted-foreground">{t("preview.nietActief")}</div>
         )}
       </div>
 
       {usesRuntime && (
-        <details className="max-h-56 overflow-auto border-t border-border text-xs">
-          <summary className="cursor-pointer px-3 py-2 text-muted-foreground">{t("preview.logs")}</summary>
-          <pre data-testid="dev-logs" className="whitespace-pre-wrap px-3 pb-3 font-mono text-muted-foreground">
-            {logs.length ? logs.join("\n") : t("preview.geenLogs")}
-          </pre>
-        </details>
+        <Collapsible className="max-h-56 overflow-auto border-t border-border text-sm">
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" size="sm" className="m-1">
+              {t("preview.logs")}
+              <ChevronDownIcon aria-hidden="true" />
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent forceMount>
+            <pre data-testid="dev-logs" className="px-3 pb-3 font-mono whitespace-pre-wrap text-muted-foreground">
+              {logs.length ? logs.join("\n") : t("preview.geenLogs")}
+            </pre>
+          </CollapsibleContent>
+        </Collapsible>
       )}
       {onAutoSwitch && (
-        <label className="flex items-center gap-2 border-t border-border px-3 py-2 text-xs text-muted-foreground">
-          <input type="checkbox" checked={autoSwitch} onChange={(e) => onAutoSwitch(e.target.checked)} />
-          {t("preview.autoWissel")}
-        </label>
+        <div className="flex items-center gap-3 border-t border-border px-3 py-2 text-sm text-muted-foreground">
+          <Checkbox id="auto-wissel" checked={autoSwitch} onCheckedChange={(c) => onAutoSwitch(c === true)} />
+          <Label htmlFor="auto-wissel" className="text-sm font-normal text-muted-foreground">
+            {t("preview.autoWissel")}
+          </Label>
+        </div>
       )}
     </div>
   );

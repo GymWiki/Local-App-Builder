@@ -36,7 +36,7 @@ describe("ActivityPanel", () => {
     await screen.findByTestId("timeline");
     fireEvent.click(screen.getByRole("button", { name: "Terug naar vorige versie" }));
 
-    const dialog = await screen.findByRole("dialog");
+    const dialog = await screen.findByRole("alertdialog");
     expect(dialog).toHaveTextContent("Eerste versie");
     expect(dialog).toHaveTextContent("automatisch bewaard");
     expect(api.runtime).not.toHaveBeenCalledWith(1, "git.restore", expect.anything());
