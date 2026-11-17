@@ -15,7 +15,7 @@ use serde_json::{json, Value};
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, MutexGuard};
 use std::time::Duration;
-use tauri::State;
+use tauri::{Emitter, Manager, State};
 
 pub struct Db(pub Mutex<Connection>);
 pub struct Profiles(pub PathBuf);
@@ -103,34 +103,59 @@ fn trust_key(project_id: i64) -> String {
     format!("studio_trust:{project_id}")
 }
 
+/// Start de MCP-server van een project op een achtergrondthread. Blokkeert niets: terminal, preview en git werken
+/// gewoon door, ook als de server faalt. De uitkomst (draait of de echte foutreden) komt als `mcp-status`-gebeurtenis.
+fn begin_mcp(app: &tauri::AppHandle, p: &Project) -> McpInfo {
+    let mcp = app.state::<McpManager>();
+    if mcp.mark_starting(p.id) {
+        let (app, id, name, pad) = (app.clone(), p.id, p.naam.clone(), p.pad.clone());
+        std::thread::spawn(move || {
+            let mcp = app.state::<McpManager>();
+            let info = mcp.start(id, &name, Path::new(&pad));
+            if !mcp.finish_starting(id) {
+                mcp.stop(id); // project werd ondertussen gesloten
+                return;
+            }
+            if info.is_up() {
+                let trusted = app
+                    .state::<Db>()
+                    .conn()
+                    .ok()
+                    .and_then(|c| crate::db::get_setting(&c, &trust_key(id)).ok().flatten());
+                let _ = mcp.call(
+                    id,
+                    "trust.set",
+                    json!({ "hash": trusted }),
+                    Duration::from_secs(5),
+                );
+            }
+            let _ = app.emit("mcp-status", json!({ "project_id": id, "info": info }));
+            // De runtime is er (of juist niet): preview opnieuw beoordelen (plan doorgeven, dev-server starten, melding tonen).
+            app.state::<PreviewManager>().open(id, PathBuf::from(&pad));
+        });
+    }
+    mcp.info(p.id).unwrap_or_else(|| McpInfo {
+        state: "starting".into(),
+        port: None,
+        error: None,
+        kind: None,
+        log: vec![],
+    })
+}
+
 #[tauri::command(async)]
 pub fn open_project(
+    app: tauri::AppHandle,
     db: State<Db>,
-    mcp: State<McpManager>,
     previews: State<PreviewManager>,
     id: i64,
 ) -> Result<McpInfo> {
-    let (p, trusted) = {
-        let c = db.conn()?;
-        (
-            projects::get(&c, id)?,
-            crate::db::get_setting(&c, &trust_key(id))?,
-        )
-    };
+    let p = projects::get(&*db.conn()?, id)?;
     // Vaste werkwijze (CLAUDE.md / GEMINI.md / AGENTS.md) bijwerken; mislukken mag het openen niet blokkeren.
     let _ = instructions::ensure(Path::new(&p.pad));
-    let info = mcp.start(p.id, &p.naam, Path::new(&p.pad));
-    if info.is_up() {
-        let _ = mcp.call(
-            p.id,
-            "trust.set",
-            json!({ "hash": trusted }),
-            Duration::from_secs(5),
-        );
-    }
-    // Zero-config preview: detecteren, statische server starten en bestanden gaan volgen (werkt ook zonder Node-runtime).
+    // Zero-config preview werkt direct (statisch zonder Node); de runtime volgt op de achtergrond.
     previews.open(p.id, PathBuf::from(&p.pad));
-    Ok(info)
+    Ok(begin_mcp(&app, &p))
 }
 
 // ---------- preview ----------
@@ -451,6 +476,7 @@ pub fn start_shell(
 #[tauri::command(async)]
 #[allow(clippy::too_many_arguments)]
 pub fn start_ai(
+    app: tauri::AppHandle,
     db: State<Db>,
     term: State<TerminalManager>,
     mcp: State<McpManager>,
@@ -482,7 +508,17 @@ pub fn start_ai(
 
     let mut warnings = Vec::new();
     let mut env = base_env();
-    let info = mcp.start(project.id, &project.naam, &dir);
+    // De CLI mag nooit op de MCP-server blokkeren: hooguit 4 s wachten, daarna starten we zonder MCP (met uitleg).
+    begin_mcp(&app, &project);
+    let info = mcp
+        .wait_ready(project.id, Duration::from_secs(4))
+        .unwrap_or_else(|| McpInfo {
+            state: "starting".into(),
+            port: None,
+            error: None,
+            kind: None,
+            log: vec![],
+        });
     if let (true, Some(port)) = (info.is_up(), info.port) {
         match mcp_config::ensure(provider, &dir) {
             Ok(_) => {
@@ -495,6 +531,8 @@ pub fn start_ai(
         }
     } else if let Some(e) = info.error {
         warnings.push(format!("MCP niet beschikbaar: {e}"));
+    } else if info.state == "starting" {
+        warnings.push("De MCP-server is nog niet klaar; de AI start zonder Studio-tools. Start de AI opnieuw zodra ‘MCP: gereed’ in de balk staat.".into());
     }
 
     let profile = account.as_ref().map(|a| PathBuf::from(&a.profile_dir));

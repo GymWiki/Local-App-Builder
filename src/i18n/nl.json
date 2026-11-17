@@ -164,7 +164,8 @@
       "untrusted_config": "studio.json goedkeuren",
       "dev_crashed": "De dev-server is gecrasht",
       "static_failed": "De statische preview kon niet starten",
-      "watch_failed": "Bestandswijzigingen worden niet gevolgd"
+      "watch_failed": "Bestandswijzigingen worden niet gevolgd",
+      "runtime_starting": "Projectruntime wordt gestart…"
     },
     "uitleg": {
       "node_missing": "Dit project heeft Node.js nodig. Installeer Node.js 20 of nieuwer (https://nodejs.org) en klik op Opnieuw proberen.",

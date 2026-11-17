@@ -207,6 +207,10 @@ impl Inner {
     fn runtime_problem(&self, id: i64) -> Option<Problem> {
         match self.bridge.runtime_info(id) {
             Some(i) if i.is_up() => None,
+            Some(i) if i.state == "starting" => Some(problem(
+                "runtime_starting",
+                "De projectruntime wordt gestart…",
+            )),
             Some(i) => {
                 let kind = i
                     .kind
@@ -409,7 +413,9 @@ impl Inner {
                         .map(|s| {
                             matches!(
                                 s.node_problem.as_ref().map(|p| p.kind.as_str()),
-                                Some("deps_missing") | Some("runtime_unavailable")
+                                Some("deps_missing")
+                                    | Some("runtime_unavailable")
+                                    | Some("runtime_starting")
                             )
                         })
                         .unwrap_or(false)

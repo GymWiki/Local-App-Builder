@@ -57,6 +57,9 @@ Alleen voor afwijkende situaties: zet in de projectmap een `studio.json` (leiden
 - De zijbalk toont de laatste check-resultaten en de tijdlijn.
 
 ## Problemen met de MCP-server
+- De MCP-server start op een **achtergrondthread**: terminal, preview en git werken meteen, ook als de server faalt. De terminalbalk toont ‘MCP: starten…’ en daarna ‘gereed’ of de echte foutreden met **Opnieuw proberen**.
+- In een dev-build (`tauri dev`) staat het exacte startcommando in de console van `tauri dev` (`[studio] start: …`; het token wordt nooit getoond) en als eerste regel in de logregels van de foutmelding.
+- Paden naar Node worden schoongemaakt (geen `\\?\C:\…`, geen `..`, geen gemengde scheidingstekens; werkt met spaties). Een `\\?\`-pad laat Node op Windows crashen met `EISDIR … lstat 'C:'`.
 - `npm run tauri dev` en de release-build draaien eerst `scripts/mcp-prepare.mjs`: installeert zo nodig de dependencies van `mcp-server/` en bouwt `dist/index.mjs`.
 - Studio zoekt Node in PATH en op bekende plekken (Program Files, nvm, fnm, Volta, scoop, Homebrew), start `node --version` en eist versie 20+.
 - Mislukt het starten, dan toont de terminalbalk en de Preview-tab de echte reden (Node ontbreekt/te oud, serverbestand ontbreekt, crash met laatste logregels, time-out) en een knop **Opnieuw proberen**.

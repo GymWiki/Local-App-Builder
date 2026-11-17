@@ -36,3 +36,7 @@ Lokale desktop-app (Tauri 2 + React/TypeScript/Vite + Tailwind, Rust-backend, SQ
 - De statische server (`preview/static_server.rs`) is alleen loopback, serveert nooit dotfiles of buiten de projectmap en werkt zonder Node.
 - Scripts uit package.json draaien alleen na eerste vertrouwen of herkeuring bij wijziging; nooit zonder die controle automatisch starten.
 - Bij sluiten van een project: eerst `previews.close` (watcher + statische server), dan `mcp.stop` (runtime + dev-server). Geen proces mag achterblijven; test dat.
+
+## Paden naar Node (Windows)
+- Geef `node` nooit een `\\?\`-pad (extended-length). Laat paden voor scripts/omgevingsvariabelen via `winpath::for_node` / `winpath::clean_path` lopen en gebruik `Path`/`PathBuf`, geen string-splits op `:` of `\`. Tests met spaties en schijfletters staan in `winpath.rs` en `mcp.rs`.
+- De MCP-start is nooit blokkerend voor de rest van de app (`begin_mcp` in `commands.rs`); gebruik `wait_ready` met een korte time-out als iets de uitkomst nodig heeft.

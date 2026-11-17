@@ -12,6 +12,7 @@ mod preview;
 mod projects;
 mod provider;
 mod terminal;
+mod winpath;
 
 use mcp::{McpEvent, McpManager};
 use preview::{Bridge, PreviewEvent, PreviewManager};
@@ -54,13 +55,20 @@ impl Bridge for AppBridge {
     }
 }
 
+/// Mogelijke plekken van het MCP-serverbestand. Debug (tauri dev): de verse build in de repo gaat voor op de
+/// kopie in target/debug (die kan verouderd zijn). Release: het meegeleverde resource-bestand.
 fn mcp_scripts(app: &tauri::App) -> Vec<PathBuf> {
-    let mut v = Vec::new();
-    if let Ok(d) = app.path().resource_dir() {
-        v.push(d.join("mcp-server").join("index.mjs"));
+    let dev = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../mcp-server/dist/index.mjs");
+    let bundled = app
+        .path()
+        .resource_dir()
+        .ok()
+        .map(|d| d.join("mcp-server").join("index.mjs"));
+    if cfg!(debug_assertions) {
+        std::iter::once(dev).chain(bundled).collect()
+    } else {
+        bundled.into_iter().chain(std::iter::once(dev)).collect()
     }
-    v.push(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../mcp-server/dist/index.mjs"));
-    v
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
