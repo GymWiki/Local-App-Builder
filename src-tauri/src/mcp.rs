@@ -1,5 +1,5 @@
-use crate::cli;
 use crate::error::{AppError, Result};
+use crate::node;
 use rusqlite::{params, Connection};
 use serde::Serialize;
 use serde_json::Value;
@@ -18,15 +18,31 @@ pub struct McpInfo {
     /// "starting" | "running" (server draait) | "connected" (een CLI heeft met token aangeklopt) | "unavailable"
     pub state: String,
     pub port: Option<u16>,
+    /// Leesbare reden als `state == "unavailable"`.
     pub error: Option<String>,
+    /// Korte code voor de UI: node_missing | node_old | node_broken | script_missing | spawn_failed | timeout | crashed | error
+    pub kind: Option<String>,
+    /// Laatste regels uit stderr/log van de server (voor diagnose).
+    pub log: Vec<String>,
 }
 
 impl McpInfo {
-    fn unavailable(msg: impl Into<String>) -> Self {
+    fn fail(kind: &str, msg: impl Into<String>, log: Vec<String>) -> Self {
         Self {
             state: "unavailable".into(),
             port: None,
             error: Some(msg.into()),
+            kind: Some(kind.into()),
+            log,
+        }
+    }
+    fn plain(state: &str, port: Option<u16>) -> Self {
+        Self {
+            state: state.into(),
+            port,
+            error: None,
+            kind: None,
+            log: vec![],
         }
     }
     pub fn is_up(&self) -> bool {
@@ -56,6 +72,28 @@ pub enum McpEvent {
 
 pub type McpSink = Arc<dyn Fn(McpEvent) + Send + Sync>;
 
+type LogTail = Arc<Mutex<std::collections::VecDeque<String>>>;
+const LOG_LINES: usize = 40;
+const START_TIMEOUT: Duration = Duration::from_secs(20);
+
+enum Ready {
+    Port,
+    Error(String),
+    Exited,
+}
+
+fn push_log(log: &LogTail, line: String) {
+    let mut l = log.lock().unwrap();
+    l.push_back(line.chars().take(500).collect());
+    while l.len() > LOG_LINES {
+        l.pop_front();
+    }
+}
+
+fn tail(log: &LogTail) -> Vec<String> {
+    log.lock().unwrap().iter().cloned().collect()
+}
+
 type Reply = std::result::Result<Value, String>;
 type Pending = Arc<Mutex<HashMap<u64, mpsc::Sender<Reply>>>>;
 
@@ -70,8 +108,12 @@ struct Server {
 
 pub struct McpManager {
     token: String,
-    script: Option<PathBuf>,
+    /// Mogelijke plekken van `index.mjs`; de eerste die bestaat wordt bij elke start gebruikt (dus ook als hij pas later is gebouwd).
+    scripts: Vec<PathBuf>,
     servers: Mutex<HashMap<i64, Server>>,
+    /// Laatste mislukte start per project, zodat de UI de reden kan blijven tonen.
+    failures: Mutex<HashMap<i64, McpInfo>>,
+    start_timeout: Duration,
     sink: McpSink,
 }
 
@@ -87,13 +129,21 @@ pub fn url_for(port: u16) -> String {
 }
 
 impl McpManager {
-    pub fn new(token: String, script: Option<PathBuf>, sink: McpSink) -> Self {
+    pub fn new(token: String, scripts: Vec<PathBuf>, sink: McpSink) -> Self {
         Self {
             token,
-            script,
+            scripts,
             servers: Mutex::new(HashMap::new()),
+            failures: Mutex::new(HashMap::new()),
+            start_timeout: START_TIMEOUT,
             sink,
         }
+    }
+
+    #[cfg(test)]
+    fn with_start_timeout(mut self, d: Duration) -> Self {
+        self.start_timeout = d;
+        self
     }
 
     pub fn token(&self) -> &str {
@@ -101,14 +151,17 @@ impl McpManager {
     }
 
     pub fn info(&self, project_id: i64) -> Option<McpInfo> {
-        self.servers
+        let running = self
+            .servers
             .lock()
             .unwrap()
             .get(&project_id)
-            .map(|s| s.info.lock().unwrap().clone())
+            .map(|s| s.info.lock().unwrap().clone());
+        running.or_else(|| self.failures.lock().unwrap().get(&project_id).cloned())
     }
 
-    /// Start de server voor een project (idempotent). Faalt nooit hard: zonder Node.js of script krijg je `unavailable`.
+    /// Start de server voor een project (idempotent). Faalt nooit hard: bij een probleem krijg je
+    /// `unavailable` met de echte reden (`kind`, `error`, `log`) en onthoudt de manager die.
     pub fn start(&self, project_id: i64, name: &str, dir: &Path) -> McpInfo {
         if let Some(i) = self.info(project_id) {
             if i.is_up() {
@@ -116,46 +169,84 @@ impl McpManager {
             }
             self.stop(project_id);
         }
-        let Some(script) = self.script.clone().filter(|s| s.is_file()) else {
-            return McpInfo::unavailable(
-                "MCP-serverbestand niet gevonden (bouw mcp-server/ eerst).",
-            );
-        };
-        let Some(node) = cli::resolve("node") else {
-            return McpInfo::unavailable(
-                "Node.js niet gevonden; installeer Node.js 20 of nieuwer.",
-            );
-        };
+        self.failures.lock().unwrap().remove(&project_id);
+        match self.try_start(project_id, name, dir) {
+            Ok(info) => info,
+            Err(info) => {
+                self.failures
+                    .lock()
+                    .unwrap()
+                    .insert(project_id, info.clone());
+                info
+            }
+        }
+    }
 
-        let mut cmd = Command::new(node);
-        cmd.arg(script)
+    fn try_start(
+        &self,
+        project_id: i64,
+        name: &str,
+        dir: &Path,
+    ) -> std::result::Result<McpInfo, McpInfo> {
+        let script = self.scripts.iter().find(|s| s.is_file()).cloned().ok_or_else(|| {
+            let tried: Vec<String> = self.scripts.iter().map(|p| p.display().to_string()).collect();
+            McpInfo::fail(
+                "script_missing",
+                format!(
+                    "Het MCP-serverbestand ontbreekt (gezocht: {}). Draai `npm run mcp:build` in de projectmap van Studio en start de app opnieuw.",
+                    if tried.is_empty() { "nergens".to_string() } else { tried.join("; ") }
+                ),
+                vec![],
+            )
+        })?;
+        let node = node::find().map_err(|p| McpInfo::fail(p.kind(), p.message(), vec![]))?;
+
+        let mut cmd = Command::new(&node.path);
+        cmd.arg(&script)
             .env("STUDIO_PROJECT_DIR", dir)
             .env("STUDIO_PROJECT_NAME", name)
             .env("STUDIO_MCP_TOKEN", &self.token)
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
-            .stderr(Stdio::null());
+            .stderr(Stdio::piped());
         #[cfg(windows)]
         {
             use std::os::windows::process::CommandExt;
             cmd.creation_flags(0x0800_0000);
         }
-        let mut child = match cmd.spawn() {
-            Ok(c) => c,
-            Err(e) => return McpInfo::unavailable(format!("Kon de MCP-server niet starten: {e}")),
-        };
+        let mut child = cmd.spawn().map_err(|e| {
+            McpInfo::fail(
+                "spawn_failed",
+                format!("Kon {} niet starten: {e}", node.path.display()),
+                vec![],
+            )
+        })?;
         let stdin = child.stdin.take().unwrap();
         let stdout = child.stdout.take().unwrap();
-        let info = Arc::new(Mutex::new(McpInfo {
-            state: "starting".into(),
-            port: None,
-            error: None,
-        }));
-        let (ready_tx, ready_rx) = mpsc::channel::<std::result::Result<u16, String>>();
+        let stderr = child.stderr.take().unwrap();
+        let info = Arc::new(Mutex::new(McpInfo::plain("starting", None)));
+        let log: LogTail = Arc::default();
+        let (ready_tx, ready_rx) = mpsc::channel::<Ready>();
         let pending: Pending = Arc::default();
 
         {
-            let (info, sink, pending) = (info.clone(), self.sink.clone(), pending.clone());
+            let log = log.clone();
+            std::thread::spawn(move || {
+                for line in BufReader::new(stderr)
+                    .lines()
+                    .map_while(std::result::Result::ok)
+                {
+                    push_log(&log, line);
+                }
+            });
+        }
+        {
+            let (info, sink, pending, log) = (
+                info.clone(),
+                self.sink.clone(),
+                pending.clone(),
+                log.clone(),
+            );
             std::thread::spawn(move || {
                 let mut ready_tx = Some(ready_tx);
                 for line in BufReader::new(stdout)
@@ -163,18 +254,15 @@ impl McpManager {
                     .map_while(std::result::Result::ok)
                 {
                     let Ok(v) = serde_json::from_str::<Value>(&line) else {
+                        push_log(&log, format!("[stdout] {line}"));
                         continue;
                     };
                     match v["event"].as_str() {
                         Some("ready") => {
                             let port = v["port"].as_u64().unwrap_or(0) as u16;
-                            *info.lock().unwrap() = McpInfo {
-                                state: "running".into(),
-                                port: Some(port),
-                                error: None,
-                            };
+                            *info.lock().unwrap() = McpInfo::plain("running", Some(port));
                             if let Some(tx) = ready_tx.take() {
-                                let _ = tx.send(Ok(port));
+                                let _ = tx.send(Ready::Port);
                             }
                             sink(McpEvent::Status {
                                 project_id,
@@ -182,11 +270,13 @@ impl McpManager {
                             });
                         }
                         Some("error") => {
+                            let msg = v["message"]
+                                .as_str()
+                                .unwrap_or("onbekende fout")
+                                .to_string();
+                            push_log(&log, format!("[fout] {msg}"));
                             if let Some(tx) = ready_tx.take() {
-                                let _ = tx.send(Err(v["message"]
-                                    .as_str()
-                                    .unwrap_or("onbekende fout")
-                                    .to_string()));
+                                let _ = tx.send(Ready::Error(msg));
                             }
                         }
                         Some("client") => {
@@ -225,10 +315,18 @@ impl McpManager {
                         _ => {}
                     }
                 }
-                // stdout dicht = proces weg. Als dat niet door ons stoppen kwam, meld het.
+                // stdout dicht = proces weg.
+                if let Some(tx) = ready_tx.take() {
+                    let _ = tx.send(Ready::Exited);
+                }
                 let mut i = info.lock().unwrap();
                 if i.state != "stopped" {
-                    *i = McpInfo::unavailable("MCP-server is gestopt.");
+                    std::thread::sleep(Duration::from_millis(150)); // laat stderr de laatste regels aanleveren
+                    *i = McpInfo::fail(
+                        "crashed",
+                        "De MCP-server is onverwacht gestopt.",
+                        tail(&log),
+                    );
                     let snapshot = i.clone();
                     drop(i);
                     sink(McpEvent::Status {
@@ -239,8 +337,20 @@ impl McpManager {
             });
         }
 
-        match ready_rx.recv_timeout(Duration::from_secs(8)) {
-            Ok(Ok(_)) => {
+        let died = |child: &mut Child, log: &LogTail, what: &str, kind: &str| {
+            std::thread::sleep(Duration::from_millis(200));
+            let code = child.try_wait().ok().flatten().and_then(|s| s.code());
+            let _ = child.kill();
+            let _ = child.wait();
+            let reason = match code {
+                Some(c) => format!("{what} (exitcode {c})"),
+                None => what.to_string(),
+            };
+            McpInfo::fail(kind, format!("{reason}."), tail(log))
+        };
+
+        match ready_rx.recv_timeout(self.start_timeout) {
+            Ok(Ready::Port) => {
                 self.servers.lock().unwrap().insert(
                     project_id,
                     Server {
@@ -252,18 +362,29 @@ impl McpManager {
                     },
                 );
                 let i = info.lock().unwrap().clone();
-                i
+                Ok(i)
             }
-            Ok(Err(msg)) => {
-                let _ = child.kill();
-                let _ = child.wait();
-                McpInfo::unavailable(msg)
-            }
-            Err(_) => {
-                let _ = child.kill();
-                let _ = child.wait();
-                McpInfo::unavailable("MCP-server startte niet op tijd.")
-            }
+            Ok(Ready::Error(msg)) => Err(died(
+                &mut child,
+                &log,
+                &format!("De MCP-server meldde een fout: {msg}"),
+                "error",
+            )),
+            Ok(Ready::Exited) => Err(died(
+                &mut child,
+                &log,
+                "De MCP-server stopte direct na het starten",
+                "crashed",
+            )),
+            Err(_) => Err(died(
+                &mut child,
+                &log,
+                &format!(
+                    "De MCP-server werd niet binnen {} s klaar",
+                    START_TIMEOUT.as_secs()
+                ),
+                "timeout",
+            )),
         }
     }
 
@@ -459,7 +580,7 @@ mod tests {
 
     #[test]
     fn zonder_script_is_de_server_onbeschikbaar_in_plaats_van_een_crash() {
-        let m = McpManager::new(new_token(), None, Arc::new(|_| {}));
+        let m = McpManager::new(new_token(), vec![], Arc::new(|_| {}));
         let i = m.start(1, "x", Path::new("."));
         assert_eq!(i.state, "unavailable");
     }
@@ -468,7 +589,7 @@ mod tests {
     #[test]
     fn start_en_stop_van_de_echte_server_met_auth() {
         let script = Path::new(env!("CARGO_MANIFEST_DIR")).join("../mcp-server/dist/index.mjs");
-        if !script.is_file() || cli::resolve("node").is_none() {
+        if !script.is_file() || node::find().is_err() {
             eprintln!("overgeslagen: node of mcp-server/dist ontbreekt");
             return;
         }
@@ -476,7 +597,7 @@ mod tests {
         let e = events.clone();
         let m = McpManager::new(
             new_token(),
-            Some(script),
+            vec![script],
             Arc::new(move |ev| e.lock().unwrap().push(ev)),
         );
         let tmp = tempfile::tempdir().unwrap();
@@ -548,7 +669,7 @@ mod tests {
     #[test]
     fn runtime_bridge_en_geen_zombies_na_stop() {
         let script = Path::new(env!("CARGO_MANIFEST_DIR")).join("../mcp-server/dist/index.mjs");
-        if !script.is_file() || cli::resolve("node").is_none() {
+        if !script.is_file() || node::find().is_err() {
             eprintln!("overgeslagen: node of mcp-server/dist ontbreekt");
             return;
         }
@@ -562,7 +683,7 @@ mod tests {
         let e = events.clone();
         let m = McpManager::new(
             new_token(),
-            Some(script),
+            vec![script],
             Arc::new(move |ev| e.lock().unwrap().push(ev)),
         );
         assert_eq!(m.start(3, "Demo", tmp.path()).state, "running");
@@ -613,5 +734,180 @@ mod tests {
         assert!(!pid_alive(pid), "dev-proces draait nog na stop()");
         assert!(m.info(3).is_none());
         assert!(m.call(3, "dev.status", serde_json::json!({}), t).is_err());
+    }
+
+    // ---------- diagnose: de echte reden tonen ----------
+
+    fn temp_script(body: &str) -> (tempfile::TempDir, PathBuf) {
+        let d = tempfile::tempdir().unwrap();
+        let p = d.path().join("server.mjs");
+        std::fs::write(&p, body).unwrap();
+        (d, p)
+    }
+
+    fn manager_with(scripts: Vec<PathBuf>, timeout_ms: u64) -> McpManager {
+        McpManager::new(new_token(), scripts, Arc::new(|_| {}))
+            .with_start_timeout(Duration::from_millis(timeout_ms))
+    }
+
+    #[test]
+    fn ontbrekend_serverbestand_noemt_de_paden_en_de_oplossing_en_wordt_later_alsnog_gevonden() {
+        let d = tempfile::tempdir().unwrap();
+        let script = d.path().join("dist").join("index.mjs");
+        let m = manager_with(vec![script.clone()], 2000);
+        let i = m.start(1, "x", d.path());
+        assert_eq!(i.state, "unavailable");
+        assert_eq!(i.kind.as_deref(), Some("script_missing"));
+        let e = i.error.unwrap();
+        assert!(
+            e.contains("npm run mcp:build") && e.contains(&script.display().to_string()),
+            "{e}"
+        );
+        assert_eq!(
+            m.info(1).unwrap().kind.as_deref(),
+            Some("script_missing"),
+            "mislukking wordt onthouden"
+        );
+
+        // Na het bouwen volstaat "Opnieuw proberen": het pad wordt bij elke start opnieuw gezocht.
+        if node::find().is_err() {
+            return;
+        }
+        std::fs::create_dir_all(script.parent().unwrap()).unwrap();
+        std::fs::write(
+            &script,
+            "console.log(JSON.stringify({event:'ready',port:4242}));setInterval(()=>{},1000);",
+        )
+        .unwrap();
+        let i = m.start(1, "x", d.path());
+        assert_eq!((i.state.as_str(), i.port), ("running", Some(4242)));
+        m.stop(1);
+    }
+
+    #[test]
+    fn crash_bij_opstarten_toont_exitcode_en_laatste_logregels() {
+        if node::find().is_err() {
+            return eprintln!("overgeslagen: geen Node.js");
+        }
+        let (d, script) = temp_script(
+            "console.error('regel een'); console.error('Error: kapot!'); process.exit(3);",
+        );
+        let i = manager_with(vec![script], 10_000).start(1, "x", d.path());
+        assert_eq!(i.kind.as_deref(), Some("crashed"), "{i:?}");
+        assert!(i.error.as_deref().unwrap().contains("exitcode 3"), "{i:?}");
+        assert!(
+            i.log.iter().any(|l| l.contains("Error: kapot!")),
+            "{:?}",
+            i.log
+        );
+    }
+
+    #[test]
+    fn foutmelding_van_de_server_zelf_wordt_doorgegeven() {
+        if node::find().is_err() {
+            return eprintln!("overgeslagen: geen Node.js");
+        }
+        let (d, script) = temp_script("console.log(JSON.stringify({event:'error',message:'poort 1234 is bezet (EADDRINUSE)'}));setInterval(()=>{},1000);");
+        let i = manager_with(vec![script], 10_000).start(1, "x", d.path());
+        assert_eq!(i.kind.as_deref(), Some("error"));
+        assert!(i.error.unwrap().contains("EADDRINUSE"));
+    }
+
+    #[test]
+    fn server_die_nooit_klaar_komt_geeft_timeout_en_wordt_opgeruimd() {
+        if node::find().is_err() {
+            return eprintln!("overgeslagen: geen Node.js");
+        }
+        let (d, script) = temp_script("console.error('ik doe niets');setInterval(()=>{},1000);");
+        let i = manager_with(vec![script], 1000).start(1, "x", d.path());
+        assert_eq!(i.kind.as_deref(), Some("timeout"));
+        assert!(i.log.iter().any(|l| l.contains("ik doe niets")));
+    }
+
+    // ---------- config + token kloppen met de echte server ----------
+
+    fn http_post(port: u16, headers: &[(&str, String)], body: &str) -> String {
+        use std::io::{Read, Write};
+        let mut s = std::net::TcpStream::connect(("127.0.0.1", port)).unwrap();
+        s.set_read_timeout(Some(Duration::from_secs(10))).unwrap();
+        let mut req = format!("POST /mcp HTTP/1.1\r\nHost: 127.0.0.1:{port}\r\nConnection: close\r\nContent-Type: application/json\r\nAccept: application/json, text/event-stream\r\nContent-Length: {}\r\n", body.len());
+        for (k, v) in headers {
+            req.push_str(&format!("{k}: {v}\r\n"));
+        }
+        req.push_str("\r\n");
+        req.push_str(body);
+        s.write_all(req.as_bytes()).unwrap();
+        let mut out = String::new();
+        let _ = s.read_to_string(&mut out);
+        out
+    }
+
+    /// Doet wat Claude Code/Gemini doen: `${VAR}` in de configwaarden vervangen door de omgeving van het proces.
+    fn expand(value: &str, env: &[(String, String)]) -> String {
+        let mut out = value.to_string();
+        for (k, v) in env {
+            out = out.replace(&format!("${{{k}}}"), v);
+        }
+        out
+    }
+
+    #[test]
+    fn geschreven_config_plus_omgeving_geeft_een_werkende_geauthenticeerde_verbinding() {
+        use crate::{cli, mcp_config, provider::Provider};
+        let script = Path::new(env!("CARGO_MANIFEST_DIR")).join("../mcp-server/dist/index.mjs");
+        if !script.is_file() || node::find().is_err() {
+            return eprintln!("overgeslagen: node of mcp-server/dist ontbreekt");
+        }
+        let project = tempfile::tempdir().unwrap();
+        let m = manager_with(vec![script], 20_000);
+        let info = m.start(5, "Demo", project.path());
+        assert_eq!(info.state, "running", "{info:?}");
+        let port = info.port.unwrap();
+        // Dezelfde omgeving die start_ai aan het PTY-proces meegeeft.
+        let env = cli::mcp_env(&url_for(port), m.token());
+
+        for (provider, file, url_key) in [
+            (Provider::Claude, project.path().join(".mcp.json"), "url"),
+            (
+                Provider::Gemini,
+                project.path().join(".gemini").join("settings.json"),
+                "httpUrl",
+            ),
+        ] {
+            mcp_config::ensure(provider, project.path()).unwrap();
+            let raw = std::fs::read_to_string(&file).unwrap();
+            assert!(
+                !raw.contains(m.token()),
+                "het token mag niet in {file:?} staan"
+            );
+
+            let cfg: Value = serde_json::from_str(&raw).unwrap();
+            let entry = &cfg["mcpServers"]["studio"];
+            let url = expand(entry[url_key].as_str().unwrap(), &env);
+            let auth = expand(entry["headers"]["Authorization"].as_str().unwrap(), &env);
+            assert_eq!(
+                url,
+                format!("http://127.0.0.1:{port}/mcp"),
+                "alleen loopback, juiste poort"
+            );
+            assert!(auth.starts_with("Bearer ") && auth.ends_with(m.token()));
+
+            let init = r#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"test","version":"0"}}}"#;
+            let ok = http_post(port, &[("Authorization", auth.clone())], init);
+            assert!(ok.starts_with("HTTP/1.1 200"), "{provider:?}: {ok}");
+            assert!(
+                ok.contains("\"serverInfo\"") && ok.contains("studio"),
+                "{ok}"
+            );
+            assert!(
+                http_post(port, &[], init).starts_with("HTTP/1.1 401"),
+                "zonder token moet 401 volgen"
+            );
+            assert!(
+                http_post(port, &[("Authorization", "Bearer fout".to_string())], init)
+                    .starts_with("HTTP/1.1 401")
+            );
+        }
+        m.stop(5);
     }
 }

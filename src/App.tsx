@@ -99,7 +99,8 @@ export default function App() {
           .catch(() => undefined);
       }
     } catch (e) {
-      fail(e);
+      // De echte reden tonen in plaats van alleen "niet beschikbaar".
+      setMcp((m) => ({ ...m, [id]: { state: "unavailable", port: null, error: String(e), kind: "error", log: [] } }));
     }
   }
 
@@ -147,6 +148,7 @@ export default function App() {
             dev={selected ? (dev[selected.id] ?? null) : null}
             onSessionsChange={(fn) => selected && setSessions((s) => ({ ...s, [selected.id]: fn(s[selected.id] ?? []) }))}
             onError={setError}
+            onRetryMcp={() => (selected ? select(selected.id) : undefined)}
           />
         )}
       </main>

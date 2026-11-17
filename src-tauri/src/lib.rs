@@ -6,6 +6,7 @@ mod error;
 mod instructions;
 mod mcp;
 mod mcp_config;
+mod node;
 mod projects;
 mod provider;
 mod terminal;
@@ -16,17 +17,13 @@ use std::sync::{Arc, Mutex};
 use tauri::{Emitter, Manager};
 use terminal::{PtyEvent, TerminalManager};
 
-fn mcp_script(app: &tauri::App) -> Option<PathBuf> {
-    let bundled = app
-        .path()
-        .resource_dir()
-        .ok()
-        .map(|d| d.join("mcp-server").join("index.mjs"));
-    let dev = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../mcp-server/dist/index.mjs");
-    [bundled, Some(dev)]
-        .into_iter()
-        .flatten()
-        .find(|p| p.is_file())
+fn mcp_scripts(app: &tauri::App) -> Vec<PathBuf> {
+    let mut v = Vec::new();
+    if let Ok(d) = app.path().resource_dir() {
+        v.push(d.join("mcp-server").join("index.mjs"));
+    }
+    v.push(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../mcp-server/dist/index.mjs"));
+    v
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -94,7 +91,7 @@ pub fn run() {
                     );
                 }
             });
-            app.manage(McpManager::new(mcp::new_token(), mcp_script(app), sink));
+            app.manage(McpManager::new(mcp::new_token(), mcp_scripts(app), sink));
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
@@ -112,6 +109,7 @@ pub fn run() {
             commands::runtime_call,
             commands::trust_studio_config,
             commands::last_checks,
+            commands::verify_claude_mcp,
             commands::start_shell,
             commands::start_ai,
             commands::start_login,

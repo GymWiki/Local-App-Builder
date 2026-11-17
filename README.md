@@ -3,7 +3,7 @@
 Lokale desktop-app om apps te maken met je eigen AI-CLI's. Fase 1: projecten en SQLite. Fase 2: terminal, lokale MCP-server, AI-accounts. Fase 3: de feedbackloop (preview, checks, screenshots, checkpoints).
 
 ## Vereisten
-- Node.js 20+ (ook nodig tijdens gebruik: de MCP-server draait op Node), Rust (stable), `git` in je PATH
+- Node.js 20+ (ook nodig tijdens gebruik: de MCP-server draait op Node; staat het op een ongebruikelijke plek, zet dan `STUDIO_NODE_PATH` naar `node.exe`), Rust (stable), `git` in je PATH
 - Minstens één AI-CLI: Claude Code of Gemini CLI (Studio toont installatie-uitleg als hij ontbreekt)
 - Tauri-systeemvereisten: https://v2.tauri.app/start/prerequisites/
   - Linux: `libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libssl-dev`
@@ -45,6 +45,12 @@ Zet in de projectmap een `studio.json` (de Preview-tab maakt een voorbeeld aan):
 - **Checkpoints**: `git add -A` + commit, zonder `.env`, sleutels en dergelijke. "Terug naar vorige versie" zet het project terug als nieuwe commit, nadat niet-opgeslagen werk automatisch als back-upcheckpoint is vastgelegd: er gaat niets verloren.
 - **Werkwijze voor de AI**: `skills/control-loop/instructions.md` wordt als gemarkeerd blok in `CLAUDE.md`, `GEMINI.md` en `AGENTS.md` gezet (eigen tekst in die bestanden blijft staan).
 - De zijbalk toont de laatste check-resultaten en de tijdlijn.
+
+## Problemen met de MCP-server
+- `npm run tauri dev` en de release-build draaien eerst `scripts/mcp-prepare.mjs`: installeert zo nodig de dependencies van `mcp-server/` en bouwt `dist/index.mjs`.
+- Studio zoekt Node in PATH en op bekende plekken (Program Files, nvm, fnm, Volta, scoop, Homebrew), start `node --version` en eist versie 20+.
+- Mislukt het starten, dan toont de terminalbalk en de Preview-tab de echte reden (Node ontbreekt/te oud, serverbestand ontbreekt, crash met laatste logregels, time-out) en een knop **Opnieuw proberen**.
+- Claude vraagt bij de eerste start in een project om goedkeuring van de `studio`-server uit `.mcp.json`. Zolang dat niet is gebeurd, ziet Claude de tools niet. De knop **Controleer in Claude** draait `claude mcp get studio` met de juiste omgeving en meldt connected / wacht op goedkeuring / mislukt.
 
 ## Bewust niet gedaan
 - Geen MCP-tool om de dev-server te starten: dat doet de gebruiker in de Preview-tab (vertrouwensgrens). De AI krijgt een duidelijke melding als de preview niet draait.

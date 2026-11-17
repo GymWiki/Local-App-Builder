@@ -194,6 +194,118 @@ pub fn last_checks(
     mcp::last_checks(&*db.conn()?, project_id, limit.unwrap_or(5))
 }
 
+// ---------- controle: ziet Claude onze server? ----------
+
+#[derive(Debug, Serialize)]
+pub struct McpCheck {
+    /// connected | pending_approval | failed | not_found | timeout | unknown
+    pub verdict: String,
+    pub output: String,
+}
+
+/// Vertaalt de uitvoer van `claude mcp get studio` naar een korte uitkomst (statussen uit de Claude-docs).
+pub fn mcp_verdict(status: Option<i32>, text: &str) -> &'static str {
+    let t = text.to_lowercase();
+    if status.is_none() {
+        "timeout"
+    } else if t.contains("failed to connect") {
+        "failed"
+    } else if t.contains("pending approval") {
+        "pending_approval"
+    } else if t.contains("no mcp server found") {
+        "not_found"
+    } else if t.contains("connected") && !t.contains("disconnected") {
+        "connected"
+    } else {
+        "unknown"
+    }
+}
+
+/// Draait `claude mcp get studio` in de projectmap, met precies de omgeving die ook de ingebouwde terminal krijgt.
+#[tauri::command(async)]
+pub fn verify_claude_mcp(
+    db: State<Db>,
+    mcp: State<McpManager>,
+    project_id: i64,
+    account_id: Option<i64>,
+) -> Result<McpCheck> {
+    let (project, account) = {
+        let c = db.conn()?;
+        let acc = account_id.map(|id| accounts::get(&c, id)).transpose()?;
+        (projects::get(&c, project_id)?, acc)
+    };
+    let info = mcp.info(project_id).filter(|i| i.is_up()).ok_or_else(|| {
+        AppError::Invalid("De MCP-server van dit project draait niet; los dat eerst op (zie de melding) en probeer opnieuw.".into())
+    })?;
+    let binary = cli::resolve("claude")
+        .ok_or_else(|| AppError::Invalid("claude is niet geïnstalleerd.".into()))?;
+    let dir = project_dir(&project)?;
+    mcp_config::ensure(Provider::Claude, &dir)?;
+
+    let mut env = base_env();
+    env.extend(cli::mcp_env(
+        &mcp::url_for(info.port.unwrap_or(0)),
+        mcp.token(),
+    ));
+    if let Some(a) = account.filter(|a| a.provider == "claude") {
+        env.extend(cli::profile_env(
+            Provider::Claude,
+            Some(Path::new(&a.profile_dir)),
+        ));
+    }
+    let (program, args) = cli::launch(
+        &binary,
+        vec!["mcp".into(), "get".into(), mcp_config::SERVER_NAME.into()],
+    );
+    let mut cmd = std::process::Command::new(program);
+    cmd.args(args)
+        .current_dir(&dir)
+        .stdin(std::process::Stdio::null());
+    for (k, v) in env {
+        cmd.env(k, v);
+    }
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(0x0800_0000);
+    }
+    let out = cli::output_with_timeout(cmd, Duration::from_secs(45)).map_err(AppError::Invalid)?;
+    Ok(McpCheck {
+        verdict: mcp_verdict(out.status, &out.text).into(),
+        output: out.text.trim().to_string(),
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::mcp_verdict;
+
+    #[test]
+    fn claude_status_wordt_vertaald() {
+        assert_eq!(
+            mcp_verdict(Some(0), "studio:\n  Status: ✔ Connected\n"),
+            "connected"
+        );
+        assert_eq!(
+            mcp_verdict(
+                Some(0),
+                "Status: ⏸ Pending approval (run `claude` to approve)"
+            ),
+            "pending_approval"
+        );
+        assert_eq!(
+            mcp_verdict(Some(0), "Status: ✘ Failed to connect"),
+            "failed"
+        );
+        assert_eq!(
+            mcp_verdict(Some(1), "No MCP server found with name: studio"),
+            "not_found"
+        );
+        assert_eq!(mcp_verdict(None, ""), "timeout");
+        assert_eq!(mcp_verdict(Some(0), "iets anders"), "unknown");
+    }
+}
+
 // ---------- terminal ----------
 
 #[derive(Debug, Serialize)]

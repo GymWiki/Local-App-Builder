@@ -20,10 +20,27 @@ export interface Account {
   created_at: string;
 }
 
+export type McpProblemKind =
+  | "node_missing"
+  | "node_old"
+  | "node_broken"
+  | "script_missing"
+  | "spawn_failed"
+  | "timeout"
+  | "crashed"
+  | "error";
+
 export interface McpInfo {
   state: "starting" | "running" | "connected" | "unavailable";
   port: number | null;
   error: string | null;
+  kind?: McpProblemKind | null;
+  log?: string[];
+}
+
+export interface McpCheck {
+  verdict: "connected" | "pending_approval" | "failed" | "not_found" | "timeout" | "unknown";
+  output: string;
 }
 
 export interface InstallStep {
@@ -72,6 +89,8 @@ export const deleteAccount = (id: number) => invoke<void>("delete_account", { id
 // CLI en MCP
 export const cliStatus = (provider: Provider) => invoke<CliStatus>("cli_status", { provider });
 export const openProject = (id: number) => invoke<McpInfo>("open_project", { id });
+export const verifyClaudeMcp = (projectId: number, accountId: number | null) =>
+  invoke<McpCheck>("verify_claude_mcp", { projectId, accountId });
 export const closeProject = (id: number) => invoke<void>("close_project", { id });
 
 // terminal

@@ -62,7 +62,33 @@
     "starting": "MCP: starten…",
     "running": "MCP: gereed, wacht op AI",
     "connected": "MCP: verbonden",
-    "unavailable": "MCP: niet beschikbaar"
+    "unavailable": "MCP: niet beschikbaar",
+    "nietGestart": "De projectruntime is niet gestart.",
+    "probleemTitel": "MCP-server niet beschikbaar",
+    "opnieuw": "Opnieuw proberen",
+    "bezig": "Bezig…",
+    "logs": "Laatste logregels van de server",
+    "hint": {
+      "node_missing": "Installeer Node.js 20 of nieuwer van https://nodejs.org en start Studio opnieuw. Staat Node op een ongebruikelijke plek, zet dan de omgevingsvariabele STUDIO_NODE_PATH naar node.exe.",
+      "node_old": "Werk Node.js bij naar versie 20 of nieuwer en start Studio opnieuw.",
+      "node_broken": "Het gevonden node-bestand werkt niet. Herinstalleer Node.js of zet STUDIO_NODE_PATH naar een werkende node.exe.",
+      "script_missing": "Draai `npm run mcp:build` in de map van Studio (of start Studio via `npm run tauri dev`, dat bouwt het automatisch) en klik op Opnieuw proberen.",
+      "spawn_failed": "Het besturingssysteem liet Node niet starten (antivirus of rechten?). Kijk of node.exe handmatig start.",
+      "timeout": "De server werd niet op tijd klaar. Antivirus kan het eerste keer vertragen: probeer opnieuw.",
+      "crashed": "De server stopte meteen. Zie de logregels hieronder.",
+      "error": "De server meldde een fout. Zie de melding hierboven."
+    },
+    "controleer": "Controleer in Claude",
+    "controleBezig": "Controleren…",
+    "controle": {
+      "connected": "Claude ziet de studio-server en kan verbinden.",
+      "pending_approval": "Claude wacht op jouw goedkeuring. Start Claude in de terminal en kies Ja bij de vraag over de ‘studio’-server uit .mcp.json (en vertrouw de map).",
+      "failed": "Claude ziet de server wel, maar kan niet verbinden. Zie de uitvoer hieronder.",
+      "not_found": "Claude vindt geen ‘studio’-server in deze projectmap.",
+      "timeout": "Het controlecommando duurde te lang.",
+      "unknown": "Onbekend resultaat; zie de uitvoer hieronder."
+    },
+    "goedkeuring": "Claude vraagt bij de eerste start om goedkeuring voor de ‘studio’-server. Kies Ja; daarna verschijnt hier ‘verbonden’."
   },
   "cli": {
     "nietGevonden": "{{naam}} is niet geïnstalleerd",

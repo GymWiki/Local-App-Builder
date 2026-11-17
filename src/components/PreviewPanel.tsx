@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import McpProblem from "./McpProblem";
 import {
   runtime,
   trustStudioConfig,
@@ -15,6 +16,7 @@ interface Props {
   dev: DevStatus | null;
   visible: boolean;
   onError: (msg: string) => void;
+  onRetryMcp?: () => Promise<void> | void;
 }
 
 const BADGE: Record<string, string> = {
@@ -25,13 +27,14 @@ const BADGE: Record<string, string> = {
   stopped: "bg-zinc-800 text-zinc-300",
 };
 
-export default function PreviewPanel({ project, mcp, dev, visible, onError }: Props) {
+export default function PreviewPanel({ project, mcp, dev, visible, onError, onRetryMcp }: Props) {
   const { t } = useTranslation();
   const [info, setInfo] = useState<ConfigInfo | null>(null);
   const [logs, setLogs] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [reloadKey, setReloadKey] = useState(0);
   const [tick, setTick] = useState(0);
+  const [retrying, setRetrying] = useState(false);
   const up = mcp?.state === "running" || mcp?.state === "connected";
   const state = dev?.state ?? "stopped";
   const active = state === "starting" || state === "running" || state === "stopping";
@@ -100,7 +103,21 @@ export default function PreviewPanel({ project, mcp, dev, visible, onError }: Pr
   }
 
   if (!up) {
-    return <div className="p-8 text-sm text-zinc-400">{t("preview.geenRuntime")}</div>;
+    return (
+      <div className="flex-1">
+        {mcp?.state === "unavailable" && (
+          <McpProblem
+            info={mcp}
+            busy={retrying}
+            onRetry={() => {
+              setRetrying(true);
+              void Promise.resolve(onRetryMcp?.()).finally(() => setRetrying(false));
+            }}
+          />
+        )}
+        <p className="p-6 text-sm text-zinc-400">{t("preview.geenRuntime")}</p>
+      </div>
+    );
   }
 
   const cfg = info?.config;

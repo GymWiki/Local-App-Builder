@@ -11,7 +11,7 @@
     "test": "vitest run && npm run mcp:test",
     "tauri": "tauri",
     "postinstall": "npm --prefix mcp-server install",
-    "mcp:build": "npm --prefix mcp-server run build",
+    "mcp:build": "node scripts/mcp-prepare.mjs",
     "mcp:test": "npm --prefix mcp-server test",
     "check": "npm run lint && npm test && npm run build && cd src-tauri && cargo clippy --all-targets -- -D warnings && cargo test"
   },

@@ -27,6 +27,13 @@ Bronnen: code.claude.com/docs/en/{mcp,env-vars,cli-reference,setup}.md
 - MCP-tools mogen PNG/JPEG/GIF/WebP teruggeven; Claude ziet ze inline (mcp.md). Afbeeldingen vallen onder `MAX_MCP_OUTPUT_TOKENS` (standaard 25000); daarom leveren we screenshots als JPEG (kwaliteit 70).
 - Projectservers uit `.mcp.json` vragen goedkeuring bij eerste gebruik (zie boven).
 
+**Geverifieerd met de echte CLI (Claude Code, fase 3b, Linux; tijdelijke configmap)**
+- `.mcp.json` met `${STUDIO_MCP_URL}` / `Bearer ${STUDIO_MCP_TOKEN}` wordt door `claude mcp get studio` gelezen als "Scope: Project config", "Type: http", "Timeout: 900000ms".
+- Zonder goedkeuring toont Claude `⏸ Pending approval (run \`claude\` to approve)`: de server wordt dan **niet** verbonden en de tools zijn onzichtbaar. Dit is de standaard, ook als de server draait. De gebruiker moet bij de eerste interactieve start ‘Ja’ kiezen (of de map vertrouwen).
+- Na goedkeuring (getest via `enabledMcpjsonServers` in de gebruikersinstellingen van een tijdelijke configmap) toont `claude mcp get/list` `√ Connected`, en de server meldde een client. De omgevingsvariabelen worden dus echt uitgebreid.
+- Ontbreekt `STUDIO_MCP_TOKEN` in de omgeving (bijv. Claude buiten Studio's terminal gestart), dan waarschuwt Claude "Missing environment variables" en kan hij niet verbinden. `claude mcp list` werkt daarom alleen met dezelfde omgeving als de ingebouwde terminal; Studio's knop "Controleer in Claude" geeft die mee.
+- Windows: voor HTTP-servers is geen speciale configuratie nodig (de `cmd /c`-regel in de docs gaat over stdio-servers).
+
 ## Gemini CLI (`gemini`)
 Bronnen: github.com/google-gemini/gemini-cli `docs/reference/configuration.md`, `docs/tools/mcp-server.md`, `docs/cli/session-management.md`, `docs/cli/cli-reference.md`, README.
 

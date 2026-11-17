@@ -11,6 +11,17 @@ const token = process.env.STUDIO_MCP_TOKEN;
 delete process.env.STUDIO_MCP_TOKEN;
 
 const emit = (o: object) => process.stdout.write(JSON.stringify(o) + "\n");
+// Diagnoseregels voor de app (die leest stderr mee en toont de laatste regels bij problemen). Nooit het token loggen.
+const log = (m: string) => process.stderr.write(`[studio-mcp] ${m}\n`);
+log(`start (node ${process.version}, ${process.platform})`);
+process.on("uncaughtException", (e) => {
+  log(`onverwachte fout: ${e.stack ?? e.message}`);
+  emit({ event: "error", message: e.message });
+  process.exit(1);
+});
+process.on("unhandledRejection", (e) => {
+  log(`onverwachte afwijzing: ${e instanceof Error ? (e.stack ?? e.message) : String(e)}`);
+});
 
 if (!projectDir || !token) {
   emit({ event: "error", message: "STUDIO_PROJECT_DIR en STUDIO_MCP_TOKEN zijn verplicht." });
@@ -31,14 +42,21 @@ const running = await startServer({
     }
   },
   onToolCall: (r) => emit({ event: "tool", ...r }),
+}).catch((e: NodeJS.ErrnoException) => {
+  const why = e.code === "EADDRINUSE" ? "poort bezet (EADDRINUSE)" : e.code === "EACCES" ? "geen toegang tot de poort (EACCES)" : e.message;
+  log(`kon niet luisteren op 127.0.0.1: ${why}`);
+  emit({ event: "error", message: `Kon niet luisteren op 127.0.0.1: ${why}` });
+  process.exit(1);
 });
 attachControl(runtime, process.stdin, emit);
+log(`luistert op 127.0.0.1:${running.port}`);
 emit({ event: "ready", port: running.port });
 
 let stopping = false;
 const stop = () => {
   if (stopping) return;
   stopping = true;
+  log("stoppen (stdin gesloten of signaal ontvangen)");
   const force = setTimeout(() => process.exit(1), 8000); // harde bovengrens
   force.unref();
   void running

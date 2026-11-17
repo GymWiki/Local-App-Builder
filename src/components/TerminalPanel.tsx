@@ -7,13 +7,16 @@ import {
   startShell,
   type Account,
   type CliStatus,
+  type McpCheck,
   type McpInfo,
+  verifyClaudeMcp,
   type Project,
   type Provider,
   type SessionInfo,
 } from "../lib/api";
 import TerminalView from "./TerminalView";
 import InstallGuide from "./InstallGuide";
+import McpProblem from "./McpProblem";
 import SwitchAiDialog from "./SwitchAiDialog";
 
 export interface Session extends SessionInfo {
@@ -28,6 +31,7 @@ interface Props {
   mcp: McpInfo | null;
   onSessionsChange: (updater: (prev: Session[]) => Session[]) => void;
   onError: (msg: string) => void;
+  onRetryMcp?: () => Promise<void> | void;
 }
 
 export function sessionTitle(info: SessionInfo, providerName: string, fallbackShell: string, noAccount: string): string {
@@ -35,11 +39,14 @@ export function sessionTitle(info: SessionInfo, providerName: string, fallbackSh
   return `${providerName} · ${info.account_label ?? noAccount}`;
 }
 
-export default function TerminalPanel({ project, accounts, sessions, mcp, onSessionsChange, onError }: Props) {
+export default function TerminalPanel({ project, accounts, sessions, mcp, onSessionsChange, onError, onRetryMcp }: Props) {
   const { t } = useTranslation();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [missing, setMissing] = useState<CliStatus | null>(null);
   const [switching, setSwitching] = useState(false);
+  const [retrying, setRetrying] = useState(false);
+  const [checking, setChecking] = useState(false);
+  const [check, setCheck] = useState<McpCheck | null>(null);
 
   const active = sessions.find((s) => s.id === activeId) ?? sessions[0] ?? null;
   const activeAi = active?.kind === "ai" ? active : null;
@@ -103,6 +110,27 @@ export default function TerminalPanel({ project, accounts, sessions, mcp, onSess
     if (await launch(provider, accountId, { handover: true }) && old) await close(old.id);
   }
 
+  async function retry() {
+    setRetrying(true);
+    try {
+      await onRetryMcp?.();
+    } finally {
+      setRetrying(false);
+    }
+  }
+
+  async function verify() {
+    setChecking(true);
+    setCheck(null);
+    try {
+      setCheck(await verifyClaudeMcp(project.id, defaultAccountFor("claude")));
+    } catch (e) {
+      onError(t("fout.algemeen", { bericht: String(e) }));
+    } finally {
+      setChecking(false);
+    }
+  }
+
   const accountName = activeAi ? (activeAi.account_label ?? t("terminal.systeemstandaard")) : null;
   const mcpState = mcp?.state ?? "uit";
 
@@ -147,9 +175,24 @@ export default function TerminalPanel({ project, accounts, sessions, mcp, onSess
           >
             {t(`mcp.${mcpState}`)}
           </span>
+          {(mcpState === "running" || mcpState === "connected") && (
+            <button onClick={() => void verify()} disabled={checking} className="text-indigo-400 hover:underline disabled:opacity-50">
+              {checking ? t("mcp.controleBezig") : t("mcp.controleer")}
+            </button>
+          )}
         </div>
       </div>
 
+      {mcpState === "unavailable" && <McpProblem info={mcp} busy={retrying} onRetry={() => void retry()} />}
+      {check && (
+        <div role="status" data-testid="mcp-check" className="space-y-1 border-b border-zinc-800 bg-zinc-900 px-4 py-2 text-sm">
+          <div className={check.verdict === "connected" ? "text-emerald-300" : "text-amber-300"}>{t(`mcp.controle.${check.verdict}`)}</div>
+          {check.output && <pre className="max-h-32 overflow-auto whitespace-pre-wrap font-mono text-xs text-zinc-400">{check.output}</pre>}
+        </div>
+      )}
+      {activeAi?.provider === "claude" && mcpState === "running" && !check && (
+        <div className="border-b border-zinc-800 bg-sky-950/40 px-4 py-2 text-xs text-sky-200">{t("mcp.goedkeuring")}</div>
+      )}
       <div role="tablist" className="flex gap-1 overflow-x-auto border-b border-zinc-800 px-3 pt-1">
         {sessions.map((s) => (
           <div key={s.id} className={`flex items-center rounded-t text-sm ${s.id === active?.id ? "bg-zinc-800" : "text-zinc-400"}`}>

@@ -81,6 +81,54 @@ pub fn resolve(binary: &str) -> Option<PathBuf> {
     resolve_in(binary, &search_dirs())
 }
 
+#[derive(Debug)]
+pub struct Output {
+    /// Exitcode, of `None` als het proces door een signaal/time-out eindigde.
+    pub status: Option<i32>,
+    /// stdout en stderr samen.
+    pub text: String,
+}
+
+/// Draait een (voorbereid) commando met een harde time-out; bij overschrijding wordt het proces gedood.
+pub fn output_with_timeout(
+    mut cmd: std::process::Command,
+    timeout: std::time::Duration,
+) -> std::result::Result<Output, String> {
+    use std::io::Read;
+    cmd.stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped());
+    let mut child = cmd.spawn().map_err(|e| e.to_string())?;
+    let (mut so, mut se) = (child.stdout.take().unwrap(), child.stderr.take().unwrap());
+    let t1 = std::thread::spawn(move || {
+        let mut s = String::new();
+        let _ = so.read_to_string(&mut s);
+        s
+    });
+    let t2 = std::thread::spawn(move || {
+        let mut s = String::new();
+        let _ = se.read_to_string(&mut s);
+        s
+    });
+    let deadline = std::time::Instant::now() + timeout;
+    let status = loop {
+        match child.try_wait() {
+            Ok(Some(st)) => break st.code(),
+            Ok(None) if std::time::Instant::now() >= deadline => {
+                let _ = child.kill();
+                let _ = child.wait();
+                break None;
+            }
+            Ok(None) => std::thread::sleep(std::time::Duration::from_millis(20)),
+            Err(e) => return Err(e.to_string()),
+        }
+    };
+    let (a, b) = (t1.join().unwrap_or_default(), t2.join().unwrap_or_default());
+    Ok(Output {
+        status,
+        text: format!("{a}{b}"),
+    })
+}
+
 /// Windows: npm-CLI's zijn `.cmd`/`.bat`-shims en moeten via cmd.exe starten.
 pub fn launch(path: &Path, args: Vec<String>) -> (String, Vec<String>) {
     let is_shim = cfg!(windows)
@@ -229,6 +277,23 @@ mod tests {
             Some(file)
         );
         assert!(resolve_in("bestaat-niet", &[tmp.path().to_path_buf()]).is_none());
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn commando_met_timeout_levert_uitvoer_en_wordt_gedood() {
+        let mut ok = std::process::Command::new("sh");
+        ok.args(["-c", "echo uit; echo fout 1>&2; exit 2"]);
+        let o = output_with_timeout(ok, std::time::Duration::from_secs(5)).unwrap();
+        assert_eq!(o.status, Some(2));
+        assert!(o.text.contains("uit") && o.text.contains("fout"));
+
+        let mut slow = std::process::Command::new("sleep");
+        slow.arg("30");
+        let t = std::time::Instant::now();
+        let o = output_with_timeout(slow, std::time::Duration::from_millis(300)).unwrap();
+        assert_eq!(o.status, None);
+        assert!(t.elapsed() < std::time::Duration::from_secs(5));
     }
 
     #[test]

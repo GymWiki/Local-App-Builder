@@ -15,9 +15,10 @@ interface Props {
   dev?: DevStatus | null;
   onSessionsChange?: (updater: (prev: Session[]) => Session[]) => void;
   onError?: (msg: string) => void;
+  onRetryMcp?: () => Promise<void> | void;
 }
 
-export default function Workspace({ project, accounts = [], sessions = [], mcp = null, dev = null, onSessionsChange, onError }: Props) {
+export default function Workspace({ project, accounts = [], sessions = [], mcp = null, dev = null, onSessionsChange, onError, onRetryMcp }: Props) {
   const { t } = useTranslation();
   const [tab, setTab] = useState<Tab>("terminal");
 
@@ -54,10 +55,11 @@ export default function Workspace({ project, accounts = [], sessions = [], mcp =
               mcp={mcp}
               onSessionsChange={onSessionsChange ?? (() => undefined)}
               onError={onError ?? (() => undefined)}
+              onRetryMcp={onRetryMcp}
             />
           </div>
           <div role="tabpanel" className={`min-h-0 flex-1 flex-col ${tab === "preview" ? "flex" : "hidden"}`}>
-            <PreviewPanel project={project} mcp={mcp} dev={dev} visible={tab === "preview"} onError={onError ?? (() => undefined)} />
+            <PreviewPanel project={project} mcp={mcp} dev={dev} visible={tab === "preview"} onError={onError ?? (() => undefined)} onRetryMcp={onRetryMcp} />
           </div>
           {tab === "publiceren" && (
             <div role="tabpanel" className="flex flex-1 items-center justify-center text-zinc-500">
