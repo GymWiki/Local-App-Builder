@@ -51,3 +51,17 @@ Toegestane licenties: MIT, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC. Versies 
 | `shadcn-warm` | zelfde bron als `shadcn` | MIT | zie `shadcn` | 2026-11-17 | Kleurenthema "Warm en speels" (oranje op crème, radius 20 px, Trebuchet). |
 | `shadcn-zakelijk` | zelfde bron als `shadcn` | MIT | zie `shadcn` | 2026-11-17 | Kleurenthema "Zakelijk" (donkerblauw, scherpe hoeken 4 px). |
 | `material-flutter` | https://github.com/flutter/flutter (LICENSE: "Copyright 2014 The Flutter Authors", BSD-3-Clause, gecontroleerd 2026-11-17) | BSD-3-Clause | Flutter-SDK (Material 3 ingebouwd) | 2026-11-17 | Geen pakket: alleen `lib/theme/app_theme.dart` (ThemeData uit tokens) + regels en een handmatige catalogus (`catalogus.md`). **Niet gebouwd of gedraaid**: Flutter is niet geïnstalleerd in de ontwikkelomgeving; `kit:test` controleert alleen de gegenereerde bestanden. |
+
+## Verificatie met de echte AI (2026-11-17)
+Dezelfde opdracht in een leeg web-template (`templates/web-react-vite`, via `npm run kit:try`): *een landingspagina voor een kapsalon (kop, uitleg, openingstijden, prijslijst, knop ‘Afspraak maken’) en een afspraakformulier (naam, e-mail, datum, opmerking, bedankt-melding), nieuwe onderdelen in `src/components/app/`, daarna `npm run build` en `npm run lint`*. Uitgevoerd met `claude -p --output-format json` (rechten: lezen, schrijven, bewerken, build en lint). Alle drie de runs liepen tegelijk, één keer per variant.
+
+| Variant | Kit-check | Build | Gewone `<button>/<input>/…` in nieuwe onderdelen | Kitcomponenten hergebruikt | Uitvoer-tokens | Cache-aanmaak (context) | Tijd | Kosten |
+|---|---|---|---|---|---|---|---|---|
+| `fragments-ui` (catalogus ±5600 tokens) | **groen** (4 bestanden) | gelukt | 0 | ja (`@usefragments/ui`: Button, Card, Field, Input…) | 5.549 | 32.253 | 42 s | $0,220 |
+| `shadcn-warm` (catalogus ±1000 tokens) | **groen** (4 bestanden) | gelukt | 0 | ja (`@/kit/components`: Button, Card, Input, Label, Textarea, Alert…) | 4.559 | 25.894 | 33 s | $0,176 |
+| Eigen stijl (geen kit) | niet van toepassing | gelukt | 8 (7 in het formulier, 1 op de pagina) + eigen `salon.css` | niet van toepassing | 5.909 | 21.349 | 39 s | $0,174 |
+
+**Wat dit wel en niet zegt**
+- De kit levert wat we wilden: de AI bouwde met kitcomponenten, de kit-check is groen en er staan geen losse HTML-controls in de nieuwe onderdelen. Zonder kit koos de AI zelf een stijl met eigen CSS en gewone formulierelementen.
+- Het kost **niet** minder voor één kleine opdracht: de totale kosten liggen binnen een paar cent van elkaar (de grote catalogus van Fragments UI maakt de context groter en de run iets duurder; de compacte catalogus van shadcn was iets goedkoper). Het voordeel zit in consistentie en herbruikbaarheid bij vervolgopdrachten, niet in tokens voor een eerste pagina. Dat is hier **niet** gemeten.
+- Eén run per variant en gelijktijdig uitgevoerd: tijd en kosten zijn indicatief, geen statistiek. De AI had hier de Studio MCP-tools (`run_checks`) niet; de kit-check is achteraf met `npm run kit:check` gedraaid.
