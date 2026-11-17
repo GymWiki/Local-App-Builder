@@ -349,7 +349,7 @@ export default function PreviewPanel({ project, mcp, preview, visible, reloadNon
       {onAutoSwitch && (
         <div className="flex items-center gap-3 border-t border-border px-3 py-2 text-sm text-muted-foreground">
           <Checkbox id="auto-wissel" checked={autoSwitch} onCheckedChange={(c) => onAutoSwitch(c === true)} />
-          <Label htmlFor="auto-wissel" className="text-sm font-normal text-muted-foreground">
+          <Label htmlFor="auto-wissel" className="min-h-9 flex-1 text-sm font-normal text-muted-foreground">
             {t("preview.autoWissel")}
           </Label>
         </div>

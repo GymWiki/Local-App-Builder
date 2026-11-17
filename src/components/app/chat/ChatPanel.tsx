@@ -281,7 +281,7 @@ export default function ChatPanel({
   return (
     <section
       aria-label={t("chat.titel")}
-      className={`relative flex h-full min-h-0 flex-col bg-background ${dragging ? "outline outline-4 -outline-offset-4 outline-primary" : ""}`}
+      className={`relative flex h-full min-h-0 flex-col overflow-y-auto bg-background ${dragging ? "outline outline-4 -outline-offset-4 outline-primary" : ""}`}
       onDragOver={(e) => {
         if (unavailable || !e.dataTransfer?.types?.includes("Files")) return;
         e.preventDefault();
@@ -337,7 +337,7 @@ export default function ChatPanel({
         role="log"
         aria-live="polite"
         aria-label={t("chat.geschiedenis")}
-        className="min-h-0 flex-1"
+        className="min-h-40 flex-1"
       >
         <div className="space-y-3 px-5 py-4">
           {messages.length === 0 && !unavailable && (
@@ -449,7 +449,7 @@ export default function ChatPanel({
 
       {messages.length > 0 && (
         <div
-          className="flex gap-2 overflow-x-auto px-5 pb-2"
+          className="flex gap-2 overflow-x-auto px-5 pb-2 [@media(max-height:760px)]:hidden"
           role="group"
           aria-label={t("chat.snel.titel")}
         >
@@ -576,10 +576,13 @@ export default function ChatPanel({
               ? t("chat.modus.placeholderPlan")
               : t("chat.placeholder")
           }
-          className="max-h-48 min-h-16 w-full min-w-0 resize-none overflow-y-auto text-lg leading-relaxed [field-sizing:content]"
+          className="max-h-[min(12rem,30dvh)] min-h-16 w-full min-w-0 resize-none overflow-y-auto text-lg leading-relaxed [field-sizing:content]"
           aria-describedby="chat-hint"
         />
-        <p id="chat-hint" className="text-sm text-muted-foreground">
+        <p
+          id="chat-hint"
+          className="text-sm text-muted-foreground [@media(max-height:760px)]:sr-only"
+        >
           {t("chat.hint")}
         </p>
         <div className="flex flex-wrap items-center gap-2">
