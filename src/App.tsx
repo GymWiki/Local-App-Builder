@@ -19,12 +19,17 @@ import {
 import AppSidebar from "@/components/app/AppSidebar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { CircleAlertIcon } from "lucide-react";
 import Workspace from "./components/Workspace";
 import InfoPanel from "./components/InfoPanel";
 import NewProjectDialog from "./components/NewProjectDialog";
 import AccountsScreen from "./components/AccountsScreen";
 import PreviewNotice from "./components/PreviewNotice";
-import SettingsScreen, { type CommunicationMode, type PermissionMode } from "./components/SettingsScreen";
+import SettingsSheet from "@/components/app/SettingsSheet";
+import type { CommunicationMode, PermissionMode } from "./components/SettingsScreen";
 import type { Tab } from "./components/Workspace";
 import type { Session } from "./components/TerminalPanel";
 
@@ -33,7 +38,8 @@ export default function App() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [view, setView] = useState<"project" | "accounts" | "settings">("project");
+  const [view, setView] = useState<"project" | "accounts">("project");
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [sessions, setSessions] = useState<Record<number, Session[]>>({});
@@ -172,8 +178,8 @@ export default function App() {
         onSelect={(id) => void select(id)}
         onNew={() => setDialogOpen(true)}
         onAccounts={() => setView("accounts")}
-        settingsActive={view === "settings"}
-        onSettings={() => setView("settings")}
+        settingsActive={settingsOpen}
+        onSettings={() => setSettingsOpen(true)}
         onDeleted={async (id) => {
           await close(id);
           await refresh();
@@ -182,9 +188,15 @@ export default function App() {
       />
       <main className="flex min-w-0 flex-1 flex-col">
         {error && (
-          <div role="alert" className="cursor-pointer bg-destructive/60 px-4 py-2 text-sm" onClick={() => setError(null)}>
-            {error}
-          </div>
+          <Alert variant="destructive" className="rounded-none border-0 border-b border-destructive/50 bg-destructive/10">
+            <CircleAlertIcon aria-hidden="true" />
+            <AlertDescription className="flex items-center justify-between gap-3 text-base text-foreground">
+              <span role="alert" className="min-w-0 break-words">{error}</span>
+              <Button size="sm" variant="outline" onClick={() => setError(null)}>
+                {t("fout.sluit")}
+              </Button>
+            </AlertDescription>
+          </Alert>
         )}
         {noticeProject && (
           <PreviewNotice
@@ -197,25 +209,7 @@ export default function App() {
             }}
           />
         )}
-        {view === "settings" ? (
-          <SettingsScreen
-            communication={communication}
-            permission={permission}
-            loopThreshold={loopThreshold}
-            onLoopThreshold={(n) => {
-              setLoopThreshold(n);
-              void setUiSetting("loop_threshold", String(n)).catch(fail);
-            }}
-            onCommunication={(v) => {
-              setCommunication(v);
-              void setUiSetting("communication_mode", v).catch(fail);
-            }}
-            onPermission={(v) => {
-              setPermission(v);
-              void setUiSetting("permission_mode", v).catch(fail);
-            }}
-          />
-        ) : view === "accounts" ? (
+        {view === "accounts" ? (
           <AccountsScreen accounts={accounts} onChanged={refreshAccounts} onError={setError} />
         ) : (
           <Workspace
@@ -258,6 +252,25 @@ export default function App() {
         onError={setError}
         quietUnlessWide={view === "project" && tab === "maken"}
       />
+      <SettingsSheet
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        communication={communication}
+        permission={permission}
+        loopThreshold={loopThreshold}
+        onLoopThreshold={(n) => {
+          setLoopThreshold(n);
+          void setUiSetting("loop_threshold", String(n)).catch(fail);
+        }}
+        onCommunication={(v) => {
+          setCommunication(v);
+          void setUiSetting("communication_mode", v).catch(fail);
+        }}
+        onPermission={(v) => {
+          setPermission(v);
+          void setUiSetting("permission_mode", v).catch(fail);
+        }}
+      />
       {dialogOpen && (
         <NewProjectDialog
           onClose={() => setDialogOpen(false)}
@@ -270,6 +283,7 @@ export default function App() {
           }}
         />
       )}
+      <Toaster position="bottom-right" richColors />
     </SidebarProvider>
     </TooltipProvider>
   );

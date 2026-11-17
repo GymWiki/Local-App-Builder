@@ -1,5 +1,12 @@
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useTranslation } from "react-i18next";
 import { useTheme, type Theme } from "@/components/app/theme-provider";
+import { Field, FieldContent, FieldDescription, FieldError, FieldLabel, FieldLegend, FieldSet, FieldTitle } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export type CommunicationMode = "simple" | "technical";
 export type PermissionMode = "always" | "important";
@@ -13,66 +20,88 @@ interface Props {
   onPermission: (v: PermissionMode) => void;
 }
 
-function Choice({ name, value, checked, title, text, onChange }: { name: string; value: string; checked: boolean; title: string; text: string; onChange: () => void }) {
+/** Een groep keuzes met titel en uitleg, als shadcn RadioGroup. */
+function ChoiceGroup<T extends string>({ legend, name, value, onChange, options, note }: { legend: string; name: string; value: T; onChange: (v: T) => void; options: { value: T; title: string; text: string }[]; note?: string }) {
   return (
-    <label className={`flex cursor-pointer gap-4 rounded-xl border-2 p-4 ${checked ? "border-primary bg-accent" : "border-border hover:bg-card"}`}>
-      <input type="radio" name={name} value={value} checked={checked} onChange={onChange} className="mt-1.5 h-5 w-5" />
-      <span>
-        <span className="block text-lg font-semibold">{title}</span>
-        <span className="block text-base text-muted-foreground">{text}</span>
-      </span>
-    </label>
+    <FieldSet>
+      <FieldLegend>{legend}</FieldLegend>
+      <RadioGroup value={value} onValueChange={(v) => onChange(v as T)} aria-label={legend} className="gap-3">
+        {options.map((o) => (
+          <FieldLabel key={o.value} htmlFor={`${name}-${o.value}`} className="cursor-pointer rounded-xl border-2 border-input p-4 has-data-checked:border-primary has-data-checked:bg-accent">
+            <Field orientation="horizontal">
+              <FieldContent>
+                <FieldTitle className="text-lg">{o.title}</FieldTitle>
+                <FieldDescription className="text-base">{o.text}</FieldDescription>
+              </FieldContent>
+              <RadioGroupItem id={`${name}-${o.value}`} value={o.value} />
+            </Field>
+          </FieldLabel>
+        ))}
+      </RadioGroup>
+      {note && <FieldDescription className="text-base">{note}</FieldDescription>}
+    </FieldSet>
   );
 }
 
 export default function SettingsScreen({ communication, permission, loopThreshold = 3, onLoopThreshold, onCommunication, onPermission }: Props) {
   const { t } = useTranslation();
   const { theme, setTheme } = useTheme();
+
+  const schema = z.object({ drempel: z.coerce.number<number>().int(t("instellingen.lus.fout")).min(2, t("instellingen.lus.fout")).max(10, t("instellingen.lus.fout")) });
+  type Values = z.input<typeof schema>;
+  const { register, watch, reset, formState } = useForm<Values>({ resolver: zodResolver(schema), mode: "onChange", defaultValues: { drempel: loopThreshold } });
+  useEffect(() => reset({ drempel: loopThreshold }), [loopThreshold, reset]);
+
+  // Alleen een geldige waarde wordt doorgegeven en bewaard.
+  const draft = watch("drempel");
+  useEffect(() => {
+    const parsed = schema.safeParse({ drempel: draft });
+    if (parsed.success && parsed.data.drempel !== loopThreshold) onLoopThreshold?.(parsed.data.drempel);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft]);
+
   return (
-    <section className="flex-1 overflow-y-auto p-6">
-      <h1 className="mb-6 text-2xl font-semibold">{t("instellingen.titel")}</h1>
-
-      <fieldset className="mb-8 max-w-2xl space-y-3">
-        <legend className="mb-2 text-lg font-semibold">{t("instellingen.thema.titel")}</legend>
-        {(["system", "light", "dark"] as Theme[]).map((v) => (
-          <Choice key={v} name="thema" value={v} checked={theme === v} title={t(`instellingen.thema.${v}`)} text={t(`instellingen.thema.${v}Uitleg`)} onChange={() => setTheme(v)} />
-        ))}
-      </fieldset>
-
-      <fieldset className="mb-8 max-w-2xl space-y-3">
-        <legend className="mb-2 text-lg font-semibold">{t("instellingen.taal.titel")}</legend>
-        <Choice name="communicatie" value="simple" checked={communication === "simple"} title={t("instellingen.taal.eenvoudig")} text={t("instellingen.taal.eenvoudigUitleg")} onChange={() => onCommunication("simple")} />
-        <Choice name="communicatie" value="technical" checked={communication === "technical"} title={t("instellingen.taal.technisch")} text={t("instellingen.taal.technischUitleg")} onChange={() => onCommunication("technical")} />
-        <p className="text-base text-muted-foreground">{t("instellingen.taal.toelichting")}</p>
-      </fieldset>
-
-      <fieldset className="max-w-2xl space-y-3">
-        <legend className="mb-2 text-lg font-semibold">{t("instellingen.toestemming.titel")}</legend>
-        <Choice name="toestemming" value="always" checked={permission === "always"} title={t("instellingen.toestemming.altijd")} text={t("instellingen.toestemming.altijdUitleg")} onChange={() => onPermission("always")} />
-        <Choice name="toestemming" value="important" checked={permission === "important"} title={t("instellingen.toestemming.belangrijk")} text={t("instellingen.toestemming.belangrijkUitleg")} onChange={() => onPermission("important")} />
-        <p className="text-base text-muted-foreground">{t("instellingen.toestemming.toelichting")}</p>
-      </fieldset>
+    <div className="max-w-2xl space-y-8 p-6">
+      <ChoiceGroup<Theme>
+        legend={t("instellingen.thema.titel")}
+        name="thema"
+        value={theme}
+        onChange={setTheme}
+        options={(["system", "light", "dark"] as Theme[]).map((v) => ({ value: v, title: t(`instellingen.thema.${v}`), text: t(`instellingen.thema.${v}Uitleg`) }))}
+      />
+      <ChoiceGroup<CommunicationMode>
+        legend={t("instellingen.taal.titel")}
+        name="communicatie"
+        value={communication}
+        onChange={onCommunication}
+        options={[
+          { value: "simple", title: t("instellingen.taal.eenvoudig"), text: t("instellingen.taal.eenvoudigUitleg") },
+          { value: "technical", title: t("instellingen.taal.technisch"), text: t("instellingen.taal.technischUitleg") },
+        ]}
+        note={t("instellingen.taal.toelichting")}
+      />
+      <ChoiceGroup<PermissionMode>
+        legend={t("instellingen.toestemming.titel")}
+        name="toestemming"
+        value={permission}
+        onChange={onPermission}
+        options={[
+          { value: "always", title: t("instellingen.toestemming.altijd"), text: t("instellingen.toestemming.altijdUitleg") },
+          { value: "important", title: t("instellingen.toestemming.belangrijk"), text: t("instellingen.toestemming.belangrijkUitleg") },
+        ]}
+        note={t("instellingen.toestemming.toelichting")}
+      />
       {onLoopThreshold && (
-        <div className="mt-8 max-w-2xl space-y-2">
-          <h2 className="text-lg font-semibold">{t("instellingen.lus.titel")}</h2>
-          <label className="flex items-center gap-4 text-base" htmlFor="lus-drempel">
-            <span>{t("instellingen.lus.label")}</span>
-            <input
-              id="lus-drempel"
-              type="number"
-              min={2}
-              max={10}
-              value={loopThreshold}
-              onChange={(e) => {
-                const n = Math.round(Number(e.target.value));
-                if (Number.isFinite(n) && n >= 2 && n <= 10) onLoopThreshold(n);
-              }}
-              className="min-h-11 w-24 rounded-lg border border-input bg-card px-3 text-lg"
-            />
-          </label>
-          <p className="text-base text-muted-foreground">{t("instellingen.lus.uitleg")}</p>
-        </div>
+        <FieldSet>
+          <FieldLegend>{t("instellingen.lus.titel")}</FieldLegend>
+          <Field data-invalid={!!formState.errors.drempel}>
+            <FieldLabel htmlFor="lus-drempel">{t("instellingen.lus.label")}</FieldLabel>
+            <Input id="lus-drempel" type="number" min={2} max={10} className="w-28 text-lg" aria-invalid={!!formState.errors.drempel} {...register("drempel")} />
+            <FieldError>{formState.errors.drempel?.message}</FieldError>
+            <FieldDescription className="text-base">{t("instellingen.lus.uitleg")}</FieldDescription>
+          </Field>
+        </FieldSet>
       )}
-    </section>
+    </div>
   );
 }

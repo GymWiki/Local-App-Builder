@@ -57,7 +57,8 @@
     }
   },
   "fout": {
-    "algemeen": "Er ging iets mis: {{bericht}}"
+    "algemeen": "Er ging iets mis: {{bericht}}",
+    "sluit": "Sluiten"
   },
   "provider": {
     "claude": "Claude",
@@ -135,7 +136,13 @@
     "inloggenBij": "Inloggen bij {{provider}} · {{label}}",
     "inlogUitleg": "Log in via de terminal hieronder. Sluit dit venster als je klaar bent.",
     "klaar": "Klaar",
-    "bevestigVerwijder": "Account “{{label}}” uit de lijst verwijderen? De profielmap met de login blijft staan op:\\n{{pad}}"
+    "bevestigVerwijder": "Account “{{label}}” uit de lijst verwijderen? De profielmap met de login blijft staan op:\n{{pad}}",
+    "fout": {
+      "labelLeeg": "Geef het account een naam, bijvoorbeeld ‘Werk’.",
+      "labelLang": "Kies een kortere naam (maximaal 60 tekens)."
+    },
+    "verwijderTitel": "Account verwijderen?",
+    "annuleer": "Annuleren"
   },
   "preview": {
     "status": {
@@ -468,7 +475,8 @@
     "lus": {
       "titel": "Hulp als de AI vastloopt",
       "label": "Waarschuw na zoveel keer dezelfde mislukte controle",
-      "uitleg": "Studio onderbreekt de AI als dezelfde fout of dezelfde stap zoveel keer na elkaar mislukt, of als het slechter wordt. Je krijgt dan keuzes. Standaard: 3."
+      "uitleg": "Studio onderbreekt de AI als dezelfde fout of dezelfde stap zoveel keer na elkaar mislukt, of als het slechter wordt. Je krijgt dan keuzes. Standaard: 3.",
+      "fout": "Kies een heel getal van 2 tot 10."
     },
     "thema": {
       "titel": "Weergave",
@@ -478,7 +486,9 @@
       "lightUitleg": "Een lichte achtergrond met donkere tekst.",
       "dark": "Donker",
       "darkUitleg": "Een donkere achtergrond met lichte tekst. Rustiger voor de ogen in een donkere ruimte."
-    }
+    },
+    "sluit": "Sluiten",
+    "beschrijving": "Pas aan hoe Studio eruitziet en hoe de AI met je werkt."
   },
   "versies": {
     "titel": "Versies van je project",

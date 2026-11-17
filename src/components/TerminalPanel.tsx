@@ -13,7 +13,12 @@ import {
   type Project,
   type Provider,
   type SessionInfo,
-} from "../lib/api";
+} from "@/lib/api";
+import { XIcon } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import TerminalView from "./TerminalView";
 import InstallGuide from "./InstallGuide";
 import McpProblem from "./McpProblem";
@@ -136,82 +141,92 @@ export default function TerminalPanel({ project, accounts, sessions, mcp, onSess
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2 text-sm">
-        <button onClick={() => void launch("claude", defaultAccountFor("claude"))} className="rounded bg-primary text-primary-foreground px-3 py-1 hover:bg-primary/90">
+      <div className="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2">
+        <Button size="sm" onClick={() => void launch("claude", defaultAccountFor("claude"))}>
           {t("provider.claude")}
-        </button>
-        <button onClick={() => void launch("gemini", defaultAccountFor("gemini"))} className="rounded bg-primary text-primary-foreground px-3 py-1 hover:bg-primary/90">
+        </Button>
+        <Button size="sm" onClick={() => void launch("gemini", defaultAccountFor("gemini"))}>
           {t("provider.gemini")}
-        </button>
-        <button disabled title={t("terminal.codexUitgeschakeld")} className="rounded border border-border px-3 py-1 text-muted-foreground">
+        </Button>
+        <Button size="sm" variant="outline" disabled title={t("terminal.codexUitgeschakeld")}>
           {t("provider.codex")}
-        </button>
-        <button onClick={() => void newShell()} className="rounded border border-border px-3 py-1 hover:bg-muted">
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => void newShell()}>
           {t("terminal.nieuweShell")}
-        </button>
-        <button
-          onClick={() => setSwitching(true)}
-          disabled={!activeAi}
-          className="rounded border border-border px-3 py-1 hover:bg-muted disabled:opacity-40"
-        >
+        </Button>
+        <Button size="sm" variant="outline" onClick={() => setSwitching(true)} disabled={!activeAi}>
           {t("terminal.wissel")}
-        </button>
-        <div className="ml-auto flex items-center gap-3 text-xs">
-          <span data-testid="account-badge" className="rounded bg-muted px-2 py-1">
+        </Button>
+        <div className="ml-auto flex items-center gap-3 text-sm">
+          <Badge variant="secondary" data-testid="account-badge">
             {activeAi ? t("terminal.actiefAccount", { naam: accountName }) : t("terminal.geenAi")}
-          </span>
-          <span
+          </Badge>
+          <Badge
             data-testid="mcp-badge"
             title={mcp?.error ?? undefined}
-            className={`rounded px-2 py-1 ${
+            className={
               mcpState === "connected"
-                ? "bg-success/15 text-success"
+                ? "border-transparent bg-success/15 text-success"
                 : mcpState === "running"
-                  ? "bg-accent text-accent-foreground"
+                  ? "border-transparent bg-accent text-accent-foreground"
                   : mcpState === "unavailable"
-                    ? "bg-destructive/15 text-destructive"
-                    : "bg-muted text-muted-foreground"
-            }`}
+                    ? "border-transparent bg-destructive/15 text-destructive"
+                    : "border-transparent bg-muted text-muted-foreground"
+            }
           >
             {t(`mcp.${mcpState}`)}
-          </span>
+          </Badge>
           {(mcpState === "running" || mcpState === "connected") && (
-            <button onClick={() => void verify()} disabled={checking} className="text-primary hover:underline disabled:opacity-50">
+            <Button variant="link" size="sm" onClick={() => void verify()} disabled={checking}>
               {checking ? t("mcp.controleBezig") : t("mcp.controleer")}
-            </button>
+            </Button>
           )}
         </div>
       </div>
 
       {mcpState === "unavailable" && <McpProblem info={mcp} busy={retrying} onRetry={() => void retry()} />}
       {check && (
-        <div role="status" data-testid="mcp-check" className="space-y-1 border-b border-border bg-card px-4 py-2 text-sm">
-          <div className={check.verdict === "connected" ? "text-success" : "text-warning"}>{t(`mcp.controle.${check.verdict}`)}</div>
-          {check.output && <pre className="max-h-32 overflow-auto whitespace-pre-wrap font-mono text-xs text-muted-foreground">{check.output}</pre>}
-        </div>
+        <Alert role="status" data-testid="mcp-check" className="rounded-none border-0 border-b border-border">
+          <AlertDescription className="space-y-1">
+            <div className={check.verdict === "connected" ? "text-success" : "text-warning"}>{t(`mcp.controle.${check.verdict}`)}</div>
+            {check.output && <pre className="max-h-32 overflow-auto rounded-lg bg-muted p-3 font-mono text-sm whitespace-pre-wrap text-muted-foreground">{check.output}</pre>}
+          </AlertDescription>
+        </Alert>
       )}
       {activeAi?.provider === "claude" && mcpState === "running" && !check && (
-        <div className="border-b border-border bg-accent/40 px-4 py-2 text-xs text-accent-foreground">{t("mcp.goedkeuring")}</div>
+        <div className="border-b border-border bg-accent/40 px-4 py-2 text-sm text-accent-foreground">{t("mcp.goedkeuring")}</div>
       )}
-      <div role="tablist" className="flex gap-1 overflow-x-auto border-b border-border px-3 pt-1">
-        {sessions.map((s) => (
-          <div key={s.id} className={`flex items-center rounded-t text-sm ${s.id === active?.id ? "bg-muted" : "text-muted-foreground"}`}>
-            <button role="tab" aria-selected={s.id === active?.id} className="px-3 py-1.5" onClick={() => { setActiveId(s.id); setMissing(null); }}>
-              {s.title}
-              {s.ended ? " ✕" : ""}
-            </button>
-            <button aria-label={t("terminal.sluitTab")} className="pr-2 text-muted-foreground hover:text-destructive" onClick={() => void close(s.id)}>
-              ×
-            </button>
-          </div>
-        ))}
-      </div>
+      <ScrollArea className="border-b border-border">
+        <div role="tablist" className="flex gap-1 px-3 pt-1">
+          {sessions.map((s) => (
+            <div key={s.id} className={`flex items-center rounded-t-lg ${s.id === active?.id ? "bg-muted" : "text-muted-foreground"}`}>
+              <Button
+                role="tab"
+                aria-selected={s.id === active?.id}
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setActiveId(s.id);
+                  setMissing(null);
+                }}
+              >
+                {s.title}
+                {s.ended ? " ✕" : ""}
+              </Button>
+              <Button variant="ghost" size="icon-xs" aria-label={t("terminal.sluitTab")} onClick={() => void close(s.id)}>
+                <XIcon aria-hidden="true" />
+              </Button>
+            </div>
+          ))}
+        </div>
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
 
       <div className="relative min-h-0 flex-1">
         {missing ? (
           <InstallGuide key={missing.provider} status={missing} onInstalled={(s) => void launch(s.provider, defaultAccountFor(s.provider), {}, true)} />
         ) : sessions.length === 0 ? (
-          <div className="flex h-full items-center justify-center text-muted-foreground">{t("terminal.leeg")}</div>
+          <div className="flex h-full items-center justify-center text-lg text-muted-foreground">{t("terminal.leeg")}</div>
         ) : null}
         {sessions.map((s) => (
           <div key={s.id} className={`absolute inset-0 ${!missing && s.id === active?.id ? "" : "invisible"}`}>
