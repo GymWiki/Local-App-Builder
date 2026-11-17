@@ -1,0 +1,192 @@
+[
+ {
+  "stap": "1-start-eerste-scherm",
+  "file": "01-1-start-eerste-scherm-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [],
+  "klein": [],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "2-nieuw-project-dialoog",
+  "file": "02-2-nieuw-project-dialoog-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Nieuw project",
+   "Close"
+  ],
+  "klein": [
+   "BUTTON (23x23)",
+   "INPUT (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [
+   "Close"
+  ],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "2b-leeg-versturen",
+  "file": "03-2b-leeg-versturen-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Nieuw project",
+   "Close"
+  ],
+  "klein": [
+   "BUTTON (23x23)",
+   "INPUT (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [
+   "Close"
+  ],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "2d-naam-en-map-ingevuld",
+  "file": "04-2d-naam-en-map-ingevuld-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Nieuw project",
+   "Close"
+  ],
+  "klein": [
+   "BUTTON (23x23)",
+   "INPUT (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [
+   "Close"
+  ],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "2e-project-aangemaakt",
+  "file": "05-2e-project-aangemaakt-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Fouttest (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 455x309",
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "3-opdracht-getypt",
+  "file": "06-3-opdracht-getypt-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Fouttest (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 455x309",
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "3b-ai-denkt",
+  "file": "07-3b-ai-denkt-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Fouttest (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 455x309",
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "3c-ai-bezig",
+  "file": "08-3c-ai-bezig-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Fouttest (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 455x309",
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "3d-ai-klaar",
+  "file": "09-3d-ai-klaar-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Fouttest (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 455x309",
+   "textarea[textarea] 30x110"
+  ]
+ }
+]

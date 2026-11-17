@@ -1,0 +1,371 @@
+[
+ {
+  "stap": "1-start-eerste-scherm",
+  "file": "01-1-start-eerste-scherm-licht.png",
+  "notitie": "",
+  "vw": 1920,
+  "vh": 1080,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [],
+  "klein": [],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "2-nieuw-project-dialoog",
+  "file": "02-2-nieuw-project-dialoog-licht.png",
+  "notitie": "",
+  "vw": 1920,
+  "vh": 1080,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Nieuw project",
+   "Close"
+  ],
+  "klein": [
+   "BUTTON (23x23)",
+   "INPUT (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [
+   "Close"
+  ],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "2b-leeg-versturen",
+  "file": "03-2b-leeg-versturen-licht.png",
+  "notitie": "",
+  "vw": 1920,
+  "vh": 1080,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Nieuw project",
+   "Close"
+  ],
+  "klein": [
+   "BUTTON (23x23)",
+   "INPUT (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [
+   "Close"
+  ],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "2d-naam-en-map-ingevuld",
+  "file": "04-2d-naam-en-map-ingevuld-licht.png",
+  "notitie": "",
+  "vw": 1920,
+  "vh": 1080,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Nieuw project",
+   "Close"
+  ],
+  "klein": [
+   "BUTTON (23x23)",
+   "INPUT (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [
+   "Close"
+  ],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "2e-project-aangemaakt",
+  "file": "05-2e-project-aangemaakt-licht.png",
+  "notitie": "",
+  "vw": 1920,
+  "vh": 1080,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Sanne Coaching & Advies – lange naam met",
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Sanne Coaching &  (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 647x525",
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "3-lange-opdracht-met-shift-enter",
+  "file": "06-3-lange-opdracht-met-shift-enter-licht.png",
+  "notitie": "",
+  "vw": 1920,
+  "vh": 1080,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Sanne Coaching & Advies – lange naam met",
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Sanne Coaching &  (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 647x525",
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "3a-extra-regel",
+  "file": "07-3a-extra-regel-licht.png",
+  "notitie": "",
+  "vw": 1920,
+  "vh": 1080,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Sanne Coaching & Advies – lange naam met",
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Sanne Coaching &  (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 647x525",
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "3b-ai-denkt",
+  "file": "08-3b-ai-denkt-licht.png",
+  "notitie": "",
+  "vw": 1920,
+  "vh": 1080,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Sanne Coaching & Advies – lange naam met",
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Sanne Coaching &  (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "3d-ai-klaar",
+  "file": "09-3d-ai-klaar-licht.png",
+  "notitie": "",
+  "vw": 1920,
+  "vh": 1080,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Sanne Coaching & Advies – lange naam met",
+   "— Klaar",
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Sanne Coaching &  (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 647x458",
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "4-venster-1280x720",
+  "file": "10-4-venster-1280x720-licht.png",
+  "notitie": "",
+  "vw": 1280,
+  "vh": 720,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Sanne Coaching & Advies – lange naam met",
+   "— Klaar",
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Sanne Coaching &  (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [
+   "Details",
+   "Tablet",
+   "Computer",
+   "Vernieuwen"
+  ],
+  "engels": [],
+  "dubbeleScroll": [
+   "div 493x578",
+   "div[scroll-area-viewport] 493x98",
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "4-venster-1000x700",
+  "file": "11-4-venster-1000x700-licht.png",
+  "notitie": "",
+  "vw": 1000,
+  "vh": 700,
+  "paginaScroltHorizontaal": true,
+  "paginaScroltVerticaal": true,
+  "afgekapt": [
+   "Sanne Coaching & Advies – lange naam met",
+   "— Klaar",
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Sanne Coaching &  (23x23)"
+  ],
+  "buitenBeeld": [
+   "Details",
+   "Versturen"
+  ],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 706x111",
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "4-venster-900x600",
+  "file": "12-4-venster-900x600-licht.png",
+  "notitie": "",
+  "vw": 900,
+  "vh": 600,
+  "paginaScroltHorizontaal": true,
+  "paginaScroltVerticaal": true,
+  "afgekapt": [
+   "Sanne Coaching & Advies – lange naam met",
+   "— Klaar",
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Sanne Coaching &  (23x23)"
+  ],
+  "buitenBeeld": [
+   "Details",
+   "Versturen"
+  ],
+  "engels": [],
+  "dubbeleScroll": [
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "5-tab-focus",
+  "file": "13-5-tab-focus-licht.png",
+  "notitie": "",
+  "vw": 1920,
+  "vh": 1080,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Sanne Coaching & Advies – lange naam met",
+   "— Klaar",
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Sanne Coaching &  (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 647x458",
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "6-versies",
+  "file": "14-6-versies-licht.png",
+  "notitie": "",
+  "vw": 1920,
+  "vh": 1080,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Sanne Coaching & Advies – lange naam met",
+   "— Klaar",
+   "Wat wil je maken of veranderen?",
+   "Close"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Sanne Coaching &  (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [
+   "Close"
+  ],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 647x458",
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "6b-escape-sluit",
+  "file": "15-6b-escape-sluit-licht.png",
+  "notitie": "",
+  "vw": 1920,
+  "vh": 1080,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Sanne Coaching & Advies – lange naam met",
+   "— Klaar",
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Sanne Coaching &  (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 647x458",
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "8-publiceren",
+  "file": "16-8-publiceren-licht.png",
+  "notitie": "",
+  "vw": 1920,
+  "vh": 1080,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Sanne Coaching & Advies – lange naam met"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Sanne Coaching &  (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": []
+ }
+]

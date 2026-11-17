@@ -1,0 +1,588 @@
+[
+ {
+  "stap": "1-start-eerste-scherm",
+  "file": "01-1-start-eerste-scherm-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [],
+  "klein": [],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "1b-instellingen-nieuwsgierig",
+  "file": "02-1b-instellingen-nieuwsgierig-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Close"
+  ],
+  "klein": [
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [
+   "Close"
+  ],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 407x769"
+  ]
+ },
+ {
+  "stap": "1-start-eerste-scherm",
+  "file": "03-1-start-eerste-scherm-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [],
+  "klein": [],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "2-nieuw-project-dialoog",
+  "file": "04-2-nieuw-project-dialoog-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Nieuw project",
+   "Close"
+  ],
+  "klein": [
+   "BUTTON (23x23)",
+   "INPUT (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [
+   "Close"
+  ],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "2b-leeg-versturen",
+  "file": "05-2b-leeg-versturen-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Nieuw project",
+   "Close"
+  ],
+  "klein": [
+   "BUTTON (23x23)",
+   "INPUT (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [
+   "Close"
+  ],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "2c-enter-zonder-map",
+  "file": "06-2c-enter-zonder-map-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Nieuw project",
+   "Close"
+  ],
+  "klein": [
+   "BUTTON (23x23)",
+   "INPUT (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [
+   "Close"
+  ],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "2d-naam-en-map-ingevuld",
+  "file": "07-2d-naam-en-map-ingevuld-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Nieuw project",
+   "Close"
+  ],
+  "klein": [
+   "BUTTON (23x23)",
+   "INPUT (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [
+   "Close"
+  ],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "2e-project-aangemaakt",
+  "file": "08-2e-project-aangemaakt-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Hovenier Joke (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 455x309",
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "3-opdracht-getypt",
+  "file": "09-3-opdracht-getypt-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Hovenier Joke (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 455x309",
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "3b-ai-denkt",
+  "file": "10-3b-ai-denkt-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Hovenier Joke (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 455x293",
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "3c-ai-bezig",
+  "file": "11-3c-ai-bezig-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "— Klaar",
+   "— Bezig…",
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Hovenier Joke (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 455x226",
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "3d-ai-klaar",
+  "file": "12-3d-ai-klaar-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "— Klaar",
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Hovenier Joke (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 455x242",
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "3-opdracht-getypt",
+  "file": "13-3-opdracht-getypt-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "— Klaar",
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Hovenier Joke (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 455x242",
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "3b-ai-denkt",
+  "file": "14-3b-ai-denkt-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "— Klaar",
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Hovenier Joke (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 455x226",
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "3c-ai-bezig",
+  "file": "15-3c-ai-bezig-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "— Klaar",
+   "— Bezig…",
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Hovenier Joke (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div 455x722",
+   "div[scroll-area-viewport] 455x226",
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "3d-ai-klaar",
+  "file": "16-3d-ai-klaar-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "— Klaar",
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Hovenier Joke (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div 455x722",
+   "div[scroll-area-viewport] 455x242",
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "6-versies-dialoog",
+  "file": "17-6-versies-dialoog-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "— Klaar",
+   "Wat wil je maken of veranderen?",
+   "Close"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Hovenier Joke (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [
+   "Close"
+  ],
+  "dubbeleScroll": [
+   "div 455x722",
+   "div[scroll-area-viewport] 455x242",
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "6b-terugzetten-bevestiging",
+  "file": "18-6b-terugzetten-bevestiging-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "— Klaar",
+   "Wat wil je maken of veranderen?",
+   "Close"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Hovenier Joke (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [
+   "Close"
+  ],
+  "dubbeleScroll": [
+   "div 455x722",
+   "div[scroll-area-viewport] 455x242",
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "6c-na-escape",
+  "file": "19-6c-na-escape-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "— Klaar",
+   "Wat wil je maken of veranderen?",
+   "Close"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Hovenier Joke (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [
+   "Close"
+  ],
+  "dubbeleScroll": [
+   "div 455x722",
+   "div[scroll-area-viewport] 455x242",
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "7-wissel-van-ai",
+  "file": "20-7-wissel-van-ai-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "— Klaar",
+   "Wat wil je maken of veranderen?",
+   "Close"
+  ],
+  "klein": [
+   "Verwijderen uit lijst: Hovenier Joke (23x23)",
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [
+   "Close"
+  ],
+  "dubbeleScroll": [
+   "div 455x722",
+   "div[scroll-area-viewport] 455x242",
+   "textarea[textarea] 30x110"
+  ]
+ },
+ {
+  "stap": "7b-accounts",
+  "file": "21-7b-accounts-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [],
+  "klein": [
+   "Verwijderen uit lijst: Hovenier Joke (23x23)",
+   "Claude Gemini Codex (nog niet beschikbaa (1x1)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "7c-account-toegevoegd",
+  "file": "22-7c-account-toegevoegd-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [],
+  "klein": [
+   "Verwijderen uit lijst: Hovenier Joke (23x23)",
+   "Claude Gemini Codex (nog niet beschikbaa (1x1)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "8-publiceren",
+  "file": "23-8-publiceren-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [],
+  "klein": [
+   "Verwijderen uit lijst: Hovenier Joke (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "8b-veiligheid",
+  "file": "24-8b-veiligheid-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [],
+  "klein": [
+   "Verwijderen uit lijst: Hovenier Joke (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "8c-download",
+  "file": "25-8c-download-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [],
+  "klein": [
+   "Verwijderen uit lijst: Hovenier Joke (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "9a-geavanceerd",
+  "file": "26-9a-geavanceerd-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [],
+  "klein": [
+   "Verwijderen uit lijst: Hovenier Joke (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "9b-sluiten",
+  "file": "27-9b-sluiten-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [],
+  "klein": [
+   "Verwijderen uit lijst: Hovenier Joke (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "9c-weer-open",
+  "file": "28-9c-weer-open-licht.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [],
+  "klein": [
+   "Verwijderen uit lijst: Hovenier Joke (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 329x864"
+  ]
+ }
+]
