@@ -134,3 +134,8 @@ Bron: cli-reference.md. `--tools ""` schakelt alle ingebouwde tools uit; `-p` we
 
 ## Wat is er veranderd? (functie 9)
 - Geen CLI-optie nodig: de knop stuurt een gewone opdracht naar de AI, die de MCP-tool `get_last_change` aanroept (nieuw; `mcp-server/src/tools.ts`, `git.ts#lastChange`). De tool geeft niet-opgeslagen werk of anders de laatste versie ten opzichte van de vorige, ingekort tot 24.000 tekens en zonder gevoelige bestanden (.env, sleutels, .npmrc, …). De opdracht vraagt om ten hoogste vijf korte zinnen zonder vakjargon.
+
+## Klik-en-beschrijf (functie 5)
+- Geen CLI-optie nodig. De wens gaat als gewone opdracht naar de chat; de schermafbeelding van het onderdeel gaat mee als bijlage (functie 4: pad in de opdracht, Claude leest hem met zijn leestool; geverifieerd bij functie 4).
+- Techniek: de preview laadt (alleen als de picker is aangezet) via een tussenserver in de Node-runtime (`mcp-server/src/picker.ts`, alleen 127.0.0.1, bestemming moet loopback zijn) die in HTML-pagina's één `<script>` toevoegt en WebSocket (hot reload) doorgeeft. Het script (`picker-script.ts`) doet niets totdat Studio het aanzet via `postMessage`; Studio controleert dat berichten uit de eigen iframe komen. Het project wordt nooit aangepast. Werkt voor statische previews en dev-servers.
+- Schermafbeeldingen staan in `<project>/.studio/picks/` (max. 30, via `.git/info/exclude` uit git gehouden en niet in de export). `assets::resolve_asset` staat dit pad toe voor bijlagen.

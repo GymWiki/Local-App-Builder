@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
+  chatSend,
   previewInstall,
   previewRestart,
   previewStart,
@@ -13,7 +14,10 @@ import {
   type PreviewInfo,
   type Project,
 } from "@/lib/api";
-import { ChevronDownIcon, RotateCwIcon } from "lucide-react";
+import { ChevronDownIcon, MousePointerClickIcon, RotateCwIcon } from "lucide-react";
+import { toast } from "sonner";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -53,6 +57,12 @@ export default function PreviewPanel({ project, mcp, preview, visible, reloadNon
   const [busy, setBusy] = useState(false);
   const [manualReload, setManualReload] = useState(0);
   const [viewport, setViewport] = useState<ViewportKey>("computer");
+  // Klik-en-beschrijf: de preview laadt via een tussenserver die alleen in de preview een pickerscript toevoegt.
+  const frame = useRef<HTMLIFrameElement>(null);
+  const [picking, setPicking] = useState(false);
+  const [proxyUrl, setProxyUrl] = useState<string | null>(null);
+  const [pick, setPick] = useState<{ selector: string; tag: string; text: string; path: string } | null>(null);
+  const [wish, setWish] = useState("");
   const [logs, setLogs] = useState<string[]>([]);
   const [config, setConfig] = useState<ConfigInfo | null>(null);
   const status = preview?.status ?? "idle";
@@ -100,6 +110,50 @@ export default function PreviewPanel({ project, mcp, preview, visible, reloadNon
       if (timer) clearInterval(timer);
     };
   }, [id, usesRuntime, runtimeUp, visible, status]);
+
+  const tellFrame = useCallback((on: boolean) => frame.current?.contentWindow?.postMessage({ type: "studio-picker", on }, "*"), []);
+
+  useEffect(() => {
+    const onMessage = (e: MessageEvent) => {
+      if (!frame.current || e.source !== frame.current.contentWindow) return;
+      const d = e.data as { type?: string; selector?: string; tag?: string; text?: string; path?: string } | null;
+      if (d?.type === "studio-picker-ready") tellFrame(picking);
+      else if (d?.type === "studio-pick" && typeof d.selector === "string") {
+        setPicking(false);
+        setWish("");
+        setPick({ selector: d.selector.slice(0, 500), tag: String(d.tag ?? "").slice(0, 30), text: String(d.text ?? "").slice(0, 120), path: String(d.path ?? "/").slice(0, 500) });
+      } else if (d?.type === "studio-pick-cancel") setPicking(false);
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [picking, tellFrame]);
+
+  async function togglePick() {
+    if (picking) {
+      setPicking(false);
+      tellFrame(false);
+      return;
+    }
+    await run(async () => {
+      if (!proxyUrl) setProxyUrl((await runtime<{ url: string }>(id, "picker.url")).url);
+      setPicking(true);
+      tellFrame(true);
+    });
+  }
+
+  async function sendPick() {
+    if (!pick || !wish.trim()) return;
+    const p = pick;
+    setPick(null);
+    await run(async () => {
+      // Zonder schermafbeelding (bijvoorbeeld geen browser) sturen we de wens toch.
+      const path = await runtime<{ path: string }>(id, "picker.shot", { selector: p.selector, path: p.path }).then((r) => r.path).catch(() => null);
+      const text = p.text ? ` (met de tekst ‘${p.text}’)` : "";
+      const prompt = t("preview.kies.prompt", { tag: p.tag, selector: p.selector, pad: p.path, tekst: text, wens: wish.trim(), beeld: path ? t("preview.kies.beeld") : "" });
+      await (path ? chatSend(id, prompt, [path]) : chatSend(id, prompt));
+      toast.success(t("preview.kies.verstuurd"));
+    });
+  }
 
   const active = status === "starting" || status === "running" || status === "stopping";
   const canStart = !active && !problem?.kind.match(/^(empty|flutter|unsupported|config_invalid|node_|runtime_|deps_missing|untrusted)/) && (mode === "static" || usesRuntime);
@@ -202,6 +256,12 @@ export default function PreviewPanel({ project, mcp, preview, visible, reloadNon
               {t("preview.herstart")}
             </Button>
           )}
+          {status === "running" && runtimeUp && (
+            <Button size="sm" variant={picking ? "default" : "outline"} aria-pressed={picking} title={t("preview.kies.uitleg")} disabled={busy} onClick={() => void togglePick()}>
+              <MousePointerClickIcon aria-hidden="true" />
+              {t("preview.kies.knop")}
+            </Button>
+          )}
           {status === "running" && (
             <ToggleGroup type="single" variant="outline" size="sm" role="radiogroup" aria-label={t("preview.weergave.titel")} value={viewport} onValueChange={(v) => v && setViewport(v as ViewportKey)} spacing={0}>
               {(Object.keys(VIEWPORTS) as ViewportKey[]).map((k) => (
@@ -226,9 +286,10 @@ export default function PreviewPanel({ project, mcp, preview, visible, reloadNon
       <div className={`relative min-h-0 flex-1 ${viewport === "computer" ? "bg-background" : "flex justify-center overflow-auto bg-muted"}`}>
         {status === "running" && preview?.url ? (
           <iframe
+            ref={frame}
             key={frameKey}
             title={t("tabs.preview")}
-            src={preview.url}
+            src={proxyUrl ?? preview.url}
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
             data-viewport={viewport}
             style={VIEWPORTS[viewport] ? { width: VIEWPORTS[viewport] } : undefined}
@@ -243,6 +304,32 @@ export default function PreviewPanel({ project, mcp, preview, visible, reloadNon
           <div className="flex h-full items-center justify-center text-base text-muted-foreground">{t("preview.nietActief")}</div>
         )}
       </div>
+
+      {picking && (
+        <p role="status" className="border-t border-border bg-accent px-3 py-2 text-sm text-accent-foreground">
+          {t("preview.kies.bezig")}
+        </p>
+      )}
+      <Dialog open={pick !== null} onOpenChange={(o) => !o && setPick(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("preview.kies.titel")}</DialogTitle>
+            <DialogDescription>{pick ? t("preview.kies.gekozen", { tag: pick.tag, tekst: pick.text ? ` — ‘${pick.text}’` : "" }) : ""}</DialogDescription>
+          </DialogHeader>
+          <label htmlFor="pick-wens" className="text-base font-medium">
+            {t("preview.kies.label")}
+          </label>
+          <Input id="pick-wens" autoFocus value={wish} placeholder={t("preview.kies.plek")} onChange={(e) => setWish(e.target.value)} onKeyDown={(e) => e.key === "Enter" && void sendPick()} />
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setPick(null)}>
+              {t("preview.kies.annuleer")}
+            </Button>
+            <Button disabled={!wish.trim()} onClick={() => void sendPick()}>
+              {t("preview.kies.versturen")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {usesRuntime && (
         <Collapsible className="max-h-56 overflow-auto border-t border-border text-sm">

@@ -211,6 +211,20 @@
       "tablet": "Tablet",
       "computer": "Computer",
       "uitleg": "Dit verandert alleen de breedte van het voorbeeld, niet je project."
+    },
+    "kies": {
+      "knop": "Kies een onderdeel",
+      "uitleg": "Klik op iets in het voorbeeld en vertel wat er anders moet.",
+      "bezig": "Wijs een onderdeel aan in het voorbeeld… (Esc om te stoppen)",
+      "titel": "Wat moet hier anders?",
+      "gekozen": "Gekozen onderdeel: {{tag}}{{tekst}}",
+      "label": "Beschrijf je wens",
+      "plek": "Bijvoorbeeld: maak deze knop groter en groen",
+      "versturen": "Naar de AI sturen",
+      "annuleer": "Annuleren",
+      "verstuurd": "Ik heb je wens naar de AI gestuurd. Kijk in het tabblad Maken.",
+      "prompt": "Pas dit onderdeel in de preview aan. Onderdeel: {{tag}} met de kiesregel ‘{{selector}}’ op pagina {{pad}}{{tekst}}. Wat ik wil: {{wens}}. {{beeld}}Verander alleen dit onderdeel, behalve als iets anders er echt voor aangepast moet worden. Controleer het daarna met een schermafbeelding.",
+      "beeld": "Bij dit bericht zit een schermafbeelding van het onderdeel. "
     }
   },
   "activiteit": {

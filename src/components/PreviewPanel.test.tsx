@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { vi, type Mock } from "vitest";
 import PreviewPanel from "./PreviewPanel";
 import PreviewNotice from "./PreviewNotice";
@@ -6,6 +6,7 @@ import type { McpInfo, PreviewInfo, Project } from "../lib/api";
 import * as api from "../lib/api";
 
 vi.mock("../lib/api");
+vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
 const project: Project = { id: 1, naam: "P", pad: "/p", template: "leeg", created_at: "", default_account_id: null };
 const up: McpInfo = { state: "running", port: 1, error: null };
@@ -165,5 +166,78 @@ describe("PreviewPanel: schermgrootte", () => {
   it("zonder draaiende preview staat er geen schermkeuze", () => {
     show(info({ status: "idle", url: null }));
     expect(screen.queryByRole("radiogroup", { name: "Schermgrootte van het voorbeeld" })).not.toBeInTheDocument();
+  });
+});
+
+describe("PreviewPanel: klik-en-beschrijf", () => {
+  const frame = () => screen.getByTitle("Preview") as HTMLIFrameElement;
+  const melding = (data: unknown, source: Window | null = frame().contentWindow) => act(() => void window.dispatchEvent(new MessageEvent("message", { data, source })));
+
+  beforeEach(() => {
+    (api.runtime as Mock).mockImplementation(async (_id: number, cmd: string) => (cmd === "picker.url" ? { url: "http://127.0.0.1:5555/" } : cmd === "picker.shot" ? { path: ".studio/picks/pick-1.jpg", found: true } : []));
+    (api.chatSend as Mock).mockResolvedValue(undefined);
+  });
+
+  it("de knop staat er alleen met een draaiende runtime; aanzetten laadt de preview via de tussenserver en zet de picker aan", async () => {
+    const { unmount } = show(info(), null);
+    expect(screen.queryByRole("button", { name: "Kies een onderdeel" })).not.toBeInTheDocument();
+    unmount();
+    show(info(), up);
+    const post = vi.spyOn(frame().contentWindow!, "postMessage");
+    fireEvent.click(screen.getByRole("button", { name: "Kies een onderdeel" }));
+    await waitFor(() => expect(frame().getAttribute("src")).toBe("http://127.0.0.1:5555/"));
+    expect(api.runtime).toHaveBeenCalledWith(1, "picker.url");
+    expect(screen.getByRole("button", { name: "Kies een onderdeel" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByText(/Wijs een onderdeel aan/)).toBeInTheDocument();
+    expect(post).toHaveBeenCalledWith({ type: "studio-picker", on: true }, "*");
+  });
+
+  it("een klik in het voorbeeld toont ‘Wat moet hier anders?’ en stuurt wens + selector + schermafbeelding naar de chat", async () => {
+    show(info(), up);
+    fireEvent.click(screen.getByRole("button", { name: "Kies een onderdeel" }));
+    await waitFor(() => expect(frame().getAttribute("src")).toBe("http://127.0.0.1:5555/"));
+    melding({ type: "studio-pick", selector: "main > button.groot", tag: "button", text: "Afspraak maken", path: "/" });
+    const veld = await screen.findByLabelText("Beschrijf je wens");
+    expect(screen.getByText(/Gekozen onderdeel: button — ‘Afspraak maken’/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Naar de AI sturen" })).toBeDisabled();
+    fireEvent.change(veld, { target: { value: "maak deze knop groter en groen" } });
+    fireEvent.click(screen.getByRole("button", { name: "Naar de AI sturen" }));
+    await waitFor(() => expect(api.chatSend).toHaveBeenCalledWith(1, expect.stringContaining("maak deze knop groter en groen"), [".studio/picks/pick-1.jpg"]));
+    const prompt = (api.chatSend as Mock).mock.calls[0][1] as string;
+    expect(prompt).toContain("main > button.groot");
+    expect(prompt).toContain("Afspraak maken");
+    expect(prompt).toContain("schermafbeelding van het onderdeel");
+    expect(api.runtime).toHaveBeenCalledWith(1, "picker.shot", { selector: "main > button.groot", path: "/" });
+  });
+
+  it("zonder schermafbeelding (geen browser) wordt de wens toch verstuurd", async () => {
+    (api.runtime as Mock).mockImplementation(async (_id: number, cmd: string) => {
+      if (cmd === "picker.shot") throw new Error("Geen browser gevonden");
+      return cmd === "picker.url" ? { url: "http://127.0.0.1:5555/" } : [];
+    });
+    show(info(), up);
+    fireEvent.click(screen.getByRole("button", { name: "Kies een onderdeel" }));
+    await waitFor(() => expect(frame().getAttribute("src")).toBe("http://127.0.0.1:5555/"));
+    melding({ type: "studio-pick", selector: "h1", tag: "h1", text: "", path: "/over" });
+    fireEvent.change(await screen.findByLabelText("Beschrijf je wens"), { target: { value: "andere kop" } });
+    fireEvent.click(screen.getByRole("button", { name: "Naar de AI sturen" }));
+    await waitFor(() => expect(api.chatSend).toHaveBeenCalledTimes(1));
+    expect((api.chatSend as Mock).mock.calls[0]).toHaveLength(2); // geen bijlagen
+    expect((api.chatSend as Mock).mock.calls[0][1]).not.toContain("schermafbeelding van het onderdeel");
+  });
+
+  it("berichten van andere vensters of met een onbekend type worden genegeerd; Annuleren verstuurt niets", async () => {
+    show(info(), up);
+    fireEvent.click(screen.getByRole("button", { name: "Kies een onderdeel" }));
+    await waitFor(() => expect(frame().getAttribute("src")).toBe("http://127.0.0.1:5555/"));
+    melding({ type: "studio-pick", selector: "h1", tag: "h1", text: "", path: "/" }, window); // verkeerde afzender
+    melding({ type: "iets-anders" });
+    expect(screen.queryByLabelText("Beschrijf je wens")).not.toBeInTheDocument();
+    melding({ type: "studio-pick", selector: "h1", tag: "h1", text: "", path: "/" });
+    await screen.findByLabelText("Beschrijf je wens");
+    fireEvent.click(screen.getByRole("button", { name: "Annuleren" }));
+    await waitFor(() => expect(screen.queryByLabelText("Beschrijf je wens")).not.toBeInTheDocument());
+    expect(api.chatSend).not.toHaveBeenCalled();
+    melding({ type: "studio-pick-cancel" });
   });
 });

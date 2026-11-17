@@ -10,6 +10,8 @@ import { runCommand } from "./proc.js";
 import { checkHtml, checkLinks } from "./static-checks.js";
 import { relevantLines } from "./text.js";
 import { securityCheck } from "./security.js";
+import { startPickerProxy, type PickerProxy } from "./picker.js";
+import { writePick } from "./picks.js";
 import { checkProject, setStrictness } from "./kits/check.js";
 import { refreshCatalogIfStale } from "./kits/catalog.js";
 import { applyWithSafety, current as kitCurrent, listKits, runScripts, tailor as kitTailor, type KitHost } from "./kits/ops.js";
@@ -67,6 +69,7 @@ export class Runtime {
   private trustedHash: string | null = null;
   private plan: PlanPush | null = null;
   private last: ChecksResult | null = null;
+  private picker: PickerProxy | null = null;
   private checking: AbortController | null = null;
   private readonly emit: Emit;
   private readonly permissionTimeoutMs: number;
@@ -340,6 +343,19 @@ export class Runtime {
         return this.last;
       case "git.list":
         return this.git.list(Number(args.limit) || 30);
+      case "picker.url": {
+        // Een tussenserver voor de preview waarin het pickerscript wordt toegevoegd; het project zelf verandert niet.
+        const target = await this.previewUrl();
+        if (!this.picker || this.picker.target !== new URL(target).toString()) {
+          await this.picker?.close();
+          this.picker = await startPickerProxy(target);
+        }
+        return { url: this.picker.url };
+      }
+      case "picker.shot": {
+        const shot = await this.observer.elementShot(String(args.selector ?? "").slice(0, 500), String(args.path ?? "/"));
+        return { path: await writePick(this.projectDir, shot.data), found: shot.found };
+      }
       case "security.check":
         return securityCheck(this.projectDir);
       case "git.diff":
@@ -419,7 +435,8 @@ export class Runtime {
       done({ allow: false, message: "Het project is gesloten." });
     }
     this.checking?.abort();
-    await Promise.all([this.dev.stop(), this.observer.close()]);
+    await Promise.all([this.dev.stop(), this.observer.close(), this.picker?.close()]);
+    this.picker = null;
   }
 }
 

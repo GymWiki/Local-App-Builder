@@ -103,6 +103,33 @@ export class PreviewObserver {
     await page.waitForTimeout(500); // late fouten na de load
   }
 
+  /** Screenshot van één onderdeel (CSS-selector) op een pagina van de preview. Valt terug op het zichtbare scherm als het onderdeel er niet (meer) is. */
+  async elementShot(selector: string, pagePath = "/"): Promise<{ data: Buffer; found: boolean }> {
+    const base = await this.getUrl();
+    const target = new URL(pagePath, base);
+    if (target.origin !== new URL(base).origin) throw new Error("Pad valt buiten de preview-URL.");
+    const browser = await this.ensureBrowser();
+    const ctx = await browser.newContext(VIEWPORTS.desktop);
+    try {
+      const page = await ctx.newPage();
+      page.setDefaultTimeout(NAV_TIMEOUT);
+      await this.goto(page, target.toString());
+      let loc;
+      try {
+        loc = page.locator(selector).first();
+        if ((await loc.count()) === 0) throw new Error("niet gevonden");
+      } catch {
+        const data: Buffer = await page.screenshot({ type: "jpeg", quality: 70, timeout: NAV_TIMEOUT });
+        return { data, found: false };
+      }
+      await loc.scrollIntoViewIfNeeded({ timeout: 3000 }).catch(() => undefined);
+      const data: Buffer = await loc.screenshot({ type: "jpeg", quality: 70, timeout: NAV_TIMEOUT });
+      return { data, found: true };
+    } finally {
+      await ctx.close().catch(() => undefined);
+    }
+  }
+
   async screenshot(opts: { viewport?: Viewport; path?: string; fullPage?: boolean }): Promise<{ data: Buffer; width: number; height: number; url: string }> {
     const base = await this.getUrl();
     const target = new URL(opts.path ?? "/", base);
