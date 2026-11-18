@@ -278,6 +278,7 @@ const UI_SETTINGS: &[&str] = &[
     "text_scale",
     "default_project_dir",
     "menu_collapsed",
+    "update_check",
 ];
 
 fn valid_setting(key: &str, value: &str) -> bool {
@@ -287,7 +288,7 @@ fn valid_setting(key: &str, value: &str) -> bool {
         "plan_default" => matches!(value, "0" | "1"),
         "settings_version" => value.parse::<u32>().is_ok_and(|n| n <= 1000),
         "text_scale" => matches!(value, "90" | "100" | "115" | "130"),
-        "menu_collapsed" => matches!(value, "0" | "1"),
+        "menu_collapsed" | "update_check" => matches!(value, "0" | "1"),
         "default_project_dir" => value.len() <= 1000 && !value.contains('\0'),
         "theme" => matches!(value, "system" | "light" | "dark"),
         "loop_threshold" => value

@@ -23,6 +23,7 @@ import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import BevestigDialoog from "@/components/app/supabase/BevestigDialoog";
 import ActieBevestig from "@/components/app/ActieBevestig";
+import UpdateCheck from "@/components/app/update/UpdateCheck";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -348,6 +349,7 @@ export default function App() {
         )}
         <BevestigDialoog />
         <ActieBevestig />
+        <UpdateCheck />
         <Toaster position="top-center" richColors />
       </div>
     </TooltipProvider>

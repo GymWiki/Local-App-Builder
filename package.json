@@ -27,6 +27,8 @@
     "ux:vercel": "node scripts/ux-vercel-test.mjs",
     "ux:start": "node scripts/ux-start-check.mjs",
     "dev:check": "node scripts/dev-check.mjs",
+    "setup:updates": "node scripts/setup-updates.mjs",
+    "release": "node scripts/release.mjs",
     "mcp:test": "npm --prefix mcp-server test",
     "check": "npm run lint && npm test && npm run build && cd src-tauri && cargo clippy --all-targets -- -D warnings && cargo test"
   },

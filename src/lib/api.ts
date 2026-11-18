@@ -685,3 +685,14 @@ export const vercelEnvSupabase = (projectId: number, bevestigd: boolean) => invo
 export const vercelDomainAdd = (projectId: number, domein: string) => invoke<{ naam?: string; geverifieerd?: boolean; regels?: { type: string; naam: string; waarde: string }[]; fout?: string }>("vercel_domain_add", { projectId, domein });
 export const vercelDomainCheck = (projectId: number, domein: string) => invoke<{ naam?: string; geverifieerd?: boolean; regels?: { type: string; naam: string; waarde: string }[]; fout?: string }>("vercel_domain_check", { projectId, domein });
 export const vercelUnlink = (projectId: number) => invoke<void>("vercel_unlink", { projectId });
+
+// ---------- bijwerken van Studio zelf ----------
+export interface UpdateInfo {
+  status: "actueel" | "beschikbaar" | "niet_ingesteld" | "dev" | "fout";
+  versie_nu: string;
+  nieuw: string | null;
+  notities: string | null;
+  datum: string | null;
+}
+export const updateCheck = () => invoke<UpdateInfo>("update_check");
+export const updateInstall = () => invoke<void>("update_install");

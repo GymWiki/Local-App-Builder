@@ -23,6 +23,16 @@ try {
   check("commit zichtbaar", (await b.getByTestId("build-commit").innerText()).length > 3);
   await p.screenshot({ path: "docs/ui/start-instellingen-versie.png" });
   check("geen scriptfouten", errors.length === 0);
+  // Bijwerken: bij het openen verschijnt de vraag als er een nieuwere versie is; 'Later' sluit hem zonder iets te doen.
+  const { page: q, errors: qerr } = await openApp({ w: 1280, h: 800, theme: "licht", scenario: { seed: [{ naam: "Hovenier Joke", last: "2026-11-10T10:00:00Z" }], update: { status: "beschikbaar", versie_nu: "0.1.0", nieuw: "0.2.0", notities: "Back-up op GitHub en online zetten met Vercel", datum: null } } });
+  const d = q.getByTestId("update-dialoog");
+  await d.waitFor();
+  check("updatevraag noemt de nieuwe versie", /0\.2\.0/.test(await d.innerText()) && /Back-up op GitHub/.test(await q.getByTestId("update-notities").innerText()));
+  await q.screenshot({ path: "docs/ui/start-update.png" });
+  await q.getByTestId("update-later").click();
+  await q.waitForTimeout(200);
+  check("'Later' sluit de vraag", (await q.getByTestId("update-dialoog").count()) === 0 && !(await q.evaluate(() => window.__S.updateGeinstalleerd)));
+  check("geen scriptfouten (update)", qerr.length === 0);
 } finally {
   await stop();
 }

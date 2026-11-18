@@ -1669,6 +1669,11 @@
         "label": "Koppelingen",
         "uitleg": "Verbind je eigen accounts, zoals GitHub, Vercel en Supabase. Studio bewaart je toegang alleen op deze computer, in de beveiligde kluis.",
         "binnenkort": "Komt binnenkort"
+      },
+      "update": {
+        "label": "Controleer bij het openen op een nieuwe versie",
+        "uitleg": "Studio kijkt bij het starten of er een nieuwere versie is op GitHub. Er wordt niets geïnstalleerd zonder dat jij het goedvindt. Er gaat geen gegeven van jou mee.",
+        "knop": "Nu zoeken naar een nieuwe versie"
       }
     },
     "gevorderd": {
@@ -2210,6 +2215,24 @@
       "ongeldig_token": "De koppeling met Vercel werkt niet meer.",
       "niet_gekoppeld": "Vercel is nog niet gekoppeld.",
       "onverwacht": "Dit domein kan niet worden gekoppeld. Controleer de naam."
+    }
+  },
+  "update": {
+    "zoeken": "Even zoeken…",
+    "actueel": "Je hebt de nieuwste versie ({{versie}}).",
+    "beschikbaar": "Er is een nieuwe versie: {{nieuw}} (jij hebt {{versie}}).",
+    "niet_ingesteld": "Bijwerken is nog niet ingesteld voor deze versie van Studio.",
+    "dev": "Bijwerken werkt alleen in de gebouwde app, niet in de ontwikkelversie.",
+    "fout": "Zoeken naar een nieuwe versie lukte niet. Controleer je internet en probeer het later opnieuw.",
+    "dialoog": {
+      "titel": "Er is een nieuwe versie van Studio",
+      "uitleg": "Versie {{nieuw}} is klaar. Jij hebt nu versie {{versie}}. Studio sluit je projecten netjes af, installeert de nieuwe versie en start opnieuw op. Je projecten en instellingen blijven bewaard.",
+      "notities": "Wat is er nieuw?",
+      "nu": "Nu bijwerken",
+      "later": "Later",
+      "bezig": "Bezig met downloaden…",
+      "installeren": "Bezig met installeren…",
+      "fout": "Het bijwerken is niet gelukt. Er is niets veranderd. Probeer het later opnieuw."
     }
   }
 }

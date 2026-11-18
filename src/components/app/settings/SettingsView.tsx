@@ -1,4 +1,5 @@
 import BuildInfo from "./BuildInfo";
+import UpdateRij from "@/components/app/update/UpdateRij";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertTriangleIcon } from "lucide-react";
@@ -167,6 +168,12 @@ export default function SettingsView({ scope, project, accounts, mcp, groep, onG
           </Rij>
           <Rij id="inst-voorbeeld" label={t("inst.programma.autoVoorbeeld.label")} uitleg={t("inst.programma.autoVoorbeeld.uitleg")} bereik="alle" herstel={{ onReset: () => void reset("preview_auto_switch"), isStandaard: s.preview_auto_switch === d.preview_auto_switch }}>
             <Switch checked={s.preview_auto_switch} onCheckedChange={(v) => void set("preview_auto_switch", v)} aria-label={t("inst.programma.autoVoorbeeld.label")} />
+          </Rij>
+          <Rij id="inst-update" label={t("inst.programma.update.label")} uitleg={t("inst.programma.update.uitleg")} bereik="alle" herstel={{ onReset: () => void reset("update_check"), isStandaard: s.update_check === d.update_check }}>
+            <div className="space-y-3">
+              <Switch checked={s.update_check} onCheckedChange={(v) => void set("update_check", v)} aria-label={t("inst.programma.update.label")} />
+              <UpdateRij />
+            </div>
           </Rij>
           <Rij id="inst-backup" label={t("inst.programma.backup.label")} uitleg={t("inst.programma.backup.uitleg")} bereik="dit">
             {onOpenOnline ? (

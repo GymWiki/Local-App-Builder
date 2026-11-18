@@ -25,6 +25,7 @@ describe("instellingen: standaarden en controle", () => {
       preview_auto_switch: false,
       default_project_dir: "",
       menu_collapsed: false,
+      update_check: true,
     });
   });
 

@@ -248,6 +248,8 @@ function mock({ demoUrl, scenario, THUMB }) {
     supa_sql: () => ({ status: "uitgevoerd", tekst: "Resultaat.", data: [] }),
     project_storage_get: (a) => S.opslag[a.projectId] ?? null,
     project_storage_set: (a) => void (S.opslag[a.projectId] = a.keuze),
+    update_check: () => scenario.update ?? { status: "actueel", versie_nu: "0.1.0", nieuw: null, notities: null, datum: null },
+    update_install: () => { S.updateGeinstalleerd = true; },
     vercel_state: () => S.vercelState(),
     vercel_deploy: (a) => {
       S.vercelAanroepen.push([a.doelNaam, a.bevestigd]);

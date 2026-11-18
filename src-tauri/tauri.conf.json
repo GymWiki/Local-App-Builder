@@ -40,5 +40,16 @@
       "../templates": "templates",
       "../mcp-server/node_modules/playwright-core": "mcp-server/node_modules/playwright-core"
     }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "NOG-NIET-INGESTELD",
+      "endpoints": [
+        "https://github.com/GymWiki/Local-App-Builder/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
   }
 }

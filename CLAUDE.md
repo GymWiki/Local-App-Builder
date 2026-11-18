@@ -96,3 +96,8 @@ Lokale desktop-app (Tauri 2 + React/TypeScript/Vite + Tailwind, Rust-backend, SQ
 - Waarden van omgevingsvariabelen staan alleen in de OS-kluis (`vercel-env/<project>/<NAAM>`), nooit in SQLite, uitkomsten, status, logs of AI-context. De AI kan alleen een door de gebruiker ingevoerde variabele doorsturen (`vercel_set_env` heeft alleen een naam). Een geheime sleutel nooit als "openbaar" of onder een naam die de browser ziet (`env.rs`).
 - Voor het uploaden: controles (lint/bouw/tests, kit-check, beveiligingscheck) en dezelfde geheimenscan als bij GitHub (`github/scan.rs`). Bouwlogboeken die we tonen gaan door `scan::redact`.
 - Test: `cargo test vercel`, `npm run ux:vercel`, en echt met een eigen account (docs/vercel.md §8).
+
+## Downloaden en bijwerken van Studio zelf
+- Releases worden door `.github/workflows/release.yml` gebouwd en ondertekend (`docs/updates.md`). De privésleutel staat **alleen** als GitHub-geheim (`TAURI_SIGNING_PRIVATE_KEY`) en in `~/.tauri/studio.key` van de eigenaar; nooit in de repository, een log of een bericht. In `tauri.conf.json` staat alleen de publieke sleutel.
+- De update-controle gebeurt in Rust (`src-tauri/src/updates.rs`), nooit in de frontend, en alleen naar de releases van Studio (test bewaakt het adres). Er wordt niets geïnstalleerd zonder dat de gebruiker "Nu bijwerken" kiest; vóór het installeren sluit `shutdown()` alle projecten (geen proces mag achterblijven). Instelling `update_check` (standaard aan) staat in het register en in Instellingen.
+- Nieuwe versie: `npm run release -- X.Y.Z` (versienummer in package.json, tauri.conf.json en Cargo.toml blijft gelijk), daarna `git push --follow-tags`.

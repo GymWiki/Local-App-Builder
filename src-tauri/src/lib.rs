@@ -22,6 +22,7 @@ mod projectinfo;
 mod projects;
 mod provider;
 mod templates;
+mod updates;
 mod supa;
 mod terminal;
 mod vercel;
@@ -190,6 +191,8 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .manage(updates::Pending::default())
         .setup(|app| {
             let dir = app.path().app_data_dir()?;
             std::fs::create_dir_all(&dir)?;
@@ -435,6 +438,8 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            updates::update_check,
+            updates::update_install,
             confirm::actie_confirm_answer,
             github::app::github_state,
             github::app::github_suggest_name,
@@ -564,10 +569,15 @@ pub fn run() {
         .expect("Studio kon niet starten")
         .run(|app, event| {
             if let tauri::RunEvent::Exit = event {
-                app.state::<ChatManager>().close_all();
-                app.state::<PreviewManager>().close_all();
-                app.state::<TerminalManager>().close_all();
-                app.state::<McpManager>().stop_all();
+                shutdown(app);
             }
         });
+}
+
+/// Alles netjes afsluiten: chat, previews, terminals en MCP-servers (en daarmee hun processen). Geen proces mag achterblijven.
+pub(crate) fn shutdown(app: &tauri::AppHandle) {
+    app.state::<ChatManager>().close_all();
+    app.state::<PreviewManager>().close_all();
+    app.state::<TerminalManager>().close_all();
+    app.state::<McpManager>().stop_all();
 }
