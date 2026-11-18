@@ -24,6 +24,7 @@ mod provider;
 mod templates;
 mod supa;
 mod terminal;
+mod vercel;
 mod winpath;
 
 use chat::{ChatManager, ChatOut};
@@ -225,6 +226,7 @@ pub fn run() {
                     Arc::new(vault::KeyringStore)
                 };
                 let secrets_for_engine = secrets.clone();
+                let secrets_for_vercel = secrets.clone();
                 let notify = app.handle().clone();
                 let manager = ConnManager::new(
                     providers::all(),
@@ -265,6 +267,20 @@ pub fn run() {
                     }),
                 );
                 app.manage(gh);
+                let vercel_progress = app.handle().clone();
+                let vercel_engine = vercel::engine::Engine::new(
+                    manager.clone(),
+                    secrets_for_vercel,
+                    Box::new(DbSource(app.handle().clone())),
+                    app.state::<Arc<confirm::UiActionConfirmer>>().inner().clone(),
+                    Arc::new(vercel::app::AppHooks { app: app.handle().clone() }),
+                    Arc::new(connect::manager::real_now),
+                    Arc::new(std::thread::sleep),
+                    Arc::new(move |project_id, stap, klaar, totaal| {
+                        let _ = vercel_progress.emit("vercel-voortgang", serde_json::json!({ "project_id": project_id, "stap": stap, "klaar": klaar, "totaal": totaal }));
+                    }),
+                );
+                app.manage(vercel_engine);
                 // Verversen op de achtergrond: elke minuut kijken of een token bijna verloopt.
                 std::thread::spawn(move || loop {
                     std::thread::sleep(std::time::Duration::from_secs(60));
@@ -430,6 +446,19 @@ pub fn run() {
             github::app::github_list_repos,
             github::app::github_scan,
             github::app::github_import,
+            vercel::app::vercel_state,
+            vercel::app::vercel_deploy,
+            vercel::app::vercel_cancel,
+            vercel::app::vercel_deployments,
+            vercel::app::vercel_rollback,
+            vercel::app::vercel_build_summary,
+            vercel::app::vercel_env_list,
+            vercel::app::vercel_env_set,
+            vercel::app::vercel_env_remove,
+            vercel::app::vercel_env_supabase,
+            vercel::app::vercel_domain_add,
+            vercel::app::vercel_domain_check,
+            vercel::app::vercel_unlink,
             supa::app::supa_status,
             supa::app::supa_security_check,
             supa::app::supa_users,

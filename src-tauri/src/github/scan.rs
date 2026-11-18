@@ -100,7 +100,7 @@ fn is_placeholder(v: &str) -> bool {
 }
 
 /// De soort bestand op grond van de naam alleen (zonder naar de inhoud te kijken).
-fn by_name(path: &str) -> Option<(&'static str, &'static str)> {
+pub(crate) fn by_name(path: &str) -> Option<(&'static str, &'static str)> {
     let name = path.rsplit('/').next().unwrap_or(path).to_lowercase();
     if matches!(name.as_str(), ".env.example" | ".env.sample" | ".env.template" | ".env.dist") {
         return None;
@@ -131,7 +131,7 @@ fn looks_text(data: &[u8]) -> bool {
     !data.iter().take(8000).any(|&b| b == 0)
 }
 
-fn scan_text(path: &str, text: &str, historie: bool, out: &mut Vec<Finding>) {
+pub(crate) fn scan_text(path: &str, text: &str, historie: bool, out: &mut Vec<Finding>) {
     let p = patterns();
     let is_test = path.split('/').any(|s| matches!(s, "test" | "tests" | "__tests__" | "fixtures" | "mocks")) || path.contains(".test.") || path.contains(".spec.");
     let name = path.rsplit('/').next().unwrap_or(path).to_lowercase();
@@ -182,6 +182,30 @@ fn scan_text(path: &str, text: &str, historie: bool, out: &mut Vec<Finding>) {
             }
         }
     }
+}
+
+/// Ziet deze waarde eruit als een geheim (sleutel, token, privésleutel, geheime Supabase-rol)?
+pub fn looks_secret(value: &str) -> bool {
+    let p = patterns();
+    p.keys.iter().any(|(re, soort)| re.is_match(value) && (*soort != "jwt_token" || jwt_is_secret(value))) || p.private_key.is_match(value)
+}
+
+/// Maskeert alles wat op een sleutel of token lijkt in een stuk tekst (voor logboeken die we laten zien).
+pub fn redact(text: &str) -> String {
+    let p = patterns();
+    let mut out = text.to_string();
+    for (re, _) in &p.keys {
+        out = re.replace_all(&out, "[geheim]").into_owned();
+    }
+    out = p.url_cred.replace_all(&out, "[adres met wachtwoord]").into_owned();
+    let mut r = String::new();
+    for line in out.lines() {
+        // KEY=waarde of "key": "waarde" met een geheim-achtige naam
+        let l = p.generic.replace_all(line, "[geheim]");
+        r.push_str(&l);
+        r.push('\n');
+    }
+    r.trim_end_matches('\n').to_string()
 }
 
 fn jwt_is_secret(line: &str) -> bool {

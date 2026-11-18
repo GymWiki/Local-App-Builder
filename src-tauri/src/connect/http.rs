@@ -120,6 +120,7 @@ impl Http for UreqHttp {
             ("DELETE", Body::None) => apply(self.agent.delete(&req.url)).call(),
             ("DELETE", Body::Json(j)) => apply_body(self.agent.delete(&req.url).force_send_body()).content_type("application/json").send(j.as_str()),
             ("PATCH", Body::Json(j)) => apply_body(self.agent.patch(&req.url)).content_type("application/json").send(j.as_str()),
+            ("PATCH", Body::None) => apply_body(self.agent.patch(&req.url)).send_empty(),
             ("POST", Body::Bytes { content_type, data }) => apply_body(self.agent.post(&req.url)).content_type(content_type.as_str()).send(data.as_slice()),
             ("POST", Body::None) => apply_body(self.agent.post(&req.url)).send_empty(),
             ("POST", Body::Form(f)) => {

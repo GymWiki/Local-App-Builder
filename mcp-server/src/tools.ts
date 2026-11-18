@@ -190,6 +190,15 @@ export function registerTools(server: McpServer, ctx: ProjectCtx, record: (r: Ca
     {},
     true,
   );
+  // ---- Online zetten met Vercel. Studio voert alles zelf uit met het account van de gebruiker; je krijgt nooit een token of een waarde te zien.
+  const VERCEL = "Studio voert dit zelf uit met het Vercel-account van de gebruiker; je krijgt nooit een token of de waarde van een variabele te zien. Studio controleert eerst of alles groen is. De uitslag begint met UITGEVOERD, GEWEIGERD of MISLUKT: doe nooit alsof een geweigerde of mislukte actie is gelukt. ";
+  dbTool("vercel_status", "vercel.status", LEES + "Is Vercel gekoppeld, hoe heet het project, wat is het adres van het voorbeeld en van de echte site, wat was de laatste uitkomst en welke omgevingsvariabelen ontbreken (alleen namen)?", {}, false);
+  dbTool("vercel_list_deployments", "vercel.list", LEES + "De eerdere versies die online zijn gezet: tijd, voorbeeld of echt, status en adres.", {}, false);
+  dbTool("vercel_get_build_logs", "vercel.build_logs", LEES + "Een samenvatting van het bouwlogboek van de laatste mislukte bouw: soort fout en de laatste regels (geheimen zijn gemaskeerd). Gebruik dit om de fout te herstellen.", {}, false);
+  dbTool("vercel_deploy_preview", "vercel.preview", VERCEL + "Zet een VOORBEELD online (niet de echte site) met een eigen adres. Werkt alleen als de gebruiker Vercel voor dit project al eenmaal heeft ingesteld. Kan een paar minuten duren.", {}, true);
+  dbTool("vercel_deploy_live", "vercel.live", VERCEL + "Zet de ECHTE site online. De gebruiker moet dit ALTIJD zelf bevestigen in een dialoog in Studio, ook als je veel mag; zonder zijn ja gebeurt er niets. Vraag er dus niet op een andere manier om en doe niets om dit te omzeilen.", {}, true);
+  dbTool("vercel_rollback", "vercel.rollback", VERCEL + "Zet de echte site terug naar een eerdere versie (uit `vercel_list_deployments`). De gebruiker moet dit altijd bevestigen. Op het gratis plan kan alleen naar de vorige versie.", { deployment: z.string().min(1).max(80) }, true);
+  dbTool("vercel_set_env", "vercel.set_env", VERCEL + "Stuurt een omgevingsvariabele die de GEBRUIKER zelf in Studio heeft ingevoerd door naar Vercel. Je geeft alleen de naam; je kunt en mag nooit een waarde meegeven of lezen. Bestaat de variabele niet in Studio, vraag de gebruiker dan om haar bij ‘Online zetten’ in te voeren. Voor de echte site vraagt Studio altijd bevestiging.", { naam: z.string().regex(/^[A-Z][A-Z0-9_]{0,63}$/) }, true);
   dbTool("db_status", "db.status", LEES + "Is het project gekoppeld aan Supabase, hoe heet het, in welke regio, is het gepauzeerd en welk bedieningsniveau geldt?", {}, false);
   dbTool("db_get_public_config", "db.public_config", LEES + "De project-URL en de publiceerbare sleutel (veilig voor in de app). Nooit de geheime sleutel of het wachtwoord.", {}, false);
   dbTool("db_list_tables", "db.list_tables", LEES + "Tabellen in het publieke schema met kolommen, of RLS aan staat en welk beleid er is.", {}, false);

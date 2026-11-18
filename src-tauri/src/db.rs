@@ -13,6 +13,7 @@ const MIGRATIONS: &[&str] = &[
     include_str!("../migrations/0006_koppelingen.sql"),
     include_str!("../migrations/0007_supabase.sql"),
     include_str!("../migrations/0008_github.sql"),
+    include_str!("../migrations/0009_vercel.sql"),
 ];
 
 pub fn open(path: &Path) -> Result<Connection> {
@@ -105,7 +106,10 @@ mod tests {
                 "project_layouts",
                 "projects",
                 "settings",
-                "supabase_links"
+                "supabase_links",
+                "vercel_deployments",
+                "vercel_env",
+                "vercel_links"
             ]
         );
         assert_eq!(schema_version(&conn).unwrap(), MIGRATIONS.len());

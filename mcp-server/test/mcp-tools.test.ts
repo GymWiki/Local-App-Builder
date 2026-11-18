@@ -71,6 +71,13 @@ describe("MCP-tools (fase 3)", () => {
       "run_checks",
       "security_check",
       "update_project_notes",
+      "vercel_deploy_live",
+      "vercel_deploy_preview",
+      "vercel_get_build_logs",
+      "vercel_list_deployments",
+      "vercel_rollback",
+      "vercel_set_env",
+      "vercel_status",
     ]);
   });
 
