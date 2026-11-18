@@ -1713,11 +1713,27 @@
       },
       "licentie": {
         "label": "Licentie",
-        "uitleg": "Studio is voor eigen gebruik op je computer. Je projecten zijn en blijven van jou."
+        "uitleg": "Studio is voor eigen gebruik op je computer. Je projecten zijn en blijven van jou.",
+        "gratis": "Studio is gratis. Je hebt geen licentie nodig en er is geen account of internet voor nodig.",
+        "betaald": "Licentie van {{naam}} is geldig.",
+        "melding": "Er staat een licentiebestand, maar dat klopt niet ({{reden}}). Studio werkt gewoon verder, net als gratis.",
+        "reden": {
+          "onleesbaar": "het bestand is onleesbaar",
+          "handtekening_klopt_niet": "de handtekening klopt niet",
+          "verlopen": "de licentie is verlopen",
+          "onbekende_versie": "onbekende versie"
+        }
       },
       "privacy": {
         "label": "Privacy",
-        "uitleg": "Studio verstuurt zelf niets over jou of je projecten. Alleen de AI waar je mee werkt krijgt wat je hem vraagt."
+        "uitleg": "Studio verstuurt zelf niets over jou of je projecten. Alleen de AI waar je mee werkt krijgt wat je hem vraagt.",
+        "punten": [
+          "Je projecten blijven op je eigen computer. Studio heeft geen eigen server en geen account.",
+          "Studio verstuurt geen gebruiksgegevens en heeft geen statistieken of verborgen metingen. Er is dus ook niets om uit te zetten.",
+          "De AI waar je mee werkt (Claude, Gemini) krijgt wat jij of de AI uit je project opvraagt, via je eigen AI-account. Dat gaat via dat bedrijf en valt onder hun voorwaarden.",
+          "Studio kijkt bij het openen of er een nieuwe versie van Studio is, bij de publieke releases op GitHub. Dat kun je uitzetten bij ‘Mijn programma’. Er gaat dan geen gegevens over jou mee.",
+          "Koppelingen (GitHub, Vercel, Supabase, de winkels) zijn er alleen als jij ze verbindt. Je toegang bewaart Studio alleen in de beveiligde kluis van je computer, nooit in je project of in een bericht aan de AI."
+        ]
       },
       "sleutels": {
         "label": "Koppelingen",

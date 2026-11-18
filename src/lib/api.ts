@@ -820,3 +820,6 @@ export interface ContextItem {
 export const kaartVernieuw = (projectId: number) => invoke<KaartStatus>("kaart_vernieuw", { projectId });
 export const kaartTekst = (projectId: number) => invoke<string>("kaart_tekst", { projectId });
 export const kaartContext = (projectId: number) => invoke<ContextItem[]>("kaart_context", { projectId });
+
+export type LicentieStand = { modus: "gratis" } | { modus: "betaald"; naam: string } | { modus: "gratis_met_melding"; reden: string };
+export const licentieStatus = () => invoke<LicentieStand>("licentie_status");

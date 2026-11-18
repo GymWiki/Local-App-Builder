@@ -170,4 +170,20 @@ describe("SettingsView", () => {
     fireEvent.click(await screen.findByRole("switch", { name: "Projectkaart gebruiken" }));
     await waitFor(() => expect(api.setUiSetting).toHaveBeenCalledWith("kaart_aan", "0"));
   });
+
+  it("Mijn programma: licentie (gratis) en privacy zonder verborgen metingen", async () => {
+    (api.licentieStatus as Mock).mockResolvedValue({ modus: "gratis" });
+    setup("app");
+    open("Mijn programma");
+    expect(await screen.findByTestId("licentie-tekst")).toHaveTextContent("Studio is gratis");
+    expect(screen.getByTestId("privacy-tekst")).toHaveTextContent("geen statistieken of verborgen metingen");
+    expect(screen.getByTestId("privacy-tekst")).toHaveTextContent("Je projecten blijven op je eigen computer");
+  });
+  it("een kapotte licentie geeft een vriendelijke melding en Studio blijft gratis werken", async () => {
+    (api.licentieStatus as Mock).mockResolvedValue({ modus: "gratis_met_melding", reden: "verlopen" });
+    setup("app");
+    open("Mijn programma");
+    expect(await screen.findByTestId("licentie-tekst")).toHaveTextContent("de licentie is verlopen");
+    expect(screen.getByTestId("licentie-tekst")).toHaveTextContent("werkt gewoon verder");
+  });
 });

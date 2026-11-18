@@ -280,6 +280,7 @@ function mock({ demoUrl, scenario, THUMB }) {
     kaart_vernieuw: () => ({ aan: true, bestanden: 14, tokens: 820, terugval: 0 }),
     kaart_tekst: () => "# Projectkaart\n- index.html — Mijn site\n",
     kaart_context: () => [{ id: "instructies", tokens: 900, te_groot: false }, { id: "notities", tokens: 150, te_groot: false }, { id: "kaart", tokens: 640, te_groot: false }],
+    licentie_status: () => ({ modus: "gratis" }),
     start_info: () => ({ onderbroken: !!scenario.crash, laatste_project: scenario.crash ? S.projects[0] ?? null : null }),
     maak_probleemrapport: () => "Studio 0.1.1 · Windows\nGeen problemen gevonden.",
     system_check: () => scenario.systeem ?? { punten: [{ id: "node", status: "ok", detail: "v22.3.0" }, { id: "git", status: "ok", detail: "git version 2.45" }, { id: "ai", status: "ok", detail: "claude" }, { id: "internet", status: "ok", detail: null }, { id: "schijf", status: "ok", detail: "120" }, { id: "rechten", status: "ok", detail: null }], klaar: true },

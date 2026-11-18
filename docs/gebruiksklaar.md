@@ -128,3 +128,14 @@ Tests: `src/lib/fouten.test.ts`, `src/components/app/fouten.test.tsx`, `cargo te
 - Opgelost: scrollgebieden bereikbaar met het toetsenbord, schakelaars, keuzerondjes en vinkjes en de paneelknoppen groter (zie `docs/ui.md`). Het shadcn-kitpakket is opnieuw gegenereerd.
 - Al aanwezig: "Herstel standaardindeling" (werkbalk), focusringen, grote klikdoelen, thematokens, licht en donker.
 - Nog niet gedaan: een volledige jargonronde, lege schermen en laadmeldingen per scherm, en prestatiemeting van de start.
+
+## DEEL 6 — Verpakken, bijwerken en vertrouwen
+
+| Onderdeel | Stand |
+|---|---|
+| Installer, bijwerken, "Wat is nieuw" in de updatevraag | bestond al (zie `docs/updates.md`), nog nooit echt gedraaid |
+| `docs/uitrollen.md`: wat jij zelf moet regelen (Windows-certificaat, Apple-account en notarisering, updatesleutel, waar updates staan, Node, licentie, voorwaarden) | **nieuw** |
+| Licentie-haakje, offline te controleren, overal gratis | **nieuw** (`licentie.rs`, `config/licentie.json` leeg, 3 tests met een echte testvector van de bibliotheek) |
+| Privacy in de app (Instellingen → Mijn programma): wat wel en niet naar buiten gaat | **nieuw**; zegt eerlijk dat Studio geen statistieken heeft |
+| Statistiek-keuze bij de eerste start | **bewust niet gebouwd**: er bestaat geen statistiek, dus er valt niets te kiezen |
+| **Node.js meeleveren in de installer** | **niet gedaan**: niet te testen zonder echte bouwen op Windows, macOS en Linux (zie `docs/uitrollen.md` §5) |

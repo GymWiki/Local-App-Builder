@@ -16,6 +16,7 @@ mod herstel;
 mod instructions;
 mod kaart;
 mod layouts;
+mod licentie;
 mod mcp;
 mod mcp_config;
 mod node;
@@ -465,6 +466,7 @@ pub fn run() {
             kaart::app::kaart_vernieuw,
             kaart::app::kaart_tekst,
             kaart::app::kaart_context,
+            licentie::licentie_status,
             updates::update_check,
             updates::update_install,
             confirm::actie_confirm_answer,

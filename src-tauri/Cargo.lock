@@ -4440,6 +4440,7 @@ dependencies = [
  "git2",
  "ignore",
  "keyring",
+ "minisign-verify",
  "notify",
  "portable-pty",
  "regex",

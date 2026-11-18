@@ -24,6 +24,7 @@ import { useSupa } from "@/components/app/supabase/use-supa";
 import Keuze from "./Keuze";
 import Rij from "./Rij";
 import { AiGebruikGevorderd, BeleidRij } from "./AiGebruikRijen";
+import { LicentieTekst, PrivacyTekst } from "./LicentiePrivacy";
 
 export type InstellingGroep = "project" | "ai" | "programma" | "gevorderd";
 
@@ -193,10 +194,10 @@ export default function SettingsView({ scope, project, accounts, mcp, groep, onG
             <p className="text-base">{t("inst.programma.versie.nu", { versie: pakket.version })}</p>
           </Rij>
           <Rij id="inst-licentie" label={t("inst.programma.licentie.label")} uitleg={t("inst.programma.licentie.uitleg")} bereik="alle">
-            {null}
+            <LicentieTekst />
           </Rij>
           <Rij id="inst-privacy" label={t("inst.programma.privacy.label")} uitleg={t("inst.programma.privacy.uitleg")} bereik="alle">
-            {null}
+            <PrivacyTekst />
           </Rij>
           <Rij id="inst-sleutels" label={t("inst.programma.sleutels.label")} uitleg={t("inst.programma.sleutels.uitleg")} bereik="alle">
             <KoppelingenOverzicht />
