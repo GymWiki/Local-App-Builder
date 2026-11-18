@@ -106,3 +106,57 @@ Gemeten met `npm view`, het lezen van de gebouwde bestanden en een esbuild-bunde
 - Flexlayout levert eigen CSS; die wordt alleen via `--flexlayout-*`-variabelen op onze thematokens gezet (`src/index.css`). Geen losse kleuren.
 
 **shadcn Resizable** (react-resizable-panels) blijft in gebruik voor de vaste tweedeling bij heel kleine vensters (`SplitView`) en voor schermen zonder docking. Voor de werkruimte zelf niet: het kan panelen niet verplaatsen.
+
+## Resultaat: homescherm en werkruimte (2026-11-18)
+
+### Homescherm
+- Raster met projectkaarten (`src/components/app/home/`): miniatuur (laatste schermbeeld van de preview, anders een plaatshouder), naam, "Laatst bewerkt", statusbadge en een menu met **Openen**, **Naam wijzigen** en **Uit lijst verwijderen**. Die laatste vraagt altijd een bevestiging en zegt dat de bestanden op de computer blijven staan; Studio kan geen projectbestanden wissen.
+- Eerste kaart "Nieuw project" (opent het bestaande venster met de keuze leeg project of startklare website; het uiterlijk kies je daarna in het paneel Uiterlijk), zoekveld, sorteren (laatst gebruikt, naam) en een lege staat met één grote knop.
+- Miniaturen: de runtime maakt met `preview.thumbnail` een JPEG van de preview (zelfde onzichtbare browser als `get_preview_screenshot`); de app bewaart die in de app-map (`thumbnails/<id>.jpg`, maximaal 600 kB, alleen JPEG). Zonder browser blijft de plaatshouder staan.
+- Statusbadges: "Draait", "Fout", "Niet actief", "Nieuw". **"Gepubliceerd" bestaat nog niet**: Studio publiceert nog niet zelf, dus de badge zou niet kloppen.
+- "Alle projecten" laat het project openstaan (preview en terminals lopen door); sluiten kan via het menu "Meer" in de werkruimte.
+
+### Werkruimte
+Indeling: `[ iconenbalk | links: onderdelen | midden: voorbeeld | rechts: eigenschappen boven, gesprek onder ]`.
+- Iconenbalk met Structuur, Onderdelen, Uiterlijk, Gegevens, Koppelingen en geheimen, Delen (publiceren), Eerdere versies, AI-accounts en Instellingen; **Geavanceerd (terminal)** onderaan. Elk icoon opent of sluit een paneel; open panelen hebben `aria-pressed`.
+- Terminal, accountbeheer, instellingen en versies/tijdlijn zijn verhuisd naar panelen; er is niets verwijderd. De oude zijbalk en het Projectinfo-paneel zijn vervangen (de gegevens staan nu in het paneel Instellingen).
+- **Onderdelen, Gegevens en Koppelingen** zijn nog plaatsen zonder functie: ze leggen eerlijk uit wat er komt en laten de AI er alvast bij helpen.
+- Bovenbalk: terug naar alle projecten, naam, status van voorbeeld en AI-koppeling, het menu **Indeling** (Standaard, Veel voorbeeld, Veel gesprek, Voorbeeld groot maken, Herstel standaardindeling) en een menu **Meer** (Sneltoetsen, Project sluiten).
+
+### Indeling per project (Layout-service)
+- `src/lib/layout/`: `panels.ts` (alle panelen, minimale groottes), `defaults.ts` (de drie vaste indelingen), `service.ts` (valideren, migreren, lezen, uitgesteld opslaan, herstellen). Los van de UI en met 33 unit-tests.
+- Opslag in SQLite (tabel `project_layouts`, migratie 0005): versienummer + JSON. De indeling wordt **streng gecontroleerd** bij het lezen: alleen bekende panelen, elk hoogstens één keer, preview en gesprek aanwezig, beperkte diepte en aantal, geldige getallen. Vaste eigenschappen (niet sluitbaar, blijft in het geheugen) worden altijd opnieuw gezet.
+- **Een kapotte, onbekende of te nieuwe indeling blokkeert nooit**: dan geldt de standaardindeling en de kapotte regel wordt gewist. Oudere versies gaan stap voor stap door `MIGRATIES` (nog leeg: versie 1 is de eerste).
+- Opslaan na 400 ms rust, zodat slepen niet bij elke pixel schrijft; een mislukte opslag wordt genegeerd.
+
+### Formaat, verplaatsen en zweven
+- Formaat: scheidingsgrepen met muis én toetsenbord (pijltjestoetsen; met Shift grotere stappen). De grepen hebben de rol `separator` met waarden en een naam; de minimale breedte en hoogte per paneel staan in `panels.ts`.
+- Verplaatsen: slepen naar links, rechts, boven, onder of als tabblad naast een ander paneel; daarnaast het menu **Paneel verplaatsen** bij elk paneel (voor het toetsenbord). Zwevend: via datzelfde menu ("Los laten zweven"); de zwevende panelen worden mee opgeslagen. Maximaliseren per groep.
+- Smal venster (werkruimte < 1000 px): een tijdelijke compacte indeling met twee groepen tabbladen (voorbeeld met de onderdelen; gesprek met eigenschappen). Wijzigingen in die weergave worden niet bewaard; de opgeslagen indeling blijft ongemoeid. Minimale venstergrootte: 900 × 600 (`src-tauri/tauri.conf.json`).
+- Op schermen vanaf 2200 px breed is de basisgrootte van de tekst groter (21 px in plaats van 17 px).
+
+### Eigenschappen
+- Element-kiezer in de preview (klik op een onderdeel); het paneel toont soort in gewone woorden, tekst, afmetingen, thematokens (met de naam van het token), eigen waarden, of het een onderdeel uit het uiterlijk (kit) is, het kruimelpad, en knoppen om het onderdeel erboven of eronder te kiezen. Het veld "Wat moet hier anders?" stuurt de keuze met een schermafbeelding naar de chat.
+- Zonder keuze: korte uitleg en gegevens van de pagina (titel, adres, taal, grootte, kleuren, lettertype), zodra de preview via de tussenserver is geladen.
+- Het pickerscript (`mcp-server/src/picker-script.ts`) leest alleen; het verandert niets aan de pagina behalve de omlijning. Alle berichten worden in de app gecontroleerd en ingekort (`pick.ts`).
+- **Stap 2 (directe aanpassing)** is niet gebouwd: zie `docs/eigenschappen-stap2.md`.
+
+### Toetsenbord en toegankelijkheid
+- Tabvolgorde: bovenbalk, iconenbalk, per paneel de tab, het verplaatsmenu, "groot maken" en de scheidingsgreep, daarna de inhoud. F6 wisselt tussen tabblad en inhoud; `Ctrl+]` en `Ctrl+[` gaan naar de volgende of vorige groep.
+- Sneltoetsen: `Ctrl+Shift+G` (naar het gesprek), `E` (Eigenschappen), `L` (linkerpaneel), `M` (voorbeeld groot). Geen Alt, want dat is AltGr op veel toetsenborden. Overzicht in "Meer → Sneltoetsen".
+- Alle teksten van de bibliotheek (knoppen, tips, menu's) zijn vertaald via `i18nTranslator`.
+- Bekende beperking van flexlayout: `aria-valuenow` van een greep loopt één stap achter; de indeling zelf beweegt direct.
+
+### Prestaties
+- Preview, gesprek en terminal blijven in het geheugen (`enableRenderOnDemand: false`). Tijdens slepen, verplaatsen en zweven laadt het iframe van de preview **niet opnieuw** (getest: 0 navigaties).
+
+### Controle
+- `npm run ux:test` (Playwright, zeven formaten: 900×600, 1280×720, 1366×768, 1536×864 (1920 bij 125%), 1280×720 (1920 bij 150%), 1920×1080, 2560×1440): lege staat, project maken, werkruimte, invoerveld, opdracht versturen, element kiezen en wens sturen, slepen met bewaren en terugkeren, pijltjestoetsen, docken door slepen, verplaatsmenu, zweven, vaste indelingen, herstel, klikdoelen en een vergelijking met basisscreenshots (`docs/ux/basis/`).
+- **Echte Tauri-app** (onder Xvfb, met muisbesturing via XTEST): homescherm met kaart, werkruimte openen, voorbeeld uit een echt project, echte terminal (PTY) in het paneel, accountpaneel, slepen van een greep, docken van een tabblad, herstarten en dezelfde indeling terugzien, "Herstel standaardindeling", element kiezen in de echte preview. Daarbij is een **bestaande fout gevonden en opgelost**: `chat_target` vergrendelde de database twee keer, waardoor het hele venster vastliep bij het openen van een project (zie de commit "Fix: chat_target…"). Screenshots: `docs/ui/indeling-echt-*.png`.
+- Voor/na: `docs/ui/indeling-voor-*.png` (oude indeling) en `docs/ui/indeling-na-*.png` (nieuw), plus `indeling-stap2-home-*.png`.
+
+### Bewust niet gedaan of nog niet getest
+- Geen zwevende of losse vensters buiten de app (popout): dat is uitgezet; zwevend blijft binnen het venster.
+- Schermschaal 125/150% is nagebootst via de venstergrootte; echte Windows-schaling is niet getest (ook niet in de echte app, die draaide op Linux).
+- Het compacte pad (smal venster) bewaart niets; als u daar iets verschuift, is het na heropenen weg.
+- Een tweede scherm of het verplaatsen van het venster tussen schermen met een andere schaal is niet getest.

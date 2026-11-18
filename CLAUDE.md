@@ -59,3 +59,10 @@ Lokale desktop-app (Tauri 2 + React/TypeScript/Vite + Tailwind, Rust-backend, SQ
 ## UI-kits toevoegen (ontwikkelwerkwijze)
 - Een nieuwe UI-kit, thema of componentenbibliotheek aan de kit library toevoegen gaat via de skill `add-kit` (`.claude/skills/add-kit/SKILL.md`): typ `/add-kit <pakketnaam of URL>` of vraag in één zin "voeg [kit] toe aan de kit library". De skill onderzoekt, beslist (alleen MIT, Apache-2.0, BSD-2/3-Clause, ISC; exacte versie), maakt `design-packs/<id>/`, test (`npm run kit:validate`, `kit:test`, `kit:try`, `kit:check`) en legt het vast in `docs/kits.md`. Formaat en achtergrond: `docs/kits.md`.
 - Voer nooit installatiescripts van onbekende pakketten uit zonder bevestiging, gebruik geen kit met een niet-toegestane licentie en kopieer geen code uit kits met een onbekende licentie.
+
+## Indeling (homescherm en werkruimte)
+- Homescherm met projectkaarten (`src/components/app/home/`) en een werkruimte per project (`src/components/app/workspace/`) met docking via **flexlayout-react** (keuze en reden: `docs/ui.md`). De iconenbalk, panelen en menu's gebruiken alleen shadcn-onderdelen en thematokens; de kleuren van flexlayout staan in `src/index.css` (`.studio-layout`).
+- De indeling per project staat in SQLite (`project_layouts`) en wordt beheerd door de Layout-service (`src/lib/layout/`). Wijzig je het formaat, verhoog dan `LAYOUT_VERSION` en voeg een migratie toe; een ongeldige indeling valt altijd terug op de standaard. Nieuwe panelen: `panels.ts` + `factory` in `ProjectWorkspace.tsx` + `werkruimte.paneel.<id>` in `nl.json`.
+- Een commando in Rust mag de `Db`-vergrendeling nooit vasthouden terwijl er code wordt aangeroepen die zelf `db.conn()` neemt (ChatManager, AppStore): dat blokkeert het hele venster. Beperk de vergrendeling tot een blok.
+- Test wijzigingen aan de indeling met `npm run ux:test` én in de echte app (`npm run tauri dev`); de nagebootste Tauri-laag vangt zulke fouten niet.
+
