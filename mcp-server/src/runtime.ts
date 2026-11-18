@@ -74,6 +74,7 @@ export class Runtime {
   private readonly emit: Emit;
   private readonly permissionTimeoutMs: number;
   private readonly permissions = new Map<string, (r: { allow: boolean; message?: string }) => void>();
+  private readonly hostCalls = new Map<string, (r: { ok: boolean; result?: unknown; error?: string }) => void>();
 
   constructor(o: RuntimeOptions) {
     this.projectDir = o.projectDir;
@@ -309,6 +310,13 @@ export class Runtime {
         const l = await loadConfig(this.projectDir);
         return { ...l, trusted: !!l.hash && l.hash === this.trustedHash };
       }
+      case "host.answer": {
+        const done = this.hostCalls.get(String(args.id ?? ""));
+        if (!done) throw new Error("Onbekende of al beantwoorde vraag aan Studio.");
+        this.hostCalls.delete(String(args.id));
+        done({ ok: args.ok === true, result: args.result, error: typeof args.error === "string" ? args.error : undefined });
+        return { ok: true };
+      }
       case "permission.answer":
         this.answerPermission(String(args.id ?? ""), args.allow === true, typeof args.message === "string" ? args.message : undefined);
         return { ok: true };
@@ -426,6 +434,26 @@ export class Runtime {
     });
   }
 
+  /**
+   * Een vraag aan de app zelf (bijvoorbeeld: welke koppelingen zijn er, of: voer deze database-actie uit). De app doet het werk en bewaart
+   * alle sleutels; hier komt alleen het antwoord terug. Zonder antwoord binnen de tijd of bij sluiten is het een fout.
+   */
+  hostCall(cmd: string, args: Record<string, unknown> = {}, timeoutMs = 10 * 60 * 1000): Promise<unknown> {
+    const id = randomUUID();
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => {
+        if (this.hostCalls.delete(id)) reject(new Error("Studio gaf geen antwoord op tijd; er is niets uitgevoerd."));
+      }, timeoutMs);
+      timer.unref();
+      this.hostCalls.set(id, (r) => {
+        clearTimeout(timer);
+        if (r.ok) resolve(r.result);
+        else reject(new Error(r.error ?? "Studio kon dit niet uitvoeren."));
+      });
+      this.emit({ event: "host_request", id, cmd, args });
+    });
+  }
+
   answerPermission(id: string, allow: boolean, message?: string): void {
     const done = this.permissions.get(id);
     if (!done) throw new Error("Onbekende of al beantwoorde toestemmingsvraag.");
@@ -435,6 +463,10 @@ export class Runtime {
 
   /** Stopt alles wat dit project draait: checks, dev-server en de onzichtbare browser. */
   async close(): Promise<void> {
+    for (const [id, done] of [...this.hostCalls]) {
+      this.hostCalls.delete(id);
+      done({ ok: false, error: "Het project is gesloten; er is niets uitgevoerd." });
+    }
     for (const [id, done] of [...this.permissions]) {
       this.permissions.delete(id);
       done({ allow: false, message: "Het project is gesloten." });

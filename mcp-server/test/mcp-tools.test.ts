@@ -41,6 +41,8 @@ describe("MCP-tools (fase 3)", () => {
       "get_preview_screenshot",
       "git_checkpoint",
       "git_list_checkpoints",
+      "koppeling_voorstellen",
+      "koppelingen_status",
       "needs_data",
       "permission_prompt",
       "project_status",

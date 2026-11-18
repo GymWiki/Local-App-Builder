@@ -10,6 +10,7 @@ const MIGRATIONS: &[&str] = &[
     include_str!("../migrations/0003_fase3.sql"),
     include_str!("../migrations/0004_chat.sql"),
     include_str!("../migrations/0005_indeling.sql"),
+    include_str!("../migrations/0006_koppelingen.sql"),
 ];
 
 pub fn open(path: &Path) -> Result<Connection> {
@@ -95,6 +96,7 @@ mod tests {
                 "chat_messages",
                 "chat_sessions",
                 "check_runs",
+                "connections",
                 "mcp_calls",
                 "project_layouts",
                 "projects",

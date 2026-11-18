@@ -765,6 +765,11 @@ impl ChatManager {
         self.inner.push(project, "divider", divider);
     }
 
+    /// Plaatst een bericht van Studio zelf in het gesprek (bijvoorbeeld een kaartje met een knop ‘Verbinden’).
+    pub fn post_message(&self, project: i64, kind: &str, payload: Value) {
+        self.inner.push(project, kind, payload);
+    }
+
     // ---------- toestemmingen ----------
 
     /// Een toestemmingsvraag van de AI (via de MCP-tool). Beslist met de gekozen stand; vraagt anders de gebruiker.

@@ -395,6 +395,8 @@ pub fn classify(tool: &str, input: &Value, project_dir: &Path) -> Classified {
                     | "git_list_checkpoints"
                     | "get_console_errors"
                     | "get_preview_screenshot"
+                    | "koppelingen_status"
+                    | "koppeling_voorstellen"
             );
             c.kind = match name {
                 "run_checks" => ActionKind::RunChecks,

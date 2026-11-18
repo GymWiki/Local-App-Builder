@@ -1,0 +1,6 @@
+{
+  "_uitleg": "Publieke client-ID's van door Studio geregistreerde apps (geen geheimen!). Leeg = de Verbinden-knop valt terug op 'token plakken'. Zie docs/koppelingen.md.",
+  "github": { "client_id": "" },
+  "vercel": { "client_id": "" },
+  "supabase": { "client_id": "" }
+}
