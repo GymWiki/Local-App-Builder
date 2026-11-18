@@ -1701,6 +1701,14 @@
         "uitleg": "Waarden voor verschillende omgevingen. De waarden komen straks in een veilige kluis, nooit in je project.",
         "binnenkort": "Komt binnenkort"
       }
+    },
+    "versie": {
+      "titel": "Welke versie draait er?",
+      "versie": "Versie",
+      "commit": "Codeversie",
+      "tijd": "Gebouwd op",
+      "dev": "Dit is de ontwikkelversie (npm run tauri dev). De bouwtijd is het moment waarop de server startte.",
+      "release": "Dit is een gebouwde versie van Studio."
     }
   },
   "woordenlijst": {

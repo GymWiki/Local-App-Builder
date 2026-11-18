@@ -1,3 +1,4 @@
+import BuildInfo from "./BuildInfo";
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { AlertTriangleIcon } from "lucide-react";
@@ -192,6 +193,7 @@ export default function SettingsView({ scope, project, accounts, mcp, groep, onG
           <Gevorderd project={metProject ? project : null} mcp={mcp ?? null} />
         </TabsContent>
       </Tabs>
+      <BuildInfo />
     </div>
   );
 }
