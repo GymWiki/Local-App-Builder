@@ -131,4 +131,36 @@ mod tests {
         assert!(!copied.contains(&"link".to_string()));
         assert!(!d.path().join("link").exists());
     }
+
+    /// De meegeleverde startprojecten zijn klein, draaien meteen (statische preview), hebben een ingevulde PROJECT.md en niets geheims.
+    #[test]
+    fn de_startprojecten_zijn_klaar_voor_gebruik() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../templates");
+        let namen = ["start-takenlijst", "start-portfolio", "start-webshop", "start-kassa"];
+        for n in namen {
+            let d = tempfile::tempdir().unwrap();
+            let gekopieerd = copy_template(&root, n, d.path()).unwrap();
+            for f in ["index.html", "stijl.css", "app.js", "PROJECT.md"] {
+                assert!(gekopieerd.contains(&f.to_string()), "{n}: {f} ontbreekt");
+            }
+            assert!(crate::projectinfo::signals(d.path()).project_md_ingevuld, "{n}: PROJECT.md is niet ingevuld");
+            let plan = crate::preview::detect::detect(d.path());
+            assert!(plan.previewable() && plan.kind == crate::preview::detect::Kind::Static, "{n}: geen directe preview");
+            let totaal: u64 = gekopieerd.iter().map(|f| fs::metadata(d.path().join(f)).unwrap().len()).sum();
+            assert!(totaal < 60_000, "{n}: te groot ({totaal} bytes)");
+            for f in &gekopieerd {
+                assert!(!crate::github::scan::scan_alleen_naam(f), "{n}: {f} lijkt geheim");
+                if f.ends_with(".html") || f.ends_with(".js") || f.ends_with(".css") {
+                    let t = fs::read_to_string(d.path().join(f)).unwrap();
+                    // Geen externe bronnen: het voorbeeld werkt zonder internet en stuurt niets naar derden.
+                    assert!(!t.contains("src=\"http") && !t.contains("href=\"http") && !t.contains("fetch(") && !t.contains("@import"), "{n}: {f} haalt iets van buiten op");
+                }
+            }
+        }
+        // Alleen het webshop-voorbeeld levert een databasevoorstel mee.
+        let d = tempfile::tempdir().unwrap();
+        copy_template(&root, "start-webshop", d.path()).unwrap();
+        assert!(d.path().join("supabase/migrations/0001_bestellingen.sql").is_file());
+        assert!(fs::read_to_string(d.path().join("supabase/migrations/0001_bestellingen.sql")).unwrap().contains("enable row level security"));
+    }
 }

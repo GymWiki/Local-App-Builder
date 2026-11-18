@@ -300,7 +300,7 @@ function MijnProject({ project, onError, onRenamed, onRemove }: { project: Proje
         </div>
       </Rij>
       <Rij id="inst-stack" label={t("inst.project.stack.label")} uitleg={t("inst.project.stack.uitleg")} bereik="dit">
-        <p className="text-base">{project.template === "leeg" ? t("inst.project.stack.leeg") : t("inst.project.stack.web-react-vite")}</p>
+        <p className="text-base">{t(`inst.project.stack.${project.template}`, { defaultValue: t("inst.project.stack.voorbeeld") })}</p>
         <p className="mt-1 break-all text-sm text-muted-foreground">
           {t("inst.project.map.label")}: {project.pad}
         </p>

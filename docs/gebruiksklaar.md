@@ -93,3 +93,18 @@ Voortgang per deel staat hieronder bij elk deel; de definitieve gereedheidslijst
 - **Gegevens:** alleen open als de app opslag nodig heeft; anders "niet nodig".
 - **Delen:** opent Online zetten (waar back-up, Vercel en winkel staan). Live zetten en insturen vragen daar altijd bevestiging.
 - Tests: `cargo test route`, `route.test.ts`, `route.test.tsx`; alle `ux:`-suites slagen met de balk erin.
+
+## DEEL 3 · Startprojecten en voorbeelden (gedaan, met beperkingen)
+
+- **Nieuw project** biedt nu "Beschrijf je idee" (leeg project) en "Begin met een voorbeeld". Voorbeelden (alle in `templates/`, samen minder dan 60 kB elk, zonder externe bronnen, met ingevulde PROJECT.md zodat de route direct een plan heeft):
+  | Voorbeeld | Soort | Gegevens |
+  |---|---|---|
+  | Takenlijst (`start-takenlijst`) | web | zonder database (bewaard in de browser) |
+  | Portfolio (`start-portfolio`) | web | zonder database; contactformulier opent het e-mailprogramma |
+  | Kleine webshop (`start-webshop`) | web | met een kant-en-klaar **voorstel** voor een Supabase-tabel (`supabase/migrations/`, beveiliging per rij aan, nog geen beleid); werkt zonder database |
+  | Kassa (`start-kassa`) | web, gemaakt voor een telefoon | zonder database |
+  | Startklare website (`web-react-vite`) | web (React), met kitkiezer | bestaand template |
+- **Draait in een minuut:** statische voorbeelden hebben geen installatie nodig; de preview start direct (getest: `detect` ziet "static").
+- **Beperking, eerlijk:** er is **geen echte mobiele app (Flutter) als voorbeeld**: er bestaat geen Flutter-template en ik heb er geen gebouwd (niet te testen zonder Flutter). Het kassa-voorbeeld is een website voor op een telefoon.
+- **Kits:** de voorbeelden gebruiken eigen stijlvariabelen (licht en donker, focusringen, grote knoppen), geen kit; de kitkiezer en kit-check blijven bij het React-template. De "Uiterlijk"-stap wordt voor de statische voorbeelden daarom niet automatisch geopend.
+- Tests: `cargo test templates` (elk voorbeeld kopieert, is klein, heeft een plan, geen geheimen, geen externe verbindingen), `npm run ux:startprojecten` (elk voorbeeld draait echt in een browser met klikken en toetsenbord op 390×844, 1280×720 en 1920×1080).

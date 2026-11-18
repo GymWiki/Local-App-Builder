@@ -104,16 +104,35 @@
     "annuleer": "Annuleren",
     "maak": "Project aanmaken",
     "bezig": "Bezig…",
-    "soort": "Soort project",
-    "soortLeeg": "Leeg project",
-    "soortLeegUitleg": "Je begint met een lege map. De AI bepaalt wat erin komt.",
-    "soortWeb": "Startklare website",
+    "soort": "Hoe wil je beginnen?",
+    "soortLeeg": "Beschrijf je idee",
+    "soortLeegUitleg": "Je begint met een leeg project en vertelt de AI in je eigen woorden wat je wilt.",
+    "soortWeb": "Startklare website (met kleuren en uiterlijk kiezen)",
     "soortWebUitleg": "Je krijgt meteen een werkende website om op voort te bouwen. Straks kies je hoe hij eruitziet.",
     "fout": {
       "naamLeeg": "Geef je project een naam.",
       "naamLang": "Kies een kortere naam (maximaal 60 tekens).",
       "naamTekens": "Gebruik geen tekens als / \\ : * ? \" < > | in de naam.",
       "mapLeeg": "Kies eerst een map waarin het project komt."
+    },
+    "voorbeeldKop": "Of begin met een voorbeeld dat meteen werkt",
+    "voorbeeld": {
+      "start-takenlijst": {
+        "titel": "Takenlijst",
+        "uitleg": "Taken toevoegen, afvinken en verwijderen. Geen account nodig."
+      },
+      "start-portfolio": {
+        "titel": "Portfolio",
+        "uitleg": "Een persoonlijke website met je werk en een contactformulier."
+      },
+      "start-webshop": {
+        "titel": "Kleine webshop (met voorstel voor een database)",
+        "uitleg": "Producten, winkelmandje en bestellen. Bestellingen bewaren in een database kan later."
+      },
+      "start-kassa": {
+        "titel": "Kassa voor op je telefoon",
+        "uitleg": "Producten aanslaan, totaal zien en afrekenen, gemaakt voor een klein scherm."
+      }
     }
   },
   "fout": {
@@ -1580,7 +1599,8 @@
         "label": "Soort project",
         "uitleg": "Dit kun je hier niet veranderen.",
         "leeg": "Leeg project",
-        "web-react-vite": "Website of app met voorbeeldpagina’s"
+        "web-react-vite": "Website of app met voorbeeldpagina’s",
+        "voorbeeld": "Een startproject (voorbeeld)"
       },
       "map": {
         "label": "Map op je computer"

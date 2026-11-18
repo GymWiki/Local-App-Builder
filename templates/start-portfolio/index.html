@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mijn portfolio</title>
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="stijl.css" />
+  <style>
+    .werk { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); }
+    .werk .kaart h3 { margin: 0 0 0.25rem; font-size: 1.1rem; }
+    .held { padding: 2rem 0 1rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="held">
+      <h1>Hoi, ik ben Alex</h1>
+      <p>Ik maak websites en foto’s voor kleine bedrijven. Hieronder zie je een deel van mijn werk.</p>
+      <a href="#contact"><button class="hoofd" type="button">Neem contact op</button></a>
+    </header>
+    <section aria-labelledby="werk-titel">
+      <h2 id="werk-titel">Mijn werk</h2>
+      <div class="werk" id="werk"></div>
+    </section>
+    <section aria-labelledby="over-titel">
+      <h2 id="over-titel">Over mij</h2>
+      <p>Schrijf hier een paar zinnen over jezelf: wat je doet, wat je belangrijk vindt en waarom mensen met je willen werken.</p>
+    </section>
+    <section id="contact" aria-labelledby="contact-titel">
+      <h2 id="contact-titel">Contact</h2>
+      <form id="formulier" class="kaart">
+        <label for="naam">Je naam</label>
+        <input id="naam" required autocomplete="name" />
+        <label for="bericht">Je bericht</label>
+        <textarea id="bericht" rows="4" required></textarea>
+        <p id="melding" aria-live="polite"></p>
+        <button class="hoofd" type="submit">Versturen</button>
+      </form>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

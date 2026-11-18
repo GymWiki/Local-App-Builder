@@ -100,6 +100,11 @@ fn is_placeholder(v: &str) -> bool {
 }
 
 /// De soort bestand op grond van de naam alleen (zonder naar de inhoud te kijken).
+/// Alleen op de bestandsnaam: lijkt dit bestand geheim (zoals `.env` of een sleutelbestand)?
+pub(crate) fn scan_alleen_naam(path: &str) -> bool {
+    by_name(path).is_some()
+}
+
 pub(crate) fn by_name(path: &str) -> Option<(&'static str, &'static str)> {
     let name = path.rsplit('/').next().unwrap_or(path).to_lowercase();
     if matches!(name.as_str(), ".env.example" | ".env.sample" | ".env.template" | ".env.dist") {

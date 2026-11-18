@@ -58,6 +58,12 @@ pub fn create_project(
         &template,
     )?;
     if template != "leeg" {
+        // Heeft het voorbeeld een eigen, ingevulde PROJECT.md, dan vervangt die de lege die zojuist is gemaakt (het project is nog nieuw).
+        if let Ok(t) = templates::bundled(&app, "templates") {
+            if t.join(&template).join("PROJECT.md").is_file() {
+                let _ = std::fs::remove_file(Path::new(&project.pad).join("PROJECT.md"));
+            }
+        }
         // Een echt template: bestanden erin zetten. Lukt dat niet, dan verdwijnt het project weer uit de lijst (de map blijft staan).
         let copied = templates::bundled(&app, "templates")
             .and_then(|t| templates::copy_template(&t, &template, Path::new(&project.pad)));

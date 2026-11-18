@@ -17,7 +17,9 @@ interface Props {
   onCreated: (p: Project) => void | Promise<void>;
 }
 
-const SOORTEN = ["leeg", "web-react-vite"] as const;
+/** "Beschrijf je idee" (leeg project) en "Begin met een voorbeeld" (kant-en-klare startprojecten die in een minuut draaien). */
+export const SOORTEN = ["leeg", "web-react-vite", "start-takenlijst", "start-portfolio", "start-webshop", "start-kassa"] as const;
+const VOORBEELDEN = SOORTEN.filter((k) => k !== "leeg");
 const VERBODEN = /[\\/:*?"<>|]/;
 
 export default function NewProjectDialog({ onClose, onCreated }: Props) {
@@ -55,7 +57,7 @@ export default function NewProjectDialog({ onClose, onCreated }: Props) {
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent>
+      <DialogContent className="max-h-[92vh] overflow-y-auto">
         <form onSubmit={(e) => void handleSubmit(submit)(e)} noValidate className="space-y-5">
           <DialogHeader>
             <DialogTitle>{t("nieuw.titel")}</DialogTitle>
@@ -75,13 +77,25 @@ export default function NewProjectDialog({ onClose, onCreated }: Props) {
                 name="soort"
                 render={({ field }) => (
                   <RadioGroup aria-labelledby="nieuw-soort" value={field.value} onValueChange={field.onChange} className="gap-3">
-                    {SOORTEN.map((k) => (
+                    <FieldLabel htmlFor="soort-leeg" className="cursor-pointer rounded-lg border border-input p-3 has-data-checked:border-primary has-data-checked:bg-accent">
+                      <Field orientation="horizontal">
+                        <RadioGroupItem id="soort-leeg" value="leeg" aria-labelledby="soort-leeg-titel" />
+                        <div>
+                          <div id="soort-leeg-titel" className="font-medium">{t("nieuw.soortLeeg")}</div>
+                          <FieldDescription>{t("nieuw.soortLeegUitleg")}</FieldDescription>
+                        </div>
+                      </Field>
+                    </FieldLabel>
+                    <p className="pt-1 text-sm font-medium text-muted-foreground" data-testid="nieuw-voorbeelden-kop">
+                      {t("nieuw.voorbeeldKop")}
+                    </p>
+                    {VOORBEELDEN.map((k) => (
                       <FieldLabel key={k} htmlFor={`soort-${k}`} className="cursor-pointer rounded-lg border border-input p-3 has-data-checked:border-primary has-data-checked:bg-accent">
                         <Field orientation="horizontal">
                           <RadioGroupItem id={`soort-${k}`} value={k} aria-labelledby={`soort-${k}-titel`} />
                           <div>
-                            <div id={`soort-${k}-titel`} className="font-medium">{t(k === "leeg" ? "nieuw.soortLeeg" : "nieuw.soortWeb")}</div>
-                            <FieldDescription>{t(k === "leeg" ? "nieuw.soortLeegUitleg" : "nieuw.soortWebUitleg")}</FieldDescription>
+                            <div id={`soort-${k}-titel`} className="font-medium">{t(k === "web-react-vite" ? "nieuw.soortWeb" : `nieuw.voorbeeld.${k}.titel`)}</div>
+                            <FieldDescription>{t(k === "web-react-vite" ? "nieuw.soortWebUitleg" : `nieuw.voorbeeld.${k}.uitleg`)}</FieldDescription>
                           </div>
                         </Field>
                       </FieldLabel>

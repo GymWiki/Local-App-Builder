@@ -11,7 +11,7 @@ export default function UiterlijkPanel() {
   const w = useWorkspace();
   return (
     <ScrollArea className="h-full">
-      <AppearancePanel key={w.project.id} projectId={w.project.id} firstRun={w.project.template !== "leeg"} onError={w.onError} />
+      <AppearancePanel key={w.project.id} projectId={w.project.id} firstRun={w.project.template === "web-react-vite"} onError={w.onError} />
       <div className="px-6 pb-6">
         <Card>
           <CardHeader>

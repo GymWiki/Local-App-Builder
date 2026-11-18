@@ -1,0 +1,34 @@
+/* Eenvoudige, rustige stijl. Pas de kleuren hier aan; alles gebruikt deze variabelen. */
+:root {
+  --achtergrond: #f8fafc;
+  --kaart: #ffffff;
+  --tekst: #0f172a;
+  --zacht: #475569;
+  --lijn: #cbd5e1;
+  --accent: #2563eb;
+  --accent-tekst: #ffffff;
+  --goed: #15803d;
+  --gevaar: #b91c1c;
+  --straal: 12px;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --achtergrond: #0b1220; --kaart: #111a2e; --tekst: #e2e8f0; --zacht: #a3b1c6; --lijn: #334155; --accent: #60a5fa; --accent-tekst: #0b1220; --goed: #4ade80; --gevaar: #f87171; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 1.0625rem; line-height: 1.5; background: var(--achtergrond); color: var(--tekst); }
+main { max-width: 42rem; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+h1 { font-size: 1.75rem; margin: 0 0 0.25rem; }
+h2 { font-size: 1.25rem; margin: 1.5rem 0 0.5rem; }
+p { margin: 0.25rem 0 1rem; color: var(--zacht); }
+button, input, select, textarea { font: inherit; }
+button { min-height: 2.75rem; padding: 0.5rem 1rem; border-radius: var(--straal); border: 1px solid var(--lijn); background: var(--kaart); color: var(--tekst); cursor: pointer; }
+button.hoofd { background: var(--accent); color: var(--accent-tekst); border-color: var(--accent); font-weight: 600; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+input, select, textarea { width: 100%; min-height: 2.75rem; padding: 0.5rem 0.75rem; border-radius: var(--straal); border: 1px solid var(--lijn); background: var(--kaart); color: var(--tekst); }
+label { display: block; font-weight: 600; margin: 0.75rem 0 0.25rem; }
+.kaart { background: var(--kaart); border: 1px solid var(--lijn); border-radius: var(--straal); padding: 1rem; }
+.rij { display: flex; gap: 0.5rem; align-items: center; }
+.rij > input { flex: 1; }
+ul.lijst { list-style: none; margin: 1rem 0; padding: 0; display: grid; gap: 0.5rem; }
+.leeg { color: var(--zacht); text-align: center; padding: 1.5rem; }
+.klaar { text-decoration: line-through; color: var(--zacht); }
