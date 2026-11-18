@@ -74,3 +74,34 @@ Bewust, voor grote klikdoelen en leesbaarheid; bij `shadcn add` altijd "nee" ant
 - `Progress` is wel toegevoegd en in de kit opgenomen, maar nog nergens in Studio nodig: laden gebeurt met `Skeleton` en een draaiend icoon.
 - Het tabblad Publiceren blijft een placeholder.
 - Oude Tailwind-klassen met vaste kleuren zijn vervangen door tokens; de lint-regel bewaakt dat verder.
+
+---
+
+# Indeling: homescherm en werkruimte (docking-bibliotheek)
+
+## Onderzoek (2026-11-18)
+
+Gemeten met `npm view`, het lezen van de gebouwde bestanden en een esbuild-bundel (minified + gzip, alleen de JavaScript van de bibliotheek, zonder CSS en React). Daarna zijn dockview en flexlayout allebei in een proefpagina met een iframe uitgeprobeerd: een tabblad naar een ander paneel slepen laat het iframe in beide **niet** opnieuw laden (belangrijk voor de preview en de terminal).
+
+| | dockview-react 8.9.1 | flexlayout-react 0.11.2 | rc-dock 4.1.0 | react-resizable-panels 4.24 (shadcn Resizable) |
+|---|---|---|---|---|
+| Licentie | MIT | MIT | Apache-2.0 | MIT |
+| Onderhoud | release 2026-11-17 | release 2026-11-16 | release 2026-10-25 | release 2026-11-15 |
+| Afhankelijkheden | geen (alleen `dockview-core`) | geen | lodash, classnames, @rc-component/* | geen |
+| React 19 | ja | ja (18 – 19) | ja | ja |
+| Grootte (gzip) | ± 99 kB | **± 51 kB** | ± 70 kB (+ lodash) | al in Studio |
+| Panelen slepen/docken, tabs, zwevend, maximaliseren | ja | ja | ja | **nee** |
+| Randpanelen (smalle iconenbalk met uitklapbaar paneel) | beperkt (edge groups) | **ja** (`borders`) | nee | nee |
+| Indeling als JSON opslaan/laden | ja | ja | ja | alleen groottes |
+| Scheidingsgrepen met toetsenbord en schermlezer | **nee** (geen rol, niet focusbaar; bevestigd in proef) | **ja**: `role=separator`, pijltjestoetsen, `aria-valuenow/min/max`, zichtbare focus | nee | ja |
+| Tabs en sneltoetsen | `role=tab/tabpanel`, pijltjes, toetsenbord-verplaatsmodus, schermlezer-meldingen | `role=tab/tabpanel`, pijltjes, instelbare sneltoetsen (`keyMap`), `aria-keyshortcuts`, vertaalbaar via `i18nMapper` | enkele `aria-*` | n.v.t. |
+
+**Keuze: flexlayout-react (MIT).** Redenen: (1) de eis dat alle grepen met het toetsenbord en een schermlezer te bedienen zijn, is er al ingebouwd; bij dockview zouden we dat zelf moeten bouwen; (2) randpanelen passen precies bij de gewenste iconenbalk met uitklapbare panelen; (3) de kleinste van de drie, zonder afhankelijkheden; (4) de proef laat zien dat een iframe niet opnieuw laadt na verplaatsen.
+
+*Correctie op een eerdere versie van dit blok:* daar stond dat flexlayout geen ARIA had en dockview wel. Dat was een meetfout (ik had het verkeerde pakket doorzocht). Na controle is het andersom: flexlayout heeft de beste toetsenbord- en schermlezerondersteuning voor de grepen; dockview heeft als enige een toetsenbord-verplaatsmodus voor tabs.
+
+**Beperkingen die we zelf oplossen:**
+- Panelen met het toetsenbord *verplaatsen* kent flexlayout niet; Studio biedt daarvoor een menu "Paneel verplaatsen" (links, rechts, boven, onder, naast een ander paneel) naast het slepen.
+- Flexlayout levert eigen CSS; die wordt alleen via `--flexlayout-*`-variabelen op onze thematokens gezet (`src/index.css`). Geen losse kleuren.
+
+**shadcn Resizable** (react-resizable-panels) blijft in gebruik voor de vaste tweedeling bij heel kleine vensters (`SplitView`) en voor schermen zonder docking. Voor de werkruimte zelf niet: het kan panelen niet verplaatsen.
