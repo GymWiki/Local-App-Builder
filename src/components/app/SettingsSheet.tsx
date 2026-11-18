@@ -1,21 +1,19 @@
 import { useTranslation } from "react-i18next";
-import SettingsScreen, { type CommunicationMode, type PermissionMode } from "@/components/SettingsScreen";
+import type { Account } from "@/lib/api";
+import SettingsView from "@/components/app/settings/SettingsView";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  communication: CommunicationMode;
-  permission: PermissionMode;
-  loopThreshold: number;
-  onLoopThreshold: (n: number) => void;
-  onCommunication: (v: CommunicationMode) => void;
-  onPermission: (v: PermissionMode) => void;
+  accounts: Account[];
+  onAccountsChanged: () => void | Promise<void>;
+  onError: (msg: string) => void;
 }
 
-/** Instellingen in een paneel dat van rechts inschuift. */
-export default function SettingsSheet({ open, onClose, ...rest }: Props) {
+/** Instellingen voor alle projecten, vanaf het homescherm. Dezelfde onderdelen als in de werkruimte, zonder "Mijn project". */
+export default function SettingsSheet({ open, onClose, accounts, onAccountsChanged, onError }: Props) {
   const { t } = useTranslation();
   return (
     <Sheet open={open} onOpenChange={(o) => !o && onClose()}>
@@ -25,7 +23,7 @@ export default function SettingsSheet({ open, onClose, ...rest }: Props) {
           <SheetDescription>{t("instellingen.beschrijving")}</SheetDescription>
         </SheetHeader>
         <ScrollArea className="min-h-0 flex-1">
-          <SettingsScreen {...rest} />
+          <SettingsView scope="app" accounts={accounts} onAccountsChanged={onAccountsChanged} onError={onError} />
         </ScrollArea>
       </SheetContent>
     </Sheet>

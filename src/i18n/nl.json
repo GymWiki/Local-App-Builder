@@ -1274,5 +1274,173 @@
       "test": "Koppeling testen",
       "later": "Je vindt inlogsleutels later terug onder Instellingen > Mijn programma."
     }
+  },
+  "inst": {
+    "titel": "Instellingen",
+    "uitleg": "Hier bepaal je hoe Studio werkt. Bij elke instelling staat of hij voor alle projecten geldt of alleen voor dit project.",
+    "groep": {
+      "project": "Mijn project",
+      "ai": "Mijn AI",
+      "programma": "Mijn programma",
+      "gevorderd": "Voor gevorderden"
+    },
+    "bereik": {
+      "alle": "Voor alle projecten",
+      "dit": "Alleen dit project"
+    },
+    "herstel": "Standaard herstellen",
+    "herstelKlaar": "De standaard is hersteld.",
+    "opgeslagen": "Opgeslagen",
+    "project": {
+      "naam": {
+        "label": "Naam van het project",
+        "uitleg": "Alleen de naam in Studio verandert. De map op je computer houdt haar naam.",
+        "opslaan": "Naam opslaan",
+        "klaar": "De naam is gewijzigd."
+      },
+      "icoon": {
+        "label": "Icoon van de app",
+        "uitleg": "Het icoon van je app kies je straks hier.",
+        "binnenkort": "Komt binnenkort"
+      },
+      "beschrijving": {
+        "label": "Korte beschrijving",
+        "uitleg": "Een paar zinnen over wat je maakt. De AI leest dit en Studio bewaart het in PROJECT.md.",
+        "plaats": "Bijvoorbeeld: een website voor mijn tuinbedrijf",
+        "opslaan": "Beschrijving opslaan",
+        "klaar": "De beschrijving is opgeslagen.",
+        "fout": "De beschrijving kon niet worden opgeslagen: {{reden}}"
+      },
+      "stack": {
+        "label": "Soort project",
+        "uitleg": "Dit kun je hier niet veranderen.",
+        "leeg": "Leeg project",
+        "web-react-vite": "Website of app met voorbeeldpagina’s"
+      },
+      "map": {
+        "label": "Map op je computer"
+      },
+      "gevaar": {
+        "titel": "Gevarenzone",
+        "uitleg": "Je kunt het project uit de lijst van Studio halen. De bestanden op je computer blijven altijd staan; Studio wist niets.",
+        "knop": "Uit lijst verwijderen"
+      }
+    },
+    "ai": {
+      "account": {
+        "label": "Welk AI-account gebruikt dit project?",
+        "uitleg": "Studio gebruikt dit account als je iets aan de AI vraagt.",
+        "standaard": "Het account waarmee je al bent ingelogd"
+      },
+      "accounts": {
+        "titel": "AI-accounts toevoegen en wisselen",
+        "uitleg": "Hier voeg je een account toe, log je in of haal je een account weg. Studio bewaart nooit je wachtwoord."
+      },
+      "toestemming": {
+        "label": "Hoeveel mag de AI zelf doen?",
+        "uitleg": "Bepaalt wanneer de AI eerst om toestemming vraagt.",
+        "uitlegCli": "Dit geldt voor het gesprek met Claude. In de terminal bepaalt het AI-programma zelf wat het vraagt.",
+        "waarschuwing": "Let op: bij ‘Werk zelfstandig’ werkt de AI door zonder te vragen. Online zetten, verwijderen en schrijven buiten je project vragen altijd om toestemming."
+      },
+      "taal": {
+        "label": "Hoe praat de AI tegen je?",
+        "uitleg": "In gewone woorden, of met vaktaal en technische details."
+      },
+      "plan": {
+        "label": "Eerst overleggen is standaard",
+        "uitleg": "Als dit aan staat, bespreekt de AI eerst een plan en past hij niets aan tot jij ‘Bouwen’ kiest."
+      },
+      "lus": {
+        "label": "Waarschuw als dezelfde fout steeds terugkomt",
+        "uitleg": "Na zoveel keer dezelfde mislukte controle onderbreekt Studio de AI en krijg je keuzes. Standaard: 3.",
+        "fout": "Kies een heel getal van 2 tot 10."
+      }
+    },
+    "programma": {
+      "thema": {
+        "label": "Licht of donker",
+        "uitleg": "Hoe Studio eruitziet.",
+        "system": "Volgens mijn computer",
+        "light": "Licht",
+        "dark": "Donker"
+      },
+      "tekst": {
+        "label": "Tekstgrootte",
+        "uitleg": "Maak alles in Studio groter of kleiner.",
+        "90": "Kleiner",
+        "100": "Normaal",
+        "115": "Groter",
+        "130": "Heel groot"
+      },
+      "taal": {
+        "label": "Taal van Studio",
+        "uitleg": "Studio is nu alleen in het Nederlands.",
+        "nl": "Nederlands"
+      },
+      "map": {
+        "label": "Standaardmap voor nieuwe projecten",
+        "uitleg": "Hier komt een nieuw project standaard te staan.",
+        "kies": "Map kiezen",
+        "geen": "Nog geen map gekozen"
+      },
+      "autoVoorbeeld": {
+        "label": "Het voorbeeld vanzelf tonen",
+        "uitleg": "Als er voor het eerst iets te zien is, springt Studio naar het voorbeeld."
+      },
+      "backup": {
+        "label": "Back-up en kopie maken",
+        "uitleg": "Een kopie van een project maak je bij ‘Online zetten’. Studio bewaart elke keer dat de AI klaar is een eerdere versie.",
+        "knop": "Naar Online zetten"
+      },
+      "versie": {
+        "label": "Versie en updates",
+        "uitleg": "Studio werkt nog niet vanzelf bij. Nieuwe versies haal je zelf op.",
+        "nu": "Je gebruikt Studio {{versie}}."
+      },
+      "licentie": {
+        "label": "Licentie",
+        "uitleg": "Studio is voor eigen gebruik op je computer. Je projecten zijn en blijven van jou."
+      },
+      "privacy": {
+        "label": "Privacy",
+        "uitleg": "Studio verstuurt zelf niets over jou of je projecten. Alleen de AI waar je mee werkt krijgt wat je hem vraagt."
+      },
+      "sleutels": {
+        "label": "Inlogsleutels",
+        "uitleg": "Studio bewaart geen wachtwoorden of inlogsleutels in je projecten. Je login bij de AI staat in het AI-programma zelf. Sleutels voor hostingbedrijven of appwinkels komen binnenkort; ze worden dan veilig op je computer bewaard.",
+        "binnenkort": "Komt binnenkort"
+      }
+    },
+    "gevorderd": {
+      "waarschuwing": "Dit is bedoeld voor mensen met technische kennis. Verander hier alleen iets als je zeker weet wat het doet. Beginners hebben dit niet nodig.",
+      "paden": {
+        "label": "Paden naar AI-programma’s",
+        "uitleg": "Waar Studio de AI-programma’s op je computer vond.",
+        "niet": "niet gevonden",
+        "node": "Node.js wordt automatisch gezocht. Staat het op een ongebruikelijke plek, zet dan de omgevingsvariabele STUDIO_NODE_PATH."
+      },
+      "poorten": {
+        "label": "Poorten",
+        "uitleg": "De poort van de AI-koppeling van dit project. Die kiest Studio zelf, alleen op je eigen computer.",
+        "geen": "Geen (de koppeling draait niet)"
+      },
+      "debug": {
+        "label": "Debug-logs",
+        "uitleg": "Uitgebreide technische meldingen. Staan nu altijd uit.",
+        "binnenkort": "Komt binnenkort"
+      },
+      "opdrachten": {
+        "label": "Opdrachten van het project (studio.json)",
+        "uitleg": "De opdrachten die Studio na jouw goedkeuring mag uitvoeren.",
+        "geen": "Dit project heeft geen studio.json.",
+        "goedgekeurd": "goedgekeurd",
+        "nietGoedgekeurd": "nog niet goedgekeurd"
+      },
+      "omgeving": {
+        "label": "Omgevingsvariabelen",
+        "uitleg": "Waarden voor verschillende omgevingen. De waarden komen straks in een veilige kluis, nooit in je project.",
+        "binnenkort": "Komt binnenkort"
+      }
+    }
   }
 }

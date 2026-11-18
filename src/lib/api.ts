@@ -131,8 +131,8 @@ export const ptyResize = (id: string, rows: number, cols: number) => invoke<void
 export const ptySnapshot = (id: string) => invoke<Snapshot>("pty_snapshot", { id });
 export const ptyClose = (id: string) => invoke<void>("pty_close", { id });
 
-export async function kiesMap(): Promise<string | null> {
-  const result = await open({ directory: true, multiple: false });
+export async function kiesMap(startIn?: string): Promise<string | null> {
+  const result = await open({ directory: true, multiple: false, ...(startIn ? { defaultPath: startIn } : {}) });
   return typeof result === "string" ? result : null;
 }
 

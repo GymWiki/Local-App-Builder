@@ -56,8 +56,6 @@ export default function App() {
   const { settings, set: setSetting } = useSettings();
   const autoSwitch = settings.preview_auto_switch;
   const communication = settings.communication_mode;
-  const permission = settings.permission_mode;
-  const loopThreshold = settings.loop_threshold;
   const [notice, setNotice] = useState<number | null>(null);
   const [tick, setTick] = useState<Record<number, number>>({});
   const [thumbNonce, setThumbNonce] = useState(0);
@@ -296,20 +294,6 @@ export default function App() {
             }}
             technical={communication === "technical"}
             tick={tick[selected.id] ?? 0}
-            settings={{
-              communication,
-              permission,
-              loopThreshold,
-              onLoopThreshold: (n) => {
-                void setSetting("loop_threshold", n);
-              },
-              onCommunication: (v) => {
-                void setSetting("communication_mode", v);
-              },
-              onPermission: (v) => {
-                void setSetting("permission_mode", v);
-              },
-            }}
             request={request}
             onSessionsChange={(fn) => setSessions((s) => ({ ...s, [selected.id]: fn(s[selected.id] ?? []) }))}
             onError={setError}
@@ -325,23 +309,24 @@ export default function App() {
             onAccountsChanged={refreshAccounts}
             onHome={goHome}
             onCloseProject={() => void close(selected.id)}
+            onRenamed={async () => {
+              await refresh();
+              toast.success(t("home.hernoem.klaar"));
+            }}
+            onRemove={async (p) => {
+              await close(p.id, false);
+              await deleteProject(p.id).catch(fail);
+              await refresh();
+              setSelectedId(null);
+            }}
           />
         )}
         <SettingsSheet
           open={settingsOpen}
           onClose={() => setSettingsOpen(false)}
-          communication={communication}
-          permission={permission}
-          loopThreshold={loopThreshold}
-          onLoopThreshold={(n) => {
-            void setSetting("loop_threshold", n);
-          }}
-          onCommunication={(v) => {
-            void setSetting("communication_mode", v);
-          }}
-          onPermission={(v) => {
-            void setSetting("permission_mode", v);
-          }}
+          accounts={accounts}
+          onAccountsChanged={refreshAccounts}
+          onError={setError}
         />
         {dialogOpen && (
           <NewProjectDialog

@@ -16,7 +16,6 @@ vi.mock("@/components/AccountsScreen", () => ({ default: () => <div data-testid=
 vi.mock("@/components/app/PublishPanel", () => ({ default: () => <div data-testid="publiceren">publiceren</div> }));
 
 const project = { id: 7, naam: "Hovenier Joke", pad: "/p/joke", template: "leeg", created_at: "2026-01-01", default_account_id: null, last_used_at: null };
-const settings = { communication: "simple" as const, permission: "important" as const, loopThreshold: 3, onLoopThreshold: vi.fn(), onCommunication: vi.fn(), onPermission: vi.fn() };
 const leegSignaal = { project_md_ingevuld: false, needs_data: false, needs_data_reden: null, heeft_database: false, aantal_assets: 0 };
 
 function setup(extra: Partial<React.ComponentProps<typeof ProjectWorkspace>> = {}) {
@@ -31,7 +30,6 @@ function setup(extra: Partial<React.ComponentProps<typeof ProjectWorkspace>> = {
     onAutoSwitch: vi.fn(),
     technical: false,
     tick: 0,
-    settings,
     request: null,
     onSessionsChange: vi.fn(),
     onError: vi.fn(),
@@ -40,6 +38,8 @@ function setup(extra: Partial<React.ComponentProps<typeof ProjectWorkspace>> = {
     onAccountsChanged: vi.fn(),
     onHome: vi.fn(),
     onCloseProject: vi.fn(),
+    onRenamed: vi.fn(),
+    onRemove: vi.fn(),
     ...extra,
   };
   const r = render(
@@ -71,6 +71,7 @@ beforeEach(() => {
   (api.setUiSetting as Mock).mockResolvedValue(undefined);
   (api.resetUiSetting as Mock).mockResolvedValue(undefined);
   (api.projectSignals as Mock).mockResolvedValue(leegSignaal);
+  (api.projectDescriptionGet as Mock).mockResolvedValue("");
   (api.projectFlags as Mock).mockResolvedValue({});
   (api.projectFlagSet as Mock).mockResolvedValue(undefined);
   (api.chatHistory as Mock).mockResolvedValue([]);
@@ -143,7 +144,11 @@ describe("Werkruimte: menu", () => {
     setup();
     await screen.findByTestId("chat");
     fireEvent.click(screen.getByTestId("menu-instellingen"));
-    expect(await screen.findByTestId("accounts")).toBeInTheDocument();
+    expect(await screen.findByTestId("instellingen")).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Mijn project" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Mijn AI" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Mijn programma" })).toBeInTheDocument();
+    expect(screen.getByRole("tab", { name: "Voor gevorderden" })).toBeInTheDocument();
   });
 });
 

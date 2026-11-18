@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useTranslation } from "react-i18next";
 import { createProject, kiesMap, type Project } from "@/lib/api";
+import { useSettings } from "@/components/app/settings-provider";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -21,6 +22,7 @@ const VERBODEN = /[\\/:*?"<>|]/;
 
 export default function NewProjectDialog({ onClose, onCreated }: Props) {
   const { t } = useTranslation();
+  const { settings } = useSettings();
   const [error, setError] = useState<string | null>(null);
 
   const schema = useMemo(
@@ -36,7 +38,7 @@ export default function NewProjectDialog({ onClose, onCreated }: Props) {
 
   const { register, control, handleSubmit, setValue, formState } = useForm<Values>({
     resolver: zodResolver(schema),
-    defaultValues: { naam: "", map: "", soort: "leeg" },
+    defaultValues: { naam: "", map: settings.default_project_dir, soort: "leeg" },
   });
   const { errors, isSubmitting } = formState;
   const naam = useWatch({ control, name: "naam" });
@@ -92,7 +94,7 @@ export default function NewProjectDialog({ onClose, onCreated }: Props) {
             <Field data-invalid={!!errors.map}>
               <FieldLabel>{t("nieuw.map")}</FieldLabel>
               <div className="flex items-center gap-3">
-                <Button type="button" variant="outline" onClick={() => void kiesMap().then((m) => m && setValue("map", m, { shouldValidate: true }))}>
+                <Button type="button" variant="outline" onClick={() => void kiesMap(settings.default_project_dir || undefined).then((m) => m && setValue("map", m, { shouldValidate: true }))}>
                   {t("nieuw.kiesMap")}
                 </Button>
                 <span className="min-w-0 truncate text-muted-foreground">{map || t("nieuw.geenMap")}</span>

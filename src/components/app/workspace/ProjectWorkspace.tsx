@@ -7,7 +7,6 @@ import { layoutGet, layoutReset, layoutSet, type Account, type McpInfo, type Pre
 import { compacteIndeling, isPanelId, LayoutService, PANEL_IDS, type PanelId, type PresetId } from "@/lib/layout";
 import { menuStatus, type MenuId } from "@/lib/menu";
 import ChatPanel from "@/components/app/chat/ChatPanel";
-import AccountsScreen from "@/components/AccountsScreen";
 import PreviewPanel from "@/components/PreviewPanel";
 import TerminalPanel, { type Session } from "@/components/TerminalPanel";
 import { useSettings } from "@/components/app/settings-provider";
@@ -23,7 +22,7 @@ import HistoryPanel from "./panels/HistoryPanel";
 import HulpPanel from "./panels/HulpPanel";
 import LogsPanel from "./panels/LogsPanel";
 import OnlinePanel from "./panels/OnlinePanel";
-import ProjectSettingsPanel, { type SettingsProps } from "./panels/ProjectSettingsPanel";
+import SettingsView from "@/components/app/settings/SettingsView";
 import SchermenPanel from "./panels/SchermenPanel";
 import StartPanel from "./panels/StartPanel";
 import StatusPanel from "./panels/StatusPanel";
@@ -60,7 +59,6 @@ interface Props {
   onAutoSwitch: (v: boolean) => void;
   technical: boolean;
   tick: number;
-  settings: SettingsProps;
   /** Een verzoek van buiten om een paneel te tonen (bijvoorbeeld de preview zodra er iets te zien is). `nonce` maakt elk verzoek nieuw. */
   request: { id: PanelId; nonce: number } | null;
   onSessionsChange: (updater: (prev: Session[]) => Session[]) => void;
@@ -70,6 +68,8 @@ interface Props {
   onAccountsChanged: () => void | Promise<void>;
   onHome: () => void;
   onCloseProject: () => void;
+  onRenamed: (p: Project) => void | Promise<void>;
+  onRemove: (p: Project) => void | Promise<void>;
 }
 
 /** De werkruimte van één project: links het menu, daarnaast een indeling van panelen die je kunt verschuiven en vergroten. */
@@ -285,8 +285,18 @@ export default function ProjectWorkspace(props: Props) {
       case "instellingen":
         return (
           <ScrollArea className="h-full">
-            <ProjectSettingsPanel project={project} accounts={accounts} onDefaultAccount={props.onDefaultAccount} {...props.settings} />
-            <AccountsScreen accounts={accounts} onChanged={props.onAccountsChanged} onError={onError} />
+            <SettingsView
+              scope="project"
+              project={project}
+              accounts={accounts}
+              mcp={mcp}
+              onDefaultAccount={props.onDefaultAccount}
+              onAccountsChanged={props.onAccountsChanged}
+              onError={onError}
+              onRenamed={props.onRenamed}
+              onRemove={props.onRemove}
+              onOpenOnline={() => openPaneel("onlinezetten")}
+            />
           </ScrollArea>
         );
       case "hulp":

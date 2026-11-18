@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { getUiSetting, resetUiSetting, setUiSetting } from "@/lib/api";
 import { bewaar, defaults, loadSettings, migrateSettings, REGISTER, type SettingKey, type Settings, type SettingsStorage } from "@/lib/settings";
 import { useTheme } from "@/components/app/theme-provider";
@@ -22,6 +22,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [settings, setSettings] = useState<Settings>(defaults);
   const [geladen, setGeladen] = useState(false);
   const { setTheme } = useTheme();
+  // Wat de gebruiker al heeft veranderd terwijl het laden nog bezig was, overschrijft het laden niet.
+  const aangeraakt = useRef(new Set<SettingKey>());
 
   useEffect(() => {
     let off = false;
@@ -29,7 +31,11 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       .then(() => loadSettings(storage))
       .then((s) => {
         if (off) return;
-        setSettings(s);
+        setSettings((prev) => {
+          const uit = { ...s } as Record<string, unknown>;
+          for (const k of aangeraakt.current) uit[k] = prev[k];
+          return uit as unknown as Settings;
+        });
         setGeladen(true);
       })
       .catch(() => !off && setGeladen(true));
@@ -45,6 +51,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   const set = useCallback(
     async <K extends SettingKey>(key: K, value: Settings[K]) => {
+      aangeraakt.current.add(key);
       setSettings((s) => ({ ...s, [key]: value }));
       if (key === "theme") return setTheme(value as Settings["theme"]); // de themawisselaar bewaart zelf
       await setUiSetting(key, bewaar(value as string | number | boolean)).catch(() => undefined);
@@ -55,6 +62,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const reset = useCallback(
     async (key: SettingKey) => {
       const standaard = defaults()[key];
+      aangeraakt.current.add(key);
       setSettings((s) => ({ ...s, [key]: standaard }));
       if (key === "theme") return setTheme("system");
       await resetUiSetting(key).catch(() => undefined);
