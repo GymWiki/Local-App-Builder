@@ -78,6 +78,9 @@ describe("MCP-tools (fase 3)", () => {
       "vercel_rollback",
       "vercel_set_env",
       "vercel_status",
+      "winkel_klaarcheck",
+      "winkel_schrijf_teksten",
+      "winkel_status",
     ]);
   });
 

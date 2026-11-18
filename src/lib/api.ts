@@ -696,3 +696,88 @@ export interface UpdateInfo {
 }
 export const updateCheck = () => invoke<UpdateInfo>("update_check");
 export const updateInstall = () => invoke<void>("update_install");
+
+// ---------- In de appwinkel (Google Play en App Store) ----------
+export interface WinkelAppData {
+  app_naam: string;
+  android_id: string;
+  ios_id: string;
+  categorie_play: string;
+  categorie_apple: string;
+  contact_email: string;
+  website: string;
+  privacy_url: string;
+  support_url: string;
+  leeftijd_ingevuld: boolean;
+  heeft_login: boolean;
+  demo_account_gezet: boolean;
+  bevestigd: Record<string, boolean>;
+  talen: string[];
+}
+export type WinkelPuntStatus = "klaar" | "let_op" | "ontbreekt" | "handmatig";
+export interface WinkelPunt {
+  id: string;
+  status: WinkelPuntStatus;
+  detail: Record<string, unknown> | null;
+}
+export interface WinkelStand {
+  winkel: "play" | "appstore";
+  punten: WinkelPunt[];
+  klaar: number;
+  totaal: number;
+}
+export interface WinkelKaart {
+  id: string;
+  winkels: ("play" | "appstore")[];
+  antwoord: "ja" | "nee" | "controleer";
+  redenen: string[];
+}
+export interface WinkelBevinding {
+  code: string;
+  ernst: "fout" | "let_op";
+  detail: string | null;
+}
+export interface WinkelOverzicht {
+  data: WinkelAppData;
+  winkels: WinkelStand[];
+  invulhulp: { signalen: { permissies: string[]; pakketten: string[]; onderwerpen: string[] }; kaarten: WinkelKaart[] };
+  veilig: WinkelBevinding[];
+  versie: { naam: string; build: number } | null;
+  nodig: Record<string, { kosten: string; bron: string; geverifieerd: boolean }>;
+  spec: { versie: number; datum: string; talen: string[]; app_id: unknown };
+}
+export interface WinkelTelling {
+  aantal: number;
+  min: number;
+  max: number;
+  eenheid: "tekens" | "bytes";
+  oordeel: "goed" | "te_kort" | "te_lang" | "leeg";
+}
+export interface WinkelVersie {
+  id: number;
+  tekst: string;
+  status: "concept" | "goedgekeurd" | "vervangen";
+  bron: "ai" | "gebruiker";
+  at: number;
+}
+export interface WinkelVeldStand {
+  veld: string;
+  officieel: string;
+  goedgekeurd: WinkelVersie | null;
+  concept: WinkelVersie | null;
+  telling: WinkelTelling | null;
+  min: number;
+  max: number;
+  eenheid: "tekens" | "bytes";
+  geverifieerd: boolean;
+  bron: string;
+}
+export const winkelsOverzicht = (projectId: number) => invoke<WinkelOverzicht>("winkels_overzicht", { projectId });
+export const winkelsBewaar = (projectId: number, data: WinkelAppData) => invoke<{ ok?: boolean; fout?: string; veld?: string; code?: string }>("winkels_bewaar", { projectId, data });
+export const winkelsAppIdVoorstel = (domein: string, naam: string) => invoke<{ voorstel: string; android: { geldig: boolean; code: string; let_op: string | null }; ios: { geldig: boolean; code: string; let_op: string | null } }>("winkels_app_id_voorstel", { domein, naam });
+export const winkelsVersieOphogen = (projectId: number, hoe: "build" | "patch" | "minor" | "major") => invoke<{ oud?: string; nieuw?: string; fout?: string }>("winkels_versie_ophogen", { projectId, hoe });
+export const winkelsTeksten = (projectId: number, winkel: string, taal: string) => invoke<WinkelVeldStand[]>("winkels_teksten", { projectId, winkel, taal });
+export const winkelsTekstConcept = (projectId: number, winkel: string, taal: string, veld: string, tekst: string) => invoke<{ id?: number; fout?: string }>("winkels_tekst_concept", { projectId, winkel, taal, veld, tekst });
+export const winkelsTekstGoedkeuren = (projectId: number, id: number) => invoke<{ ok?: boolean; fout?: string }>("winkels_tekst_goedkeuren", { projectId, id });
+export const winkelsTekstOntgrendel = (projectId: number, winkel: string, taal: string, veld: string) => invoke<{ ok?: boolean; fout?: string }>("winkels_tekst_ontgrendel", { projectId, winkel, taal, veld });
+export const winkelsTekstGeschiedenis = (projectId: number, winkel: string, taal: string, veld: string) => invoke<WinkelVersie[]>("winkels_tekst_geschiedenis", { projectId, winkel, taal, veld });

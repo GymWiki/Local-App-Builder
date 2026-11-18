@@ -14,6 +14,7 @@ const MIGRATIONS: &[&str] = &[
     include_str!("../migrations/0007_supabase.sql"),
     include_str!("../migrations/0008_github.sql"),
     include_str!("../migrations/0009_vercel.sql"),
+    include_str!("../migrations/0010_winkels.sql"),
 ];
 
 pub fn open(path: &Path) -> Result<Connection> {
@@ -106,6 +107,8 @@ mod tests {
                 "project_layouts",
                 "projects",
                 "settings",
+                "store_apps",
+                "store_tekst_versies",
                 "supabase_links",
                 "vercel_deployments",
                 "vercel_env",

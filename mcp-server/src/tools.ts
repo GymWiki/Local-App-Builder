@@ -199,6 +199,18 @@ export function registerTools(server: McpServer, ctx: ProjectCtx, record: (r: Ca
   dbTool("vercel_deploy_live", "vercel.live", VERCEL + "Zet de ECHTE site online. De gebruiker moet dit ALTIJD zelf bevestigen in een dialoog in Studio, ook als je veel mag; zonder zijn ja gebeurt er niets. Vraag er dus niet op een andere manier om en doe niets om dit te omzeilen.", {}, true);
   dbTool("vercel_rollback", "vercel.rollback", VERCEL + "Zet de echte site terug naar een eerdere versie (uit `vercel_list_deployments`). De gebruiker moet dit altijd bevestigen. Op het gratis plan kan alleen naar de vorige versie.", { deployment: z.string().min(1).max(80) }, true);
   dbTool("vercel_set_env", "vercel.set_env", VERCEL + "Stuurt een omgevingsvariabele die de GEBRUIKER zelf in Studio heeft ingevoerd door naar Vercel. Je geeft alleen de naam; je kunt en mag nooit een waarde meegeven of lezen. Bestaat de variabele niet in Studio, vraag de gebruiker dan om haar bij ‘Online zetten’ in te voeren. Voor de echte site vraagt Studio altijd bevestiging.", { naam: z.string().regex(/^[A-Z][A-Z0-9_]{0,63}$/) }, true);
+  // ---- In de appwinkel (Google Play en App Store). Studio bewaart alle gegevens; je krijgt nooit een sleutel, wachtwoord of demo-account te zien.
+  const WINKEL = "Studio voert dit zelf uit; je krijgt nooit sleutels, wachtwoorden of inloggegevens te zien. De uitslag begint met UITGEVOERD, GEWEIGERD of MISLUKT: doe nooit alsof een geweigerde actie is gelukt. ";
+  dbTool("winkel_status", "winkel.status", LEES + "De stand van de voorbereiding voor Google Play en de App Store: app-naam, unieke app-namen, versienummer en per winkel hoeveel onderdelen klaar zijn. Punten met status ‘handmatig’ moet de gebruiker zelf bij de winkel doen.", {}, false);
+  dbTool("winkel_klaarcheck", "winkel.klaarcheck", LEES + "De volledige klaar-check per winkel (ontbreekt, let_op, klaar, handmatig) en de bevindingen over de inhoud (ontbrekende privacyverklaring, testtekst, gevoelige rechten). Gebruik dit om te zien wat je nog kunt herstellen in het project.", {}, false);
+  dbTool(
+    "winkel_schrijf_teksten",
+    "winkel.schrijf_teksten",
+    WINKEL +
+      "Stelt teksten voor de winkelpagina voor en slaat ze op als CONCEPT, pas nadat de gebruiker dat in Studio heeft toegestaan. Een door de gebruiker goedgekeurde tekst wordt nooit gewijzigd; de gebruiker keurt zelf goed. Velden voor ‘appstore’: app_naam, subtitel, trefwoorden, beschrijving, promotietekst, wat_is_nieuw. Voor ‘play’: app_naam, korte_beschrijving, volledige_beschrijving, wat_is_nieuw. De uitslag toont per veld het aantal tekens en of het binnen de limiet is: schrijf korter als het ‘te_lang’ is. Verzin geen functies die de app niet heeft.",
+    { winkel: z.enum(["play", "appstore"]), taal: z.enum(["nl", "en"]), teksten: z.record(z.string().min(1).max(40), z.string().max(20_000)) },
+    true,
+  );
   dbTool("db_status", "db.status", LEES + "Is het project gekoppeld aan Supabase, hoe heet het, in welke regio, is het gepauzeerd en welk bedieningsniveau geldt?", {}, false);
   dbTool("db_get_public_config", "db.public_config", LEES + "De project-URL en de publiceerbare sleutel (veilig voor in de app). Nooit de geheime sleutel of het wachtwoord.", {}, false);
   dbTool("db_list_tables", "db.list_tables", LEES + "Tabellen in het publieke schema met kolommen, of RLS aan staat en welk beleid er is.", {}, false);

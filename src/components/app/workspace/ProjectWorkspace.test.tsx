@@ -135,7 +135,7 @@ describe("Werkruimte: menu", () => {
     fireEvent.click(screen.getByTestId("menu-versies"));
     expect(await screen.findByTestId("activity")).toBeInTheDocument();
     fireEvent.click(screen.getByTestId("menu-appwinkel"));
-    expect(await screen.findByText("Dit heb je straks nodig")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "In de appwinkel" })).toBeInTheDocument();
     fireEvent.click(screen.getByTestId("menu-hulp"));
     expect(await screen.findByText("Zo werkt het")).toBeInTheDocument();
   });

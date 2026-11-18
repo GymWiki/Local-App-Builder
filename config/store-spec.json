@@ -1,0 +1,80 @@
+{
+  "versie": 1,
+  "datum": "2026-11-18",
+  "uitleg": "Alle limieten, formaten en regels van de winkels op één plek. De app leest alles hieruit; er staan geen losse getallen in de code. Per regel staat de bron en of die op de genoemde datum in de officiële tekst is gelezen (geverifieerd: true) of niet (false: dan komt het uit algemene kennis en moet het worden gecontroleerd voor je erop vertrouwt). Zie docs/winkels.md.",
+  "talen": ["nl", "en"],
+  "telling": {
+    "tekens": "Aantal zichtbare tekens (een emoji of een letter met accent telt als één).",
+    "bytes": "Aantal bytes in UTF-8 (een letter met accent of een emoji telt meer dan één)."
+  },
+  "app_id": {
+    "android": {
+      "regels": ["minstens twee delen gescheiden door punten", "elk deel begint met een letter", "alleen letters, cijfers en liggende streepjes", "na de eerste upload nooit meer te wijzigen"],
+      "bron": "https://developer.android.com/build/configure-app-module#set-application-id",
+      "geverifieerd": true,
+      "max_lengte": 155,
+      "max_lengte_geverifieerd": false
+    },
+    "ios": {
+      "regels": ["letters, cijfers, streepjes en punten", "omgekeerde domeinnaam met minstens twee delen"],
+      "bron": "https://developer.apple.com/help/account/identifiers/register-an-app-id",
+      "geverifieerd": false
+    }
+  },
+  "stores": {
+    "play": {
+      "naam": "Google Play",
+      "account": { "kosten": "Eenmalig een bedrag voor een ontwikkelaarsaccount (in dollars)", "bron": "https://support.google.com/googleplay/android-developer", "geverifieerd": false },
+      "velden": {
+        "app_naam": { "officieel": "App name", "min": 1, "max": 30, "eenheid": "tekens", "bron": "https://support.google.com/googleplay/android-developer/answer/9866151", "geverifieerd": false },
+        "korte_beschrijving": { "officieel": "Short description", "min": 1, "max": 80, "eenheid": "tekens", "bron": "https://support.google.com/googleplay/android-developer/answer/9866151", "geverifieerd": false },
+        "volledige_beschrijving": { "officieel": "Full description", "min": 1, "max": 4000, "eenheid": "tekens", "bron": "https://support.google.com/googleplay/android-developer/answer/9866151", "geverifieerd": false },
+        "wat_is_nieuw": { "officieel": "Release notes (What's new)", "min": 1, "max": 500, "eenheid": "tekens", "bron": "https://support.google.com/googleplay/android-developer/answer/9859348", "geverifieerd": false }
+      },
+      "afbeeldingen": {
+        "icoon": { "officieel": "App icon", "breedte": 512, "hoogte": 512, "types": ["png"], "max_bytes": 1048576, "bron": "https://support.google.com/googleplay/android-developer/answer/9866151", "geverifieerd": false },
+        "feature_graphic": { "officieel": "Feature graphic", "breedte": 1024, "hoogte": 500, "types": ["png", "jpg"], "max_bytes": 15728640, "bron": "https://support.google.com/googleplay/android-developer/answer/9866151", "geverifieerd": false },
+        "telefoon_screenshots": { "officieel": "Phone screenshots", "min_aantal": 2, "max_aantal": 8, "min_zijde": 320, "max_zijde": 3840, "types": ["png", "jpg"], "bron": "https://support.google.com/googleplay/android-developer/answer/9866151", "geverifieerd": false }
+      },
+      "toetsing": {
+        "gesloten_test": { "uitleg": "Een nieuw persoonlijk ontwikkelaarsaccount moet eerst een gesloten test met een minimum aantal testers laten lopen voordat de app echt uitgebracht mag worden.", "bron": "https://support.google.com/googleplay/android-developer/answer/14151465", "geverifieerd": false }
+      },
+      "ondertekenen": {
+        "uitleg": "Google Play beheert de definitieve ondertekeningssleutel (Play App Signing); jij ondertekent met een uploadsleutel en bewaart die zelf. Een gebruikte sleutel is niet terug te halen bij Google, een verloren uploadsleutel kan via de Play Console worden vervangen.",
+        "bron": "https://developer.android.com/studio/publish/app-signing",
+        "geverifieerd": true
+      }
+    },
+    "appstore": {
+      "naam": "App Store (Apple)",
+      "account": { "kosten": "99 dollar per jaar", "bron": "https://developer.apple.com/programs/", "geverifieerd": true },
+      "velden": {
+        "app_naam": { "officieel": "Name", "min": 2, "max": 30, "eenheid": "tekens", "bron": "https://developer.apple.com/help/app-store-connect/reference/app-information/", "geverifieerd": true },
+        "subtitel": { "officieel": "Subtitle", "min": 1, "max": 30, "eenheid": "tekens", "bron": "https://developer.apple.com/help/app-store-connect/reference/app-information/", "geverifieerd": true },
+        "trefwoorden": { "officieel": "Keywords", "min": 1, "max": 100, "eenheid": "bytes", "bron": "https://developer.apple.com/help/app-store-connect/reference/app-information/platform-version-information", "geverifieerd": true },
+        "beschrijving": { "officieel": "Description", "min": 1, "max": 4000, "eenheid": "tekens", "bron": "https://developer.apple.com/help/app-store-connect/reference/app-information/platform-version-information", "geverifieerd": true },
+        "promotietekst": { "officieel": "Promotional text", "min": 0, "max": 170, "eenheid": "tekens", "bron": "https://developer.apple.com/help/app-store-connect/reference/app-information/platform-version-information", "geverifieerd": true },
+        "wat_is_nieuw": { "officieel": "What's New in This Version", "min": 1, "max": 4000, "eenheid": "tekens", "bron": "https://developer.apple.com/help/app-store-connect/reference/app-information/platform-version-information", "geverifieerd": true }
+      },
+      "afbeeldingen": {
+        "icoon": { "officieel": "App icon", "breedte": 1024, "hoogte": 1024, "types": ["png"], "alfa": false, "bron": "https://developer.apple.com/design/human-interface-guidelines/app-icons", "geverifieerd": false },
+        "iphone_screenshots": {
+          "officieel": "iPhone screenshots",
+          "min_aantal": 1,
+          "max_aantal": 10,
+          "types": ["png", "jpg", "jpeg"],
+          "alfa": false,
+          "maten": [[1290, 2796], [1284, 2778], [1179, 2556], [1170, 2532], [1242, 2208]],
+          "bron": "https://developer.apple.com/help/app-store-connect/reference/app-information/screenshot-specifications",
+          "geverifieerd": true,
+          "opmerking": "De volledige tabel met alle toegestane maten staat op de pagina van Apple; dit zijn de voorbeelden die daar staan."
+        }
+      },
+      "verplicht": {
+        "privacybeleid_url": { "uitleg": "Een link naar het privacybeleid is verplicht, in App Store Connect én in de app zelf.", "bron": "https://developer.apple.com/app-store/review/guidelines/", "geverifieerd": true },
+        "demo_account": { "uitleg": "Heeft de app een login, dan is een werkend demo-account (of een demo-modus) voor de beoordelaar verplicht.", "bron": "https://developer.apple.com/app-store/review/guidelines/", "geverifieerd": true },
+        "account_verwijderen": { "uitleg": "Kun je in de app een account maken, dan moet je het in de app ook kunnen verwijderen.", "bron": "https://developer.apple.com/app-store/review/guidelines/", "geverifieerd": true }
+      }
+    }
+  }
+}

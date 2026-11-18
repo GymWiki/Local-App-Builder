@@ -26,6 +26,7 @@ mod updates;
 mod supa;
 mod terminal;
 mod vercel;
+mod winkels;
 mod winpath;
 
 use chat::{ChatManager, ChatOut};
@@ -438,6 +439,15 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            winkels::app::winkels_overzicht,
+            winkels::app::winkels_bewaar,
+            winkels::app::winkels_app_id_voorstel,
+            winkels::app::winkels_versie_ophogen,
+            winkels::app::winkels_teksten,
+            winkels::app::winkels_tekst_concept,
+            winkels::app::winkels_tekst_goedkeuren,
+            winkels::app::winkels_tekst_ontgrendel,
+            winkels::app::winkels_tekst_geschiedenis,
             updates::update_check,
             updates::update_install,
             confirm::actie_confirm_answer,

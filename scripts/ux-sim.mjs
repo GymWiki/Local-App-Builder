@@ -90,6 +90,30 @@ function mock({ demoUrl, scenario, THUMB }) {
   S.vercelEnv = scenario.vercelEnv ?? [];
   S.vercelVersies = scenario.vercelVersies ?? [];
   S.vercelState = () => ({ ...S.vercel, werkt: S.conn.vercel.status === "werkt", account: S.conn.vercel.account, nu: Math.floor(Date.now() / 1000) });
+  // ---- In de appwinkel (nagebootst): gegevens, klaar-check, teksten met limieten
+  S.wk = { data: { app_naam: "Hovenier Joke", android_id: "", ios_id: "", categorie_play: "", categorie_apple: "", contact_email: "", website: "", privacy_url: "", support_url: "", leeftijd_ingevuld: false, heeft_login: false, demo_account_gezet: false, bevestigd: {}, talen: ["nl"] }, versie: { naam: "1.0.0", build: 1 }, teksten: [], nid: 1 };
+  S.wkLimieten = { appstore: { app_naam: [2, 30, "tekens"], subtitel: [1, 30, "tekens"], trefwoorden: [1, 100, "bytes"], beschrijving: [1, 4000, "tekens"], promotietekst: [0, 170, "tekens"], wat_is_nieuw: [1, 4000, "tekens"] }, play: { app_naam: [1, 30, "tekens"], korte_beschrijving: [1, 80, "tekens"], volledige_beschrijving: [1, 4000, "tekens"], wat_is_nieuw: [1, 500, "tekens"] } };
+  S.wkTel = (e, t) => (e === "bytes" ? new TextEncoder().encode(t).length : [...new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(t)].length);
+  S.wkStand = (w, taal, v) => {
+    const [min, max, eenheid] = S.wkLimieten[w][v];
+    const alle = S.wk.teksten.filter((x) => x.w === w && x.taal === taal && x.v === v).sort((a, b) => b.id - a.id);
+    const g = alle.find((x) => x.status === "goedgekeurd") ?? null;
+    const c = alle.find((x) => x.status === "concept") ?? null;
+    const tekst = (c ?? g)?.tekst;
+    return { veld: v, officieel: v, goedgekeurd: g && { id: g.id, tekst: g.tekst, status: g.status, bron: g.bron, at: 1 }, concept: c && { id: c.id, tekst: c.tekst, status: c.status, bron: c.bron, at: 1 }, telling: tekst == null ? null : { aantal: S.wkTel(eenheid, tekst), min, max, eenheid, oordeel: "goed" }, min, max, eenheid, geverifieerd: w === "appstore", bron: "https://x" };
+  };
+  S.wkOverzicht = () => {
+    const d = S.wk.data;
+    const goed = (w) => Object.entries(S.wkLimieten[w]).filter(([, l]) => l[0] > 0).filter(([v]) => S.wk.teksten.some((x) => x.w === w && x.taal === "nl" && x.v === v && x.status === "goedgekeurd")).length;
+    const tot = (w) => Object.values(S.wkLimieten[w]).filter((l) => l[0] > 0).length;
+    const punt = (id, status, detail = null) => ({ id, status, detail });
+    const bev = (k) => (d.bevestigd[k] ? "klaar" : "handmatig");
+    const stand = (w) => {
+      const punten = [punt("account", bev(w === "play" ? "play_account" : "apple_account")), punt("app_id", (w === "play" ? d.android_id : d.ios_id) ? "klaar" : "ontbreekt"), punt("versie", "klaar", { versie: `${S.wk.versie.naam}+${S.wk.versie.build}` }), punt("teksten", goed(w) === tot(w) ? "klaar" : goed(w) > 0 ? "let_op" : "ontbreekt", { klaar: goed(w), totaal: tot(w), mist: [] }), punt("icoon", "ontbreekt"), punt("screenshots", "ontbreekt", { aantal: 0, minimaal: w === "play" ? 2 : 1 }), punt("privacy", d.privacy_url ? "klaar" : "ontbreekt"), punt("contact", d.contact_email ? "klaar" : "ontbreekt"), punt("leeftijd", d.leeftijd_ingevuld ? "klaar" : "handmatig"), punt(w === "play" ? "data_safety" : "apple_privacy", bev(w === "play" ? "data_safety" : "apple_privacy")), punt("inhoud", d.privacy_url ? "klaar" : "ontbreekt")];
+      return { winkel: w, punten, klaar: punten.filter((p) => p.status === "klaar").length, totaal: punten.length };
+    };
+    return { data: { ...d }, winkels: [stand("play"), stand("appstore")], invulhulp: { signalen: { permissies: [], pakketten: [], onderwerpen: ["inloggen"] }, kaarten: [{ id: "gegevens_verzamelen", winkels: ["play", "appstore"], antwoord: "ja", redenen: ["pakket:inloggen"] }, { id: "advertenties", winkels: ["play"], antwoord: "nee", redenen: ["geen_advertentiepakket"] }, { id: "leeftijd", winkels: ["play", "appstore"], antwoord: "controleer", redenen: ["jij_beslist"] }] }, veilig: d.privacy_url ? [] : [{ code: "privacy_ontbreekt", ernst: "fout", detail: null }, { code: "gevoelig_recht", ernst: "let_op", detail: "READ_SMS" }], versie: S.wk.versie, nodig: { play: { kosten: "Eenmalig een bedrag voor een ontwikkelaarsaccount (in dollars)", bron: "https://x", geverifieerd: false }, appstore: { kosten: "99 dollar per jaar", bron: "https://x", geverifieerd: true } }, spec: { versie: 1, datum: "2026-11-18", talen: ["nl", "en"], app_id: {} } };
+  };
   window.__stuurActie = (req) => emit("actie-confirm", req);
   window.__stuurBevestiging = (req) => emit("db-confirm", req);
   S.connLijst = () =>
@@ -248,6 +272,19 @@ function mock({ demoUrl, scenario, THUMB }) {
     supa_sql: () => ({ status: "uitgevoerd", tekst: "Resultaat.", data: [] }),
     project_storage_get: (a) => S.opslag[a.projectId] ?? null,
     project_storage_set: (a) => void (S.opslag[a.projectId] = a.keuze),
+    winkels_overzicht: () => S.wkOverzicht(),
+    winkels_bewaar: (a) => {
+      if (a.data.android_id && !/^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/i.test(a.data.android_id)) return { fout: "app_id", veld: "android_id", code: "begint_niet_met_letter" };
+      S.wk.data = { ...a.data };
+      return { ok: true };
+    },
+    winkels_app_id_voorstel: () => ({ voorstel: "nl.hovenierjoke.hovenierjoke", android: { geldig: true, code: "", let_op: null }, ios: { geldig: true, code: "", let_op: null } }),
+    winkels_versie_ophogen: () => { const o = `${S.wk.versie.naam}+${S.wk.versie.build}`; S.wk.versie = { naam: S.wk.versie.naam, build: S.wk.versie.build + 1 }; return { oud: o, nieuw: `${S.wk.versie.naam}+${S.wk.versie.build}` }; },
+    winkels_teksten: (a) => Object.keys(S.wkLimieten[a.winkel]).map((v) => S.wkStand(a.winkel, a.taal, v)),
+    winkels_tekst_concept: (a) => { S.wk.teksten.forEach((x) => x.w === a.winkel && x.taal === a.taal && x.v === a.veld && x.status === "concept" && (x.status = "vervangen")); const id = S.wk.nid++; S.wk.teksten.push({ id, w: a.winkel, taal: a.taal, v: a.veld, tekst: a.tekst, status: "concept", bron: "gebruiker" }); return { id }; },
+    winkels_tekst_goedkeuren: (a) => { const x = S.wk.teksten.find((t) => t.id === a.id); const [min, max, e] = S.wkLimieten[x.w][x.v]; const n = S.wkTel(e, x.tekst); if (n > max) return { fout: "te_lang" }; if (n < min) return { fout: "te_kort" }; S.wk.teksten.forEach((t) => t.w === x.w && t.taal === x.taal && t.v === x.v && t.status === "goedgekeurd" && (t.status = "vervangen")); x.status = "goedgekeurd"; return { ok: true }; },
+    winkels_tekst_ontgrendel: (a) => { const g = S.wk.teksten.find((t) => t.w === a.winkel && t.taal === a.taal && t.v === a.veld && t.status === "goedgekeurd"); const id = S.wk.nid++; S.wk.teksten.push({ id, w: a.winkel, taal: a.taal, v: a.veld, tekst: g.tekst, status: "concept", bron: "gebruiker" }); return { ok: true }; },
+    winkels_tekst_geschiedenis: (a) => S.wk.teksten.filter((t) => t.w === a.winkel && t.taal === a.taal && t.v === a.veld).sort((x, y) => y.id - x.id).map((t) => ({ id: t.id, tekst: t.tekst, status: t.status, bron: t.bron, at: 1 })),
     update_check: () => scenario.update ?? { status: "actueel", versie_nu: "0.1.0", nieuw: null, notities: null, datum: null },
     update_install: () => { S.updateGeinstalleerd = true; },
     vercel_state: () => S.vercelState(),

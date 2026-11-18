@@ -1182,8 +1182,8 @@
   },
   "appwinkel": {
     "titel": "In de appwinkel",
-    "badge": "Komt binnenkort",
-    "uitleg": "Hier maak je straks een pakket om je app in de appwinkel van Android (Google Play) en iPhone (Apple) te zetten. Dat is nog niet klaar.",
+    "badge": "Eerste stap",
+    "uitleg": "Hier bereid je je app voor op Google Play (Android) en de App Store (iPhone), met je eigen ontwikkelaarsaccounts. Studio zegt eerlijk wat het voor je doet en wat je zelf bij de winkel moet doen.",
     "nodig": {
       "titel": "Dit heb je straks nodig",
       "een": "Schermafbeeldingen van je app",
@@ -2044,6 +2044,10 @@
     "vercel_variabele": {
       "titel": "Mag de AI een instelling voor de echte site doorsturen?",
       "uitleg": "De AI wil de instelling {{naam}} doorsturen naar je echte site. De waarde blijft geheim; de AI ziet haar niet."
+    },
+    "winkel_teksten": {
+      "titel": "Mag de AI teksten voor de winkel voorstellen?",
+      "uitleg": "De AI wil {{aantal}} tekst(en) voor {{winkel}} als concept opslaan. Een concept verandert niets aan wat je al hebt goedgekeurd; jij keurt zelf goed."
     }
   },
   "vercel": {
@@ -2233,6 +2237,453 @@
       "bezig": "Bezig met downloaden…",
       "installeren": "Bezig met installeren…",
       "fout": "Het bijwerken is niet gelukt. Er is niets veranderd. Probeer het later opnieuw."
+    }
+  },
+  "winkels": {
+    "winkel": {
+      "play": "Google Play (Android)",
+      "appstore": "App Store (iPhone)"
+    },
+    "taal": {
+      "nl": "Nederlands",
+      "en": "Engels"
+    },
+    "eenheid": {
+      "tekens": "tekens",
+      "bytes": "bytes"
+    },
+    "tab": {
+      "overzicht": "Overzicht",
+      "pakket": "Winkelpakket"
+    },
+    "status": {
+      "klaar": "Klaar",
+      "let_op": "Let op",
+      "ontbreekt": "Ontbreekt",
+      "handmatig": "Doe je zelf bij de winkel"
+    },
+    "klaarVan": "{{klaar}} van {{totaal}} klaar",
+    "voortgang": "Voortgang voor deze winkel",
+    "ikHebDitGedaan": "Ik heb dit gedaan",
+    "kopieer": "Kopieer",
+    "gekopieerd": "Gekopieerd.",
+    "specInfo": "De regels en limieten van de winkels staan in één bestand met bron en datum ({{datum}}). Bij regels met ‘nog niet gecontroleerd’ komt de waarde niet uit de officiële tekst van de winkel; controleer die voor je erop vertrouwt.",
+    "nodig": {
+      "titel": "Wat heb je nodig?",
+      "uitleg": "Per winkel: wat het kost, hoe lang het duurt en wie wat doet. ‘Studio’ betekent dat Studio het (straks) voor je doet; ‘Jij’ betekent dat je het zelf bij de winkel doet.",
+      "kosten": "Kosten van het ontwikkelaarsaccount",
+      "kostenControleer": "Dit bedrag komt niet uit de officiële tekst; controleer het bij de winkel.",
+      "open": "Open {{winkel}}",
+      "wie": {
+        "zelf": "Jij",
+        "studio": "Studio",
+        "play": {
+          "account": {
+            "wie": "Jij",
+            "uitleg": "Je maakt zelf een account en betaalt zelf."
+          },
+          "app": {
+            "wie": "Studio",
+            "uitleg": "Je vult de gegevens hier in en Studio controleert ze."
+          },
+          "teksten": {
+            "wie": "Studio",
+            "uitleg": "De AI stelt voor; jij keurt goed."
+          },
+          "afbeeldingen": {
+            "wie": "Jij",
+            "uitleg": "Studio controleert of ze er zijn en de juiste maat hebben. Maken gaat in een volgende stap."
+          },
+          "privacy": {
+            "wie": "Jij",
+            "uitleg": "Je zet een privacyverklaring online; hier vul je de link in."
+          },
+          "formulieren": {
+            "wie": "Jij",
+            "uitleg": "Gegevensveiligheid, leeftijd en doelgroep vul je zelf in bij Google. Studio geeft een voorstel."
+          },
+          "bouwen": {
+            "wie": "Studio",
+            "uitleg": "Nog niet gebouwd. Komt in een volgende stap."
+          },
+          "uploaden": {
+            "wie": "Studio",
+            "uitleg": "Nog niet gebouwd. De eerste keer uploaden moet bij Google vaak met de hand."
+          },
+          "beoordeling": {
+            "wie": "Jij",
+            "uitleg": "Uitbrengen bevestig je altijd zelf."
+          }
+        },
+        "appstore": {
+          "account": {
+            "wie": "Jij",
+            "uitleg": "Je meldt je zelf aan en betaalt zelf."
+          },
+          "app": {
+            "wie": "Studio",
+            "uitleg": "Je vult de gegevens hier in en Studio controleert ze."
+          },
+          "teksten": {
+            "wie": "Studio",
+            "uitleg": "De AI stelt voor; jij keurt goed."
+          },
+          "afbeeldingen": {
+            "wie": "Jij",
+            "uitleg": "Studio controleert of ze er zijn. Maken gaat in een volgende stap."
+          },
+          "privacy": {
+            "wie": "Jij",
+            "uitleg": "De link is verplicht, ook in de app zelf."
+          },
+          "formulieren": {
+            "wie": "Jij",
+            "uitleg": "Privacy-gegevens en exportregels vul je zelf in. Studio geeft een voorstel."
+          },
+          "bouwen": {
+            "wie": "Studio",
+            "uitleg": "Nog niet gebouwd. Een iPhone-app bouwen vraagt een Mac of een bouwdienst."
+          },
+          "uploaden": {
+            "wie": "Studio",
+            "uitleg": "Nog niet gebouwd."
+          },
+          "beoordeling": {
+            "wie": "Jij",
+            "uitleg": "Indienen bevestig je altijd zelf."
+          }
+        }
+      },
+      "wacht": {
+        "play": "Een nieuw account wordt eerst gecontroleerd door Google en moet vaak eerst een proefperiode (gesloten test) doorlopen voordat je echt mag uitbrengen. Dat kan weken duren. Controleer de actuele regels bij Google.",
+        "appstore": "Je meldt je aan bij het Apple Developer Program. De beoordeling van een nieuwe app duurt meestal enkele dagen. Voor een iPhone-app is een Mac met Xcode of een bouwdienst nodig."
+      },
+      "stap": {
+        "account": "Een ontwikkelaarsaccount",
+        "app": "De gegevens van je app",
+        "teksten": "Teksten",
+        "afbeeldingen": "Pictogram en schermafbeeldingen",
+        "privacy": "Een privacyverklaring",
+        "formulieren": "De formulieren van de winkel",
+        "bouwen": "De app bouwen",
+        "uploaden": "De app uploaden",
+        "beoordeling": "Beoordeling en uitbrengen"
+      }
+    },
+    "gegevens": {
+      "titel": "De gegevens van je app",
+      "uitleg": "Deze gegevens gelden voor beide winkels. Er komen geen sleutels of wachtwoorden in te staan.",
+      "naam": "Naam van je app",
+      "androidId": "Unieke app-naam voor Android",
+      "iosId": "Unieke app-naam voor iPhone",
+      "email": "Contact-e-mailadres",
+      "emailHulp": "Dit adres kan voor iedereen zichtbaar zijn in de winkel.",
+      "website": "Website",
+      "support": "Link naar hulp en contact",
+      "privacy": "Link naar je privacyverklaring",
+      "privacyHulp": "Verplicht bij beide winkels. De pagina moet echt bestaan en uitleggen welke gegevens je app gebruikt.",
+      "categoriePlay": "Categorie bij Google Play",
+      "categorieApple": "Categorie bij de App Store",
+      "talen": "In welke talen zet je je app in de winkel?",
+      "heeftLogin": "Mijn app heeft een inlog (dan is een demo-account voor de beoordelaar nodig)",
+      "bewaar": "Gegevens opslaan",
+      "bewaard": "De gegevens zijn opgeslagen.",
+      "fout": "Het opslaan lukte niet. Controleer de velden."
+    },
+    "appid": {
+      "titel": "Je unieke app-naam (app-ID)",
+      "uitleg": "Elke app heeft een unieke naam, bijvoorbeeld nl.mijnwinkel.app. Na de eerste keer uploaden kun je die nooit meer wijzigen.",
+      "domein": "Je domeinnaam (bijvoorbeeld mijnwinkel.nl)",
+      "voorstel": "Doe een voorstel",
+      "voorstelTekst": "Voorstel",
+      "gebruik": "Gebruik dit",
+      "hulpAndroid": "Minstens twee delen met punten ertussen; elk deel begint met een letter; alleen letters, cijfers en liggende streepjes.",
+      "hulpIos": "Letters, cijfers, streepjes en punten, minstens twee delen.",
+      "leeg": "Vul een unieke app-naam in.",
+      "te_lang": "Deze naam is te lang.",
+      "een_deel": "Gebruik minstens twee delen met een punt ertussen.",
+      "leeg_deel": "Er staat een leeg deel tussen twee punten.",
+      "begint_niet_met_letter": "Elk deel moet met een letter beginnen.",
+      "tekens": "Gebruik alleen letters, cijfers en streepjes (Android: liggende streepjes).",
+      "gereserveerd_woord": "Een van de delen is een gereserveerd woord.",
+      "streepje_rand": "Een deel mag niet met een streepje beginnen of eindigen.",
+      "voorbeeld": "Dit is een voorbeeldnaam (com.example). Winkels weigeren die meestal; kies je eigen naam.",
+      "gereserveerd": "Deze naam hoort bij Google of Apple zelf. Kies je eigen naam.",
+      "hoofdletters": "Hoofdletters kunnen, maar kleine letters zijn gebruikelijker."
+    },
+    "versie": {
+      "titel": "Versienummer",
+      "nu": "Nu",
+      "uitleg": "Elke keer dat je een nieuwe versie uploadt, moet het buildnummer (het getal achter het plusteken) hoger zijn dan de vorige. Studio verhoogt dat voor je.",
+      "geen": "Studio kan het versienummer alleen lezen en ophogen in een Flutter-app (bestand pubspec.yaml). Bij dit project is dat niet te vinden.",
+      "build": "Alleen het buildnummer ophogen",
+      "patch": "Kleine nieuwe versie (1.0.0 → 1.0.1)",
+      "minor": "Nieuwe versie met nieuwe dingen (1.0.0 → 1.1.0)",
+      "nieuw": "Het versienummer is nu {{versie}}.",
+      "fout": {
+        "geen_versie": "Er is geen versienummer gevonden.",
+        "geen_pubspec": "Er is geen pubspec.yaml.",
+        "geen_versieregel": "In pubspec.yaml staat geen versieregel.",
+        "schrijven_mislukt": "Het opslaan lukte niet.",
+        "onbekend": "Het ophogen lukte niet."
+      }
+    },
+    "punt": {
+      "account": {
+        "titel": "Ontwikkelaarsaccount",
+        "uitleg": "Maak zelf een account bij de winkel en vink dit af als het klaar is.",
+        "klaar": "Je account staat klaar."
+      },
+      "app_id": {
+        "titel": "Unieke app-naam",
+        "uitleg": "Vul hierboven een geldige unieke app-naam in.",
+        "klaar": "De unieke app-naam is geldig."
+      },
+      "versie": {
+        "titel": "Versienummer",
+        "uitleg": "Studio kan het versienummer van een Flutter-app lezen en ophogen.",
+        "klaar": "Het versienummer staat goed."
+      },
+      "teksten": {
+        "titel": "Teksten",
+        "uitleg": "Schrijf of laat schrijven en keur goed, in elke taal, onder Winkelpakket.",
+        "klaar": "Alle teksten zijn goedgekeurd."
+      },
+      "icoon": {
+        "titel": "Pictogram",
+        "uitleg": "Zet een vierkante afbeelding in store/icoon.png in je project. Het maken van alle maten komt in een volgende stap.",
+        "klaar": "Het pictogram is er."
+      },
+      "feature_graphic": {
+        "titel": "Brede afbeelding voor Google Play",
+        "uitleg": "Zet de afbeelding in store/play/feature-graphic.png. Maken komt in een volgende stap.",
+        "klaar": "De brede afbeelding is er."
+      },
+      "screenshots": {
+        "titel": "Schermafbeeldingen",
+        "uitleg": "Zet de afbeeldingen in store/screenshots/<winkel>/<taal>/. Maken komt in een volgende stap.",
+        "klaar": "Er zijn genoeg schermafbeeldingen."
+      },
+      "privacy": {
+        "titel": "Privacyverklaring",
+        "uitleg": "Vul een echte link in naar je privacyverklaring.",
+        "klaar": "De link naar je privacyverklaring ziet er goed uit."
+      },
+      "contact": {
+        "titel": "Contact-e-mailadres",
+        "uitleg": "Vul een e-mailadres in.",
+        "klaar": "Er is een e-mailadres."
+      },
+      "support": {
+        "titel": "Link naar hulp en contact",
+        "uitleg": "Vul een link in waar mensen hulp krijgen.",
+        "klaar": "De link is ingevuld."
+      },
+      "categorie": {
+        "titel": "Categorie",
+        "uitleg": "Kies een categorie voor je app.",
+        "klaar": "De categorie is ingevuld."
+      },
+      "leeftijd": {
+        "titel": "Leeftijdsindeling",
+        "uitleg": "Beantwoord de vragen bij de winkel zelf en vink dit af.",
+        "klaar": "De leeftijdsindeling is ingevuld."
+      },
+      "data_safety": {
+        "titel": "Gegevensveiligheid (Data safety)",
+        "uitleg": "Een formulier bij Google over welke gegevens je app gebruikt. Zie de antwoordkaarten hieronder.",
+        "klaar": "Dit formulier is ingevuld."
+      },
+      "doelgroep": {
+        "titel": "Doelgroep en inhoud",
+        "uitleg": "Geef bij Google aan voor wie je app is (kinderen of niet).",
+        "klaar": "Dit is ingevuld."
+      },
+      "advertenties": {
+        "titel": "Advertenties",
+        "uitleg": "Geef bij Google aan of je app advertenties toont.",
+        "klaar": "Dit is ingevuld."
+      },
+      "apple_privacy": {
+        "titel": "Privacy-gegevens (App Privacy)",
+        "uitleg": "Een formulier bij Apple over welke gegevens je app verzamelt. Zie de antwoordkaarten hieronder.",
+        "klaar": "Dit formulier is ingevuld."
+      },
+      "export_regels": {
+        "titel": "Regels over versleuteling (export)",
+        "uitleg": "Apple vraagt of je app versleuteling gebruikt. Zie de antwoordkaart hieronder.",
+        "klaar": "Dit is ingevuld."
+      },
+      "demo_account": {
+        "titel": "Demo-account voor de beoordelaar",
+        "uitleg": "Heeft je app een inlog, dan heeft Apple een werkend demo-account nodig. De inloggegevens komen later veilig in de kluis van Studio, nooit in je project.",
+        "klaar": "Het demo-account is klaar."
+      },
+      "inhoud": {
+        "titel": "Controle op inhoud",
+        "uitleg": "Kijk bij ‘Controle voor de beoordeling’ wat er nog moet.",
+        "klaar": "Er zijn geen problemen gevonden."
+      }
+    },
+    "detail": {
+      "teksten": "{{klaar}} van {{totaal}}",
+      "screenshots": "{{aantal}} van minstens {{minimaal}}"
+    },
+    "invul": {
+      "titel": "Hulp bij de formulieren",
+      "uitleg": "Studio kijkt in je project en stelt per vraag een antwoord voor, met de reden. Jij vult de formulieren zelf in bij de winkel.",
+      "verantwoordelijk": "Dit is hulp, geen juridisch advies. Jij blijft verantwoordelijk voor de antwoorden die je bij de winkel invult. Twijfel je? Kies dan voorzichtig of vraag advies.",
+      "studioDenkt": "Studio denkt",
+      "voor": "Voor",
+      "antwoord": {
+        "ja": "Ja",
+        "nee": "Nee",
+        "controleer": "Controleer dit zelf"
+      },
+      "reden": {
+        "pakket": "Je app gebruikt iets voor: {{onderwerp}}.",
+        "geen_signalen": "Studio vond geen aanwijzing in je project. Controleer zelf of je app gegevens gebruikt.",
+        "geen_inlog": "Er is geen inlog gevonden.",
+        "geen_advertentiepakket": "Er is geen advertentiepakket gevonden.",
+        "geen_betaalpakket": "Er is geen betaalpakket gevonden.",
+        "jij_beslist": "Dit kan alleen jij beslissen.",
+        "https_gebruiken": "Normaal gebruikt je app een beveiligde verbinding (https). Controleer dat.",
+        "alleen_https": "Gebruikt je app alleen de gewone beveiligde verbinding van het toestel? Dan is het meestal een vrijstelling. Controleer het bij Apple.",
+        "gebruikers_kunnen_inloggen": "Gebruikers kunnen inloggen: houd daar rekening mee bij de leeftijd."
+      },
+      "onderwerp": {
+        "advertenties": "advertenties",
+        "analyse": "statistieken",
+        "inloggen": "inloggen",
+        "betalen": "betalen",
+        "locatie": "locatie",
+        "camera": "camera",
+        "foto": "foto’s",
+        "contacten": "contacten",
+        "microfoon": "microfoon",
+        "meldingen": "meldingen",
+        "online_opslag": "online opslag"
+      },
+      "kaart": {
+        "gegevens_verzamelen": {
+          "titel": "Verzamelt je app gegevens?",
+          "vraag": "Worden er gegevens van gebruikers verzameld, zoals e-mailadres, locatie of gebruik van de app?"
+        },
+        "gegevens_delen": {
+          "titel": "Deelt je app gegevens met anderen?",
+          "vraag": "Worden gegevens gedeeld met andere bedrijven, bijvoorbeeld voor advertenties of statistieken?"
+        },
+        "versleuteld_onderweg": {
+          "titel": "Beveiligde verbinding",
+          "vraag": "Worden gegevens beveiligd verstuurd (https)?"
+        },
+        "account_verwijderen": {
+          "titel": "Account verwijderen",
+          "vraag": "Kunnen gebruikers hun account en gegevens laten verwijderen? Dat moet als je app een inlog heeft."
+        },
+        "advertenties": {
+          "titel": "Advertenties",
+          "vraag": "Toont je app advertenties?"
+        },
+        "betalingen": {
+          "titel": "Betalingen",
+          "vraag": "Kunnen gebruikers in de app iets kopen?"
+        },
+        "doelgroep_kinderen": {
+          "titel": "Kinderen als doelgroep",
+          "vraag": "Is je app (ook) bedoeld voor kinderen? Dan gelden strengere regels."
+        },
+        "export_versleuteling": {
+          "titel": "Versleuteling (export)",
+          "vraag": "Gebruikt je app versleuteling die niet standaard in het toestel zit?"
+        },
+        "leeftijd": {
+          "titel": "Leeftijdsindeling",
+          "vraag": "Welke leeftijdsklasse past bij je app? Je beantwoordt vragen over geweld, taal, gokken en dergelijke."
+        }
+      }
+    },
+    "veilig": {
+      "titel": "Controle voor de beoordeling",
+      "uitleg": "Dingen die een beoordelaar kan afkeuren. Studio kijkt in je project en je winkelteksten.",
+      "niets": "Studio vond niets verdachts.",
+      "fout": "Houdt je app waarschijnlijk tegen",
+      "letOp": "Let op",
+      "linksOpmerking": "Links worden alleen op uiterlijk gecontroleerd. Of een pagina echt bestaat en werkt, moet je zelf bekijken.",
+      "herstel": "Laat de AI dit herstellen",
+      "prompt": "Studio vond dingen die de beoordeling van mijn app in de winkel kunnen laten mislukken: {{lijst}}. Herstel wat in mijn project te herstellen is en vertel me wat ik zelf moet doen. Verander niets zonder het uit te leggen.",
+      "privacy_ontbreekt": {
+        "titel": "Je privacyverklaring ontbreekt",
+        "uitleg": "Beide winkels vragen een link naar een privacyverklaring."
+      },
+      "privacy_link": {
+        "titel": "De link naar je privacyverklaring ziet er niet goed uit",
+        "uitleg": "Gebruik een echte https-link naar een pagina die bestaat."
+      },
+      "link": {
+        "titel": "Een link ziet er niet goed uit",
+        "uitleg": "Gebruik een echte https-link."
+      },
+      "contact_email": {
+        "titel": "Het e-mailadres ziet er niet goed uit",
+        "uitleg": "Gebruik een echt e-mailadres."
+      },
+      "gevoelig_recht": {
+        "titel": "Je app vraagt een gevoelig recht",
+        "uitleg": "Winkels vragen om uitleg en weigeren dit vaak. Haal het weg als je het niet echt nodig hebt."
+      },
+      "testtekst": {
+        "titel": "Er staat een testtekst",
+        "uitleg": "Teksten zoals ‘lorem ipsum’ of de standaardtekst van een voorbeeldapp worden afgekeurd."
+      },
+      "sleutel_in_project": {
+        "titel": "Een sleutelbestand staat in je project",
+        "uitleg": "Sleutels horen veilig buiten je project te staan. Zet het bestand niet online en bewaar het op een veilige plek."
+      }
+    },
+    "pakket": {
+      "nu": "Teksten",
+      "nogNiet": "Schermafbeeldingen, pictogrammen, hulp bij formulieren per winkel en exporteren komen in volgende stappen."
+    },
+    "veld": {
+      "app_naam": "Naam van je app",
+      "korte_beschrijving": "Korte beschrijving",
+      "volledige_beschrijving": "Volledige beschrijving",
+      "wat_is_nieuw": "Wat is nieuw",
+      "subtitel": "Ondertitel",
+      "trefwoorden": "Zoekwoorden",
+      "beschrijving": "Beschrijving",
+      "promotietekst": "Korte aanbeveling"
+    },
+    "teksten": {
+      "titel": "Teksten",
+      "uitleg": "Per winkel en taal de teksten voor je pagina. De teller toont hoeveel je mag gebruiken. Een goedgekeurde tekst is vergrendeld: de AI kan hem niet wijzigen. De AI schrijft alleen concepten.",
+      "kiesWinkel": "Winkel",
+      "kiesTaal": "Taal",
+      "teller": "{{aantal}} van {{max}} {{eenheid}}",
+      "nietGeverifieerd": "Deze limiet komt niet uit de officiële tekst van de winkel; controleer hem bij de winkel.",
+      "concept": "Opslaan als concept",
+      "keurGoed": "Goedkeuren",
+      "bewerk": "Bewerken",
+      "goedgekeurd": "Goedgekeurd en vergrendeld",
+      "laatAiSchrijven": "Laat de AI een voorstel schrijven",
+      "geschiedenis": "Eerdere versies",
+      "fout": "Opslaan lukte niet.",
+      "goedkeurFout": {
+        "te_lang": "De tekst is te lang voor deze winkel.",
+        "te_kort": "De tekst is te kort voor deze winkel.",
+        "niet_gevonden": "Deze versie bestaat niet meer."
+      },
+      "status": {
+        "concept": "Concept",
+        "goedgekeurd": "Goedgekeurd",
+        "vervangen": "Vervangen"
+      },
+      "bron": {
+        "ai": "AI",
+        "gebruiker": "Jij"
+      },
+      "aiPrompt": "Schrijf een voorstel voor het veld ‘{{officieel}}’ ({{veld}}) van mijn app voor {{winkel}} in het {{taal}}. De limiet is {{max}} {{eenheid}}: blijf daaronder. Lees eerst PROJECT.md en kijk naar de schermen van mijn app. Gebruik het hulpmiddel winkel_schrijf_teksten; dat slaat alleen een concept op en vraagt mijn toestemming. Verzin geen functies die de app niet heeft en gebruik geen overdreven beloftes."
     }
   }
 }
