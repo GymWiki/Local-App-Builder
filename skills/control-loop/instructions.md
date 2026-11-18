@@ -19,6 +19,8 @@ Je hoeft de preview dus niet zelf te starten of te configureren. Gebruik de tool
 - Studio houdt `.studio/kaart.md` bij: schermen, bestanden met hun doel, en de database. Lees die eerst. Is iets niet duidelijk, gebruik dan `bestanden_voor_taak`, `zoek_symbool` of `afhankelijkheden` in plaats van mappen door te lezen.
 - Doorzoek nooit `node_modules`, `dist`, `build`, `.git` of caches. Lees van een bestand alleen het stuk dat je nodig hebt (regelbereik). De kaart kan achterlopen: klopt iets niet, lees dan het echte bestand.
 
+- Een groot verzoek? Maak eerst een kort plan van 3 tot 5 stappen en voer één stap per keer uit, met controle na elke stap. Draai je in cirkels (dezelfde fout of hetzelfde bestand steeds opnieuw), stop dan en zeg in één zin wat je nu anders doet.
+
 ## Overige afspraken
 - Lees `PROJECT.md` aan het begin (`read_project_notes`) en werk het bij (`update_project_notes`) bij beslissingen en statuswijzigingen. Het is de overdracht naar de volgende AI of sessie.
 - Zegt een tool dat de preview niet draait of dat scripts nog niet zijn goedgekeurd? Dan wacht Studio op de gebruiker: vraag die op ‘Start’ of ‘Vertrouwen’ te klikken in de Preview-tab. Wijzig `studio.json` of de scripts in `package.json` niet stiekem om commando's te laten draaien; gewijzigde scripts moeten opnieuw worden goedgekeurd.

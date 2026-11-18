@@ -316,12 +316,12 @@ describe("ChatPanel: bug-lus bewaker", () => {
   const alert = (payload: Partial<ChatMessage["payload"]> = {}) =>
     msg("loop_alert", { reason: "same_error", streak: 3, threshold: 3, last_working: { hash: "g".repeat(40), title: "Pagina werkt" }, ...payload });
 
-  it("onderbreekt vriendelijk met drie knoppen en legt uit wat er aan de hand is", async () => {
+  it("onderbreekt vriendelijk met vier keuzes en legt uit wat er aan de hand is", async () => {
     setup([alert()]);
     const card = await screen.findByTestId("loop-alert");
     expect(card).toHaveTextContent("Even pauzeren");
     expect(card).toHaveTextContent("dezelfde fout aan, 3 keer na elkaar");
-    for (const knop of ["Terug naar laatste werkende versie", "Eerst overleggen", "Andere AI proberen"]) {
+    for (const knop of ["Terug naar laatste werkende versie", "Probeer een andere aanpak", "Eerst alleen onderzoeken", "Andere AI proberen"]) {
       expect(within(card).getByRole("button", { name: knop })).toBeInTheDocument();
     }
   });
@@ -350,13 +350,21 @@ describe("ChatPanel: bug-lus bewaker", () => {
     expect(screen.getByText(/nog geen werkende versie/)).toBeInTheDocument();
   });
 
-  it("'Eerst overleggen' zet de plan-modus aan en vraagt de AI om uit te leggen wat er misgaat", async () => {
+  it("'Eerst alleen onderzoeken' zet de plan-modus aan en vraagt de AI om uit te leggen wat er misgaat", async () => {
     (api.chatModeSet as Mock).mockResolvedValue(undefined);
     setup([alert()]);
     const card = await screen.findByTestId("loop-alert");
-    fireEvent.click(within(card).getByRole("button", { name: "Eerst overleggen" }));
+    fireEvent.click(within(card).getByRole("button", { name: "Eerst alleen onderzoeken" }));
     await waitFor(() => expect(api.chatModeSet).toHaveBeenCalledWith(1, "plan"));
-    await waitFor(() => expect(api.chatSend).toHaveBeenCalledWith(1, expect.stringContaining("Leg in gewone woorden uit wat er misgaat")));
+    await waitFor(() => expect(api.chatSend).toHaveBeenCalledWith(1, expect.stringContaining("leg in gewone woorden uit wat er misgaat")));
+  });
+
+  it("'Probeer een andere aanpak' vraagt de AI het wezenlijk anders te doen en leest eerst alleen wat nodig is", async () => {
+    setup([alert({ reason: "rewrites", streak: 6 })]);
+    const card = await screen.findByTestId("loop-alert");
+    expect(card).toHaveTextContent("steeds hetzelfde bestand opnieuw");
+    fireEvent.click(within(card).getByRole("button", { name: "Probeer een andere aanpak" }));
+    await waitFor(() => expect(api.chatSend).toHaveBeenCalledWith(1, expect.stringContaining("wezenlijk andere manier")));
   });
 
   it("'Andere AI proberen' opent het wisselscherm met overdracht via PROJECT.md", async () => {
@@ -369,6 +377,22 @@ describe("ChatPanel: bug-lus bewaker", () => {
     setup([alert(), msg("assistant", { text: "tussendoor" }), alert({ streak: 4 })]);
     await screen.findAllByTestId("loop-alert");
     expect(screen.getAllByRole("button", { name: "Andere AI proberen" })).toHaveLength(1);
+  });
+});
+
+describe("ChatPanel: lang gesprek", () => {
+  it("stelt na veel berichten een frisse start voor en gebruikt dezelfde AI", async () => {
+    (api.chatSwitch as Mock).mockResolvedValue({ provider: "claude", account_id: null, account_label: null, structured: true, mode: "build" });
+    setup(Array.from({ length: 62 }, (_, i) => msg(i % 2 ? "assistant" : "user", { text: `bericht ${i}` })));
+    const kaart = await screen.findByTestId("lang-gesprek");
+    expect(kaart).toHaveTextContent("Dit gesprek is al lang");
+    fireEvent.click(within(kaart).getByRole("button", { name: "Ga verder met een frisse start" }));
+    await waitFor(() => expect(api.chatSwitch).toHaveBeenCalledWith(1, "claude", null));
+  });
+  it("'Blijf in dit gesprek' verbergt de suggestie en kort gesprek toont niets", async () => {
+    setup(Array.from({ length: 62 }, (_, i) => msg(i % 2 ? "assistant" : "user", { text: `bericht ${i}` })));
+    fireEvent.click(await screen.findByRole("button", { name: "Blijf in dit gesprek" }));
+    await waitFor(() => expect(screen.queryByTestId("lang-gesprek")).toBeNull());
   });
 });
 

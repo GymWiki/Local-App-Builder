@@ -9,6 +9,8 @@ pub enum Reason {
     SameStep,
     /// Het resultaat wordt slechter (meer fouten dan de vorige keer).
     Worse,
+    /// Hetzelfde bestand wordt steeds opnieuw herschreven terwijl de controles blijven falen.
+    Rewrites,
 }
 
 impl Reason {
@@ -17,10 +19,13 @@ impl Reason {
             Reason::SameError => "same_error",
             Reason::SameStep => "same_step",
             Reason::Worse => "worse",
+            Reason::Rewrites => "rewrites",
         }
     }
 }
 
+/// Zoveel keer hetzelfde bestand schrijven terwijl de controles falen = in cirkels draaien.
+pub const REWRITE_LIMIT: usize = 6;
 pub const DEFAULT_THRESHOLD: usize = 3;
 pub const MIN_THRESHOLD: usize = 2;
 pub const MAX_THRESHOLD: usize = 10;
@@ -30,6 +35,8 @@ pub struct LoopGuard {
     failing: Vec<CheckInfo>,
     /// De laatste controle in deze reeks slaagde (dan is de huidige staat "werkend").
     pub healthy: bool,
+    /// Hoe vaak elk bestand is geschreven sinds de laatste geslaagde controle (of het laatste bericht van de gebruiker).
+    writes: std::collections::HashMap<String, usize>,
 }
 
 impl LoopGuard {
@@ -41,7 +48,18 @@ impl LoopGuard {
     /// Vanaf een nieuw bericht van de gebruiker begint een nieuwe reeks.
     pub fn reset(&mut self) {
         self.failing.clear();
+        self.writes.clear();
         self.healthy = false;
+    }
+
+    /// Een bestand is geschreven of gewijzigd. Geeft `Rewrites` zodra hetzelfde bestand te vaak voorbijkomt terwijl er al een controle faalde.
+    pub fn record_edit(&mut self, file: &str) -> Option<Reason> {
+        if file.is_empty() {
+            return None;
+        }
+        let n = self.writes.entry(file.to_string()).or_insert(0);
+        *n += 1;
+        (*n >= REWRITE_LIMIT && !self.failing.is_empty()).then_some(Reason::Rewrites)
     }
 
     pub fn streak(&self) -> usize {
@@ -53,6 +71,7 @@ impl LoopGuard {
         let threshold = threshold.clamp(MIN_THRESHOLD, MAX_THRESHOLD);
         if run.ok {
             self.failing.clear();
+            self.writes.clear();
             self.healthy = true;
             return None;
         }
@@ -188,5 +207,35 @@ mod tests {
         g.reset();
         assert_eq!(g.record(&fail("build", "x", 1), 3), None);
         assert!(!g.healthy);
+    }
+
+    #[test]
+    fn steeds_hetzelfde_bestand_herschrijven_terwijl_checks_falen_is_een_lus() {
+        let mut g = LoopGuard::new();
+        // Zonder falende controle is veel schrijven gewoon bouwen.
+        for _ in 0..10 {
+            assert_eq!(g.record_edit("src/app.ts"), None);
+        }
+        g.reset();
+        g.record(&fail("build", "a", 1), 5);
+        for i in 1..REWRITE_LIMIT {
+            assert_eq!(g.record_edit("src/app.ts"), None, "{i}");
+        }
+        assert_eq!(g.record_edit("src/app.ts"), Some(Reason::Rewrites));
+        assert_eq!(g.record_edit(""), None);
+        // verschillende bestanden tellen apart; slagen begint opnieuw
+        g.reset();
+        g.record(&fail("build", "a", 1), 5);
+        for f in ["a", "b", "c", "d", "e", "f", "g"] {
+            assert_eq!(g.record_edit(f), None);
+        }
+        for _ in 0..3 {
+            g.record_edit("x");
+        }
+        g.record(&pass(), 3);
+        g.record(&fail("build", "b", 1), 5);
+        for _ in 0..3 {
+            assert_eq!(g.record_edit("x"), None);
+        }
     }
 }

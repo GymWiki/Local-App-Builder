@@ -526,18 +526,21 @@
       "uitleg": {
         "same_error": "De AI loopt steeds tegen dezelfde fout aan, {{aantal}} keer na elkaar. Verder proberen helpt waarschijnlijk niet.",
         "same_step": "Dezelfde controle mislukt steeds, {{aantal}} keer na elkaar, ook al probeert de AI iets anders.",
-        "worse": "Het wordt niet beter maar slechter: er gaan nu méér dingen mis dan eerst."
+        "worse": "Het wordt niet beter maar slechter: er gaan nu méér dingen mis dan eerst.",
+        "rewrites": "De AI schrijft steeds hetzelfde bestand opnieuw, terwijl de controle nog steeds mislukt. Zo komt hij waarschijnlijk niet verder."
       },
       "vraag": "Wat wil je doen?",
       "terug": "Terug naar laatste werkende versie",
       "terugGeen": "Er is nog geen werkende versie om naar terug te gaan.",
-      "overleg": "Eerst overleggen",
+      "overleg": "Eerst alleen onderzoeken",
       "andere": "Andere AI proberen",
       "terugBevestig": "Terug naar ‘{{titel}}’?",
       "terugUitleg": "Je huidige werk wordt eerst bewaard als een versie, dus er gaat niets verloren.",
       "terugJa": "Ja, ga terug",
       "terugKlaar": "Klaar: je project staat weer bij ‘{{titel}}’.",
-      "overlegPrompt": "Stop even met bouwen. Leg in gewone woorden uit wat er misgaat en waarom, en stel een ander plan voor. Pas nog niets aan."
+      "overlegPrompt": "Stop even met bouwen. Onderzoek alleen: leg in gewone woorden uit wat er misgaat en waarom, en stel een ander plan voor. Pas nog niets aan.",
+      "anderePrompt": "Je eerdere aanpak werkt niet. Probeer het op een wezenlijk andere manier: lees eerst alleen wat nodig is, zoek de echte oorzaak en leg in één zin uit wat je nu anders doet. Herschrijf niet opnieuw wat je al probeerde.",
+      "andereAanpak": "Probeer een andere aanpak"
     },
     "bijlage": {
       "knop": "Bestand",
@@ -569,6 +572,12 @@
       "gebruik": "Zet in mijn tekstvak",
       "annuleer": "Annuleren",
       "opnieuw": "Probeer opnieuw"
+    },
+    "lang": {
+      "titel": "Dit gesprek is al lang",
+      "uitleg": "Een lang gesprek kost de AI steeds meer gebruik, en hij kan details vergeten. Met een frisse start begint hij opnieuw met je projectnotities en de laatste versies. Je werk en je eerdere gesprek blijven bewaard.",
+      "fris": "Ga verder met een frisse start",
+      "blijf": "Blijf in dit gesprek"
     }
   },
   "instellingen": {

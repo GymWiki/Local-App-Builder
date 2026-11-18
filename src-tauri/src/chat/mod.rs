@@ -282,6 +282,18 @@ fn handle_event(
                 st.rows.insert(id, (m.id, payload));
             }
             inner.status(project, kind.status(), true);
+            if matches!(kind, events::ActionKind::FileCreated | events::ActionKind::FileEdited) {
+                let file = params["path"].as_str().or_else(|| params["file"].as_str()).unwrap_or("").to_string();
+                let (reden, streak) = {
+                    let mut guards = inner.guards.lock().unwrap();
+                    let g = guards.entry(project).or_default();
+                    (g.record_edit(&file), guard::REWRITE_LIMIT)
+                };
+                if let Some(reden) = reden {
+                    let threshold = inner.store.setting("ui:loop_threshold").and_then(|v| v.parse::<usize>().ok()).unwrap_or(guard::DEFAULT_THRESHOLD);
+                    ingrijpen(inner, project, reden, streak, threshold, pending, st);
+                }
+            }
         }
         ChatEvent::ActionResult {
             id,
@@ -360,6 +372,11 @@ fn guard_check(
         (g.record(check, threshold), g.streak())
     };
     let Some(reason) = reason else { return };
+    ingrijpen(inner, project, reason, streak, threshold, pending, st);
+}
+
+/// Meldt de lus aan de gebruiker en stopt de AI (het gesprek blijft hervatbaar; er komt geen versie van de kapotte staat).
+fn ingrijpen(inner: &Arc<Inner>, project: i64, reason: guard::Reason, streak: usize, threshold: usize, pending: &AtomicUsize, st: &mut TurnState) {
     let last_working = inner
         .store
         .last_working(project)
@@ -369,7 +386,6 @@ fn guard_check(
         "loop_alert",
         json!({ "reason": reason.as_str(), "streak": streak, "threshold": threshold.clamp(guard::MIN_THRESHOLD, guard::MAX_THRESHOLD), "last_working": last_working }),
     );
-    // De AI onderbreken: het proces stopt (het gesprek blijft hervatbaar) en er komt geen versie van deze kapotte staat.
     st.aborted = true;
     pending.store(0, Ordering::SeqCst);
     inner.turns.lock().unwrap().remove(&project);

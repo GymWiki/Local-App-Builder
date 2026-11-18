@@ -18,7 +18,7 @@ interface Props {
   canRetry: boolean;
   onRetry: () => void;
   onOpenAccounts: () => void;
-  loop?: { active: boolean; onRestore: (hash: string, title: string) => Promise<void> | void; onDiscuss: () => void; onOtherAi: () => void };
+  loop?: { active: boolean; onRestore: (hash: string, title: string) => Promise<void> | void; onDiscuss: () => void; onNewApproach: () => void; onOtherAi: () => void };
 }
 
 export default function MessageView({ message, live, technical, canRetry, onRetry, onOpenAccounts, loop }: Props) {
@@ -86,7 +86,7 @@ export default function MessageView({ message, live, technical, canRetry, onRetr
       );
     case "loop_alert":
       return loop ? (
-        <LoopAlertCard message={message} active={loop.active} onRestore={loop.onRestore} onDiscuss={loop.onDiscuss} onOtherAi={loop.onOtherAi} />
+        <LoopAlertCard message={message} active={loop.active} onRestore={loop.onRestore} onDiscuss={loop.onDiscuss} onNewApproach={loop.onNewApproach} onOtherAi={loop.onOtherAi} />
       ) : null;
     case "divider":
       return (

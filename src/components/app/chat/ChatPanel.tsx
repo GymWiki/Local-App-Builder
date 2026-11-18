@@ -37,6 +37,7 @@ import {
 } from "@/lib/api";
 import InstallGuide from "@/components/InstallGuide";
 import ChatSwitchDialog from "./ChatSwitchDialog";
+import LangGesprek, { berichtenSindsScheiding, LANG_GESPREK } from "./LangGesprek";
 import VersionsDialog from "./VersionsDialog";
 import MessageView from "./MessageView";
 import AssetThumb from "./AssetThumb";
@@ -92,6 +93,7 @@ export default function ChatPanel({
   const [mode, setMode] = useState<ChatMode>("build");
   const [missing, setMissing] = useState<CliStatus | null>(null);
   const [switching, setSwitching] = useState(false);
+  const [langNegeren, setLangNegeren] = useState(false);
   const [showVersions, setShowVersions] = useState(false);
   const [improving, setImproving] = useState<string | null>(null);
   const [pending, setPending] = useState<SavedAsset[]>([]);
@@ -268,6 +270,8 @@ export default function ChatPanel({
     }
   }
 
+  const toonLang = !langNegeren && !busy && !!target?.structured && berichtenSindsScheiding(messages.map((x) => x.kind)) >= LANG_GESPREK;
+
   const lastLoopId = [...messages]
     .reverse()
     .find((x) => x.kind === "loop_alert")?.id;
@@ -385,6 +389,7 @@ export default function ChatPanel({
                   await runtime<RestoreResult>(id, "git.restore", { hash });
                 },
                 onDiscuss: () => void discuss(),
+                onNewApproach: () => void chatSend(id, t("chat.lus.anderePrompt")).catch(fail),
                 onOtherAi: () => setSwitching(true),
               }}
             />
@@ -446,6 +451,12 @@ export default function ChatPanel({
           </Button>
         )}
       </div>
+
+      {toonLang && target && (
+        <div className="px-5 pb-2">
+          <LangGesprek onFris={() => void switchTo(target.provider, target.account_id)} onBlijf={() => setLangNegeren(true)} />
+        </div>
+      )}
 
       {messages.length > 0 && (
         <div

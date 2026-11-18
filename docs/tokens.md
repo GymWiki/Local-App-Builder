@@ -93,7 +93,8 @@ en na elk deel opnieuw met een ander label (`na-deel-1` …). De uitvoer komt in
 | 0 Meten | meetinstrument + tests + onderzoek klaar; taakmeting wacht op de eigenaar (kost AI-gebruik) |
 | 1 Projectkaart | klaar: index, kaart, zes MCP-tools, instructie (zie §5); taakmeting wacht op de eigenaar |
 | 3 Slimme uitvoer | klaar (zie §6); taakmeting wacht op de eigenaar |
-| 2, 4–8 | nog niet gedaan |
+| 4 Sessiebeheer | gedeeltelijk klaar (zie §7) |
+| 2, 5–8 | nog niet gedaan |
 
 ## 5. Deel 1 — de projectkaart
 
@@ -126,3 +127,14 @@ Voorbeeld uit de test: een mislukte build met 150 logregels geeft nu minder dan 
 
 **Wat dit niet is:** een gemeten besparing in tokens. De verkorting is in regels aangetoond; de echte winst zie je in de taakmeting (§2c).
 **Niet gedaan:** het verkleinen van de afbeelding zelf (de browser levert al JPEG kwaliteit 70; verder verkleinen vraagt een afbeeldingsbibliotheek of een andere viewport, en dat kan de leesbaarheid raken), en "lezen op regelbereik" door onze eigen tool: de AI leest bestanden met de ingebouwde leestool van de CLI, die wij niet kunnen vervangen. We sturen daar via de kaart (regelnummers bij elk symbool) en de instructie op aan.
+
+## 7. Deel 4 — sessiebeheer en bug-loopbewaking
+
+**Gedaan**
+- **Bug-loop:** de bewaker (`chat/guard.rs`) kende al "dezelfde fout", "dezelfde stap" en "het wordt slechter". Nieuw: **hetzelfde bestand ≥ 6 keer schrijven terwijl de controle faalt** (`Reason::Rewrites`, getest). De AI wordt dan gestopt (het gesprek blijft hervatbaar) en de gebruiker krijgt vier keuzes in gewone taal: *Terug naar laatste werkende versie* (bestond), **Probeer een andere aanpak** (nieuw: stuurt een prompt om het wezenlijk anders te doen en eerst alleen te lezen wat nodig is), **Eerst alleen onderzoeken** (bestond als "Eerst overleggen": plan-modus) en *Andere AI proberen* (bestond).
+- **Lang gesprek:** na 60 berichten sinds de laatste scheiding stelt Studio een **frisse start** voor ("Ga verder met een frisse start" / "Blijf in dit gesprek"). De frisse start gebruikt de bestaande overdracht (zelfde AI, nieuwe sessie, scheiding in de chat); de overdrachtstekst wijst nu ook naar `.studio/kaart.md` en de laatste versies. De "samenvatting" is dus de projectnotities plus kaart plus versies, **niet** door de AI geschreven (dat zou zelf tokens kosten en kan dingen verzinnen).
+- **Eén taak per keer:** een korte regel in de instructie: bij een groot verzoek eerst een plan van 3–5 stappen en één stap per keer.
+
+**Niet gedaan (met reden)**
+- **CLI-eigen compact:** `/compact` (Claude) en `/compress` (Gemini) bestaan (§3), maar we sturen ze niet automatisch: de Claude-docs zeggen dat compacten zelf "a large request" is, en we hebben geen meting dat het hier netto bespaart. De frisse start is voorspelbaarder.
+- **Subagents standaard aan:** niet aangezet. Ze tellen volgens de docs mee voor dezelfde limiet en kosten eigen tokens; zonder meting (§2c) zetten we ze niet aan.

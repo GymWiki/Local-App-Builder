@@ -12,18 +12,19 @@ interface Props {
   active: boolean;
   onRestore: (hash: string, title: string) => Promise<void> | void;
   onDiscuss: () => void;
+  onNewApproach: () => void;
   onOtherAi: () => void;
 }
 
 /** Vriendelijke onderbreking als de AI in cirkels draait, met drie duidelijke keuzes. */
-export default function LoopAlertCard({ message, active, onRestore, onDiscuss, onOtherAi }: Props) {
+export default function LoopAlertCard({ message, active, onRestore, onDiscuss, onNewApproach, onOtherAi }: Props) {
   const { t } = useTranslation();
   const p = message.payload;
   const working: { hash: string; title: string } | null = p.last_working ?? null;
   const [confirm, setConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<string | null>(null);
-  const reason: string = ["same_error", "same_step", "worse"].includes(p.reason) ? p.reason : "same_error";
+  const reason: string = ["same_error", "same_step", "worse", "rewrites"].includes(p.reason) ? p.reason : "same_error";
 
   async function restore() {
     if (!working) return;
@@ -54,6 +55,9 @@ export default function LoopAlertCard({ message, active, onRestore, onDiscuss, o
               <div className="flex flex-wrap gap-3">
                 <Button size="lg" disabled={!working} onClick={() => setConfirm(true)}>
                   {t("chat.lus.terug")}
+                </Button>
+                <Button size="lg" variant="outline" onClick={onNewApproach}>
+                  {t("chat.lus.andereAanpak")}
                 </Button>
                 <Button size="lg" variant="outline" onClick={onDiscuss}>
                   {t("chat.lus.overleg")}
