@@ -8,8 +8,9 @@ use std::time::Duration;
 pub enum Body {
     None,
     Form(Vec<(String, String)>),
-    #[allow(dead_code)] // gebruikt door de Supabase-acties (volgende delen)
     Json(String),
+    /// Ruwe bytes met een eigen type (bijvoorbeeld een multipart-formulier voor een edge function).
+    Bytes { content_type: String, data: Vec<u8> },
 }
 
 pub struct Request {
@@ -25,6 +26,9 @@ impl Request {
     }
     pub fn post(url: impl Into<String>, body: Body) -> Self {
         Self { method: "POST", url: url.into(), headers: vec![], body }
+    }
+    pub fn with(method: &'static str, url: impl Into<String>, body: Body) -> Self {
+        Self { method, url: url.into(), headers: vec![], body }
     }
     pub fn header(mut self, k: &str, v: impl Into<String>) -> Self {
         self.headers.push((k.to_string(), v.into()));
@@ -114,6 +118,9 @@ impl Http for UreqHttp {
         let result = match (req.method, &req.body) {
             ("GET", _) => apply(self.agent.get(&req.url)).call(),
             ("DELETE", Body::None) => apply(self.agent.delete(&req.url)).call(),
+            ("DELETE", Body::Json(j)) => apply_body(self.agent.delete(&req.url).force_send_body()).content_type("application/json").send(j.as_str()),
+            ("PATCH", Body::Json(j)) => apply_body(self.agent.patch(&req.url)).content_type("application/json").send(j.as_str()),
+            ("POST", Body::Bytes { content_type, data }) => apply_body(self.agent.post(&req.url)).content_type(content_type.as_str()).send(data.as_slice()),
             ("POST", Body::None) => apply_body(self.agent.post(&req.url)).send_empty(),
             ("POST", Body::Form(f)) => {
                 let pairs: Vec<(&str, &str)> = f.iter().map(|(k, v)| (k.as_str(), v.as_str())).collect();

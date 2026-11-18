@@ -11,6 +11,7 @@ const MIGRATIONS: &[&str] = &[
     include_str!("../migrations/0004_chat.sql"),
     include_str!("../migrations/0005_indeling.sql"),
     include_str!("../migrations/0006_koppelingen.sql"),
+    include_str!("../migrations/0007_supabase.sql"),
 ];
 
 pub fn open(path: &Path) -> Result<Connection> {
@@ -97,10 +98,12 @@ mod tests {
                 "chat_sessions",
                 "check_runs",
                 "connections",
+                "db_actions",
                 "mcp_calls",
                 "project_layouts",
                 "projects",
-                "settings"
+                "settings",
+                "supabase_links"
             ]
         );
         assert_eq!(schema_version(&conn).unwrap(), MIGRATIONS.len());
