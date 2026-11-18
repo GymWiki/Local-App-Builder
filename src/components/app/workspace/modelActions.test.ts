@@ -2,6 +2,7 @@ import { Model } from "flexlayout-react";
 import { defaultLayout } from "@/lib/layout";
 import {
   bestemmingenVoor,
+  geefRuimteAanEigenschappen,
   verplaats,
   closePanel,
   isOpen,
@@ -156,6 +157,32 @@ describe("werkruimte: panelen verplaatsen met het menu", () => {
     const m = nieuw();
     const voor = JSON.stringify(m.toJson());
     verplaats(m, "database", "links");
+    expect(JSON.stringify(m.toJson())).toBe(voor);
+  });
+});
+
+describe("werkruimte: ruimte voor Eigenschappen", () => {
+  const gewichten = (m: Model) => {
+    const rij = m.getNodeById("eigenschappen")!.getParent()!.getParent()!;
+    return (rij.getChildren() as unknown as { getWeight(): number }[]).map((k) => k.getWeight());
+  };
+
+  it("geeft Eigenschappen meer ruimte als het klein is, en laat het verder met rust", () => {
+    const m = nieuw();
+    const [voor] = gewichten(m);
+    expect(voor).toBeLessThan(45);
+    geefRuimteAanEigenschappen(m);
+    const [na, chat] = gewichten(m);
+    expect(na / (na + chat)).toBeCloseTo(0.55, 1);
+    geefRuimteAanEigenschappen(m); // al groot genoeg
+    expect(gewichten(m)[0]).toBeCloseTo(na, 5);
+  });
+
+  it("doet niets als Eigenschappen of het gesprek elders staat", () => {
+    const m = nieuw();
+    verplaats(m, "eigenschappen", "bijPreview");
+    const voor = JSON.stringify(m.toJson());
+    geefRuimteAanEigenschappen(m);
     expect(JSON.stringify(m.toJson())).toBe(voor);
   });
 });

@@ -117,3 +117,21 @@ export function verplaats(model: Model, id: PanelId, naar: Bestemming): void {
     model.doAction(Actions.popoutTab(id, "float"));
   }
 }
+
+/** Na het kiezen van een onderdeel heeft Eigenschappen meer ruimte nodig dan in de standaardindeling: schuif de verdeling met het gesprek op. */
+export function geefRuimteAanEigenschappen(model: Model): void {
+  const ts = parentTabset(model, "eigenschappen");
+  const chat = parentTabset(model, "chat");
+  const rij = ts?.getParent();
+  if (!ts || !chat || !rij || rij !== chat.getParent() || model.getMaximizedTabset()) return;
+  const kinderen = rij.getChildren() as unknown as { getWeight(): number }[];
+  if (kinderen.length !== 2) return;
+  const gewichten = kinderen.map((k) => k.getWeight());
+  const totaal = gewichten[0] + gewichten[1];
+  const i = rij.getChildren().indexOf(ts);
+  if (gewichten[i] / totaal >= 0.45) return;
+  const nieuw = [totaal * 0.45, totaal * 0.45];
+  nieuw[i] = totaal * 0.55;
+  nieuw[1 - i] = totaal - nieuw[i];
+  model.doAction(Actions.adjustWeights(rij.getId(), nieuw));
+}

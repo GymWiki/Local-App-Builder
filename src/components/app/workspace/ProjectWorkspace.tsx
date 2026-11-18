@@ -60,6 +60,7 @@ import WorkspaceBar from "./WorkspaceBar";
 import { ICONEN } from "./sections";
 import {
   closePanel,
+  geefRuimteAanEigenschappen,
   isOpen,
   isPreviewMaximized,
   openIds,
@@ -238,7 +239,10 @@ export default function ProjectWorkspace(props: Props) {
             onRetryMcp={props.onRetryMcp}
             onSelect={(el) => {
               setSelection(el);
-              if (model) openPanel(model, "eigenschappen");
+              if (model) {
+                openPanel(model, "eigenschappen");
+                geefRuimteAanEigenschappen(model);
+              }
             }}
             onPage={setPage}
             controlRef={control}
