@@ -24,6 +24,7 @@ import { Toaster } from "@/components/ui/sonner";
 import BevestigDialoog from "@/components/app/supabase/BevestigDialoog";
 import ActieBevestig from "@/components/app/ActieBevestig";
 import UpdateCheck from "@/components/app/update/UpdateCheck";
+import EersteStart from "@/components/app/eerstestart/EersteStart";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -349,6 +350,7 @@ export default function App() {
         )}
         <BevestigDialoog />
         <ActieBevestig />
+        <EersteStart onAccountsGewijzigd={refreshAccounts} />
         <UpdateCheck />
         <Toaster position="top-center" richColors />
       </div>

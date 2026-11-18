@@ -69,3 +69,14 @@ Datum inventaris: 18 november 2026, versie 0.1.0 (commit-hash staat onderaan Ins
 | 10 | **Voor de winkel klaarmaken** | Veel formulieren, wachttijden, kosten | Klaar-check en formulierhulp bestaan; bouwen/uploaden niet |
 
 Voortgang per deel staat hieronder bij elk deel; de definitieve gereedheidslijst volgt bij "Afronding".
+
+
+## DEEL 1 · Eerste start en klaar-check (gedaan)
+
+- **Eerste-startscherm in drie stappen** (`src/components/app/eerstestart/EersteStart.tsx`): welkom in twee zinnen (met "Studio verstuurt zelf niets over jou"); AI kiezen en inloggen (Claude en Gemini; maakt zo nodig zelf een account aan en opent het bestaande inlogvenster dat ook de installatie-uitleg toont); hoeveel de AI zelf mag doen, in drie keuzes in gewone taal (zelf bepalen / vraag bij belangrijke dingen / laat de AI zijn gang gaan, met waarschuwing). Elke stap is over te slaan ("Later doen") en alles is terug te vinden bij Instellingen ("Eerste start opnieuw tonen").
+- **Systeemcheck** (`src-tauri/src/systeemcheck.rs`, ook onder Hulp): Node, Git, AI-programma's, internet (alleen een verbinding naar poort 443, niets verstuurd), schijfruimte (waarschuwing onder 1 GB, fout onder 200 MB) en schrijfrechten. Elk punt heeft een uitleg in gewone taal en bij Node en Git een knop naar de downloadpagina.
+- **Beperking, eerlijk:** Studio levert Node.js en Git nog **niet** mee en kan ze niet zelf installeren; de leek krijgt uitleg en een downloadknop. "Los dit voor mij op" bestaat dus alleen voor wat Studio echt zelf kan (opnieuw proberen, inloggen). Meeleveren is een aparte bouwstap (zie docs/uitrollen.md).
+- **Codex** wordt nog niet ondersteund (er is geen adapter; eerst de uitvoer van de echte CLI opnemen). Het scherm zegt dat.
+- **MCP/runtime blokkeert nooit:** bestond al (`begin_mcp`, foutkaart met "Opnieuw proberen"); onveranderd.
+- **Hulp-paneel:** had al uitleg, voorbeeldvragen en een vraagveld; nu ook de systeemcheck. "Meld een probleem" komt bij DEEL 4.
+- Tests: `cargo test systeemcheck`, `eerstestart.test.tsx`.

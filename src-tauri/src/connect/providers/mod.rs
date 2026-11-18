@@ -39,6 +39,8 @@ pub fn open_hosts() -> Vec<&'static str> {
     }
     // Websites die Studio online heeft gezet (voorbeelden en de echte site) mogen in de browser worden geopend; er wordt niets opgehaald.
     v.push(".vercel.app");
+    // Downloadpagina's voor wat Studio nodig heeft (alleen openen in de browser, er wordt niets opgehaald).
+    v.extend(["nodejs.org", "git-scm.com"]);
     v.sort();
     v.dedup();
     v

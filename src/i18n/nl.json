@@ -1674,6 +1674,11 @@
         "label": "Controleer bij het openen op een nieuwe versie",
         "uitleg": "Studio kijkt bij het starten of er een nieuwere versie is op GitHub. Er wordt niets geïnstalleerd zonder dat jij het goedvindt. Er gaat geen gegeven van jou mee.",
         "knop": "Nu zoeken naar een nieuwe versie"
+      },
+      "eerste": {
+        "label": "Eerste start",
+        "uitleg": "Loop het welkomstscherm met AI en bedieningsniveau nog een keer door.",
+        "knop": "Eerste start opnieuw tonen"
       }
     },
     "gevorderd": {
@@ -2685,5 +2690,106 @@
       },
       "aiPrompt": "Schrijf een voorstel voor het veld ‘{{officieel}}’ ({{veld}}) van mijn app voor {{winkel}} in het {{taal}}. De limiet is {{max}} {{eenheid}}: blijf daaronder. Lees eerst PROJECT.md en kijk naar de schermen van mijn app. Gebruik het hulpmiddel winkel_schrijf_teksten; dat slaat alleen een concept op en vraagt mijn toestemming. Verzin geen functies die de app niet heeft en gebruik geen overdreven beloftes."
     }
+  },
+  "systeem": {
+    "titel": "Is alles klaar op je computer?",
+    "uitleg": "Studio kijkt zelf wat het nodig heeft. Wat ontbreekt, krijgt hieronder een uitleg.",
+    "opnieuw": "Opnieuw controleren",
+    "bezig": "Even kijken…",
+    "alles": "Alles is klaar.",
+    "let_op": "Er is iets om op te letten, maar je kunt gewoon verder.",
+    "fout": "Er ontbreekt iets. Los het hieronder op; daarna werkt alles.",
+    "status": {
+      "ok": "Gelukt",
+      "let_op": "Let op",
+      "fout": "Ontbreekt"
+    },
+    "punt": {
+      "node": {
+        "titel": "Een hulpprogramma voor Studio (Node.js)",
+        "ok": "Gevonden (versie {{detail}}).",
+        "fout": "Dit programma ontbreekt of is te oud. Studio heeft het nodig om je app te controleren en te tonen.",
+        "oplossing": "Installeer het eenmalig: open de downloadpagina, kies de ‘LTS’-versie en installeer die. Start Studio daarna opnieuw."
+      },
+      "git": {
+        "titel": "Een programma dat je versies bewaart (Git)",
+        "ok": "Gevonden.",
+        "fout": "Dit programma ontbreekt. Zonder dit kan Studio je eerdere versies niet bewaren.",
+        "oplossing": "Installeer het eenmalig: open de downloadpagina en installeer met de standaardkeuzes. Start Studio daarna opnieuw."
+      },
+      "ai": {
+        "titel": "Een AI om mee te werken",
+        "ok": "Gevonden: {{detail}}.",
+        "fout": "Er is nog geen AI-programma op je computer. Studio gebruikt jouw eigen AI-account.",
+        "oplossing": "Kies hieronder een AI en volg de uitleg om hem te installeren en in te loggen."
+      },
+      "internet": {
+        "titel": "Internet",
+        "ok": "Je bent online.",
+        "let_op": "Geen verbinding gevonden. De AI heeft internet nodig; je projecten en versies werken ook zonder.",
+        "oplossing": "Controleer je wifi of kabel en kies ‘Opnieuw controleren’."
+      },
+      "schijf": {
+        "titel": "Ruimte op je computer",
+        "ok": "Genoeg ruimte ({{detail}} GB vrij).",
+        "let_op": "Er is nog maar {{detail}} MB vrij. Maak ruimte vrij voor je projecten.",
+        "fout": "Er is bijna geen ruimte meer ({{detail}} MB). Maak ruimte vrij, anders kan Studio niets meer opslaan.",
+        "oplossing": "Verwijder bestanden die je niet meer nodig hebt en kies ‘Opnieuw controleren’."
+      },
+      "rechten": {
+        "titel": "Mag Studio bestanden opslaan?",
+        "ok": "Ja.",
+        "fout": "Studio mag hier geen bestanden maken.",
+        "oplossing": "Kies bij Instellingen een andere map voor je projecten, bijvoorbeeld in Documenten."
+      }
+    },
+    "open": {
+      "node": "Open de downloadpagina van Node.js",
+      "git": "Open de downloadpagina van Git"
+    }
+  },
+  "eerstestart": {
+    "titel": "Welkom bij Studio",
+    "stap": "Stap {{nu}} van {{totaal}}",
+    "overslaan": "Later doen",
+    "volgende": "Volgende",
+    "terug": "Terug",
+    "klaar": "Aan de slag",
+    "welkom": {
+      "titel": "Maak je eigen app, zonder te programmeren",
+      "een": "Je vertelt in gewone woorden wat je wilt. Een AI bouwt het en je ziet meteen het resultaat.",
+      "twee": "Je projecten blijven op jouw computer. Studio gebruikt jouw eigen AI-account en verstuurt zelf niets over jou of je projecten.",
+      "drie": "Alles is optioneel: je hebt geen account nodig om te beginnen, alleen een AI."
+    },
+    "ai": {
+      "titel": "Kies je AI",
+      "uitleg": "Studio werkt met de AI-programma’s Claude en Gemini. Je logt in met je eigen account; Studio kent je wachtwoord niet. Je kunt dit later veranderen bij ‘AI-accounts’.",
+      "claude": "Claude (van Anthropic)",
+      "gemini": "Gemini (van Google)",
+      "codex": "Codex komt later.",
+      "inloggen": "Inloggen",
+      "gevonden": "Gevonden op je computer",
+      "nietGevonden": "Nog niet geïnstalleerd: ‘Inloggen’ legt uit hoe.",
+      "kostenAi": "Let op: de AI die je kiest rekent soms zelf kosten. Dat loopt via je eigen account; Studio rekent niets.",
+      "fout": "Het inloggen kon niet worden gestart. Probeer het opnieuw."
+    },
+    "niveau": {
+      "titel": "Hoeveel mag de AI zelf doen?",
+      "uitleg": "Dit bepaalt hoe vaak Studio eerst vraagt. Je kunt het altijd veranderen bij Instellingen. Echt online zetten en insturen naar een winkel vraagt altijd eerst jouw ja.",
+      "always": {
+        "titel": "Ik wil het zelf bepalen",
+        "uitleg": "Studio vraagt bij bijna alles eerst of het mag. Rustig en veilig, maar je klikt vaker."
+      },
+      "important": {
+        "titel": "Vraag me bij belangrijke dingen",
+        "uitleg": "De AI werkt door en vraagt alleen bij dingen die iets groots veranderen. Dit is de aanrader voor de meeste mensen."
+      },
+      "autonomous": {
+        "titel": "Laat de AI zijn gang gaan",
+        "uitleg": "De AI doet bijna alles zelf. Handig als je hem vertrouwt, maar let goed op wat hij maakt.",
+        "waarschuwing": "Bij deze keuze vraagt de AI veel minder. Je kunt altijd terug naar een eerder moment."
+      }
+    },
+    "accountNaam": "Mijn account"
   }
 }

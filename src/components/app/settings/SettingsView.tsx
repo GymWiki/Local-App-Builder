@@ -175,6 +175,11 @@ export default function SettingsView({ scope, project, accounts, mcp, groep, onG
               <UpdateRij />
             </div>
           </Rij>
+          <Rij id="inst-eerste" label={t("inst.programma.eerste.label")} uitleg={t("inst.programma.eerste.uitleg")} bereik="alle">
+            <Button variant="outline" data-testid="eerste-opnieuw" onClick={() => void set("eerste_start_klaar", false)}>
+              {t("inst.programma.eerste.knop")}
+            </Button>
+          </Rij>
           <Rij id="inst-backup" label={t("inst.programma.backup.label")} uitleg={t("inst.programma.backup.uitleg")} bereik="dit">
             {onOpenOnline ? (
               <Button variant="outline" onClick={onOpenOnline}>

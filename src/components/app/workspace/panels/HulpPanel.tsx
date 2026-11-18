@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
+import Systeemcheck from "@/components/app/eerstestart/Systeemcheck";
 import { useWorkspace } from "../workspace-context";
 import Frame from "./Frame";
 
@@ -67,6 +68,11 @@ export default function HulpPanel() {
           {t("hulp.vraag.knop")}
         </Button>
       </section>
+      <Card>
+        <CardContent className="pt-6">
+          <Systeemcheck />
+        </CardContent>
+      </Card>
     </Frame>
   );
 }

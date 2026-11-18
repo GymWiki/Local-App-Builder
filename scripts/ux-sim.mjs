@@ -49,7 +49,7 @@ function mock({ demoUrl, scenario, THUMB }) {
     busy: false,
     preview: {},
     versions: {},
-    settings: { theme: scenario.theme, communication_mode: "simple", permission_mode: "important", loop_threshold: "3", preview_auto_switch: "0" },
+    settings: { theme: scenario.theme, communication_mode: "simple", permission_mode: "important", loop_threshold: "3", preview_auto_switch: "0", ...(scenario.eersteStart ? {} : { eerste_start_klaar: "1" }) },
     cliMissing: !!scenario.cliMissing,
     offline: !!scenario.offline,
     notLoggedIn: !!scenario.notLoggedIn,
@@ -272,6 +272,7 @@ function mock({ demoUrl, scenario, THUMB }) {
     supa_sql: () => ({ status: "uitgevoerd", tekst: "Resultaat.", data: [] }),
     project_storage_get: (a) => S.opslag[a.projectId] ?? null,
     project_storage_set: (a) => void (S.opslag[a.projectId] = a.keuze),
+    system_check: () => scenario.systeem ?? { punten: [{ id: "node", status: "ok", detail: "v22.3.0" }, { id: "git", status: "ok", detail: "git version 2.45" }, { id: "ai", status: "ok", detail: "claude" }, { id: "internet", status: "ok", detail: null }, { id: "schijf", status: "ok", detail: "120" }, { id: "rechten", status: "ok", detail: null }], klaar: true },
     winkels_overzicht: () => S.wkOverzicht(),
     winkels_bewaar: (a) => {
       if (a.data.android_id && !/^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/i.test(a.data.android_id)) return { fout: "app_id", veld: "android_id", code: "begint_niet_met_letter" };

@@ -781,3 +781,15 @@ export const winkelsTekstConcept = (projectId: number, winkel: string, taal: str
 export const winkelsTekstGoedkeuren = (projectId: number, id: number) => invoke<{ ok?: boolean; fout?: string }>("winkels_tekst_goedkeuren", { projectId, id });
 export const winkelsTekstOntgrendel = (projectId: number, winkel: string, taal: string, veld: string) => invoke<{ ok?: boolean; fout?: string }>("winkels_tekst_ontgrendel", { projectId, winkel, taal, veld });
 export const winkelsTekstGeschiedenis = (projectId: number, winkel: string, taal: string, veld: string) => invoke<WinkelVersie[]>("winkels_tekst_geschiedenis", { projectId, winkel, taal, veld });
+
+// ---------- systeemcheck (eerste start en Hulp) ----------
+export interface SysteemPunt {
+  id: "node" | "git" | "ai" | "internet" | "schijf" | "rechten";
+  status: "ok" | "let_op" | "fout";
+  detail: string | null;
+}
+export interface SysteemRapport {
+  punten: SysteemPunt[];
+  klaar: boolean;
+}
+export const systemCheck = () => invoke<SysteemRapport>("system_check");
