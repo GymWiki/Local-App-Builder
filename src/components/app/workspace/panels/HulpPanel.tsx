@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
+import ProbleemRapport from "@/components/app/ProbleemRapport";
 import Systeemcheck from "@/components/app/eerstestart/Systeemcheck";
 import { useWorkspace } from "../workspace-context";
 import Frame from "./Frame";
@@ -16,6 +17,7 @@ export default function HulpPanel() {
   const w = useWorkspace();
   const [vraag, setVraag] = useState("");
   const [bezig, setBezig] = useState(false);
+  const [rapport, setRapport] = useState(false);
 
   async function stel() {
     if (!vraag.trim()) return;
@@ -73,6 +75,10 @@ export default function HulpPanel() {
           <Systeemcheck />
         </CardContent>
       </Card>
+      <Button variant="outline" data-testid="hulp-meld" onClick={() => setRapport(true)}>
+        {t("fouten.meld")}
+      </Button>
+      {rapport && <ProbleemRapport projectId={w.project.id} onClose={() => setRapport(false)} />}
     </Frame>
   );
 }

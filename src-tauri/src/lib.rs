@@ -12,6 +12,7 @@ mod export;
 mod github;
 mod host;
 mod improve;
+mod herstel;
 mod instructions;
 mod layouts;
 mod mcp;
@@ -21,6 +22,7 @@ mod preview;
 mod projectinfo;
 mod projects;
 mod provider;
+mod rapport;
 mod route;
 mod systeemcheck;
 mod templates;
@@ -201,7 +203,11 @@ pub fn run() {
             std::fs::create_dir_all(&dir)?;
             let profiles = dir.join("profiles");
             std::fs::create_dir_all(&profiles)?;
-            app.manage(commands::Db(Mutex::new(db::open(&dir.join("studio.db"))?)));
+            let conn = db::open(&dir.join("studio.db"))?;
+            // Was de vorige sessie niet netjes afgesloten? Dan vraagt het scherm bij het opstarten of je wilt verdergaan.
+            let onderbroken = herstel::begin(&conn);
+            app.manage(herstel::Start { onderbroken });
+            app.manage(commands::Db(Mutex::new(conn)));
             app.manage(commands::Profiles(profiles));
 
             let handle = app.handle().clone();
@@ -452,6 +458,8 @@ pub fn run() {
             winkels::app::winkels_tekst_geschiedenis,
             systeemcheck::system_check,
             route::route_feiten,
+            herstel::start_info,
+            rapport::maak_probleemrapport,
             updates::update_check,
             updates::update_install,
             confirm::actie_confirm_answer,
@@ -594,4 +602,7 @@ pub(crate) fn shutdown(app: &tauri::AppHandle) {
     app.state::<PreviewManager>().close_all();
     app.state::<TerminalManager>().close_all();
     app.state::<McpManager>().stop_all();
+    if let Ok(c) = app.state::<commands::Db>().conn() {
+        herstel::einde(&c);
+    }
 }

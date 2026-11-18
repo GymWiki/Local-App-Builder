@@ -101,6 +101,7 @@ fn is_placeholder(v: &str) -> bool {
 
 /// De soort bestand op grond van de naam alleen (zonder naar de inhoud te kijken).
 /// Alleen op de bestandsnaam: lijkt dit bestand geheim (zoals `.env` of een sleutelbestand)?
+#[cfg(test)]
 pub(crate) fn scan_alleen_naam(path: &str) -> bool {
     by_name(path).is_some()
 }

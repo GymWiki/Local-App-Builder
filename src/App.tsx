@@ -25,12 +25,10 @@ import BevestigDialoog from "@/components/app/supabase/BevestigDialoog";
 import ActieBevestig from "@/components/app/ActieBevestig";
 import UpdateCheck from "@/components/app/update/UpdateCheck";
 import EersteStart from "@/components/app/eerstestart/EersteStart";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import FoutBanner from "@/components/app/FoutBanner";
+import HerstelMelding from "@/components/app/HerstelMelding";
 import { Button } from "@/components/ui/button";
-import {
-  ArrowLeftIcon,
-  CircleAlertIcon,
-} from "lucide-react";
+import { ArrowLeftIcon } from "lucide-react";
 import ProjectWorkspace from "@/components/app/workspace/ProjectWorkspace";
 import type { PanelId } from "@/lib/layout";
 import NewProjectDialog from "./components/NewProjectDialog";
@@ -65,8 +63,8 @@ export default function App() {
   const [thumbNonce, setThumbNonce] = useState(0);
 
   const fail = useCallback(
-    (e: unknown) => setError(t("fout.algemeen", { bericht: String(e) })),
-    [t],
+    (e: unknown) => setError(String(e)),
+    [],
   );
 
   const refresh = useCallback(async () => {
@@ -226,19 +224,7 @@ export default function App() {
   return (
     <TooltipProvider>
       <div className="flex h-full min-h-0 flex-col">
-        {error && (
-          <Alert variant="destructive" className="rounded-none border-0 border-b border-destructive/50 bg-destructive/10">
-            <CircleAlertIcon aria-hidden="true" />
-            <AlertDescription className="flex items-center justify-between gap-3 text-base text-foreground">
-              <span role="alert" className="min-w-0 break-words">
-                {error}
-              </span>
-              <Button size="sm" variant="outline" onClick={() => setError(null)}>
-                {t("fout.sluit")}
-              </Button>
-            </AlertDescription>
-          </Alert>
-        )}
+        {error && <FoutBanner fout={error} onSluit={() => setError(null)} />}
         {noticeProject && (
           <PreviewNotice
             projectName={noticeProject.naam}
@@ -351,6 +337,7 @@ export default function App() {
         <BevestigDialoog />
         <ActieBevestig />
         <EersteStart onAccountsGewijzigd={refreshAccounts} />
+        <HerstelMelding onVerder={(p) => void select(p.id)} />
         <UpdateCheck />
         <Toaster position="top-center" richColors />
       </div>

@@ -796,3 +796,11 @@ export const systemCheck = () => invoke<SysteemRapport>("system_check");
 
 // ---------- de route van idee tot app ----------
 export const routeFeiten = (projectId: number) => invoke<import("./route").RouteFeiten>("route_feiten", { projectId });
+
+// ---------- fouten, rapport en herstel ----------
+export const maakProbleemrapport = (projectId?: number) => invoke<string>("maak_probleemrapport", { projectId: projectId ?? null });
+export interface StartInfo {
+  onderbroken: boolean;
+  laatste_project: Project | null;
+}
+export const startInfo = () => invoke<StartInfo>("start_info");

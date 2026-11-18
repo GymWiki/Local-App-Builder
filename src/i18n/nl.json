@@ -2924,5 +2924,72 @@
       "bouwen": "Bouw versie 1 van mijn app volgens het plan in PROJECT.md. Vertel in het gesprek per stap in gewone taal wat je doet (bijvoorbeeld ‘Ik maak het inlogscherm’) en laat geen ruwe uitvoer zien. Controleer je werk met de controles en een schermafbeelding, en sla na elke stap een leesbaar moment op.",
       "testen": "Test de belangrijkste handelingen van mijn app zelf, bijvoorbeeld: kan ik iets toevoegen, opslaan en terugvinden? Gebruik het voorbeeld en de controles. Geef daarna een eenvoudig rapport met per onderdeel groen (werkt), oranje (let op) of rood (werkt niet), in gewone taal. Herstel rode punten pas als ik daarom vraag."
     }
+  },
+  "fouten": {
+    "toonDetails": "Toon details",
+    "verberg": "Verberg details",
+    "detailsUitleg": "Dit is de technische tekst. Je hebt hem alleen nodig als je hulp vraagt.",
+    "meld": "Meld een probleem",
+    "schijf_vol": {
+      "titel": "Je computer zit vol.",
+      "oplossing": "Maak ruimte vrij door bestanden te verwijderen die je niet meer nodig hebt, en probeer het daarna opnieuw."
+    },
+    "niet_gevonden": {
+      "titel": "Studio kan een bestand of map niet vinden.",
+      "oplossing": "Is het verplaatst of verwijderd? Zet het terug op de oude plek, of kies een andere map, en probeer het opnieuw."
+    },
+    "geen_toestemming": {
+      "titel": "Je computer geeft Studio hier geen toestemming voor.",
+      "oplossing": "Kies een andere map, bijvoorbeeld in Documenten, of sluit het programma dat het bestand gebruikt, en probeer het opnieuw."
+    },
+    "in_gebruik": {
+      "titel": "Een ander programma gebruikt dit bestand.",
+      "oplossing": "Sluit het andere programma (bijvoorbeeld Word of Verkenner) en probeer het opnieuw."
+    },
+    "time_out": {
+      "titel": "Het duurde te lang.",
+      "oplossing": "Probeer het over een paar minuten opnieuw. Je werk is niet verloren gegaan."
+    },
+    "geen_internet": {
+      "titel": "Er is geen verbinding met internet.",
+      "oplossing": "Controleer je wifi of kabel en probeer het opnieuw. Je projecten en versies werken ook zonder internet."
+    },
+    "inloggen": {
+      "titel": "Je bent niet meer ingelogd.",
+      "oplossing": "Log opnieuw in bij ‘AI-accounts’ of bij de Verbinden-knop van de dienst."
+    },
+    "database_bezig": {
+      "titel": "Studio is nog even bezig met iets anders.",
+      "oplossing": "Wacht een paar seconden en probeer het opnieuw."
+    },
+    "bestaat_al": {
+      "titel": "Dit bestaat al.",
+      "oplossing": "Kies een andere naam of een andere plek."
+    },
+    "geen_programma": {
+      "titel": "Een programma dat Studio nodig heeft, is niet gevonden.",
+      "oplossing": "Open Hulp en kijk bij ‘Is alles klaar op je computer?’. Daar staat wat er ontbreekt en hoe je het installeert."
+    },
+    "onbekend": {
+      "titel": "Er ging iets mis.",
+      "oplossing": "Probeer het opnieuw. Lukt het weer niet, open dan ‘Toon details’ of kies ‘Meld een probleem’ om hulp te vragen."
+    }
+  },
+  "rapport": {
+    "titel": "Meld een probleem",
+    "uitleg": "Studio maakt een rapport dat je kunt meesturen als je hulp vraagt. Er staan geen wachtwoorden, sleutels, namen of stukken van je project in. Je kunt het hieronder eerst lezen. Er wordt niets automatisch verstuurd.",
+    "maak": "Rapport maken",
+    "bezig": "Even bezig…",
+    "kopieer": "Kopieer het rapport",
+    "gekopieerd": "Het rapport is gekopieerd. Plak het in een e-mail of bericht.",
+    "fout": "Het rapport kon niet worden gemaakt.",
+    "sluit": "Sluiten"
+  },
+  "herstel": {
+    "titel": "Je werk is bewaard",
+    "uitleg": "Studio is de vorige keer niet netjes afgesloten, bijvoorbeeld door een storing. Al je projecten en eerdere versies staan gewoon nog op je computer. Wil je verdergaan met ‘{{naam}}’?",
+    "uitlegZonder": "Studio is de vorige keer niet netjes afgesloten, bijvoorbeeld door een storing. Al je projecten en eerdere versies staan gewoon nog op je computer.",
+    "verder": "Ja, verdergaan",
+    "later": "Later"
   }
 }

@@ -89,6 +89,16 @@ pub fn export_zip(project: &Path, dest: &Path) -> Result<ExportResult> {
             "Sla de zip buiten je projectmap op.".into(),
         ));
     }
+    // Geheimenscan vóór het exporteren: een sleutel of wachtwoord in je bestanden gaat nooit ongemerkt mee in een zip die je deelt.
+    let gevonden = crate::vercel::files::collect(&root);
+    let blok = gevonden.blokkades();
+    if !blok.is_empty() {
+        let namen: Vec<String> = blok.iter().take(5).map(|f| f.bestand.clone()).collect();
+        return Err(AppError::Invalid(format!(
+            "De export is gestopt: in je bestanden staat iets wat geheim hoort te blijven (zoals een sleutel of wachtwoord), in: {}. Haal het eruit (de AI kan helpen) en probeer het opnieuw.",
+            namen.join(", ")
+        )));
+    }
     let tmp: PathBuf = dest.with_extension("zip.studio-tmp");
     let file = File::create(&tmp)?;
     let mut zip = zip::ZipWriter::new(file);
@@ -366,5 +376,21 @@ mod tests {
         ] {
             assert!(!is_secret(s), "{s}");
         }
+    }
+
+    /// Een sleutel in de code stopt de export (de waarde zelf staat nooit in de melding).
+    #[test]
+    fn export_stopt_bij_een_geheim_in_de_code_en_noemt_het_bestand_maar_niet_de_waarde() {
+        let d = tempfile::tempdir().unwrap();
+        let sleutel = ["ghp", "_", &"h4Jk".repeat(9)].concat();
+        std::fs::write(d.path().join("index.html"), "<h1>x</h1>").unwrap();
+        std::fs::create_dir_all(d.path().join("src")).unwrap();
+        std::fs::write(d.path().join("src/a.js"), format!("const t = '{sleutel}';")).unwrap();
+        let uit = tempfile::tempdir().unwrap();
+        let fout = export_zip(d.path(), &uit.path().join("x.zip")).unwrap_err().to_string();
+        assert!(fout.contains("src/a.js") && !fout.contains(&sleutel), "{fout}");
+        assert!(!uit.path().join("x.zip").exists());
+        std::fs::write(d.path().join("src/a.js"), "const t = 1;").unwrap();
+        assert!(export_zip(d.path(), &uit.path().join("x.zip")).is_ok());
     }
 }

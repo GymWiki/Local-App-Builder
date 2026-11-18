@@ -277,6 +277,8 @@ function mock({ demoUrl, scenario, THUMB }) {
       const f = (k) => S.flags[pid + ":" + k];
       return { heeft_idee: (S.messages[pid] || []).some((m) => m.kind === "user"), plan_klaar: f("route_plan") === "1", kit_gekozen: !!scenario.kitGekozen, versies: (S.versions[pid] || []).length, gegevens_nodig: !!scenario.gegevensNodig, gegevens_klaar: false, tests_ok: scenario.testsOk ?? null, back_up: false, online: f("online_gezet") === "1", winkel: false, overgeslagen: ["idee", "plan", "uiterlijk", "bouwen", "aanpassen", "gegevens", "testen", "delen"].filter((x) => f("over_" + x) === "1") };
     },
+    start_info: () => ({ onderbroken: !!scenario.crash, laatste_project: scenario.crash ? S.projects[0] ?? null : null }),
+    maak_probleemrapport: () => "Studio 0.1.1 · Windows\nGeen problemen gevonden.",
     system_check: () => scenario.systeem ?? { punten: [{ id: "node", status: "ok", detail: "v22.3.0" }, { id: "git", status: "ok", detail: "git version 2.45" }, { id: "ai", status: "ok", detail: "claude" }, { id: "internet", status: "ok", detail: null }, { id: "schijf", status: "ok", detail: "120" }, { id: "rechten", status: "ok", detail: null }], klaar: true },
     winkels_overzicht: () => S.wkOverzicht(),
     winkels_bewaar: (a) => {

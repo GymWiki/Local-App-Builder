@@ -108,3 +108,16 @@ Voortgang per deel staat hieronder bij elk deel; de definitieve gereedheidslijst
 - **Beperking, eerlijk:** er is **geen echte mobiele app (Flutter) als voorbeeld**: er bestaat geen Flutter-template en ik heb er geen gebouwd (niet te testen zonder Flutter). Het kassa-voorbeeld is een website voor op een telefoon.
 - **Kits:** de voorbeelden gebruiken eigen stijlvariabelen (licht en donker, focusringen, grote knoppen), geen kit; de kitkiezer en kit-check blijven bij het React-template. De "Uiterlijk"-stap wordt voor de statische voorbeelden daarom niet automatisch geopend.
 - Tests: `cargo test templates` (elk voorbeeld kopieert, is klein, heeft een plan, geen geheimen, geen externe verbindingen), `npm run ux:startprojecten` (elk voorbeeld draait echt in een browser met klikken en toetsenbord op 390×844, 1280×720 en 1920×1080).
+
+## DEEL 4 — Als er iets misgaat, en vertrouwen
+
+| Onderdeel | Wat er nu is | Plek |
+|---|---|---|
+| Fouten in gewone taal | Elke fout krijgt een titel, een oorzaak en een oplossing. De technische tekst staat achter "Toon details". | `src/lib/fouten.ts`, `FoutBanner.tsx`, `fouten.*` in `nl.json` |
+| Meld een probleem | In Hulp: maakt een rapport zonder geheimen en zonder gebruikersnaam in paden. Je kopieert het zelf; er wordt niets verstuurd. | `rapport.rs`, `ProbleemRapport.tsx` |
+| Herstel na een storing | Bij de volgende start: "Je werk is bewaard, wil je verdergaan?" | `herstel.rs`, `HerstelMelding.tsx` |
+| Geheimenscan bij export | `export_zip` scant eerst; een gevonden geheim blokkeert de export. Back-up en online zetten hadden dit al. | `export.rs`, `github/scan.rs` |
+
+Nog niet gedaan in dit deel: een tijdlijn met miniaturen per eerder moment (de lijst met versies bestaat al, zonder miniaturen) en een kostenzin voor elke actie.
+
+Tests: `src/lib/fouten.test.ts`, `src/components/app/fouten.test.tsx`, `cargo test herstel rapport export`.
