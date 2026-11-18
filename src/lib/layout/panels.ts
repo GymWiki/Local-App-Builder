@@ -36,7 +36,7 @@ export const PANELEN: Record<PanelId, PanelDef> = {
   instellingen: DEF("instellingen", "midden", { minBreedte: 280 }),
   geavanceerd: DEF("geavanceerd", "midden", { behouden: true, minBreedte: 300, minHoogte: 160 }),
   preview: DEF("preview", "midden", { sluitbaar: false, behouden: true, minBreedte: 300, minHoogte: 200 }),
-  eigenschappen: DEF("eigenschappen", "rechts", { minBreedte: 240, minHoogte: 140 }),
+  eigenschappen: DEF("eigenschappen", "rechts", { minBreedte: 240, minHoogte: 110 }),
   chat: DEF("chat", "rechts", { sluitbaar: false, behouden: true, minBreedte: 300, minHoogte: 300 }),
 };
 

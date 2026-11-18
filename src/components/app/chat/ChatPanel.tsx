@@ -281,7 +281,7 @@ export default function ChatPanel({
   return (
     <section
       aria-label={t("chat.titel")}
-      className={`relative flex h-full min-h-0 flex-col overflow-y-auto bg-background ${dragging ? "outline outline-4 -outline-offset-4 outline-primary" : ""}`}
+      className={`relative flex h-full min-h-0 flex-col overflow-hidden bg-background [container-type:size] ${dragging ? "outline outline-4 -outline-offset-4 outline-primary" : ""}`}
       onDragOver={(e) => {
         if (unavailable || !e.dataTransfer?.types?.includes("Files")) return;
         e.preventDefault();
@@ -302,17 +302,17 @@ export default function ChatPanel({
           {t("chat.bijlage.sleep")}
         </div>
       )}
-      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-5 py-3">
-        <h2 className="text-lg font-semibold">
-          {t("chat.titel")}
+      <header className="flex items-center justify-between gap-2 border-b border-border px-4 py-2">
+        <h2 className="min-w-0 truncate text-base text-muted-foreground">
+          <span className="sr-only">{t("chat.titel")} </span>
           {target && (
-            <span className="ml-2 text-base font-normal text-muted-foreground">
+            <>
               {aiName}
               {target.account_label ? ` · ${target.account_label}` : ""}
-            </span>
+            </>
           )}
         </h2>
-        <div className="flex gap-2">
+        <div className="flex shrink-0 gap-2">
           <Button
             variant="outline"
             size="sm"
@@ -337,7 +337,7 @@ export default function ChatPanel({
         role="log"
         aria-live="polite"
         aria-label={t("chat.geschiedenis")}
-        className="min-h-40 flex-1"
+        className="min-h-24 flex-1"
       >
         <div className="space-y-3 px-5 py-4">
           {messages.length === 0 && !unavailable && (
@@ -422,7 +422,7 @@ export default function ChatPanel({
         role="status"
         aria-live="polite"
         data-testid="status-line"
-        className="flex items-center gap-3 border-t border-border px-5 py-2 text-base text-muted-foreground"
+        className={`flex items-center gap-3 border-t border-border px-5 py-2 text-base text-muted-foreground ${busy ? "" : "[@container(max-height:560px)]:sr-only"}`}
       >
         {busy ? (
           <LoaderIcon aria-hidden="true" className="size-4 animate-spin" />
@@ -449,7 +449,7 @@ export default function ChatPanel({
 
       {messages.length > 0 && (
         <div
-          className="flex gap-2 overflow-x-auto px-5 pb-2 [@media(max-height:760px)]:hidden"
+          className="flex gap-2 overflow-x-auto px-5 pb-2 [@container(max-height:620px)]:hidden"
           role="group"
           aria-label={t("chat.snel.titel")}
         >
@@ -478,7 +478,7 @@ export default function ChatPanel({
       )}
 
       <div className="flex flex-wrap items-center gap-3 border-t border-border px-4 pt-3">
-        <span className="text-base text-muted-foreground">
+        <span className="text-base text-muted-foreground [@container(max-height:560px)]:hidden">
           {t("chat.modus.kop")}
         </span>
         <ToggleGroup
@@ -581,7 +581,7 @@ export default function ChatPanel({
         />
         <p
           id="chat-hint"
-          className="text-sm text-muted-foreground [@media(max-height:760px)]:sr-only"
+          className="text-sm text-muted-foreground [@container(max-height:560px)]:sr-only"
         >
           {t("chat.hint")}
         </p>
@@ -596,7 +596,7 @@ export default function ChatPanel({
             onClick={() => picker.current?.click()}
           >
             <PaperclipIcon aria-hidden="true" />
-            {t("chat.bijlage.knop")}
+            <span className="[@container(max-width:480px)]:sr-only">{t("chat.bijlage.knop")}</span>
           </Button>
           <Button
             type="button"
@@ -607,7 +607,7 @@ export default function ChatPanel({
             onClick={() => setImproving(text.trim())}
           >
             <WandSparklesIcon aria-hidden="true" />
-            {t("chat.verbeter.knop")}
+            <span className="[@container(max-width:480px)]:sr-only">{t("chat.verbeter.knop")}</span>
           </Button>
           <Button
             type="submit"

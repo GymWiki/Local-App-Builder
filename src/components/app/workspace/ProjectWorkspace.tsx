@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { toast } from "sonner";
+import type { KeyboardEvent } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Layout,
@@ -270,6 +271,14 @@ export default function ProjectWorkspace(props: Props) {
     if (Icon) rv.leading = <Icon aria-hidden="true" className="size-4" />;
   };
 
+  // Grotere stappen met het toetsenbord: Shift + pijltoets op een scheidingsgreep is acht keer zo groot als een gewone pijltoets.
+  const onGripKey = (e: KeyboardEvent<HTMLDivElement>) => {
+    const el = e.target as HTMLElement;
+    if (!e.shiftKey || el.getAttribute("role") !== "separator" || !e.key.startsWith("Arrow")) return;
+    // Een voor een, met een korte pauze: de indeling moet na elke stap eerst bijwerken.
+    for (let i = 1; i <= 7; i++) setTimeout(() => el.dispatchEvent(new KeyboardEvent("keydown", { key: e.key, bubbles: true, cancelable: true })), i * 40);
+  };
+
   const i18nTranslator = (key: string): string => {
     if (key.startsWith("werkruimte.paneel.")) return t(key);
     const ui = `werkruimte.ui.${key}`;
@@ -297,6 +306,7 @@ export default function ProjectWorkspace(props: Props) {
         />
         <div
           ref={host}
+          onKeyDownCapture={onGripKey}
           className="studio-layout relative min-h-0 min-w-0 flex-1"
           data-compact={isCompactView ? "ja" : "nee"}
           aria-label={t("werkruimte.label")}

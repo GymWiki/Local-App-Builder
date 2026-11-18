@@ -36,7 +36,7 @@ export type PresetId = "standaard" | "veelPreview" | "veelChat";
 export const PRESETS: PresetId[] = ["standaard", "veelPreview", "veelChat"];
 
 const GEWICHTEN: Record<PresetId, { links: number; midden: number; rechts: number; props: number; chat: number }> = {
-  standaard: { links: 16, midden: 46, rechts: 38, props: 28, chat: 72 },
+  standaard: { links: 16, midden: 46, rechts: 38, props: 22, chat: 78 },
   veelPreview: { links: 12, midden: 64, rechts: 24, props: 25, chat: 75 },
   veelChat: { links: 14, midden: 30, rechts: 56, props: 20, chat: 80 },
 };
