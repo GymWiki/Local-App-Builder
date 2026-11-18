@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type MutableRefObject } from "react";
 import { useTranslation } from "react-i18next";
 import {
   chatSend,
@@ -15,6 +15,7 @@ import {
   type Project,
 } from "@/lib/api";
 import { ChevronDownIcon, MousePointerClickIcon, RotateCwIcon } from "lucide-react";
+import { parsePage, parsePick, type PageInfo, type PickedElement, type PreviewControl } from "@/components/app/workspace/pick";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -42,6 +43,11 @@ interface Props {
   onAutoSwitch?: (v: boolean) => void;
   onError: (msg: string) => void;
   onRetryMcp?: () => Promise<void> | void;
+  /** Als dit er is, meldt een klik in de preview het onderdeel hier (paneel Eigenschappen) in plaats van een eigen venster te openen. */
+  onSelect?: (el: PickedElement) => void;
+  onPage?: (info: PageInfo) => void;
+  /** Geeft het paneel Eigenschappen de knoppen om een onderdeel te kiezen of de keuze te verplaatsen. */
+  controlRef?: MutableRefObject<PreviewControl | null>;
 }
 
 const BADGE: Record<string, string> = {
@@ -52,7 +58,7 @@ const BADGE: Record<string, string> = {
   idle: "border-transparent bg-muted text-muted-foreground",
 };
 
-export default function PreviewPanel({ project, mcp, preview, visible, reloadNonce = 0, autoSwitch = false, onAutoSwitch, onError, onRetryMcp }: Props) {
+export default function PreviewPanel({ project, mcp, preview, visible, reloadNonce = 0, autoSwitch = false, onAutoSwitch, onError, onRetryMcp, onSelect, onPage, controlRef }: Props) {
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   const [manualReload, setManualReload] = useState(0);
@@ -113,20 +119,32 @@ export default function PreviewPanel({ project, mcp, preview, visible, reloadNon
 
   const tellFrame = useCallback((on: boolean) => frame.current?.contentWindow?.postMessage({ type: "studio-picker", on }, "*"), []);
 
+  const post = useCallback((msg: object) => frame.current?.contentWindow?.postMessage(msg, "*"), []);
+
   useEffect(() => {
     const onMessage = (e: MessageEvent) => {
       if (!frame.current || e.source !== frame.current.contentWindow) return;
-      const d = e.data as { type?: string; selector?: string; tag?: string; text?: string; path?: string } | null;
-      if (d?.type === "studio-picker-ready") tellFrame(picking);
-      else if (d?.type === "studio-pick" && typeof d.selector === "string") {
+      const d = e.data as { type?: string } | null;
+      if (d?.type === "studio-picker-ready") {
+        tellFrame(picking);
+        if (onPage) post({ type: "studio-picker-page" });
+      } else if (d?.type === "studio-pick") {
+        const el = parsePick(d);
+        if (!el) return;
         setPicking(false);
-        setWish("");
-        setPick({ selector: d.selector.slice(0, 500), tag: String(d.tag ?? "").slice(0, 30), text: String(d.text ?? "").slice(0, 120), path: String(d.path ?? "/").slice(0, 500) });
+        if (onSelect) onSelect(el);
+        else {
+          setWish("");
+          setPick({ selector: el.selector, tag: el.tag, text: el.text, path: el.path });
+        }
+      } else if (d?.type === "studio-page") {
+        const info = parsePage(d);
+        if (info && onPage) onPage(info);
       } else if (d?.type === "studio-pick-cancel") setPicking(false);
     };
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, [picking, tellFrame]);
+  }, [picking, tellFrame, onSelect, onPage, post]);
 
   async function togglePick() {
     if (picking) {
@@ -140,6 +158,26 @@ export default function PreviewPanel({ project, mcp, preview, visible, reloadNon
       tellFrame(true);
     });
   }
+
+  // Het paneel Eigenschappen bedient de preview via deze knoppen.
+  const toggleRef = useRef(togglePick);
+  useEffect(() => {
+    toggleRef.current = togglePick;
+  });
+  useEffect(() => {
+    if (!controlRef) return;
+    controlRef.current = {
+      startPick: async () => {
+        if (!picking) await toggleRef.current();
+      },
+      select: (selector) => post({ type: "studio-picker-select", selector }),
+      clear: () => post({ type: "studio-picker-clear" }),
+      askPage: () => post({ type: "studio-picker-page" }),
+    };
+    return () => {
+      controlRef.current = null;
+    };
+  }, [controlRef, picking, post]);
 
   async function sendPick() {
     if (!pick || !wish.trim()) return;

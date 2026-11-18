@@ -67,6 +67,25 @@ try {
     await p.waitForTimeout(7500);
     check(tag("AI-antwoord zichtbaar"), await p.getByText(/Wil je dat ik iets verander/).first().isVisible().catch(() => false));
 
+    // ---- Eigenschappen: een onderdeel kiezen in de preview, ouder/kind, en een wens naar de chat
+    await p.getByRole("button", { name: "Kies een onderdeel" }).first().click();
+    await p.waitForTimeout(700);
+    await p.frameLocator("iframe").locator("button.knop").click();
+    await p.waitForTimeout(700);
+    const sel = p.getByTestId("eigenschappen-selectie");
+    check(tag("eigenschappen tonen de gekozen knop"), await sel.isVisible().catch(() => false));
+    const selTekst = (await sel.innerText().catch(() => "")) || "";
+    check(tag("eigenschappen: soort, afmeting, kit en token"), /Knop/.test(selTekst) && /pixels/.test(selTekst) && /button/.test(selTekst) && /primary/.test(selTekst), selTekst.slice(0, 80));
+    await p.getByRole("button", { name: "Kies het onderdeel erboven" }).click();
+    await p.waitForTimeout(500);
+    check(tag("eigenschappen: ouder kiezen werkt"), /main/.test(await p.getByTestId("breadcrumb").innerText()));
+    await p.getByLabel("Beschrijf wat je anders wilt").fill("maak dit groter");
+    await p.getByRole("button", { name: "Naar de AI sturen" }).click();
+    await p.waitForTimeout(600);
+    check(tag("eigenschappen: wens is naar de chat gestuurd"), (await p.evaluate(() => window.__S.sent.at(-1) ?? "")).includes("maak dit groter"));
+    await p.getByRole("button", { name: "Keuze wissen" }).click();
+    await p.waitForTimeout(300);
+
     // ---- Slepen van een scheidingsgreep: preview laadt niet opnieuw, indeling wordt bewaard en teruggezet
     let navs = 0;
     p.on("framenavigated", (f) => {

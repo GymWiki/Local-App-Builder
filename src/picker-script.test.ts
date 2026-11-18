@@ -68,4 +68,41 @@ describe("pickerscript (alleen in de preview)", () => {
     new Function(PICKER_SCRIPT)();
     expect(sent.filter((m) => m.type === "studio-picker-ready")).toHaveLength(0);
   });
+
+  it("een klik geeft ook de plek in de pagina, de onderdelen eronder, het kitonderdeel en de gebruikte tokens door", () => {
+    pagina(
+      '<style>.knop{background-color:var(--primary)}@media (min-width:1px){.knop{color:var(--primary-foreground)}}</style>' +
+        '<main id="top"><section class="hero"><div data-slot="card"><button class="knop" id="k"><span>Hoi</span><span>Daar</span></button></div></section></main>',
+    );
+    zet(true);
+    klik(document.getElementById("k")!);
+    const pick = sent.find((m) => m.type === "studio-pick") as unknown as { info: { breadcrumb: { label: string; selector: string }[]; children: { label: string }[]; childCount: number; kit: { name: string; self: boolean } | null; tokens: { prop: string; token: string }[]; size: object; styles: Record<string, string> } };
+    expect(pick.info.breadcrumb.map((b) => b.label)).toEqual(["body", "main#top", "section.hero", "div", "button#k"]);
+    expect(pick.info.breadcrumb.at(-1)!.selector).toBe("#k");
+    expect(pick.info.childCount).toBe(2);
+    expect(pick.info.children.map((c) => c.label)).toEqual(["span", "span"]);
+    expect(pick.info.kit).toEqual({ name: "card", self: false });
+    expect(pick.info.tokens).toEqual(expect.arrayContaining([{ prop: "background-color", token: "--primary" }, { prop: "color", token: "--primary-foreground" }]));
+    expect(Object.keys(pick.info.styles)).toEqual(expect.arrayContaining(["color", "background", "fontSize", "borderRadius", "padding", "gap"]));
+  });
+
+  it("Studio kan een ander onderdeel vragen (ouder of kind); een ongeldige selector doet niets", () => {
+    pagina('<section id="s"><p id="p">tekst</p></section>');
+    window.dispatchEvent(new MessageEvent("message", { data: { type: "studio-picker-select", selector: "#s" }, source: window.parent }));
+    expect(sent.find((m) => m.type === "studio-pick")).toMatchObject({ selector: "#s", tag: "section" });
+    sent.length = 0;
+    window.dispatchEvent(new MessageEvent("message", { data: { type: "studio-picker-select", selector: "###" }, source: window.parent }));
+    window.dispatchEvent(new MessageEvent("message", { data: { type: "studio-picker-select", selector: "#bestaat-niet" }, source: window.parent }));
+    window.dispatchEvent(new MessageEvent("message", { data: { type: "studio-picker-select", selector: "#s" }, source: null }));
+    expect(sent).toHaveLength(0);
+  });
+
+  it("geeft op verzoek gegevens van de pagina en laat de pagina verder ongemoeid", () => {
+    pagina("<p>x</p>");
+    document.title = "Tuin";
+    const html = document.body.innerHTML;
+    window.dispatchEvent(new MessageEvent("message", { data: { type: "studio-picker-page" }, source: window.parent }));
+    expect(sent.find((m) => m.type === "studio-page")).toMatchObject({ type: "studio-page", title: "Tuin", path: "/" });
+    expect(document.body.innerHTML).toBe(html);
+  });
 });

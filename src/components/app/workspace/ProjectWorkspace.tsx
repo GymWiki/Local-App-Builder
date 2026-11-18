@@ -48,6 +48,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import EigenschappenPanel from "./panels/EigenschappenPanel";
 import HistoryPanel from "./panels/HistoryPanel";
 import PlaceholderPanel from "./panels/PlaceholderPanel";
+import type { PageInfo, PickedElement, PreviewControl } from "./pick";
 import ProjectSettingsPanel, {
   type SettingsProps,
 } from "./panels/ProjectSettingsPanel";
@@ -104,6 +105,9 @@ export default function ProjectWorkspace(props: Props) {
   const [compact, setCompact] = useState(false);
   const [, redraw] = useReducer((n: number) => n + 1, 0);
   const host = useRef<HTMLDivElement>(null);
+  const [selection, setSelection] = useState<PickedElement | null>(null);
+  const [page, setPage] = useState<PageInfo | null>(null);
+  const control = useRef<PreviewControl | null>(null);
   const normalRef = useRef<Model | null>(null);
 
   // Indeling van dit project laden (valt altijd terug op de standaardindeling).
@@ -201,6 +205,12 @@ export default function ProjectWorkspace(props: Props) {
             onAutoSwitch={props.onAutoSwitch}
             onError={onError}
             onRetryMcp={props.onRetryMcp}
+            onSelect={(el) => {
+              setSelection(el);
+              if (model) openPanel(model, "eigenschappen");
+            }}
+            onPage={setPage}
+            controlRef={control}
           />
         );
       case "geavanceerd":
@@ -257,9 +267,22 @@ export default function ProjectWorkspace(props: Props) {
           />
         );
       case "structuur":
-        return <StructuurPanel selection={null} />;
+        return <StructuurPanel selection={selection} />;
       case "eigenschappen":
-        return <EigenschappenPanel />;
+        return (
+          <EigenschappenPanel
+            projectId={project.id}
+            selection={selection}
+            page={page}
+            control={control}
+            previewRunning={preview?.status === "running"}
+            onClear={() => {
+              setSelection(null);
+              control.current?.clear();
+            }}
+            onError={onError}
+          />
+        );
       case "componenten":
       case "database":
       case "koppelingen":

@@ -14,8 +14,9 @@ const THUMB = `data:image/jpeg;base64,${readFileSync(path.join(root, "scripts/fi
 const require = createRequire(path.join(root, "mcp-server", "package.json"));
 const { chromium } = require("playwright-core");
 
-const DEMO = (naam) => `<!doctype html><html lang="nl"><body style="font-family:Georgia,serif;margin:0;background:#f0fdf4;color:#14532d"><header style="padding:32px;background:#166534;color:#fff"><h1 style="margin:0">${naam}</h1><p>Tuinaanleg, onderhoud en beplanting</p></header><main style="padding:24px"><h2>Wat wij doen</h2><p>Een mooie tuin zonder zorgen.</p><button style="padding:12px 20px;border:0;border-radius:8px;background:#15803d;color:#fff;font-size:16px">Vraag een offerte aan</button></main></body></html>`;
-const demo = createServer((_, res) => res.writeHead(200, { "content-type": "text/html" }).end(DEMO("Hovenier Joke")));
+const { PICKER_SCRIPT } = await import("../mcp-server/src/picker-script.ts");
+const DEMO = (naam) => `<!doctype html><html lang="nl"><head><title>${naam}</title><style>:root{--primary:#15803d;--radius-lg:8px;--spacing-md:12px}.knop{padding:12px 20px;border:0;border-radius:var(--radius-lg);background:var(--primary);color:#fff;font-size:16px}</style></head><body style="font-family:Georgia,serif;margin:0;background:#f0fdf4;color:#14532d"><header style="padding:32px;background:#166534;color:#fff"><h1 style="margin:0">${naam}</h1><p>Tuinaanleg, onderhoud en beplanting</p></header><main style="padding:24px"><h2>Wat wij doen</h2><p>Een mooie tuin zonder zorgen.</p><button class="knop" data-slot="button">Vraag een offerte aan</button></main><script src="/__studio/picker.js"></script></body></html>`;
+const demo = createServer((req, res) => (req.url === "/__studio/picker.js" ? res.writeHead(200, { "content-type": "text/javascript" }).end(PICKER_SCRIPT) : res.writeHead(200, { "content-type": "text/html" }).end(DEMO("Hovenier Joke"))));
 await new Promise((r) => demo.listen(0, "127.0.0.1", r));
 const demoUrl = `http://127.0.0.1:${demo.address().port}/`;
 
@@ -173,6 +174,8 @@ function mock({ demoUrl, scenario, THUMB }) {
       }
       if (a.cmd === "security.check") return { scanned: 6, findings: [] };
       if (a.cmd === "preview.thumbnail") return { data_url: THUMB };
+      if (a.cmd === "picker.url") return { url: demoUrl };
+      if (a.cmd === "picker.shot") return { path: ".studio/picks/pick-1.jpg", found: true };
       return {};
     },
     start_shell: () => ({ id: "s" + nextId, kind: "shell", provider: null, account_id: null, account_label: null, project_id: 1, warnings: [] }),
