@@ -217,3 +217,38 @@ Alle schermen na de reparatie (licht en donker) staan opnieuw in `docs/ux/<scena
 - `field-sizing: content` (het meegroeien van het invoerveld) is in Chromium getest. In oudere WebKit-versies (Linux/macOS) valt het veld terug op een vaste hoogte met scrollen; dat is nog niet in de echte app gezien.
 - De visuele regressietest vergelijkt met schermafbeeldingen uit dezelfde omgeving (Chromium, Linux, lokale lettertypen); op een andere machine kunnen kleine afwijkingen voorkomen en moet `--update` gebruikt worden.
 - Of de nieuwe teksten voor echte niet-technische gebruikers begrijpelijk zijn is niet gemeten met echte mensen, alleen beoordeeld door mijn persona's.
+
+---
+
+# UX-rapport — Fase B: acceptatietest als totale beginner (18 november 2026)
+
+Script: `npm run ux:beginner` (`scripts/ux-beginner-test.mjs`; `ONLY=1366x768` voor één formaat, een letter `A`–`D` voor één scenario). Methode en beperking zijn dezelfde als hierboven: de echte frontend in Chromium met een **nagebootste Tauri-laag en een nagebootste AI**. Dit zegt dus iets over wegen, knoppen en teksten, **niet** over de kwaliteit van de AI, de echte CLI's of echte accounts. Formaten: 1280×720, 1366×768, 1920×1080; licht en donker (donker bij 1366×768).
+
+## Resultaten
+
+| Scenario | Uitkomst | Klikken | Opmerking |
+|---|---|---|---|
+| **A** Schone installatie → eerste start (welkom, AI kiezen en inloggen, bedieningsniveau) → project uit voorbeeld (Takenlijst) → tien wijzigingen in de chat | **Geslaagd** op alle formaten, licht en donker | 19 (3 eerste start + 2 inloggen + 4 project + 10 berichten) | Elke chatbeurt wacht op een nieuw antwoord; na tien beurten staat er een opgeslagen versie |
+| **B** Eigen idee → idee beschrijven → uiterlijk → bouwen → Online zetten | **Geslaagd**, maar **ondiep**: het scherm Online zetten wordt bereikt, het echt online zetten wordt hier niet doorlopen | 10 | Het echt online zetten met bevestiging staat in `npm run ux:vercel` (eigen test, nagebootst account) |
+| **C** App naar de winkelvoorbereiding (Google Play en App Store) | **Geslaagd**, **ondiep**: schermen openen en controleren dat er niets wordt ingediend | 3 | De inhoud (teksten, tellers, export) staat in `npm run ux:winkels` |
+| **D** Foutsituaties: geen internet, AI niet ingelogd, volle schijf, AI loopt vast, sluiten tijdens bouwen, tweede project | **Geslaagd** (zie hieronder: een blokkade gevonden en opgelost) | 1–4 | Elke melding is begrijpelijk en heeft een herstelroute |
+
+## Gevonden en opgelost
+1. **Blokkade — volle schijf bij Nieuw project:** de gebruiker zag de ruwe tekst `Error: No space left on device (os error 28)` in het dialoogvenster. Opgelost: het dialoogvenster gebruikt nu dezelfde vertaling als de rest (`FoutBanner`): "Je computer zit vol." met een oplossing, en de technische tekst achter "Toon details". Nu vast in scenario D.
+2. **Vaktaal in de gewone weergave:** "tokens" bij Uiterlijk en "database" bij Online zetten (de beveiligingscontrole). Herschreven naar "AI-gebruik" en "gegevens die voor iedereen openstaan". De test meldt vaktaal voortaan bij elke stap.
+3. Eerder in deze sessie al gevonden en opgelost: kleine klikdoelen (schakelaars, keuzerondjes, vinkjes, paneelknoppen) en scrollgebieden zonder toetsenbord (`npm run ux:a11y` geeft nu geen schendingen).
+
+## Nog open (eerlijk)
+- **Inloggen bij de AI toont een terminal.** "Inloggen" opent een venster met een ingebouwde terminal waarin de AI zijn eigen inlogvraag toont. Het venster zegt "Log hieronder in bij de AI. Sluit dit venster als je klaar bent", maar voor een beginner blijft dit het engste moment van de route. Een echt terminalloze weg kan alleen als de CLI's die zelf aanbieden; dat is niet nagekeken en niet gebouwd.
+- **Node.js en Git moeten op de computer staan** (zie `docs/uitrollen.md` §5); de systeemcheck legt het uit en biedt een downloadknop, maar het blijft een extra stap.
+- **"Technische weergave" valt buiten beeld bij 1366×768** in de chatkop (afgekapt). Het is een knop voor gevorderden; geen blokkade, wel rommelig.
+- **Dubbele scrollgebieden** in de werkruimte (paneel + gesprek) bij 1366×768; bestond al in Fase A.
+- **De eerste-startdialoog is bij 768 px hoog te hoog voor het scherm** en scrolt dan binnen het dialoogvenster (stap 2, AI kiezen). Bruikbaar, niet mooi.
+- **Niet getest:** een echte beginner, echte AI-accounts, echt Windows (rendering, DPI, trage computers), de echte Tauri-app (er is hier geen venstermanager), echte accounts bij GitHub, Vercel of de winkels. Wachttijden zijn die van de nagebootste AI (± 4 seconden per beurt) en zeggen niets over de echte.
+
+## Wat jij zelf moet testen met een echte beginner
+1. Geef iemand die nooit met code werkte de app (alleen het installatiebestand en de naam van hun AI-account) en kijk **zonder te helpen** wat ze doen. Noteer waar ze stoppen, welke woorden ze niet snappen en wat ze aanklikken dat niets doet.
+2. Laat ze inloggen bij de AI. Dat is de plek waar ik de meeste twijfel verwacht (terminal).
+3. Laat ze een project uit een voorbeeld maken en tien dingen veranderen met hun eigen woorden. Kijk of ze snappen wat de AI doet en wat "Klaar" betekent.
+4. Laat ze online zetten met hun eigen (gratis) Vercel-account en kijk of ze de bevestiging snappen.
+5. Trek het internet eruit, en laat de AI-aanmelding verlopen. Zien ze wat ze moeten doen?

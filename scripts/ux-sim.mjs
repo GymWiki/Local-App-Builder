@@ -194,6 +194,7 @@ function mock({ demoUrl, scenario, THUMB }) {
   const handlers = {
     list_projects: () => S.projects,
     create_project: (a) => {
+      if (scenario.schijfVol) throw new Error("No space left on device (os error 28)");
       const p = { id: S.next++, naam: a.naam, pad: `${a.bovenliggendPad}/${a.naam}`, template: a.template || "leeg", created_at: now(), default_account_id: null, last_used_at: null };
       S.projects.push(p);
       return p;

@@ -1,0 +1,106 @@
+[
+ {
+  "scenario": "A 1280x720 licht",
+  "klikken": 19,
+  "seconden": 40.2,
+  "stappen": [
+   {
+    "naam": "eerste start: welkom",
+    "ok": true,
+    "ms": 109
+   },
+   {
+    "naam": "eerste start: AI kiezen en inloggen",
+    "ok": true,
+    "ms": 504
+   },
+   {
+    "naam": "eerste start: bedieningsniveau en afronden",
+    "ok": true,
+    "ms": 76
+   },
+   {
+    "naam": "nieuw project (start-takenlijst)",
+    "ok": true,
+    "ms": 792
+   },
+   {
+    "naam": "route-balk en chat zichtbaar",
+    "ok": true,
+    "ms": 13
+   },
+   {
+    "naam": "chat 1: Maak de kop groter",
+    "ok": true,
+    "ms": 3843
+   },
+   {
+    "naam": "chat 2: Voeg een tweede pagina toe",
+    "ok": true,
+    "ms": 3845
+   },
+   {
+    "naam": "chat 3: Maak de knop blauw",
+    "ok": true,
+    "ms": 3878
+   },
+   {
+    "naam": "chat 4: Zet de tekst in het midden",
+    "ok": true,
+    "ms": 3877
+   },
+   {
+    "naam": "chat 5: Voeg een contactknop toe",
+    "ok": true,
+    "ms": 3864
+   },
+   {
+    "naam": "chat 6: Maak de achtergrond lichter",
+    "ok": true,
+    "ms": 3853
+   },
+   {
+    "naam": "chat 7: Verander de titel",
+    "ok": true,
+    "ms": 3860
+   },
+   {
+    "naam": "chat 8: Voeg een voettekst toe",
+    "ok": true,
+    "ms": 3894
+   },
+   {
+    "naam": "chat 9: Maak de knoppen groter",
+    "ok": true,
+    "ms": 3904
+   },
+   {
+    "naam": "chat 10: Voeg een logo toe",
+    "ok": true,
+    "ms": 3863
+   },
+   {
+    "naam": "na tien wijzigingen: versies bewaard en voorbeeld zichtbaar",
+    "ok": true,
+    "ms": 21
+   }
+  ],
+  "blokkades": [],
+  "twijfel": [
+   "welkom: afgekapt: Sluiten",
+   "AI kiezen: afgekapt: Sluiten",
+   "AI kiezen: dubbeleScroll: div[dialog-content] 408x662",
+   "niveau: afgekapt: Sluiten",
+   "niveau: dubbeleScroll: div[dialog-content] 408x662",
+   "werkruimte: afgekapt: Mijn takenlijst | nog te doen | Gesprek met de AI",
+   "werkruimte: buitenBeeld: Technische weergave",
+   "werkruimte: dubbeleScroll: div[scroll-area-viewport] 256x390 | div 260x526 | div[scroll-area-viewport] 260x526",
+   "na tien wijzigingen: afgekapt: Mijn takenlijst | klaar | nog te doen",
+   "na tien wijzigingen: buitenBeeld: Technische weergave",
+   "na tien wijzigingen: dubbeleScroll: div[scroll-area-viewport] 256x390 | div 260x526 | div[scroll-area-viewport] 260x526"
+  ],
+  "scriptfouten": [],
+  "gelukteWijzigingen": 10,
+  "wachtMsInChat": 38025
+ }
+]

@@ -134,7 +134,7 @@ describe("KitPicker", () => {
     (api.kitApply as Mock).mockResolvedValue(ok());
     render(<KitPicker projectId={5} onApplied={vi.fn()} onError={vi.fn()} />);
     await screen.findByTestId("kit-fragments-ui");
-    expect(screen.getByText(/meer tijd en meer tokens/)).toBeInTheDocument();
+    expect(screen.getByText(/meer tijd en meer AI-gebruik/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Eigen stijl kiezen" }));
     await waitFor(() => expect(api.chatSend).toHaveBeenCalledWith(5, expect.stringContaining("eigen stijl")));
     (api.chatSend as Mock).mockClear();

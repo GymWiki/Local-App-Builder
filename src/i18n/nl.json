@@ -695,7 +695,7 @@
     },
     "eigen": {
       "titel": "Eigen stijl",
-      "uitleg": "De AI bedenkt alles zelf. Dat kost meer tijd en meer tokens dan een kant-en-klaar uiterlijk, en het wordt minder consequent.",
+      "uitleg": "De AI bedenkt alles zelf. Dat kost meer tijd en meer AI-gebruik dan een kant-en-klaar uiterlijk, en het wordt minder consequent.",
       "kies": "Eigen stijl kiezen",
       "prompt": "Ik wil een eigen stijl voor deze app, zonder kant-en-klare kit. Stel eerst een klein ontwerp voor (kleuren, lettertype, ronding en ruimte) en zet dat in design/tokens.json en in CSS-variabelen. Gebruik daarna alleen die waarden.",
       "kitTitel": "Eigen stijl op basis van een kit",
@@ -812,7 +812,7 @@
     },
     "veilig": {
       "titel": "Controleer veiligheid",
-      "uitleg": "Ik zoek naar dingen die niet openbaar mogen worden: geheime sleutels, wachtwoorden en een database die voor iedereen openstaat.",
+      "uitleg": "Ik zoek naar dingen die niet openbaar mogen worden: geheime sleutels, wachtwoorden en gegevens die voor iedereen openstaan.",
       "knop": "Controleer veiligheid",
       "bezig": "Bezig met controleren…",
       "schoon": "Alles ziet er goed uit: er zijn geen problemen gevonden in {{aantal}} bestanden.",

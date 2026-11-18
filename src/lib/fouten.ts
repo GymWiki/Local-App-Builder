@@ -17,16 +17,29 @@ const REGELS: [FoutCode, RegExp][] = [
   ["niet_gevonden", /no such file|os error 2\b|enoent|not found|cannot find the (file|path)|os error 3\b/i],
 ];
 
+/** Technische kenmerken: systeemfoutnummers, uitzonderingen, codes in hoofdletters, adressen, accolades. */
+const TECHNISCH = /os error|errno|exception|\bError\b|\bENO\w+|\bEACCES\b|panicked|stack|\bat \w+[.:]|0x[0-9a-f]{4,}|\b[A-Z][A-Z_]{4,}\b|[{}]|\\\\|https?:\/\//;
+const NEDERLANDS = /\b(de|het|een|je|niet|geen|kon|bestaat|dit|deze|dat|probeer|moet|zijn|naar|voor|met|bij|maar|wordt)\b/i;
+
+/** Staat er al gewone Nederlandse tekst, bedoeld voor een mens (bijvoorbeeld van onze eigen backend)? Dan tonen we die zoals hij is. */
+export function isMensentaal(tekst: string): boolean {
+  const t = tekst.trim();
+  return t.length >= 12 && t.length <= 240 && !t.includes("\n") && t.split(/\s+/).length >= 3 && NEDERLANDS.test(t) && !TECHNISCH.test(t);
+}
+
 export interface VertaaldeFout {
   code: FoutCode;
+  /** De tekst is al gewone taal en wordt zonder vertaling getoond. */
+  mensentaal: boolean;
   /** De ruwe tekst, voor "Toon details". */
   details: string;
 }
 
 export function vertaalFout(raw: unknown): VertaaldeFout {
   const details = typeof raw === "string" ? raw : raw instanceof Error ? raw.message : JSON.stringify(raw) ?? String(raw);
-  const code = REGELS.find(([, re]) => re.test(details))?.[0] ?? "onbekend";
-  return { code, details };
+  const mensentaal = isMensentaal(details);
+  const code = mensentaal ? "onbekend" : (REGELS.find(([, re]) => re.test(details))?.[0] ?? "onbekend");
+  return { code, mensentaal, details };
 }
 
 /** Haalt paden met een gebruikersnaam weg uit tekst die iemand gaat delen (rapport, plakken in een bericht). */

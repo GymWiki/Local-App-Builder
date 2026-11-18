@@ -139,3 +139,19 @@ Tests: `src/lib/fouten.test.ts`, `src/components/app/fouten.test.tsx`, `cargo te
 | Privacy in de app (Instellingen → Mijn programma): wat wel en niet naar buiten gaat | **nieuw**; zegt eerlijk dat Studio geen statistieken heeft |
 | Statistiek-keuze bij de eerste start | **bewust niet gebouwd**: er bestaat geen statistiek, dus er valt niets te kiezen |
 | **Node.js meeleveren in de installer** | **niet gedaan**: niet te testen zonder echte bouwen op Windows, macOS en Linux (zie `docs/uitrollen.md` §5) |
+
+## DEEL 7 — Acceptatietest als beginner
+Zie het volledige verslag onder "Fase B" in `docs/ux-rapport.md`. Kort: scenario A (schone installatie → tien chatwijzigingen) slaagt op alle drie de formaten; B (eigen idee) en C (winkelvoorbereiding) slagen maar zijn ondiep omdat de diepere stappen in eigen testen staan (`ux:vercel`, `ux:winkels`); D (geen internet, niet ingelogd, volle schijf, AI loopt vast, sluiten tijdens bouwen, tweede project) slaagt nadat een blokkade (ruwe foutmelding bij volle schijf) is opgelost. Alles nagebootst: echte AI, echt Windows en een echte beginner zijn niet getest.
+
+## DEEL 5 — kort overzicht van wat wel en niet gedaan is
+Gedaan: toegankelijkheid (axe, klikdoelen, toetsenbord), vaktaalronde op de plekken die de acceptatietest vond, foutmeldingen in gewone taal, "Herstel standaardindeling" (bestond al). **Niet gedaan:** een systematische jargonronde door alle teksten, lege-schermenronde, laad- en succesmeldingen per scherm en een prestatiemeting van de opstart.
+
+## AFRONDING — eerlijke gereedheidslijst
+
+**Klaar (in de nagebootste omgeving en met tests):** eerste start met systeemcheck; route van idee tot app (8 stappen); vier startprojecten; foutmeldingen in gewone taal met "Toon details"; Meld een probleem (zonder geheimen); herstel na een storing; geheimenscan voor export, back-up en online zetten; GitHub-back-up; online zetten met Vercel met bevestiging; voorbereiding voor Google Play en App Store (zonder iets in te dienen); bijwerken binnen Studio; projectkaart en zuinigere AI-aanroepen (zie `docs/tokens.md`).
+
+**Bewust beperkt in versie 1:** alleen Claude heeft een chatweergave (Gemini via de terminal, Codex niet ondersteund); winkelregels van Google niet geverifieerd (de site was niet bereikbaar); geen Flutter-sjabloon of privacyverklaring-generator; geen statistieken of metingen (er is dus ook geen keuze daarover); Studio is gratis, het licentie-haakje staat uit; Graphify niet ingebouwd.
+
+**Alleen te testen met jouw accounts:** Claude- en Gemini-login en de echte kosten/limieten; GitHub-back-up; Vercel (echt online zetten); Supabase; de winkels; het eerste echte release- en updatetraject (0.1.1 → 0.1.2); Windows PowerShell `npm run setup:updates`; de taakmeting van het AI-gebruik (`docs/tokens.md` §2c).
+
+**Wat jij nog moet regelen voor een openbare release:** zie `docs/uitrollen.md` (Windows-certificaat, Apple-account en notarisering, updatesleutel en -hosting, Node.js meeleveren, licentie en betalingen, privacyverklaring en gebruiksvoorwaarden, voorwaarden van de AI-aanbieders voor het gebruik van hun CLI's).

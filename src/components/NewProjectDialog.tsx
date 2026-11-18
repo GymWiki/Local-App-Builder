@@ -5,8 +5,8 @@ import { z } from "zod";
 import { useTranslation } from "react-i18next";
 import { createProject, kiesMap, type Project } from "@/lib/api";
 import { useSettings } from "@/components/app/settings-provider";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import FoutBanner from "@/components/app/FoutBanner";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -119,9 +119,7 @@ export default function NewProjectDialog({ onClose, onCreated }: Props) {
           </FieldGroup>
 
           {error && (
-            <Alert variant="destructive">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
+            <FoutBanner fout={error} inline onSluit={() => setError(null)} />
           )}
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={onClose}>

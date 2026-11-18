@@ -1,4 +1,4 @@
-import { anonimiseer, vertaalFout } from "./fouten";
+import { anonimiseer, isMensentaal, vertaalFout } from "./fouten";
 
 describe("fouten in gewone taal", () => {
   it.each([
@@ -29,4 +29,16 @@ describe("fouten in gewone taal", () => {
     expect(anonimiseer("/home/pieter/projecten/x")).toBe("~/projecten/x");
     expect(anonimiseer("/Users/joke/Studio")).toBe("~/Studio");
   });
+
+  it("tekst die al gewone taal is, blijft zoals hij is; technische tekst niet", () => {
+    expect(isMensentaal("De map “Site” bestaat al op die locatie.")).toBe(true);
+    expect(isMensentaal("Geef je project een naam.")).toBe(true);
+    expect(isMensentaal("No space left on device (os error 28)")).toBe(false);
+    expect(isMensentaal("Error: kon het bestand niet openen")).toBe(false);
+    expect(isMensentaal("De map ligt in C:\\Users\\jan\\x en ENOENT trad op")).toBe(false);
+    expect(isMensentaal("iets raars")).toBe(false);
+    expect(vertaalFout("De map “Site” bestaat al op die locatie.").mensentaal).toBe(true);
+    expect(vertaalFout("os error 28: No space left on device").mensentaal).toBe(false);
+  });
 });
+

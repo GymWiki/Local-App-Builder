@@ -23,6 +23,11 @@ describe("FoutBanner", () => {
     fireEvent.click(screen.getByTestId("fout-details-knop"));
     expect(screen.getByTestId("fout-details")).toHaveTextContent("No space left");
   });
+  it("een melding die al gewone taal is, wordt zonder vertaling en zonder details getoond", () => {
+    render(<FoutBanner fout="De map “Site” bestaat al op die locatie." onSluit={() => undefined} />);
+    expect(screen.getByTestId("fout-mensentaal")).toHaveTextContent("De map “Site” bestaat al op die locatie.");
+    expect(screen.queryByTestId("fout-details-knop")).toBeNull();
+  });
   it("valt voor een onbekende fout terug op een algemene uitleg", () => {
     render(<FoutBanner fout="iets raars" onSluit={() => undefined} />);
     expect(screen.getByText("Er ging iets mis.")).toBeInTheDocument();
