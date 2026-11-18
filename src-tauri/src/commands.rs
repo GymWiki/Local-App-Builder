@@ -552,11 +552,18 @@ fn target_of(provider: Provider, acc: &Option<accounts::Account>, mode: String) 
     }
 }
 
-#[tauri::command]
-pub fn chat_target(db: State<Db>, chat: State<ChatManager>, project_id: i64) -> Result<ChatTarget> {
+/// Welke AI en welk account bij dit project horen. De database-vergrendeling is weer vrij zodra de functie klaar is.
+fn target_gegevens(db: &Db, project_id: i64) -> Result<(Provider, Option<accounts::Account>)> {
     let c = db.conn()?;
     let p = projects::get(&c, project_id)?;
-    let (provider, acc) = resolve_target(&c, &p)?;
+    resolve_target(&c, &p)
+}
+
+#[tauri::command]
+pub fn chat_target(db: State<Db>, chat: State<ChatManager>, project_id: i64) -> Result<ChatTarget> {
+    // Eerst de vergrendeling vrijgeven en dan pas `chat.mode`: die leest zelf uit de database. Houd je hem vast, dan blokkeert
+    // het commando zichzelf (en omdat dit een gewoon commando is, het hele venster).
+    let (provider, acc) = target_gegevens(&db, project_id)?;
     Ok(target_of(provider, &acc, chat.mode(project_id)))
 }
 
@@ -1257,4 +1264,27 @@ pub fn improve_prompt(db: State<Db>, project_id: i64, text: String) -> Result<St
         &text,
         Duration::from_secs(120),
     )
+}
+#[cfg(test)]
+mod target_tests {
+    use super::*;
+    use std::sync::Mutex;
+
+    /// Regressie: `chat_target` hield de database-vergrendeling vast terwijl `chat.mode` hem opnieuw nam. Dat blokkeerde het
+    /// hele venster zodra je een project opende. De vergrendeling moet vrij zijn zodra de gegevens zijn opgehaald.
+    #[test]
+    fn target_gegevens_geeft_de_database_weer_vrij() {
+        let db = Db(Mutex::new(crate::db::open_in_memory().unwrap()));
+        let tmp = tempfile::tempdir().unwrap();
+        let p = projects::create(&db.conn().unwrap(), "App", tmp.path(), "leeg").unwrap();
+        let (provider, account) = target_gegevens(&db, p.id).unwrap();
+        assert_eq!(provider, Provider::Claude);
+        assert!(account.is_none());
+        assert!(db.0.try_lock().is_ok(), "de database is nog vergrendeld");
+        assert!(target_gegevens(&db, 9999).is_err());
+        assert!(
+            db.0.try_lock().is_ok(),
+            "de database is na een fout nog vergrendeld"
+        );
+    }
 }
