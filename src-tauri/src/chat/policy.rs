@@ -8,12 +8,15 @@ pub enum Mode {
     Always,
     /// "Vraag alleen bij belangrijke dingen" (standaard).
     Important,
+    /// "Werk zelfstandig": ook opdrachten uitvoeren zonder te vragen. Gevaarlijke acties en schrijven buiten het project blijven vragen.
+    Autonomous,
 }
 
 impl Mode {
     pub fn parse(s: Option<&str>) -> Mode {
         match s {
             Some("always") => Mode::Always,
+            Some("autonomous") => Mode::Autonomous,
             _ => Mode::Important,
         }
     }
@@ -51,6 +54,7 @@ pub fn decide(mode: Mode, plan_mode: bool, c: &Classified) -> Decision {
                 Decision::Ask
             }
         }
+        Mode::Autonomous => Decision::Allow,
         // Gewoon bouwwerk (bestanden maken, controleren, installeren) mag door; onbekende opdrachten niet.
         Mode::Important => {
             if c.kind == ActionKind::RunCommand {
@@ -78,6 +82,31 @@ mod tests {
         assert_eq!(Mode::parse(None), Mode::Important);
         assert_eq!(Mode::parse(Some("rommel")), Mode::Important);
         assert_eq!(Mode::parse(Some("always")), Mode::Always);
+        assert_eq!(Mode::parse(Some("autonomous")), Mode::Autonomous);
+    }
+
+    #[test]
+    fn werk_zelfstandig_laat_alles_door_behalve_gevaarlijk_en_buiten_het_project() {
+        let m = Mode::Autonomous;
+        assert_eq!(
+            d("Bash", json!({"command": "npm run iets-onbekends"}), m),
+            Decision::Allow
+        );
+        assert_eq!(
+            d("Write", json!({"file_path": "/p/index.html"}), m),
+            Decision::Allow
+        );
+        for gevaarlijk in ["rm -rf dist", "git push", "npm publish"] {
+            assert_eq!(
+                d("Bash", json!({"command": gevaarlijk}), m),
+                Decision::Ask,
+                "{gevaarlijk}"
+            );
+        }
+        assert_eq!(
+            d("Write", json!({"file_path": "/etc/passwd"}), m),
+            Decision::Ask
+        );
     }
 
     #[test]

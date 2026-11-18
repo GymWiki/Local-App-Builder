@@ -591,6 +591,11 @@ impl ChatManager {
     pub fn mode(&self, project: i64) -> String {
         match self.inner.store.setting(&mode_key(project)).as_deref() {
             Some("plan") => "plan".into(),
+            Some("build") => "build".into(),
+            // Nog geen keuze voor dit project: de algemene instelling "Eerst overleggen is standaard" geldt.
+            _ if self.inner.store.setting("ui:plan_default").as_deref() == Some("1") => {
+                "plan".into()
+            }
             _ => "build".into(),
         }
     }

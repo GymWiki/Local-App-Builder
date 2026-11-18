@@ -800,6 +800,27 @@ fn args_lines(fake: &Path) -> Vec<String> {
 }
 
 #[test]
+fn algemene_instelling_eerst_overleggen_geldt_tot_het_project_zelf_kiest() {
+    let h = harness();
+    h.store
+        .0
+        .lock()
+        .unwrap()
+        .execute(
+            "INSERT INTO settings (key, value) VALUES ('ui:plan_default', '1')",
+            [],
+        )
+        .unwrap();
+    assert_eq!(h.mgr.mode(h.project), "plan");
+    h.mgr.set_mode(h.project, "build").unwrap();
+    assert_eq!(
+        h.mgr.mode(h.project),
+        "build",
+        "de eigen keuze van het project wint"
+    );
+}
+
+#[test]
 fn modus_is_standaard_bouwen_wordt_per_project_onthouden_en_meldt_de_wijziging() {
     let h = harness();
     assert_eq!(h.mgr.mode(h.project), "build");

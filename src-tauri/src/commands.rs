@@ -273,12 +273,20 @@ const UI_SETTINGS: &[&str] = &[
     "permission_mode",
     "loop_threshold",
     "theme",
+    "plan_default",
+    "settings_version",
+    "text_scale",
+    "default_project_dir",
 ];
 
 fn valid_setting(key: &str, value: &str) -> bool {
     match key {
         "communication_mode" => matches!(value, "simple" | "technical"),
-        "permission_mode" => matches!(value, "always" | "important"),
+        "permission_mode" => matches!(value, "always" | "important" | "autonomous"),
+        "plan_default" => matches!(value, "0" | "1"),
+        "settings_version" => value.parse::<u32>().is_ok_and(|n| n <= 1000),
+        "text_scale" => matches!(value, "90" | "100" | "115" | "130"),
+        "default_project_dir" => value.len() <= 1000 && !value.contains('\0'),
         "theme" => matches!(value, "system" | "light" | "dark"),
         "loop_threshold" => value
             .parse::<usize>()
@@ -293,6 +301,17 @@ pub fn get_ui_setting(db: State<Db>, key: String) -> Result<Option<String>> {
         return Err(AppError::Invalid("Onbekende instelling.".into()));
     }
     crate::db::get_setting(&*db.conn()?, &format!("ui:{key}"))
+}
+
+/// "Standaard herstellen": wist de keuze, zodat de standaardwaarde weer geldt.
+#[tauri::command(async)]
+pub fn reset_ui_setting(db: State<Db>, key: String) -> Result<()> {
+    if !UI_SETTINGS.contains(&key.as_str()) {
+        return Err(AppError::Invalid("Onbekende instelling.".into()));
+    }
+    db.conn()?
+        .execute("DELETE FROM settings WHERE key = ?1", [format!("ui:{key}")])?;
+    Ok(())
 }
 
 #[tauri::command(async)]
@@ -1206,6 +1225,10 @@ mod setting_tests {
             "permission_mode",
             "loop_threshold",
             "theme",
+            "plan_default",
+            "settings_version",
+            "text_scale",
+            "default_project_dir",
         ] {
             assert!(UI_SETTINGS.contains(&key), "{key} ontbreekt in UI_SETTINGS");
         }
@@ -1215,6 +1238,14 @@ mod setting_tests {
                 && valid_setting("theme", "dark")
         );
         assert!(!valid_setting("theme", "paars"));
+        assert!(
+            valid_setting("permission_mode", "autonomous")
+                && !valid_setting("permission_mode", "alles")
+        );
+        assert!(valid_setting("plan_default", "1") && !valid_setting("plan_default", "ja"));
+        assert!(valid_setting("text_scale", "115") && !valid_setting("text_scale", "500"));
+        assert!(valid_setting("settings_version", "1") && !valid_setting("settings_version", "x"));
+        assert!(!valid_setting("default_project_dir", "a\0b"));
         assert!(
             valid_setting("loop_threshold", "3")
                 && !valid_setting("loop_threshold", "1")

@@ -397,6 +397,7 @@ pub fn run() {
             commands::permission_answer,
             commands::get_ui_setting,
             commands::set_ui_setting,
+            commands::reset_ui_setting,
             commands::start_shell,
             commands::start_ai,
             commands::start_login,
