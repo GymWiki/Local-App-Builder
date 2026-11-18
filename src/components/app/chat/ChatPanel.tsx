@@ -302,7 +302,7 @@ export default function ChatPanel({
           {t("chat.bijlage.sleep")}
         </div>
       )}
-      <header className="flex items-center justify-between gap-2 border-b border-border px-4 py-2">
+      <header className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-2">
         <h2 className="min-w-0 truncate text-base text-muted-foreground">
           <span className="sr-only">{t("chat.titel")} </span>
           {target && (

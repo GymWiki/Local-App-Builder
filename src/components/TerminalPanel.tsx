@@ -157,7 +157,7 @@ export default function TerminalPanel({ project, accounts, sessions, mcp, onSess
         <Button size="sm" variant="outline" onClick={() => setSwitching(true)} disabled={!activeAi}>
           {t("terminal.wissel")}
         </Button>
-        <div className="ml-auto flex items-center gap-3 text-sm">
+        <div className="ml-auto flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
           <Badge variant="secondary" data-testid="account-badge">
             {activeAi ? t("terminal.actiefAccount", { naam: accountName }) : t("terminal.geenAi")}
           </Badge>
