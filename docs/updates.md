@@ -13,9 +13,18 @@ In de ontwikkelversie (`npm run tauri dev`) wordt niet bijgewerkt; Instellingen 
 ```
 npm run setup:updates
 ```
-Dit maakt een sleutelpaar in `~/.tauri/studio.key` (**bewaar dat bestand veilig**; zonder dit bestand kun je geen updates meer uitgeven), zet de publieke sleutel in `src-tauri/tauri.conf.json` en zet de privésleutel als GitHub-geheim `TAURI_SIGNING_PRIVATE_KEY` (met de GitHub CLI `gh`, als die is ingelogd; anders toont het script wat je handmatig doet). Commit en push daarna `src-tauri/tauri.conf.json`.
+Draai dit in een gewone terminal (Windows PowerShell werkt). Het script vraagt:
+1. **Wachtwoord?** Aanbevolen: ja. Je kiest zelf een wachtwoord (minstens 8 tekens, verborgen invoer, twee keer). Daarna vraagt het sleutelprogramma van Tauri **zelf** om een wachtwoord (ook twee keer): typ daar hetzelfde. Het script controleert daarna of het klopt en laat je anders opnieuw beginnen. Kies je "nee", dan wordt de sleutel zonder wachtwoord gemaakt.
+2. Het maakt een sleutelpaar in de map `.tauri` in je persoonlijke map (`%USERPROFILE%\.tauri\studio.key` op Windows) en zet de **publieke** sleutel in `src-tauri/tauri.conf.json`.
+3. Is de GitHub CLI `gh` ingelogd? Dan zet het de privésleutel als geheim `TAURI_SIGNING_PRIVATE_KEY` én (bij een wachtwoord) het wachtwoord als `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` in GitHub. Anders toont het precies wat je zelf moet invullen (GitHub → Settings → Secrets and variables → Actions → New repository secret). De release-workflow geeft beide geheimen mee.
 
-Zolang in de configuratie `NOG-NIET-INGESTELD` staat, zegt Studio "Bijwerken is nog niet ingesteld" en weigert de release-workflow te draaien met een duidelijke fout.
+Het wachtwoord staat nooit op een commandoregel: het gaat alleen via een omgevingsvariabele of via stdin naar een ander programma, en komt niet in een bestand of log.
+
+**Bewaar altijd twee dingen veilig** (wachtwoordmanager + back-up): het bestand `studio.key` **en** het wachtwoord. Verlies je er één, dan kun je geen updates meer uitgeven en moeten mensen met een geïnstalleerde versie opnieuw downloaden.
+
+**Opnieuw draaien kan veilig:** bestaat er al een sleutel, dan vraagt het script of die moet worden hergebruikt (standaard ja). Een nieuwe sleutel kan alleen als je letterlijk `JA, NIEUWE SLEUTEL` typt; de oude sleutel wordt dan hernoemd (`studio.key.oud-<tijdstip>`) en nooit overschreven of verwijderd.
+
+Commit en push daarna `src-tauri/tauri.conf.json`. Zolang daarin `NOG-NIET-INGESTELD` staat, zegt Studio "Bijwerken is nog niet ingesteld" en weigert de release-workflow met een duidelijke fout.
 
 ## Een nieuwe versie uitgeven
 ```
