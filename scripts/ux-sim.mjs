@@ -38,6 +38,9 @@ function mock({ demoUrl, scenario, THUMB }) {
     projects: (scenario.seed || []).map((x, i) => ({ id: i + 1, naam: x.naam, pad: `/home/joke/Documenten/${x.naam}`, template: "leeg", created_at: "2026-11-01 10:00:00", default_account_id: null, last_used_at: x.last ?? null })),
     next: (scenario.seed || []).length + 1,
     layouts: {},
+    flags: {},
+    assets: {},
+    descr: {},
     thumbs: Object.fromEntries((scenario.seed || []).map((x, i) => [i + 1, x.thumb === "demo" ? THUMB : (x.thumb ?? null)])),
     accounts: [],
     nextAcc: 1,
@@ -126,6 +129,24 @@ function mock({ demoUrl, scenario, THUMB }) {
       p.naam = a.naam.trim();
       return p;
     },
+    project_pages: (a) => (S.preview[a.projectId] ? [{ naam: "Startpagina", pad: "/", bestand: "index.html" }, { naam: "Over ons", pad: "/over-ons.html", bestand: "over-ons.html" }] : []),
+    project_files: () => [{ pad: "index.html", grootte: 640 }, { pad: "PROJECT.md", grootte: 220 }, { pad: "style.css", grootte: 1500 }],
+    project_file_read: (a) => ({ tekst: a.path === "index.html" ? "<h1>Hovenier Joke</h1>" : "# Project\n", ingekort: false }),
+    project_signals: (a) => ({ project_md_ingevuld: false, needs_data: !!S.flags[a.projectId + ":needs"], needs_data_reden: S.flags[a.projectId + ":needs"] ?? null, heeft_database: false, aantal_assets: (S.assets[a.projectId] || []).length }),
+    assets_list: (a) => S.assets[a.projectId] || [],
+    assets_delete: (a) => void (S.assets[a.projectId] = (S.assets[a.projectId] || []).filter((x) => x.pad !== a.path)),
+    chat_attach: (a) => {
+      const f = { naam: a.name, name: a.name, pad: "assets/" + a.name, path: "assets/" + a.name, soort: "image", kind: "image", grootte: 2048, size: 2048 };
+      (S.assets[a.projectId] ||= []).push(f);
+      return f;
+    },
+    data_overview: () => [],
+    data_rows: () => ({ kolommen: [], rijen: [], totaal: 0 }),
+    project_description_get: (a) => S.descr[a.projectId] ?? "",
+    project_description_set: (a) => void (S.descr[a.projectId] = a.text),
+    project_flags: (a) => Object.fromEntries(Object.entries(S.flags).filter(([k]) => k.startsWith(a.projectId + ":") && !k.endsWith(":needs")).map(([k, v]) => [k.split(":")[1], v])),
+    project_flag_set: (a) => void (a.value == null ? delete S.flags[a.projectId + ":" + a.key] : (S.flags[a.projectId + ":" + a.key] = a.value)),
+    reset_ui_setting: (a) => void delete S.settings[a.key],
     layout_get: (a) => S.layouts[a.projectId] ?? null,
     layout_set: (a) => void (S.layouts[a.projectId] = { versie: a.versie, json: a.json }),
     layout_reset: (a) => void delete S.layouts[a.projectId],

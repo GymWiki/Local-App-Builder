@@ -24,30 +24,30 @@ describe("werkruimte: panelen openen en sluiten", () => {
     expect(
       [
         ...openIds(m, [
-          "structuur",
+          "start",
           "preview",
           "eigenschappen",
           "chat",
-          "database",
-          "geavanceerd",
+          "gegevens",
+          "terminal",
         ]),
       ].sort(),
-    ).toEqual(["chat", "eigenschappen", "preview", "structuur"]);
+    ).toEqual(["chat", "eigenschappen", "preview", "start"]);
   });
 
   it("een onderdeel dat links hoort komt bij de andere linkse onderdelen", () => {
     const m = nieuw();
-    openPanel(m, "database");
-    expect(isOpen(m, "database")).toBe(true);
-    expect(tabsetVan(m, "database")).toBe(tabsetVan(m, "structuur"));
+    openPanel(m, "bestanden");
+    expect(isOpen(m, "bestanden")).toBe(true);
+    expect(tabsetVan(m, "bestanden")).toBe(tabsetVan(m, "start"));
   });
 
   it("een breed onderdeel (terminal, publiceren) komt in het midden naast de preview", () => {
     const m = nieuw();
-    openPanel(m, "geavanceerd");
-    openPanel(m, "publiceren");
-    expect(tabsetVan(m, "geavanceerd")).toBe(tabsetVan(m, "preview"));
-    expect(tabsetVan(m, "publiceren")).toBe(tabsetVan(m, "preview"));
+    openPanel(m, "terminal");
+    openPanel(m, "onlinezetten");
+    expect(tabsetVan(m, "terminal")).toBe(tabsetVan(m, "preview"));
+    expect(tabsetVan(m, "onlinezetten")).toBe(tabsetVan(m, "preview"));
   });
 
   it("eigenschappen komt boven de chat als het gesloten was", () => {
@@ -61,14 +61,14 @@ describe("werkruimte: panelen openen en sluiten", () => {
 
   it("zonder linkse groep wordt die opnieuw links aangemaakt", () => {
     const m = nieuw();
-    closePanel(m, "structuur");
+    closePanel(m, "start");
     expect(m.getNodeById("ts-links")).toBeUndefined();
-    openPanel(m, "geschiedenis");
-    expect(isOpen(m, "geschiedenis")).toBe(true);
+    openPanel(m, "versies");
+    expect(isOpen(m, "versies")).toBe(true);
     const root = m.toJson().layout.children![0] as {
       children: { component: string }[];
     };
-    expect(root.children[0].component).toBe("geschiedenis");
+    expect(root.children[0].component).toBe("versies");
   });
 
   it("preview en chat zijn niet te sluiten", () => {
@@ -81,8 +81,8 @@ describe("werkruimte: panelen openen en sluiten", () => {
 
   it("de iconenbalk schakelt: dicht → open, zichtbaar → dicht, verstopt → naar voren", () => {
     const m = nieuw();
-    togglePanel(m, "publiceren");
-    expect(isOpen(m, "publiceren")).toBe(true);
+    togglePanel(m, "onlinezetten");
+    expect(isOpen(m, "onlinezetten")).toBe(true);
     // Publiceren is nu het geselecteerde tabblad; de preview zit erachter.
     togglePanel(m, "preview"); // verstopt → naar voren, niet sluiten
     expect(isOpen(m, "preview")).toBe(true);
@@ -91,14 +91,14 @@ describe("werkruimte: panelen openen en sluiten", () => {
         m.getNodeById("preview") as unknown as { isSelected(): boolean }
       ).isSelected(),
     ).toBe(true);
-    togglePanel(m, "publiceren"); // verstopt achter de preview → naar voren
+    togglePanel(m, "onlinezetten"); // verstopt achter de preview → naar voren
     expect(
       (
-        m.getNodeById("publiceren") as unknown as { isSelected(): boolean }
+        m.getNodeById("onlinezetten") as unknown as { isSelected(): boolean }
       ).isSelected(),
     ).toBe(true);
-    togglePanel(m, "publiceren"); // zichtbaar → sluiten
-    expect(isOpen(m, "publiceren")).toBe(false);
+    togglePanel(m, "onlinezetten"); // zichtbaar → sluiten
+    expect(isOpen(m, "onlinezetten")).toBe(false);
   });
 
   it("de preview is groot te maken en weer normaal", () => {
@@ -134,8 +134,8 @@ describe("werkruimte: panelen verplaatsen met het menu", () => {
     const m = nieuw();
     verplaats(m, "eigenschappen", "bijPreview");
     expect(tabsetVan(m, "eigenschappen")).toBe(tabsetVan(m, "preview"));
-    verplaats(m, "structuur", "bijChat");
-    expect(tabsetVan(m, "structuur")).toBe(tabsetVan(m, "chat"));
+    verplaats(m, "start", "bijChat");
+    expect(tabsetVan(m, "start")).toBe(tabsetVan(m, "chat"));
   });
 
   it("zwevend: het paneel blijft bestaan en staat in een los venster binnen de app", () => {
@@ -156,7 +156,7 @@ describe("werkruimte: panelen verplaatsen met het menu", () => {
   it("onbekend of gesloten paneel doet niets", () => {
     const m = nieuw();
     const voor = JSON.stringify(m.toJson());
-    verplaats(m, "database", "links");
+    verplaats(m, "gegevens", "links");
     expect(JSON.stringify(m.toJson())).toBe(voor);
   });
 });

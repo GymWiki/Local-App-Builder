@@ -1,6 +1,5 @@
 import { useTranslation } from "react-i18next";
 import {
-  ArrowLeftIcon,
   LayoutPanelLeftIcon,
   MoreHorizontalIcon,
   RotateCcwIcon,
@@ -19,11 +18,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface Props {
-  naam: string;
   mcp: McpInfo | null;
   preview: PreviewInfo | null;
   maximized: boolean;
-  onHome: () => void;
   onPreset: (p: PresetId) => void;
   onReset: () => void;
   onToggleMaximize: () => void;
@@ -46,13 +43,11 @@ const MCP_TOON: Record<string, string> = {
   uit: "border-transparent bg-muted text-muted-foreground",
 };
 
-/** Bovenbalk van de werkruimte: terug naar alle projecten, de naam, de status van voorbeeld en AI-koppeling, en het indelingsmenu. */
+/** Bovenbalk van de werkruimte: status van voorbeeld en AI-koppeling en het indelingsmenu. (Terug en projectnaam staan bovenaan het menu.) */
 export default function WorkspaceBar({
-  naam,
   mcp,
   preview,
   maximized,
-  onHome,
   onPreset,
   onReset,
   onToggleMaximize,
@@ -71,16 +66,7 @@ export default function WorkspaceBar({
   }[mStatus];
   return (
     <header className="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2">
-      <Button variant="ghost" onClick={onHome}>
-        <ArrowLeftIcon aria-hidden="true" />
-        {t("home.alleProjecten")}
-      </Button>
-      <h1
-        className="min-w-0 flex-1 truncate text-lg font-semibold"
-        title={naam}
-      >
-        {naam}
-      </h1>
+      <div className="flex-1" />
       <div
         role="group"
         aria-label={t("werkruimte.balk.status")}

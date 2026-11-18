@@ -36,9 +36,9 @@ export type PresetId = "standaard" | "veelPreview" | "veelChat";
 export const PRESETS: PresetId[] = ["standaard", "veelPreview", "veelChat"];
 
 const GEWICHTEN: Record<PresetId, { links: number; midden: number; rechts: number; props: number; chat: number }> = {
-  standaard: { links: 16, midden: 46, rechts: 38, props: 22, chat: 78 },
-  veelPreview: { links: 12, midden: 64, rechts: 24, props: 25, chat: 75 },
-  veelChat: { links: 14, midden: 30, rechts: 56, props: 20, chat: 80 },
+  standaard: { links: 22, midden: 40, rechts: 38, props: 22, chat: 78 },
+  veelPreview: { links: 18, midden: 56, rechts: 26, props: 25, chat: 75 },
+  veelChat: { links: 18, midden: 26, rechts: 56, props: 20, chat: 80 },
 };
 
 /** [ links: onderdelen | midden: preview | rechts: eigenschappen boven, chat onder ] */
@@ -56,7 +56,7 @@ export function defaultLayout(preset: PresetId = "standaard"): IJsonModel {
     layout: {
       type: "row",
       id: "root",
-      children: [tabset("ts-links", ["structuur"], w.links), tabset("ts-midden", ["preview"], w.midden), rechts],
+      children: [tabset("ts-links", ["start"], w.links), tabset("ts-midden", ["preview"], w.midden), rechts],
     },
   };
 }

@@ -9,7 +9,7 @@ import {
 import {
   defaultLayout,
   PANELEN,
-  SECTIES,
+  PANEL_IDS,
   tab,
   type PanelId,
   type PresetId,
@@ -50,7 +50,7 @@ export function openPanel(model: Model, id: PanelId): void {
       );
     return;
   }
-  const buur = SECTIES.filter((s) => s !== id && PANELEN[s].plek === "links")
+  const buur = PANEL_IDS.filter((s) => s !== id && PANELEN[s].plek === "links")
     .map((s) => parentTabset(model, s))
     .find(Boolean);
   if (buur) {
@@ -135,3 +135,7 @@ export function geefRuimteAanEigenschappen(model: Model): void {
   nieuw[1 - i] = totaal - nieuw[i];
   model.doAction(Actions.adjustWeights(rij.getId(), nieuw));
 }
+
+/** Welke panelen zijn nu zichtbaar (het geselecteerde tabblad van hun groep)? */
+export const zichtbaarIds = (model: Model, ids: readonly PanelId[]): Set<PanelId> =>
+  new Set(ids.filter((id) => (model.getNodeById(id) as TabNode | undefined)?.isSelected()));

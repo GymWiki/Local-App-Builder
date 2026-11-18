@@ -27,10 +27,20 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 interface Props {
   project: Project;
   onError: (msg: string) => void;
+  /** Zonder eigen scrollvlak en titel, om in een ander paneel te tonen (Online zetten). */
+  inline?: boolean;
+  /** Meldt het resultaat van de veiligheidscheck. */
+  onChecked?: (schoon: boolean) => void;
+  /** Meldt dat er een kopie van het project is gemaakt. */
+  onExported?: () => void;
+}
+
+function Buiten({ inline, children }: { inline: boolean; children: React.ReactNode }) {
+  return inline ? <>{children}</> : <ScrollArea className="min-h-0 flex-1">{children}</ScrollArea>;
 }
 
 /** Tabblad Publiceren: je project downloaden. */
-export default function PublishPanel({ project, onError }: Props) {
+export default function PublishPanel({ project, onError, inline = false, onChecked, onExported }: Props) {
   const { t } = useTranslation();
   const [busy, setBusy] = useState(false);
   const [notes, setNotes] = useState<string[]>([]);
@@ -46,6 +56,7 @@ export default function PublishPanel({ project, onError }: Props) {
       toast.success(
         t("publiceren.export.klaar", { aantal: r.files, pad: r.path }),
       );
+      onExported?.();
       setNotes([
         ...(r.skipped_secrets.length
           ? [
@@ -72,7 +83,9 @@ export default function PublishPanel({ project, onError }: Props) {
   async function check() {
     setChecking(true);
     try {
-      setReport(await runtime<SecurityReport>(project.id, "security.check"));
+      const r = await runtime<SecurityReport>(project.id, "security.check");
+      setReport(r);
+      onChecked?.(r.findings.length === 0);
     } catch (e) {
       onError(t("fout.algemeen", { bericht: String(e) }));
     } finally {
@@ -116,12 +129,12 @@ export default function PublishPanel({ project, onError }: Props) {
   }
 
   return (
-    <ScrollArea className="min-h-0 flex-1">
+    <Buiten inline={inline}>
       <section
         aria-label={t("publiceren.titel")}
-        className="max-w-3xl space-y-5 p-6"
+        className={inline ? "space-y-5" : "max-w-3xl space-y-5 p-6"}
       >
-        <h2 className="text-2xl font-semibold">{t("publiceren.titel")}</h2>
+        {!inline && <h2 className="text-2xl font-semibold">{t("publiceren.titel")}</h2>}
         <Card>
           <CardHeader>
             <CardTitle className="text-lg">
@@ -266,6 +279,6 @@ export default function PublishPanel({ project, onError }: Props) {
           </CardFooter>
         </Card>
       </section>
-    </ScrollArea>
+    </Buiten>
   );
 }

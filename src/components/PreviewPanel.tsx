@@ -50,6 +50,17 @@ interface Props {
   controlRef?: MutableRefObject<PreviewControl | null>;
 }
 
+/** Het adres van het voorbeeld met de gekozen pagina erachter; alleen op dezelfde server, nooit ergens anders. */
+export function frameSrc(base: string, pad: string): string {
+  if (pad === "/") return base;
+  try {
+    const u = new URL(pad, base);
+    return u.origin === new URL(base).origin ? u.toString() : base;
+  } catch {
+    return base;
+  }
+}
+
 const BADGE: Record<string, string> = {
   running: "border-transparent bg-success/15 text-success",
   starting: "border-transparent bg-accent text-accent-foreground",
@@ -67,6 +78,7 @@ export default function PreviewPanel({ project, mcp, preview, visible, reloadNon
   const frame = useRef<HTMLIFrameElement>(null);
   const [picking, setPicking] = useState(false);
   const [proxyUrl, setProxyUrl] = useState<string | null>(null);
+  const [pagePath, setPagePath] = useState("/");
   const [pick, setPick] = useState<{ selector: string; tag: string; text: string; path: string } | null>(null);
   const [wish, setWish] = useState("");
   const [logs, setLogs] = useState<string[]>([]);
@@ -173,6 +185,7 @@ export default function PreviewPanel({ project, mcp, preview, visible, reloadNon
       select: (selector) => post({ type: "studio-picker-select", selector }),
       clear: () => post({ type: "studio-picker-clear" }),
       askPage: () => post({ type: "studio-picker-page" }),
+      navigate: (pad) => setPagePath(/^\/[^\s]*$/.test(pad) && !pad.startsWith("//") ? pad : "/"),
     };
     return () => {
       controlRef.current = null;
@@ -327,7 +340,7 @@ export default function PreviewPanel({ project, mcp, preview, visible, reloadNon
             ref={frame}
             key={frameKey}
             title={t("tabs.preview")}
-            src={proxyUrl ?? preview.url}
+            src={frameSrc(proxyUrl ?? preview.url, pagePath)}
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
             data-viewport={viewport}
             style={VIEWPORTS[viewport] ? { width: VIEWPORTS[viewport] } : undefined}

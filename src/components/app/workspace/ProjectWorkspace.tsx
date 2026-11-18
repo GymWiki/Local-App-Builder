@@ -1,76 +1,47 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useReducer,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { toast } from "sonner";
-import type { KeyboardEvent } from "react";
 import { useTranslation } from "react-i18next";
-import {
-  Layout,
-  Model,
-  type TabNode,
-  type TabSetNode,
-  type BorderNode,
-  type ITabRenderValues,
-  type ITabSetRenderValues,
-} from "flexlayout-react";
+import { Layout, Model, type BorderNode, type ITabRenderValues, type ITabSetRenderValues, type TabNode, type TabSetNode } from "flexlayout-react";
 import "flexlayout-react/style/light.css";
-import {
-  layoutGet,
-  layoutReset,
-  layoutSet,
-  type Account,
-  type McpInfo,
-  type PreviewInfo,
-  type Project,
-} from "@/lib/api";
-import {
-  compacteIndeling,
-  isPanelId,
-  LayoutService,
-  PANEL_IDS,
-  type PanelId,
-  type PresetId,
-} from "@/lib/layout";
+import { layoutGet, layoutReset, layoutSet, type Account, type McpInfo, type PreviewInfo, type Project } from "@/lib/api";
+import { compacteIndeling, isPanelId, LayoutService, PANEL_IDS, type PanelId, type PresetId } from "@/lib/layout";
+import { menuStatus, type MenuId } from "@/lib/menu";
 import ChatPanel from "@/components/app/chat/ChatPanel";
-import PublishPanel from "@/components/app/PublishPanel";
 import AccountsScreen from "@/components/AccountsScreen";
-import AppearancePanel from "@/components/kits/AppearancePanel";
 import PreviewPanel from "@/components/PreviewPanel";
 import TerminalPanel, { type Session } from "@/components/TerminalPanel";
+import { useSettings } from "@/components/app/settings-provider";
+import { useMediaQuery } from "@/hooks/use-media-query";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import AppwinkelPanel from "./panels/AppwinkelPanel";
+import BestandenPanel from "./panels/BestandenPanel";
+import CodePanel from "./panels/CodePanel";
 import EigenschappenPanel from "./panels/EigenschappenPanel";
+import GegevensPanel from "./panels/GegevensPanel";
 import HistoryPanel from "./panels/HistoryPanel";
-import PlaceholderPanel from "./panels/PlaceholderPanel";
+import HulpPanel from "./panels/HulpPanel";
+import LogsPanel from "./panels/LogsPanel";
+import OnlinePanel from "./panels/OnlinePanel";
+import ProjectSettingsPanel, { type SettingsProps } from "./panels/ProjectSettingsPanel";
+import SchermenPanel from "./panels/SchermenPanel";
+import StartPanel from "./panels/StartPanel";
+import StatusPanel from "./panels/StatusPanel";
+import UiterlijkPanel from "./panels/UiterlijkPanel";
 import type { PageInfo, PickedElement, PreviewControl } from "./pick";
-import ProjectSettingsPanel, {
-  type SettingsProps,
-} from "./panels/ProjectSettingsPanel";
-import StructuurPanel from "./panels/StructuurPanel";
 import MovePanelMenu from "./MovePanelMenu";
-import SectionRail from "./SectionRail";
 import ShortcutsDialog from "./ShortcutsDialog";
 import WorkspaceBar from "./WorkspaceBar";
-import { ICONEN } from "./sections";
-import {
-  closePanel,
-  geefRuimteAanEigenschappen,
-  isOpen,
-  isPreviewMaximized,
-  openIds,
-  openPanel,
-  toggleMaximizePreview,
-  togglePanel,
-} from "./modelActions";
+import WorkspaceMenu from "./WorkspaceMenu";
+import { ICONEN } from "./menuIcons";
+import { WorkspaceProvider, type WorkspaceCtx } from "./workspace-context";
+import { useProjectSignals } from "./useProjectSignals";
+import { closePanel, geefRuimteAanEigenschappen, isOpen, isPreviewMaximized, openPanel, toggleMaximizePreview, zichtbaarIds } from "./modelActions";
 
 /** Onder deze breedte (in CSS-pixels) toont de werkruimte een compacte indeling met tabbladen. */
 export const COMPACT_BREEDTE = 1000;
+/** Onder deze vensterbreedte klapt het menu vanzelf in tot iconen. */
+export const MENU_SMAL = 1180;
 
 const service = new LayoutService({
   get: layoutGet,
@@ -101,10 +72,11 @@ interface Props {
   onCloseProject: () => void;
 }
 
-/** De werkruimte van één project: iconenbalk links, daarnaast een indeling van panelen die je kunt verschuiven en vergroten. */
+/** De werkruimte van één project: links het menu, daarnaast een indeling van panelen die je kunt verschuiven en vergroten. */
 export default function ProjectWorkspace(props: Props) {
   const { project, accounts, sessions, mcp, preview, onError } = props;
   const { t } = useTranslation();
+  const { settings, set: setSetting } = useSettings();
   const [normal, setNormal] = useState<Model | null>(null);
   const [compact, setCompact] = useState(false);
   const [, redraw] = useReducer((n: number) => n + 1, 0);
@@ -114,6 +86,9 @@ export default function ProjectWorkspace(props: Props) {
   const control = useRef<PreviewControl | null>(null);
   const [toonSneltoetsen, setToonSneltoetsen] = useState(false);
   const normalRef = useRef<Model | null>(null);
+  // In een smal venster is het menu vanzelf ingeklapt tot iconen.
+  const smalVenster = !useMediaQuery(`(min-width: ${MENU_SMAL + 1}px)`);
+  const { signalen, ruw, vlaggen, ververs, setVlag } = useProjectSignals(project, mcp, preview, props.tick);
 
   // Indeling van dit project laden (valt altijd terug op de standaardindeling).
   useEffect(() => {
@@ -134,8 +109,7 @@ export default function ProjectWorkspace(props: Props) {
   useEffect(() => {
     const el = host.current;
     if (!el) return;
-    const meet = () =>
-      setCompact(el.clientWidth > 0 && el.clientWidth < COMPACT_BREEDTE);
+    const meet = () => setCompact(el.clientWidth > 0 && el.clientWidth < COMPACT_BREEDTE);
     meet();
     const ro = new ResizeObserver(meet);
     ro.observe(el);
@@ -143,7 +117,6 @@ export default function ProjectWorkspace(props: Props) {
   }, []);
 
   const compactModel = useMemo(() => (compact && normal ? Model.fromJson(compacteIndeling(normal.toJson())) : null), [compact, normal]);
-
   const model = compact && compactModel ? compactModel : normal;
   const isCompactView = model !== null && model === compactModel;
 
@@ -155,7 +128,20 @@ export default function ProjectWorkspace(props: Props) {
     [project.id],
   );
 
-  // Sneltoetsen: Ctrl (of Cmd) + Shift + G/E/L/M. Geen Alt, want dat is op veel toetsenborden de AltGr-toets.
+  const focusGesprek = useCallback(() => {
+    if (!model) return;
+    openPanel(model, "chat");
+    setTimeout(() => document.getElementById("chat-input")?.focus(), 60);
+  }, [model]);
+
+  const openPaneel = useCallback(
+    (id: PanelId) => {
+      if (model) openPanel(model, id);
+    },
+    [model],
+  );
+
+  // Sneltoetsen: Ctrl (of Cmd) + Shift + S/P/G/E/L/M. Geen Alt, want dat is op veel toetsenborden de AltGr-toets.
   useEffect(() => {
     if (!model) return;
     const onKey = (e: globalThis.KeyboardEvent) => {
@@ -163,16 +149,20 @@ export default function ProjectWorkspace(props: Props) {
       const k = e.key.toLowerCase();
       if (k === "g") {
         e.preventDefault();
-        openPanel(model, "chat");
-        setTimeout(() => document.getElementById("chat-input")?.focus(), 60);
+        focusGesprek();
+      } else if (k === "s") {
+        e.preventDefault();
+        openPanel(model, "start");
+      } else if (k === "p") {
+        e.preventDefault();
+        openPanel(model, "preview");
       } else if (k === "e") {
         e.preventDefault();
         if (isOpen(model, "eigenschappen")) closePanel(model, "eigenschappen");
         else openPanel(model, "eigenschappen");
       } else if (k === "l") {
         e.preventDefault();
-        if (isOpen(model, "structuur")) closePanel(model, "structuur");
-        else openPanel(model, "structuur");
+        void setSetting("menu_collapsed", !settings.menu_collapsed);
       } else if (k === "m") {
         e.preventDefault();
         toggleMaximizePreview(model);
@@ -180,7 +170,7 @@ export default function ProjectWorkspace(props: Props) {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [model]);
+  }, [model, focusGesprek, setSetting, settings.menu_collapsed]);
 
   // Een paneel vanzelf naar voren halen als de rest van de app daarom vraagt.
   const verwerkt = useRef(props.request?.nonce ?? 0);
@@ -191,14 +181,7 @@ export default function ProjectWorkspace(props: Props) {
     openPanel(model, r.id);
   }, [props.request, model]);
 
-  const open = model ? openIds(model, PANEL_IDS) : new Set<PanelId>();
-
-  const openSection = useCallback(
-    (id: PanelId) => {
-      if (model) openPanel(model, id);
-    },
-    [model],
-  );
+  const actief = model ? zichtbaarIds(model, PANEL_IDS) : new Set<PanelId>();
 
   async function applyPreset(preset: PresetId, melding = false) {
     const j = await service.reset(project.id, preset);
@@ -208,6 +191,24 @@ export default function ProjectWorkspace(props: Props) {
     service.save(project.id, m.toJson());
     if (melding) toast.success(t("werkruimte.balk.herstelKlaar"));
   }
+
+  const ctx: WorkspaceCtx = {
+    project,
+    accounts,
+    mcp,
+    preview,
+    tick: props.tick,
+    signalen,
+    signals: ruw,
+    vlaggen,
+    verversSignalen: ververs,
+    setVlag,
+    openPaneel,
+    focusGesprek,
+    control,
+    onError,
+    onRetryMcp: props.onRetryMcp,
+  };
 
   const factory = (node: TabNode): ReactNode => {
     const id = node.getComponent();
@@ -220,8 +221,8 @@ export default function ProjectWorkspace(props: Props) {
             project={project}
             accounts={accounts}
             technical={props.technical}
-            onOpenAdvanced={() => openSection("geavanceerd")}
-            onOpenAccounts={() => openSection("accounts")}
+            onOpenAdvanced={() => openPaneel("terminal")}
+            onOpenAccounts={() => openPaneel("instellingen")}
             onError={onError}
           />
         );
@@ -248,61 +249,6 @@ export default function ProjectWorkspace(props: Props) {
             controlRef={control}
           />
         );
-      case "geavanceerd":
-        return (
-          <TerminalPanel
-            project={project}
-            accounts={accounts}
-            sessions={sessions}
-            mcp={mcp}
-            onSessionsChange={props.onSessionsChange}
-            onError={onError}
-            onRetryMcp={props.onRetryMcp}
-          />
-        );
-      case "uiterlijk":
-        return (
-          <ScrollArea className="h-full">
-            <AppearancePanel
-              key={project.id}
-              projectId={project.id}
-              firstRun={project.template !== "leeg"}
-              onError={onError}
-            />
-          </ScrollArea>
-        );
-      case "publiceren":
-        return <PublishPanel project={project} onError={onError} />;
-      case "accounts":
-        return (
-          <ScrollArea className="h-full">
-            <AccountsScreen
-              accounts={accounts}
-              onChanged={props.onAccountsChanged}
-              onError={onError}
-            />
-          </ScrollArea>
-        );
-      case "instellingen":
-        return (
-          <ProjectSettingsPanel
-            project={project}
-            accounts={accounts}
-            onDefaultAccount={props.onDefaultAccount}
-            {...props.settings}
-          />
-        );
-      case "geschiedenis":
-        return (
-          <HistoryPanel
-            project={project}
-            mcp={mcp}
-            tick={props.tick}
-            onError={onError}
-          />
-        );
-      case "structuur":
-        return <StructuurPanel selection={selection} />;
       case "eigenschappen":
         return (
           <EigenschappenPanel
@@ -318,12 +264,39 @@ export default function ProjectWorkspace(props: Props) {
             onError={onError}
           />
         );
-      case "componenten":
-      case "database":
-      case "koppelingen":
+      case "terminal":
+        return <TerminalPanel project={project} accounts={accounts} sessions={sessions} mcp={mcp} onSessionsChange={props.onSessionsChange} onError={onError} onRetryMcp={props.onRetryMcp} />;
+      case "start":
+        return <StartPanel />;
+      case "schermen":
+        return <SchermenPanel />;
+      case "uiterlijk":
+        return <UiterlijkPanel />;
+      case "bestanden":
+        return <BestandenPanel />;
+      case "gegevens":
+        return <GegevensPanel />;
+      case "onlinezetten":
+        return <OnlinePanel />;
+      case "appwinkel":
+        return <AppwinkelPanel />;
+      case "versies":
+        return <HistoryPanel project={project} mcp={mcp} tick={props.tick} onError={onError} />;
+      case "instellingen":
         return (
-          <PlaceholderPanel id={id} projectId={project.id} onError={onError} />
+          <ScrollArea className="h-full">
+            <ProjectSettingsPanel project={project} accounts={accounts} onDefaultAccount={props.onDefaultAccount} {...props.settings} />
+            <AccountsScreen accounts={accounts} onChanged={props.onAccountsChanged} onError={onError} />
+          </ScrollArea>
         );
+      case "hulp":
+        return <HulpPanel />;
+      case "logs":
+        return <LogsPanel />;
+      case "technischestatus":
+        return <StatusPanel />;
+      case "code":
+        return <CodePanel />;
     }
   };
 
@@ -355,56 +328,58 @@ export default function ProjectWorkspace(props: Props) {
     return vertaald || key;
   };
 
+  async function voegToe(id: MenuId) {
+    if (id === "gegevens") await setVlag("gegevens_aan", "1");
+    setTimeout(() => openPaneel(id), 150);
+  }
+
   return (
-    <div className="flex min-h-0 flex-1 flex-col" data-testid="workspace">
-      <WorkspaceBar
-        naam={project.naam}
-        mcp={mcp}
-        preview={preview}
-        maximized={model ? isPreviewMaximized(model) : false}
-        onHome={props.onHome}
-        onPreset={(p) => void applyPreset(p)}
-        onReset={() => void applyPreset("standaard", true)}
-        onToggleMaximize={() => model && toggleMaximizePreview(model)}
-        onCloseProject={props.onCloseProject}
-        onShortcuts={() => setToonSneltoetsen(true)}
-      />
-      <div className="flex min-h-0 flex-1">
-        <SectionRail
-          open={open}
-          onToggle={(id) => model && togglePanel(model, id)}
+    <WorkspaceProvider value={ctx}>
+      <div className="flex min-h-0 flex-1 flex-col" data-testid="workspace">
+        <WorkspaceBar
+          mcp={mcp}
+          preview={preview}
+          maximized={model ? isPreviewMaximized(model) : false}
+          onPreset={(p) => void applyPreset(p)}
+          onReset={() => void applyPreset("standaard", true)}
+          onToggleMaximize={() => model && toggleMaximizePreview(model)}
+          onCloseProject={props.onCloseProject}
+          onShortcuts={() => setToonSneltoetsen(true)}
         />
-        <div
-          ref={host}
-          onKeyDownCapture={onGripKey}
-          className="studio-layout relative min-h-0 min-w-0 flex-1"
-          data-compact={isCompactView ? "ja" : "nee"}
-          aria-label={t("werkruimte.label")}
-          role="region"
-        >
-          {model ? (
-            <Layout
-              model={model}
-              factory={factory}
-              onRenderTab={onRenderTab}
-              onRenderTabSet={onRenderTabSet}
-              onModelChange={onModelChange}
-              keyMap={{ focusTabToggle: "F6", focusNextTabset: "Ctrl+]", focusPreviousTabset: "Ctrl+[" }}
-              i18nTranslator={i18nTranslator}
-            />
-          ) : (
-            <div
-              role="status"
-              aria-label={t("werkruimte.laden")}
-              className="space-y-3 p-6"
-            >
-              <Skeleton className="h-10 w-1/3" />
-              <Skeleton className="h-64 w-full" />
-            </div>
-          )}
+        <div className="flex min-h-0 flex-1">
+          <WorkspaceMenu
+            projectNaam={project.naam}
+            signalen={signalen}
+            vlaggen={vlaggen}
+            status={menuStatus(signalen)}
+            actief={actief}
+            ingeklapt={settings.menu_collapsed || smalVenster}
+            onToggleIngeklapt={() => void setSetting("menu_collapsed", !settings.menu_collapsed)}
+            onOpen={openPaneel}
+            onHome={props.onHome}
+            onVoegToe={(id) => void voegToe(id)}
+          />
+          <div ref={host} onKeyDownCapture={onGripKey} className="studio-layout relative min-h-0 min-w-0 flex-1" data-compact={isCompactView ? "ja" : "nee"} aria-label={t("werkruimte.label")} role="region">
+            {model ? (
+              <Layout
+                model={model}
+                factory={factory}
+                onRenderTab={onRenderTab}
+                onRenderTabSet={onRenderTabSet}
+                onModelChange={onModelChange}
+                keyMap={{ focusTabToggle: "F6", focusNextTabset: "Ctrl+]", focusPreviousTabset: "Ctrl+[" }}
+                i18nTranslator={i18nTranslator}
+              />
+            ) : (
+              <div role="status" aria-label={t("werkruimte.laden")} className="space-y-3 p-6">
+                <Skeleton className="h-10 w-1/3" />
+                <Skeleton className="h-64 w-full" />
+              </div>
+            )}
+          </div>
         </div>
+        {toonSneltoetsen && <ShortcutsDialog onClose={() => setToonSneltoetsen(false)} />}
       </div>
-      {toonSneltoetsen && <ShortcutsDialog onClose={() => setToonSneltoetsen(false)} />}
-    </div>
+    </WorkspaceProvider>
   );
 }

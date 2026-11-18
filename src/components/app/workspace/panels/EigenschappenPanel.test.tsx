@@ -35,7 +35,7 @@ const knop: PickedElement = {
 
 function setup(over: Partial<React.ComponentProps<typeof EigenschappenPanel>> = {}) {
   const control = createRef<PreviewControl | null>() as { current: PreviewControl | null };
-  control.current = { startPick: vi.fn().mockResolvedValue(undefined), select: vi.fn(), clear: vi.fn(), askPage: vi.fn() };
+  control.current = { startPick: vi.fn().mockResolvedValue(undefined), select: vi.fn(), clear: vi.fn(), askPage: vi.fn(), navigate: vi.fn() };
   const props = { projectId: 4, selection: null, page: null, control, previewRunning: true, onClear: vi.fn(), onError: vi.fn(), ...over };
   render(<EigenschappenPanel {...props} />);
   return props;

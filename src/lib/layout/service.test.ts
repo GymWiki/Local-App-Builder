@@ -1,6 +1,6 @@
 import { vi } from "vitest";
 import { Model, type IJsonModel } from "flexlayout-react";
-import { compacteIndeling, defaultLayout, LAYOUT_VERSION, LayoutService, lees, migreer, PRESETS, serialiseer, valideer, type LayoutStorage, type Opgeslagen } from "./index";
+import { MIGRATIES, compacteIndeling, defaultLayout, LAYOUT_VERSION, LayoutService, lees, migreer, PRESETS, serialiseer, valideer, type LayoutStorage, type Opgeslagen } from "./index";
 
 const tabsIn = (json: IJsonModel): string[] => {
   const uit: string[] = [];
@@ -35,7 +35,7 @@ describe("standaardindelingen", () => {
     const j = defaultLayout(preset);
     expect(valideer(j)).not.toBeNull();
     expect(() => Model.fromJson(j)).not.toThrow();
-    expect(tabsIn(j)).toEqual(expect.arrayContaining(["preview", "chat", "eigenschappen", "structuur"]));
+    expect(tabsIn(j)).toEqual(expect.arrayContaining(["preview", "chat", "eigenschappen", "start"]));
   });
 
   it("preview en chat zijn niet te sluiten; preview, chat en terminal blijven in het geheugen", () => {
@@ -82,10 +82,10 @@ describe("valideren", () => {
   it("accepteert een zwevend paneel met een geldige plek", () => {
     const j = JSON.parse(JSON.stringify(defaultLayout()));
     j.layout.children[0].children = [];
-    j.layout.children[0] = { type: "tabset", children: [{ type: "tab", component: "geavanceerd" }] };
-    j.subLayouts = { f1: { type: "float", rect: { x: 10, y: 10, width: 300, height: 200 }, layout: { type: "row", children: [{ type: "tabset", children: [{ type: "tab", component: "database" }] }] } } };
+    j.layout.children[0] = { type: "tabset", children: [{ type: "tab", component: "terminal" }] };
+    j.subLayouts = { f1: { type: "float", rect: { x: 10, y: 10, width: 300, height: 200 }, layout: { type: "row", children: [{ type: "tabset", children: [{ type: "tab", component: "gegevens" }] }] } } };
     const ok = valideer(j)!;
-    expect(tabsIn(ok)).toEqual(expect.arrayContaining(["geavanceerd", "database", "preview", "chat"]));
+    expect(tabsIn(ok)).toEqual(expect.arrayContaining(["terminal", "gegevens", "preview", "chat"]));
     expect(() => Model.fromJson(ok)).not.toThrow();
     j.subLayouts.f1.rect.width = Infinity;
     expect(valideer(j)).toBeNull();
@@ -127,7 +127,7 @@ describe("lezen en migreren", () => {
 
   it("een gemigreerde indeling wordt als zodanig gemeld", () => {
     const oud = { versie: 0, json: JSON.stringify({ oud: defaultLayout() }) };
-    const g = lees(oud, { 0: (j) => (j as { oud: unknown }).oud });
+    const g = lees(oud, { 0: (j) => (j as { oud: unknown }).oud, 1: (j) => j });
     expect(g.bron).toBe("gemigreerd");
     expect(tabsIn(g.json)).toContain("chat");
   });
@@ -168,7 +168,7 @@ describe("LayoutService", () => {
     await vi.advanceTimersByTimeAsync(450);
     expect(s.set).toHaveBeenCalledTimes(1);
     const bewaard = JSON.parse((s.set as unknown as { mock: { calls: [number, number, string][] } }).mock.calls[0][2]);
-    expect(bewaard.layout.children[1].weight).toBe(30); // de laatste (veelChat)
+    expect(bewaard.layout.children[1].weight).toBe(26); // de laatste (veelChat)
   });
 
   it("projecten hebben elk hun eigen indeling", async () => {
@@ -206,6 +206,57 @@ describe("LayoutService", () => {
     await vi.advanceTimersByTimeAsync(500);
     expect(s.set).not.toHaveBeenCalled();
     expect(huidig()).toBeNull();
-    expect((j.layout.children![1] as { weight: number }).weight).toBe(64);
+    expect((j.layout.children![1] as { weight: number }).weight).toBe(56);
+  });
+});
+
+describe("migratie van versie 1 naar het nieuwe menu (versie 2)", () => {
+  const v1 = () => ({
+    global: { tabEnableClose: true },
+    borders: [],
+    layout: {
+      type: "row",
+      id: "root",
+      children: [
+        { type: "tabset", id: "ts-links", weight: 16, children: [{ type: "tab", id: "structuur", component: "structuur" }, { type: "tab", id: "componenten", component: "componenten" }, { type: "tab", id: "database", component: "database" }] },
+        { type: "tabset", id: "ts-midden", weight: 46, selected: 2, children: [{ type: "tab", id: "preview", component: "preview" }, { type: "tab", id: "geavanceerd", component: "geavanceerd" }, { type: "tab", id: "publiceren", component: "publiceren" }, { type: "tab", id: "accounts", component: "accounts" }, { type: "tab", id: "instellingen", component: "instellingen" }, { type: "tab", id: "geschiedenis", component: "geschiedenis" }] },
+        { type: "row", id: "rechts", weight: 38, children: [{ type: "tabset", id: "ts-eigenschappen", children: [{ type: "tab", id: "eigenschappen", component: "eigenschappen" }] }, { type: "tabset", id: "ts-chat", children: [{ type: "tab", id: "chat", component: "chat" }] }] },
+      ],
+    },
+  });
+
+  it("hernoemt oude panelen, laat verdwenen panelen vallen en maakt van twee keer instellingen één", () => {
+    const g = lees({ versie: 1, json: JSON.stringify(v1()) });
+    expect(g.bron).toBe("gemigreerd");
+    const t = tabsIn(g.json);
+    expect(t.sort()).toEqual(["chat", "eigenschappen", "gegevens", "instellingen", "onlinezetten", "preview", "schermen", "terminal", "versies"].sort());
+    expect(t).not.toContain("componenten");
+    expect(() => Model.fromJson(g.json)).not.toThrow();
+  });
+
+  it("een indeling met alleen verdwenen panelen in een groep laat die groep vervallen", () => {
+    const j = v1();
+    (j.layout.children[0] as { children: unknown[] }).children = [{ type: "tab", id: "componenten", component: "componenten" }, { type: "tab", id: "koppelingen", component: "koppelingen" }];
+    const g = lees({ versie: 1, json: JSON.stringify(j) });
+    expect(g.bron).toBe("gemigreerd");
+    expect(g.json.layout.children).toHaveLength(2);
+    expect(tabsIn(g.json)).toContain("chat");
+  });
+
+  it("zwevende vensters van versie 1 vallen weg zonder de rest te raken", () => {
+    const j = { ...v1(), subLayouts: { f1: { type: "float", rect: { x: 1, y: 1, width: 300, height: 200 }, layout: { type: "row", children: [{ type: "tabset", children: [{ type: "tab", component: "accounts" }] }] } } } };
+    const g = lees({ versie: 1, json: JSON.stringify(j) });
+    expect(g.bron).toBe("gemigreerd");
+    expect(g.json.subLayouts).toBeUndefined();
+  });
+
+  it("de migratiefunctie zelf geeft iets terug dat de strenge controle doorstaat", () => {
+    expect(valideer(MIGRATIES[1](v1()))).not.toBeNull();
+  });
+
+  it("een versie-1-indeling zonder preview of chat valt veilig terug op de standaard", () => {
+    const j = v1();
+    (j.layout.children[2] as { children: unknown[] }).children = [];
+    expect(lees({ versie: 1, json: JSON.stringify(j) }).bron).toBe("hersteld");
   });
 });

@@ -825,16 +825,20 @@
     "label": "Werkruimte",
     "laden": "De werkruimte wordt geladen…",
     "paneel": {
-      "structuur": "Structuur",
-      "componenten": "Onderdelen",
+      "start": "Start",
+      "schermen": "Schermen",
       "uiterlijk": "Uiterlijk",
-      "database": "Gegevens",
-      "koppelingen": "Koppelingen",
-      "publiceren": "Delen",
-      "geschiedenis": "Versies",
-      "accounts": "AI-accounts",
+      "bestanden": "Foto’s en bestanden",
+      "gegevens": "Wat je app onthoudt",
+      "onlinezetten": "Online zetten",
+      "appwinkel": "In de appwinkel",
+      "versies": "Eerdere versies",
       "instellingen": "Instellingen",
-      "geavanceerd": "Geavanceerd",
+      "hulp": "Hulp",
+      "terminal": "Terminal",
+      "logs": "Logs",
+      "technischestatus": "Technische status",
+      "code": "Code en bestanden",
       "preview": "Voorbeeld",
       "eigenschappen": "Eigenschappen",
       "chat": "Gesprek"
@@ -1037,6 +1041,238 @@
       "svg": "Tekening",
       "video": "Video",
       "onbekend": "Onderdeel ({{tag}})"
+    }
+  },
+  "menu": {
+    "label": "Menu van je project",
+    "terug": "Alle projecten",
+    "hulp": "Hulp",
+    "klap": "Menu inklappen",
+    "klapOpen": "Menu uitklappen",
+    "groep": {
+      "maken": "Maken",
+      "delen": "Delen",
+      "beheer": "Beheer"
+    },
+    "open": "{{naam}} openen",
+    "sneltoets": "Sneltoets: {{toets}}",
+    "status": {
+      "klaar": "klaar",
+      "actie": "actie nodig",
+      "leeg": "nog niet gestart"
+    },
+    "telling": "{{aantal}} stuks",
+    "meer": {
+      "knop": "Meer onderdelen",
+      "titel": "Onderdelen toevoegen",
+      "leeg": "Je hebt alle onderdelen al in het menu.",
+      "gegevens": "Wat je app onthoudt"
+    },
+    "gevorderd": {
+      "titel": "Voor gevorderden",
+      "uitleg": "Beginners hebben dit niet nodig. Hier staan technische onderdelen voor wie meer wil zien.",
+      "open": "Voor gevorderden tonen",
+      "dicht": "Voor gevorderden verbergen"
+    }
+  },
+  "start": {
+    "titel": "Start",
+    "uitleg": "Zo kom je stap voor stap van idee naar een website of app die online staat.",
+    "volgende": "Volgende stap",
+    "klaarTitel": "Alles gedaan!",
+    "klaarUitleg": "Je project is online. Je kunt het altijd verder aanpassen via het gesprek.",
+    "stapKlaar": "klaar",
+    "stapOpen": "nog te doen",
+    "stap": {
+      "idee": {
+        "titel": "1. Beschrijf je idee",
+        "uitleg": "Vertel in gewone woorden wat je wilt maken."
+      },
+      "voorbeeld": {
+        "titel": "2. Bekijk het voorbeeld",
+        "uitleg": "Kijk hoe het er nu uitziet."
+      },
+      "aanpassen": {
+        "titel": "3. Pas het aan",
+        "uitleg": "Vraag de AI om iets te veranderen tot je tevreden bent."
+      },
+      "online": {
+        "titel": "4. Zet het online",
+        "uitleg": "Zorg dat anderen je website kunnen bekijken."
+      }
+    },
+    "knop": {
+      "idee": "Beschrijf je idee",
+      "voorbeeld": "Bekijk het voorbeeld",
+      "aanpassen": "Pas het aan",
+      "online": "Zet het online"
+    },
+    "hint": {
+      "idee": "Typ je idee in het gesprek. Bijvoorbeeld: ‘Maak een website voor mijn tuinbedrijf’.",
+      "voorbeeld": "Het voorbeeld staat in het midden.",
+      "aanpassen": "Typ in het gesprek wat anders moet. Bijvoorbeeld: ‘Maak de kop groter’.",
+      "online": "Je gaat naar de checklist voor online zetten."
+    }
+  },
+  "schermen": {
+    "titel": "Schermen",
+    "uitleg": "Dit zijn de pagina’s van je app. Klik op een pagina om hem in het voorbeeld te zien.",
+    "open": "{{naam}} tonen in het voorbeeld",
+    "pad": "Adres: {{pad}}",
+    "leeg": {
+      "titel": "Nog geen pagina’s",
+      "uitleg": "Zodra de AI je eerste pagina heeft gemaakt, staat die hier.",
+      "knop": "Naar het gesprek"
+    }
+  },
+  "bestanden": {
+    "titel": "Foto’s en bestanden",
+    "uitleg": "Hier staan de foto’s en bestanden die je app kan gebruiken. Sleep ze hierheen of kies ze.",
+    "toevoegen": "Foto of bestand toevoegen",
+    "sleep": "Laat los om toe te voegen",
+    "zoneTip": "Sleep foto’s of bestanden hierheen",
+    "toegevoegd": "{{naam}} is toegevoegd.",
+    "mislukt": "{{naam}} kon niet worden toegevoegd: {{reden}}",
+    "verwijder": "{{naam}} verwijderen",
+    "bevestig": {
+      "titel": "Dit bestand verwijderen?",
+      "uitleg": "‘{{naam}}’ wordt uit de map ‘assets’ van je project gehaald. Dit kun je niet terugdraaien. Gebruikt je app dit bestand, dan ontbreekt het daarna.",
+      "knop": "Verwijderen",
+      "annuleer": "Annuleren"
+    },
+    "verwijderd": "{{naam}} is verwijderd.",
+    "leeg": {
+      "titel": "Nog geen foto’s of bestanden",
+      "uitleg": "Voeg een foto toe, bijvoorbeeld je logo of een afbeelding van je werk. De AI kan ze daarna in je app gebruiken.",
+      "knop": "Foto of bestand toevoegen"
+    },
+    "grootte": "{{kb}} kB"
+  },
+  "hulp": {
+    "titel": "Hulp",
+    "uitleg": "Studio helpt je met een website of app te maken, zonder dat je iets van techniek hoeft te weten.",
+    "zo": {
+      "titel": "Zo werkt het",
+      "een": "Je vertelt in het gesprek wat je wilt. De AI maakt het.",
+      "twee": "Je ziet het resultaat direct in het voorbeeld.",
+      "drie": "Wil je iets anders? Vertel het in het gesprek, of klik een onderdeel in het voorbeeld aan.",
+      "vier": "Elke keer dat de AI klaar is, bewaart Studio een versie. Je kunt altijd terug naar een eerdere versie."
+    },
+    "voorbeelden": {
+      "titel": "Voorbeelden van vragen",
+      "a": "Wat kan ik hier allemaal mee?",
+      "b": "Hoe zet ik mijn website online?",
+      "c": "Waarom ziet mijn pagina er op een telefoon anders uit?",
+      "d": "Kun je uitleggen wat je net gedaan hebt?"
+    },
+    "vraag": {
+      "titel": "Stel een vraag",
+      "label": "Wat wil je weten?",
+      "plaats": "Typ hier je vraag in gewone woorden…",
+      "knop": "Vraag het aan de AI",
+      "verstuurd": "Je vraag is naar de AI gestuurd. Het antwoord staat in het gesprek.",
+      "prompt": "Beantwoord de volgende vraag in gewone, eenvoudige woorden, zonder jargon. Verander niets aan het project. Vraag: {{vraag}}"
+    }
+  },
+  "appwinkel": {
+    "titel": "In de appwinkel",
+    "badge": "Komt binnenkort",
+    "uitleg": "Hier maak je straks een pakket om je app in de appwinkel van Android (Google Play) en iPhone (Apple) te zetten. Dat is nog niet klaar.",
+    "nodig": {
+      "titel": "Dit heb je straks nodig",
+      "een": "Schermafbeeldingen van je app",
+      "twee": "Een korte en een lange beschrijving",
+      "drie": "Een privacyverklaring",
+      "vier": "Een account bij Google Play en/of Apple"
+    },
+    "nu": {
+      "titel": "Wat kun je nu al doen?",
+      "uitleg": "Vraag de AI om je alvast te vertellen wat er voor jouw app nodig is.",
+      "knop": "Vraag de AI wat ik nodig heb",
+      "prompt": "Ik wil mijn app later in de appwinkel zetten (Android en iPhone). Leg in eenvoudige woorden uit wat ik daarvoor nodig heb en wat de volgende stappen zijn. Verander nog niets aan het project.",
+      "verstuurd": "De vraag is naar de AI gestuurd."
+    }
+  },
+  "gegevens": {
+    "titel": "Wat je app onthoudt",
+    "uitleg": "Hier zie je wat je app onthoudt, zoals bestellingen of inschrijvingen.",
+    "nodig": "De AI zegt dat je app iets moet onthouden: {{reden}}",
+    "tabellen": "Bestanden met gegevens",
+    "rijen": "{{aantal}} rijen",
+    "bekijk": "{{naam}} bekijken",
+    "alleenLezen": "Je kunt de gegevens hier bekijken. Wijzigen doe je voorlopig via de AI, zodat er niets per ongeluk verdwijnt.",
+    "eerste": "De eerste {{aantal}} van {{totaal}} rijen",
+    "terug": "Terug naar de lijst",
+    "leeg": {
+      "titel": "Je app onthoudt nog niets",
+      "uitleg": "Heeft je app opslag nodig, bijvoorbeeld voor bestellingen? Vraag de AI om het samen met jou te regelen.",
+      "knop": "Vraag de AI om opslag"
+    },
+    "geenBestand": "Er staat nog geen bestand met gegevens in je project. Heb je een database bij een andere dienst, dan zie je die hier nog niet.",
+    "prompt": "Mijn app moet gegevens kunnen onthouden. Leg in eenvoudige woorden uit welke mogelijkheden er zijn en wat je aanraadt. Verander nog niets zonder dat ik het goedvind.",
+    "verstuurd": "De vraag is naar de AI gestuurd."
+  },
+  "logs": {
+    "titel": "Logs",
+    "uitleg": "Meldingen van het voorbeeld en van de AI-koppeling. Alleen handig als er iets misgaat.",
+    "voorbeeld": "Voorbeeld",
+    "koppeling": "AI-koppeling",
+    "leeg": "Nog geen meldingen."
+  },
+  "technisch": {
+    "titel": "Technische status",
+    "uitleg": "De technische toestand van het voorbeeld en de AI-koppeling.",
+    "koppeling": {
+      "titel": "AI-koppeling",
+      "toestand": "Toestand",
+      "poort": "Poort",
+      "fout": "Laatste fout"
+    },
+    "voorbeeld": {
+      "titel": "Voorbeeld",
+      "toestand": "Toestand",
+      "soort": "Soort",
+      "adres": "Adres",
+      "probleem": "Probleem"
+    },
+    "opnieuwKoppeling": "AI-koppeling opnieuw proberen",
+    "opnieuwVoorbeeld": "Voorbeeld opnieuw starten",
+    "geen": "geen"
+  },
+  "code": {
+    "titel": "Code en bestanden",
+    "uitleg": "Alle bestanden van je project, alleen om te bekijken. Geheime bestanden worden niet getoond.",
+    "kies": "Kies een bestand om te lezen.",
+    "ingekort": "Dit bestand is ingekort getoond.",
+    "leeg": "Er zijn nog geen bestanden.",
+    "fout": "Dit bestand kan niet worden getoond.",
+    "grootte": "{{kb}} kB"
+  },
+  "uiterlijkExtra": {
+    "titel": "Logo en icoon",
+    "badge": "Komt binnenkort",
+    "uitleg": "Hier kies je straks het logo en het icoon van je app. Tot die tijd kun je de AI vragen om een logo te plaatsen: voeg eerst je logo toe bij Foto’s en bestanden."
+  },
+  "online": {
+    "titel": "Online zetten",
+    "uitleg": "Zo zorg je dat anderen je website of app kunnen bekijken.",
+    "checklist": {
+      "titel": "Checklist",
+      "voorbeeld": "Je hebt het voorbeeld bekeken en het ziet er goed uit.",
+      "veilig": "Je hebt de veiligheid laten controleren.",
+      "kopie": "Je hebt een kopie van je project gemaakt.",
+      "plek": "Je hebt een plek op internet gekozen.",
+      "klaar": "Ik heb mijn project online gezet."
+    },
+    "klaarMelding": "Je project staat als ‘online’ gemarkeerd.",
+    "nogNiet": "Studio kan je project nog niet zelf online zetten. Maak een kopie, kies een bedrijf waar je website mag staan (een ‘hostingbedrijf’) en zet de kopie daar neer. Je kunt de AI vragen om je daarbij te helpen.",
+    "terugdraaien": "Gaat er iets mis? Via ‘Eerdere versies’ ga je altijd terug naar een opgeslagen versie van je project.",
+    "sleutels": {
+      "titel": "Inlogsleutel voor een hostingbedrijf",
+      "uitleg": "Voor sommige bedrijven heb je straks een inlogsleutel nodig. Dat is een lange code waarmee Studio namens jou iets mag doen. Studio bewaart nooit zelf een inlogsleutel in je project.",
+      "binnenkort": "Een koppeling met een hostingbedrijf komt binnenkort. Daar kun je dan stap voor stap je inlogsleutel invullen en testen.",
+      "test": "Koppeling testen",
+      "later": "Je vindt inlogsleutels later terug onder Instellingen > Mijn programma."
     }
   }
 }

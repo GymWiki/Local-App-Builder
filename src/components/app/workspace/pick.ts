@@ -45,6 +45,8 @@ export interface PreviewControl {
   select: (selector: string) => void;
   clear: () => void;
   askPage: () => void;
+  /** Toont een andere pagina van de app in het voorbeeld (bijvoorbeeld "/over"). */
+  navigate: (pad: string) => void;
 }
 
 const str = (v: unknown, max: number) => (typeof v === "string" ? v.slice(0, max) : "");

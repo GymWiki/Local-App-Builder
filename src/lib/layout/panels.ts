@@ -1,11 +1,10 @@
-/** Alle panelen van de werkruimte. De volgorde van `SECTIES` is de volgorde van de iconenbalk. */
-export const SECTIES = ["structuur", "componenten", "uiterlijk", "database", "koppelingen", "publiceren", "geschiedenis", "accounts", "instellingen"] as const;
+/** Alle panelen van de werkruimte. De volgorde van `MENU` is de volgorde in het linkermenu (zie ook `src/lib/menu`). */
+export const MENU = ["start", "schermen", "uiterlijk", "bestanden", "gegevens", "onlinezetten", "appwinkel", "versies", "instellingen", "hulp"] as const;
+export const GEVORDERD = ["terminal", "logs", "technischestatus", "code"] as const;
 export const KERN = ["preview", "eigenschappen", "chat"] as const;
-export const EXTRA = ["geavanceerd"] as const;
 
-export const PANEL_IDS = [...SECTIES, ...KERN, ...EXTRA] as const;
+export const PANEL_IDS = [...MENU, ...GEVORDERD, ...KERN] as const;
 export type PanelId = (typeof PANEL_IDS)[number];
-export type SectieId = (typeof SECTIES)[number];
 
 /** Waar een paneel standaard verschijnt als je het opent. */
 export type Plek = "links" | "midden" | "rechts";
@@ -25,16 +24,20 @@ export interface PanelDef {
 const DEF = (id: PanelId, plek: Plek, extra: Partial<PanelDef> = {}): PanelDef => ({ id, plek, sluitbaar: true, behouden: false, minBreedte: 220, minHoogte: 120, ...extra });
 
 export const PANELEN: Record<PanelId, PanelDef> = {
-  structuur: DEF("structuur", "links"),
-  componenten: DEF("componenten", "links"),
+  start: DEF("start", "links", { minBreedte: 260 }),
+  schermen: DEF("schermen", "links", { minBreedte: 260 }),
   uiterlijk: DEF("uiterlijk", "midden", { minBreedte: 280 }),
-  database: DEF("database", "links"),
-  koppelingen: DEF("koppelingen", "links"),
-  publiceren: DEF("publiceren", "midden", { minBreedte: 280 }),
-  geschiedenis: DEF("geschiedenis", "links"),
-  accounts: DEF("accounts", "midden", { minBreedte: 280 }),
+  bestanden: DEF("bestanden", "links", { minBreedte: 260 }),
+  gegevens: DEF("gegevens", "midden", { minBreedte: 280 }),
+  onlinezetten: DEF("onlinezetten", "midden", { minBreedte: 280 }),
+  appwinkel: DEF("appwinkel", "midden", { minBreedte: 280 }),
+  versies: DEF("versies", "links", { minBreedte: 260 }),
   instellingen: DEF("instellingen", "midden", { minBreedte: 280 }),
-  geavanceerd: DEF("geavanceerd", "midden", { behouden: true, minBreedte: 300, minHoogte: 160 }),
+  hulp: DEF("hulp", "links", { minBreedte: 260 }),
+  terminal: DEF("terminal", "midden", { behouden: true, minBreedte: 300, minHoogte: 160 }),
+  logs: DEF("logs", "midden", { minBreedte: 280 }),
+  technischestatus: DEF("technischestatus", "midden", { minBreedte: 280 }),
+  code: DEF("code", "midden", { minBreedte: 300 }),
   preview: DEF("preview", "midden", { sluitbaar: false, behouden: true, minBreedte: 300, minHoogte: 200 }),
   eigenschappen: DEF("eigenschappen", "rechts", { minBreedte: 240, minHoogte: 110 }),
   chat: DEF("chat", "rechts", { sluitbaar: false, behouden: true, minBreedte: 300, minHoogte: 300 }),

@@ -3,11 +3,48 @@ import { defaultLayout, tab } from "./defaults";
 import { isPanelId, PANELEN, type PanelId } from "./panels";
 
 /** Versienummer van het opslagformaat. Verhoog het bij elke wijziging in de structuur en voeg een migratie toe. */
-export const LAYOUT_VERSION = 1;
+export const LAYOUT_VERSION = 2;
 
 export type Migratie = (json: unknown) => unknown;
-/** `MIGRATIES[n]` zet een indeling van versie n om naar versie n + 1. Er is nog niets te migreren: versie 1 is de eerste. */
-export const MIGRATIES: Record<number, Migratie> = {};
+/** Versie 1 → 2: het nieuwe menu. Oude panelen krijgen hun nieuwe naam; wat niet meer bestaat verdwijnt. */
+const HERNOEM_V1: Record<string, string | null> = {
+  structuur: "schermen",
+  componenten: null,
+  koppelingen: null,
+  database: "gegevens",
+  publiceren: "onlinezetten",
+  geschiedenis: "versies",
+  accounts: "instellingen",
+  geavanceerd: "terminal",
+};
+
+function hernoemKnoop(n: unknown, gezien: Set<string>): unknown | null {
+  if (typeof n !== "object" || n === null || Array.isArray(n)) return n;
+  const o = n as Record<string, unknown>;
+  if (o.type === "tab") {
+    const c = typeof o.component === "string" ? o.component : "";
+    const nieuw = c in HERNOEM_V1 ? HERNOEM_V1[c] : c;
+    if (!nieuw || gezien.has(nieuw)) return null;
+    gezien.add(nieuw);
+    return { ...o, component: nieuw, id: nieuw };
+  }
+  if (Array.isArray(o.children)) {
+    const kinderen = o.children.map((k) => hernoemKnoop(k, gezien)).filter((k) => k !== null);
+    // Een lege groep of rij (behalve de bovenste) verdwijnt.
+    if (kinderen.length === 0 && o.id !== "root") return null;
+    return { ...o, children: kinderen, ...(typeof o.selected === "number" ? { selected: 0 } : {}) };
+  }
+  return n;
+}
+
+export const MIGRATIES: Record<number, Migratie> = {
+  1: (json) => {
+    if (typeof json !== "object" || json === null) return json;
+    const j = json as Record<string, unknown>;
+    // Zwevende vensters van versie 1 laten we vallen: ze bevatten alleen oude panelen, die ook al zijn verhuisd.
+    return { ...j, layout: hernoemKnoop(j.layout, new Set<string>()), subLayouts: undefined };
+  },
+};
 
 const MAX_KNOPEN = 60;
 const MAX_DIEPTE = 8;
