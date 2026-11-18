@@ -190,12 +190,12 @@
   }
   html {
     @apply font-sans;
-    font-size: 17px;
+    font-size: calc(17px * var(--text-scale, 1));
   }
   /* Op grote schermen schaalt alles mee, zodat niets te klein wordt. */
   @media (min-width: 2200px) {
     html {
-      font-size: 21px;
+      font-size: calc(21px * var(--text-scale, 1));
     }
   }
   html,

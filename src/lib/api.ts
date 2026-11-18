@@ -225,6 +225,7 @@ export const previewTrustScripts = (id: number) => invoke<PreviewInfo>("preview_
 export const previewInstall = (id: number) => invoke<PreviewInfo>("preview_install", { id });
 export const getUiSetting = (key: string) => invoke<string | null>("get_ui_setting", { key });
 export const setUiSetting = (key: string, value: string) => invoke<void>("set_ui_setting", { key, value });
+export const resetUiSetting = (key: string) => invoke<void>("reset_ui_setting", { key });
 
 // chat-weergave
 export type ChatStatus = "thinking" | "editing" | "working" | "checking" | "done" | "idle";
@@ -393,3 +394,53 @@ export interface SecurityReport {
   scanned: number;
   findings: SecurityFinding[];
 }
+
+// werkruimte: pagina's, bestanden, foto's, signalen, gegevens, beschrijving en vlaggen
+export interface PageInfo {
+  naam: string;
+  pad: string;
+  bestand: string;
+}
+export interface FileEntry {
+  pad: string;
+  grootte: number;
+}
+export interface FileContent {
+  tekst: string;
+  ingekort: boolean;
+}
+export interface AssetInfo {
+  naam: string;
+  pad: string;
+  soort: string;
+  grootte: number;
+}
+export interface ProjectSignals {
+  project_md_ingevuld: boolean;
+  needs_data: boolean;
+  needs_data_reden: string | null;
+  heeft_database: boolean;
+  aantal_assets: number;
+}
+export interface DataFile {
+  bestand: string;
+  tabellen: { naam: string; rijen: number }[];
+}
+export interface TableRows {
+  kolommen: string[];
+  rijen: string[][];
+  totaal: number;
+}
+export type ProjectFlagKey = "online_gezet" | "gegevens_aan" | "meer_onderdelen" | "start_verborgen";
+export const projectPages = (projectId: number) => invoke<PageInfo[]>("project_pages", { projectId });
+export const projectFiles = (projectId: number) => invoke<FileEntry[]>("project_files", { projectId });
+export const projectFileRead = (projectId: number, path: string) => invoke<FileContent>("project_file_read", { projectId, path });
+export const projectSignals = (projectId: number) => invoke<ProjectSignals>("project_signals", { projectId });
+export const assetsList = (projectId: number) => invoke<AssetInfo[]>("assets_list", { projectId });
+export const assetsDelete = (projectId: number, path: string) => invoke<void>("assets_delete", { projectId, path });
+export const dataOverview = (projectId: number) => invoke<DataFile[]>("data_overview", { projectId });
+export const dataRows = (projectId: number, file: string, table: string, limit = 50) => invoke<TableRows>("data_rows", { projectId, file, table, limit });
+export const projectDescriptionGet = (projectId: number) => invoke<string>("project_description_get", { projectId });
+export const projectDescriptionSet = (projectId: number, text: string) => invoke<void>("project_description_set", { projectId, text });
+export const projectFlags = (projectId: number) => invoke<Record<string, string>>("project_flags", { projectId });
+export const projectFlagSet = (projectId: number, key: ProjectFlagKey, value: string | null) => invoke<void>("project_flag_set", { projectId, key, value });

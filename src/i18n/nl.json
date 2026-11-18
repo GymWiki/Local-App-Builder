@@ -554,12 +554,14 @@
       "toelichting": "Studio zet deze keuze als instructie in CLAUDE.md, GEMINI.md en AGENTS.md van je projecten. Eigen tekst in die bestanden blijft ongemoeid."
     },
     "toestemming": {
-      "titel": "Toestemmingen",
+      "titel": "Hoeveel mag de AI zelf doen?",
       "altijd": "Vraag altijd",
       "altijdUitleg": "Studio vraagt toestemming voor alles wat iets verandert of uitvoert. Alleen kijken mag zonder vraag.",
-      "belangrijk": "Vraag alleen bij belangrijke dingen",
+      "belangrijk": "Vraag bij belangrijke dingen",
       "belangrijkUitleg": "Gewoon bouwwerk (bestanden maken, controleren) gaat zonder vraag. Onbekende opdrachten vragen toestemming.",
-      "toelichting": "Gevaarlijke acties, zoals verwijderen en publiceren, vragen altijd bevestiging, welke keuze je ook maakt."
+      "toelichting": "Gevaarlijke acties, zoals verwijderen en publiceren, vragen altijd bevestiging, welke keuze je ook maakt.",
+      "zelfstandig": "Werk zelfstandig",
+      "zelfstandigUitleg": "De AI werkt door zonder steeds te vragen, ook met opdrachten die hij zelf bedenkt. Let op: het is dan vaker iets wat je niet gezien hebt. Online zetten, verwijderen en schrijven buiten je project vragen altijd om je toestemming."
     },
     "opgeslagen": "Opgeslagen",
     "lus": {

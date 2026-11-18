@@ -17,7 +17,7 @@ describe("Instellingen", () => {
   it("toestemmingen: 'Vraag altijd' of 'Vraag alleen bij belangrijke dingen', met de zekerheid dat gevaar altijd vraagt", () => {
     const onP = vi.fn();
     render(<SettingsScreen communication="simple" permission="important" onCommunication={vi.fn()} onPermission={onP} />);
-    expect(screen.getByRole("radio", { name: /Vraag alleen bij belangrijke dingen/ })).toBeChecked();
+    expect(screen.getByRole("radio", { name: /Vraag bij belangrijke dingen/ })).toBeChecked();
     fireEvent.click(screen.getByRole("radio", { name: /Vraag altijd/ }));
     expect(onP).toHaveBeenCalledWith("always");
     expect(screen.getByText(/verwijderen en publiceren, vragen altijd bevestiging/)).toBeInTheDocument();

@@ -12,9 +12,7 @@ import {
   type Account,
   type McpInfo,
   type PreviewInfo,
-  getUiSetting,
   previewInfo,
-  setUiSetting,
   projectThumbnailSet,
   runtime,
   type Project,
@@ -35,10 +33,7 @@ import NewProjectDialog from "./components/NewProjectDialog";
 import AccountsScreen from "./components/AccountsScreen";
 import PreviewNotice from "./components/PreviewNotice";
 import SettingsSheet from "@/components/app/SettingsSheet";
-import type {
-  CommunicationMode,
-  PermissionMode,
-} from "./components/SettingsScreen";
+import { useSettings } from "@/components/app/settings-provider";
 import type { Session } from "./components/TerminalPanel";
 
 export default function App() {
@@ -58,11 +53,11 @@ export default function App() {
   const [reloadNonce, setReloadNonce] = useState<Record<number, number>>({});
   const [request, setRequest] = useState<{ id: PanelId; nonce: number } | null>(null);
   const ask = (id: PanelId) => setRequest((r) => ({ id, nonce: (r?.nonce ?? 0) + 1 }));
-  const [communication, setCommunication] =
-    useState<CommunicationMode>("simple");
-  const [permission, setPermission] = useState<PermissionMode>("important");
-  const [loopThreshold, setLoopThreshold] = useState(3);
-  const [autoSwitch, setAutoSwitch] = useState(false);
+  const { settings, set: setSetting } = useSettings();
+  const autoSwitch = settings.preview_auto_switch;
+  const communication = settings.communication_mode;
+  const permission = settings.permission_mode;
+  const loopThreshold = settings.loop_threshold;
   const [notice, setNotice] = useState<number | null>(null);
   const [tick, setTick] = useState<Record<number, number>>({});
   const [thumbNonce, setThumbNonce] = useState(0);
@@ -109,25 +104,6 @@ export default function App() {
       (e) => setMcp((m) => ({ ...m, [e.payload.project_id]: e.payload.info })),
     );
     return () => void un.then((f) => f());
-  }, []);
-
-  useEffect(() => {
-    getUiSetting("preview_auto_switch")
-      .then((v) => setAutoSwitch(v === "1"))
-      .catch(() => undefined);
-    getUiSetting("communication_mode")
-      .then((v) => setCommunication(v === "technical" ? "technical" : "simple"))
-      .catch(() => undefined);
-    getUiSetting("loop_threshold")
-      .then((v) =>
-        setLoopThreshold(
-          v && Number(v) >= 2 && Number(v) <= 10 ? Number(v) : 3,
-        ),
-      )
-      .catch(() => undefined);
-    getUiSetting("permission_mode")
-      .then((v) => setPermission(v === "always" ? "always" : "important"))
-      .catch(() => undefined);
   }, []);
 
   useEffect(() => {
@@ -316,8 +292,7 @@ export default function App() {
             reloadNonce={reloadNonce[selected.id] ?? 0}
             autoSwitch={autoSwitch}
             onAutoSwitch={(v) => {
-              setAutoSwitch(v);
-              void setUiSetting("preview_auto_switch", v ? "1" : "0").catch(() => undefined);
+              void setSetting("preview_auto_switch", v);
             }}
             technical={communication === "technical"}
             tick={tick[selected.id] ?? 0}
@@ -326,16 +301,13 @@ export default function App() {
               permission,
               loopThreshold,
               onLoopThreshold: (n) => {
-                setLoopThreshold(n);
-                void setUiSetting("loop_threshold", String(n)).catch(fail);
+                void setSetting("loop_threshold", n);
               },
               onCommunication: (v) => {
-                setCommunication(v);
-                void setUiSetting("communication_mode", v).catch(fail);
+                void setSetting("communication_mode", v);
               },
               onPermission: (v) => {
-                setPermission(v);
-                void setUiSetting("permission_mode", v).catch(fail);
+                void setSetting("permission_mode", v);
               },
             }}
             request={request}
@@ -362,16 +334,13 @@ export default function App() {
           permission={permission}
           loopThreshold={loopThreshold}
           onLoopThreshold={(n) => {
-            setLoopThreshold(n);
-            void setUiSetting("loop_threshold", String(n)).catch(fail);
+            void setSetting("loop_threshold", n);
           }}
           onCommunication={(v) => {
-            setCommunication(v);
-            void setUiSetting("communication_mode", v).catch(fail);
+            void setSetting("communication_mode", v);
           }}
           onPermission={(v) => {
-            setPermission(v);
-            void setUiSetting("permission_mode", v).catch(fail);
+            void setSetting("permission_mode", v);
           }}
         />
         {dialogOpen && (

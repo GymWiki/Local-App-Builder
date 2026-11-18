@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 export type CommunicationMode = "simple" | "technical";
-export type PermissionMode = "always" | "important";
+export type PermissionMode = "always" | "important" | "autonomous";
 
 interface Props {
   communication: CommunicationMode;
@@ -88,6 +88,7 @@ export default function SettingsScreen({ communication, permission, loopThreshol
         options={[
           { value: "always", title: t("instellingen.toestemming.altijd"), text: t("instellingen.toestemming.altijdUitleg") },
           { value: "important", title: t("instellingen.toestemming.belangrijk"), text: t("instellingen.toestemming.belangrijkUitleg") },
+          { value: "autonomous", title: t("instellingen.toestemming.zelfstandig"), text: t("instellingen.toestemming.zelfstandigUitleg") },
         ]}
         note={t("instellingen.toestemming.toelichting")}
       />
