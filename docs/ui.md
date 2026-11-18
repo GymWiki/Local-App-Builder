@@ -160,3 +160,41 @@ Indeling: `[ iconenbalk | links: onderdelen | midden: voorbeeld | rechts: eigens
 - Schermschaal 125/150% is nagebootst via de venstergrootte; echte Windows-schaling is niet getest (ook niet in de echte app, die draaide op Linux).
 - Het compacte pad (smal venster) bewaart niets; als u daar iets verschuift, is het na heropenen weg.
 - Een tweede scherm of het verplaatsen van het venster tussen schermen met een andere schaal is niet getest.
+
+---
+
+# Menu en instellingen voor beginners (2026-11-18)
+
+## Overzicht: wat er nu is en waar het naartoe verhuist
+
+Gelezen: `SectionRail.tsx`, `sections.ts`, `ProjectWorkspace.tsx`, `modelActions.ts`, `lib/layout/*`, `SettingsScreen.tsx`, `ProjectSettingsPanel.tsx`, `AccountsScreen.tsx`, `PublishPanel.tsx`, `AppearancePanel.tsx`, `ActivityPanel.tsx`, `TerminalPanel.tsx`, `PreviewPanel.tsx`, `assets.rs`, `chat/policy.rs`, `commands.rs` (instellingen).
+
+### Schermen en functies nu → straks
+
+| Nu (iconenbalk / paneel) | Wat het doet | Verhuist naar |
+|---|---|---|
+| Structuur | kruimelpad van het gekozen onderdeel | vervalt als aparte plek; zit al in Eigenschappen. Nieuw: **Schermen** (lijst van pagina's) |
+| Onderdelen, Gegevens, Koppelingen en geheimen | alleen plaatshouders | Onderdelen vervalt; **Gegevens** wordt een echt onderdeel dat pas verschijnt als het nodig is; koppelingen verhuizen naar Online zetten / In de appwinkel |
+| Uiterlijk (`AppearancePanel`) | kit kiezen, lettertype, afronding, ruimte, strengheid, controle | **Maken → Uiterlijk** (ongewijzigd) |
+| Delen (`PublishPanel`) | zip downloaden, veiligheidscheck | **Delen → Online zetten** (met checklist) |
+| Eerdere versies (`ActivityPanel`) | laatste controle, tijdlijn, terugzetten | **Beheer → Eerdere versies** |
+| AI-accounts (`AccountsScreen`) | accounts toevoegen, inloggen, verwijderen | **Instellingen → Mijn AI** |
+| Instellingen (`ProjectSettingsPanel` + `SettingsScreen`) | projectgegevens, standaardaccount, uiterlijk van Studio, taal van de AI, toestemming, drempel van de lus-bewaker | **Instellingen** in vier groepen |
+| Geavanceerd (`TerminalPanel`) | terminals, AI starten, MCP-status en -controle | **Voor gevorderden → Terminal** (en Technische status) |
+| Gesprek, Voorbeeld, Eigenschappen | vast | ongewijzigd |
+| Bovenbalk (terug, naam, status, Indeling, Meer) | | terug en naam verhuizen naar de top van het menu; status en Indeling blijven in de bovenbalk |
+| Homescherm: AI-accounts en Instellingen | losse knoppen | blijven; app-instellingen (de groepen die voor alle projecten gelden) |
+| Logs van de dev-server (in `PreviewPanel`, ingeklapt) | laatste regels | **Voor gevorderden → Logs** |
+| Chat-assets (`assets/` via bijlagen) | bestanden die de gebruiker aan de chat hing | **Maken → Foto's en bestanden** |
+
+### Wat er nog niet bestaat
+- **Start** (stappenlijst, voortgang), **Hulp**, **Status-service**, **Meer onderdelen**, statusbolletjes.
+- **Schermen**: er is geen lijst met pagina's of routes.
+- **Foto's en bestanden**: er is geen overzicht, geen verwijderen, geen slepen naar een map (alleen bijlagen in de chat).
+- **Logo en icoon** van de app.
+- **Online zetten**: er is geen deploy, geen terugdraaien en geen koppeling met een hostingdienst; alleen een zip en een veiligheidscheck. **Inlogsleutels** voor Vercel, Google Play en Apple bestaan niet (Studio bewaart zelf nooit sleutels; de login van de AI-programma's staat in hun eigen profielmap).
+- **In de appwinkel** (Android en iPhone): niets.
+- **Gegevens** (database): geen weergave; er is ook geen MCP-tool `needs_data`.
+- **Code/bestanden**: geen bestandslijst of codeweergave.
+- Instellingen die nog niet bestaan: tekstgrootte en schaal, taal kiezen (alleen Nederlands), standaard projectmap, back-up van Studio, licentie en updates, privacyverklaring, paden naar AI-programma's en Node, poorten, debug-logs, omgevingsvariabelen en de waardenkluis, de derde toestemmingsstand "Werk zelfstandig" en "Plan-modus standaard aan of uit".
+- Instellingen met versienummer en migraties: de instellingen staan nu als losse sleutels in SQLite (`ui:…`), zonder versie.
