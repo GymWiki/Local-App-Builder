@@ -1,0 +1,12 @@
+{
+  "versie": 1,
+  "uitleg": "Vaste taken voor het tokenbenchmark. Elke taak draait op een kopie van een startproject. 'kwaliteit' is wat na afloop moet kloppen; een besparing die dat breekt telt niet.",
+  "taken": [
+    { "id": "pagina-toevoegen", "project": "start-portfolio", "prompt": "Voeg een pagina 'Over mij' toe met een korte tekst en een link in het menu.", "kwaliteit": ["nieuw bestand of nieuwe sectie met 'Over mij'", "link in het menu"] },
+    { "id": "knop-groter", "project": "start-takenlijst", "prompt": "Maak de knop om een taak toe te voegen groter en duidelijker.", "kwaliteit": ["alleen stijl of knop gewijzigd", "geen andere functies stuk"] },
+    { "id": "kleur-aanpassen", "project": "start-portfolio", "prompt": "Maak de hoofdkleur van de site donkerblauw.", "kwaliteit": ["kleur op één plek aangepast", "tekst blijft leesbaar"] },
+    { "id": "fout-oplossen", "project": "start-takenlijst", "prompt": "Als ik een lege taak toevoeg, ontstaat er een leeg regeltje. Los dat op.", "kwaliteit": ["lege taak wordt geweigerd", "gewone taken werken nog"] },
+    { "id": "inloggen-toevoegen", "project": "start-webshop", "prompt": "Voeg een eenvoudig inlogscherm toe (alleen het scherm, nog zonder echte database).", "kwaliteit": ["inlogscherm bereikbaar", "bestaande pagina's werken"] },
+    { "id": "gegevens-bewaren", "project": "start-kassa", "prompt": "Bewaar de verkopen van vandaag, zodat ze er na een herstart nog zijn.", "kwaliteit": ["verkopen blijven bewaard", "kassa werkt als voorheen"] }
+  ]
+}
