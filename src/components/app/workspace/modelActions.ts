@@ -1,0 +1,91 @@
+import {
+  Actions,
+  DockLocation,
+  Model,
+  type Node,
+  type TabNode,
+  type TabSetNode,
+} from "flexlayout-react";
+import {
+  defaultLayout,
+  PANELEN,
+  SECTIES,
+  tab,
+  type PanelId,
+  type PresetId,
+} from "@/lib/layout";
+
+/** Is dit paneel nu ergens in de indeling (ook als tabblad achter een ander paneel)? */
+export const isOpen = (model: Model, id: PanelId): boolean =>
+  !!model.getNodeById(id);
+
+export const openIds = (model: Model, ids: readonly PanelId[]): Set<PanelId> =>
+  new Set(ids.filter((id) => isOpen(model, id)));
+
+const parentTabset = (model: Model, id: string): TabSetNode | undefined => {
+  const p = model.getNodeById(id)?.getParent() as Node | undefined;
+  return p && p.getType() === "tabset" ? (p as TabSetNode) : undefined;
+};
+
+/** Zet een paneel op zijn standaardplek: links bij de andere onderdelen, in het midden naast de preview, of boven de chat. */
+export function openPanel(model: Model, id: PanelId): void {
+  if (isOpen(model, id)) {
+    model.doAction(Actions.selectTab(id));
+    return;
+  }
+  const def = PANELEN[id];
+  if (def.plek === "rechts") {
+    const chat = parentTabset(model, "chat");
+    if (chat)
+      model.doAction(
+        Actions.addNode(tab(id), chat.getId(), DockLocation.TOP, -1),
+      );
+    return;
+  }
+  if (def.plek === "midden") {
+    const preview = parentTabset(model, "preview");
+    if (preview)
+      model.doAction(
+        Actions.addNode(tab(id), preview.getId(), DockLocation.CENTER, -1),
+      );
+    return;
+  }
+  const buur = SECTIES.filter((s) => s !== id && PANELEN[s].plek === "links")
+    .map((s) => parentTabset(model, s))
+    .find(Boolean);
+  if (buur) {
+    model.doAction(
+      Actions.addNode(tab(id), buur.getId(), DockLocation.CENTER, -1),
+    );
+    return;
+  }
+  const root = model.getRootRow();
+  if (root)
+    model.doAction(
+      Actions.addNode(tab(id), root.getId(), DockLocation.LEFT, -1),
+    );
+}
+
+export const closePanel = (model: Model, id: PanelId): void => {
+  if (isOpen(model, id) && PANELEN[id].sluitbaar)
+    model.doAction(Actions.deleteTab(id));
+};
+
+/** Iconenbalk: dicht → openen; open maar verstopt achter een ander tabblad → naar voren; open en zichtbaar → sluiten. */
+export function togglePanel(model: Model, id: PanelId): void {
+  const node = model.getNodeById(id) as TabNode | undefined;
+  if (!node) return openPanel(model, id);
+  if (!node.isSelected()) return void model.doAction(Actions.selectTab(id));
+  closePanel(model, id);
+}
+
+export function toggleMaximizePreview(model: Model): void {
+  const ts = parentTabset(model, "preview");
+  if (ts) model.doAction(Actions.maximizeToggle(ts.getId()));
+}
+
+export const isPreviewMaximized = (model: Model): boolean =>
+  !!model.getMaximizedTabset();
+
+export const presetModel = (preset: PresetId): Model =>
+  Model.fromJson(defaultLayout(preset));

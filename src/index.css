@@ -219,3 +219,61 @@
     }
   }
 }
+
+/* Werkruimte (flexlayout-react): de kleuren, lettertypen en de focusring komen uit de thematokens, licht en donker. */
+.studio-layout {
+  --flexlayout-color-text: var(--foreground);
+  --flexlayout-color-background: var(--background);
+  --flexlayout-color-base: var(--background);
+  --flexlayout-color-1: var(--muted);
+  --flexlayout-color-2: var(--secondary);
+  --flexlayout-color-3: var(--accent);
+  --flexlayout-color-4: var(--border);
+  --flexlayout-color-5: var(--border);
+  --flexlayout-color-6: var(--border);
+  --flexlayout-font-size: var(--text-base, 1rem);
+  --flexlayout-font-family: var(--font-sans);
+  --flexlayout-splitter-size: 0.6rem;
+  --flexlayout-splitter-active-size: 0.6rem;
+  --flexlayout-splitter-handle-visibility: visible;
+  --flexlayout-color-icon: var(--muted-foreground);
+  --flexlayout-color-overflow: var(--muted-foreground);
+  --flexlayout-color-focus: var(--ring);
+  --flexlayout-color-tabset-background: var(--card);
+  --flexlayout-color-tabset-divider-line: var(--border);
+  --flexlayout-color-tab-content: var(--background);
+  --flexlayout-color-tab-selected: var(--accent-foreground);
+  --flexlayout-color-tab-selected-background: var(--accent);
+  --flexlayout-color-tab-unselected: var(--muted-foreground);
+  --flexlayout-color-splitter: var(--muted);
+  --flexlayout-color-splitter-hover: var(--primary);
+  --flexlayout-color-splitter-drag: var(--primary);
+  --flexlayout-color-splitter-handle: var(--muted-foreground);
+  --flexlayout-color-drag1: var(--primary);
+  --flexlayout-color-drag2: var(--primary);
+  --flexlayout-color-drag1-background: color-mix(in oklab, var(--primary) 15%, transparent);
+  --flexlayout-color-drag2-background: color-mix(in oklab, var(--primary) 15%, transparent);
+  --flexlayout-color-drag-rect-border: var(--primary);
+  --flexlayout-color-drag-rect-background: var(--popover);
+  --flexlayout-color-drag-rect: var(--popover-foreground);
+  --flexlayout-color-popup-border: var(--border);
+  --flexlayout-color-popup-unselected-background: var(--popover);
+  --flexlayout-color-popup-unselected: var(--popover-foreground);
+  --flexlayout-color-popup-selected-background: var(--accent);
+  --flexlayout-color-popup-selected: var(--accent-foreground);
+  --flexlayout-color-edge-marker: var(--muted-foreground);
+  --flexlayout-color-edge-icon: var(--primary-foreground);
+  --flexlayout-color-toolbar-button-hover: var(--accent);
+  --flexlayout-color-float-window-header-background: var(--card);
+}
+.studio-layout .flexlayout__tab_button,
+.studio-layout .flexlayout__tab_button_content {
+  font-size: 1rem;
+}
+.studio-layout .flexlayout__tabset_tabbar_outer {
+  min-height: 2.9rem;
+}
+/* Een paneel dat je versleept of verkleint mag nooit onder de muis laden of flikkeren. */
+.studio-layout .flexlayout__tab {
+  overflow: auto;
+}

@@ -818,5 +818,105 @@
         "regels": "De veiligheidscheck meldt een probleem met de toegangsregels van de database in {{bestand}}: {{detail}} Maak veilige regels, zodat gebruikers alleen hun eigen gegevens kunnen lezen en veranderen (voor Supabase: row level security met policies). Leg in gewone woorden uit wat je veranderd hebt."
       }
     }
+  },
+  "werkruimte": {
+    "label": "Werkruimte",
+    "laden": "De werkruimte wordt geladen…",
+    "paneel": {
+      "structuur": "Structuur",
+      "componenten": "Onderdelen",
+      "uiterlijk": "Uiterlijk",
+      "database": "Gegevens",
+      "koppelingen": "Koppelingen",
+      "publiceren": "Delen",
+      "geschiedenis": "Versies",
+      "accounts": "AI-accounts",
+      "instellingen": "Instellingen",
+      "geavanceerd": "Geavanceerd",
+      "preview": "Voorbeeld",
+      "eigenschappen": "Eigenschappen",
+      "chat": "Gesprek"
+    },
+    "rail": {
+      "label": "Onderdelen van je project",
+      "open": "{{naam}} openen",
+      "sluit": "{{naam}} sluiten",
+      "geavanceerd": "Geavanceerd"
+    },
+    "balk": {
+      "status": "Status",
+      "preview": "Voorbeeld: {{status}}",
+      "mcp": "AI-koppeling: {{status}}",
+      "mcpGereed": "gereed",
+      "mcpVerbonden": "verbonden",
+      "mcpStart": "start op",
+      "mcpUit": "uit",
+      "mcpProbleem": "werkt niet",
+      "indeling": "Indeling",
+      "indelingMenu": "Indeling van de werkruimte",
+      "standaard": "Standaard",
+      "veelPreview": "Veel voorbeeld",
+      "veelChat": "Veel gesprek",
+      "herstel": "Herstel standaardindeling",
+      "herstelKlaar": "De standaardindeling is hersteld.",
+      "panelen": "Panelen tonen",
+      "maximaliseer": "Voorbeeld groot maken",
+      "herstelGrootte": "Voorbeeld weer normaal",
+      "sluitProject": "Project sluiten",
+      "meer": "Meer"
+    },
+    "ui": {
+      "flexlayout.ui.close.tab": "Sluiten",
+      "flexlayout.ui.close.tabset": "Groep sluiten",
+      "flexlayout.ui.maximize.tabset": "Groot maken",
+      "flexlayout.ui.restore.tabset": "Weer normaal",
+      "flexlayout.ui.overflow.menu.tooltip": "Meer tabbladen",
+      "flexlayout.ui.splitter": "Grootte aanpassen met de pijltjestoetsen",
+      "flexlayout.ui.move.tabset": "Groep verplaatsen",
+      "flexlayout.ui.popout.tab": "In nieuw venster",
+      "flexlayout.ui.menu.maximize": "Groot maken",
+      "flexlayout.ui.menu.restore": "Weer normaal",
+      "flexlayout.ui.menu.float": "Los laten zweven",
+      "flexlayout.ui.menu.close.all": "Alles sluiten",
+      "flexlayout.ui.menu.close.others": "Anderen sluiten",
+      "flexlayout.ui.menu.close.right": "Rechts sluiten",
+      "flexlayout.ui.dock.float.to.layout": "Terug in de indeling",
+      "flexlayout.ui.error.rendering.component": "Dit paneel kan niet worden getoond",
+      "flexlayout.ui.error.rendering.component.retry": "Opnieuw proberen",
+      "flexlayout.ui.active.tabset": "Actieve groep",
+      "flexlayout.ui.rename.tab": "Naam wijzigen",
+      "flexlayout.ui.menu.rename": "Naam wijzigen"
+    },
+    "plaatshouder": {
+      "binnenkort": "Komt later",
+      "componenten": "Hier zie je straks de onderdelen waaruit je pagina is gebouwd, zoals knoppen en formulieren, en kun je ze hergebruiken.",
+      "database": "Hier kun je straks gegevens bijhouden voor je app, zoals bestellingen of afspraken.",
+      "koppelingen": "Hier kun je straks diensten koppelen (bijvoorbeeld betalen of e-mail) en wachtwoorden veilig bewaren. Studio bewaart nooit zelf wachtwoorden in je project.",
+      "vraagAi": "Vraag de AI om hulp hierbij",
+      "promptComponenten": "Ik wil begrijpen uit welke onderdelen mijn pagina is gebouwd. Maak een eenvoudig overzicht in gewone woorden, zonder iets te veranderen.",
+      "promptDatabase": "Ik wil gegevens kunnen bijhouden in mijn app. Leg in eenvoudige woorden uit welke mogelijkheden er zijn en wat je aanraadt. Verander nog niets zonder dat ik het goedvind.",
+      "promptKoppelingen": "Ik wil mijn app koppelen aan een dienst, bijvoorbeeld voor betalen of e-mail. Leg in eenvoudige woorden uit wat ik nodig heb en hoe geheime sleutels veilig blijven. Verander nog niets zonder dat ik het goedvind.",
+      "verstuurd": "De vraag is naar de AI gestuurd."
+    },
+    "structuur": {
+      "titel": "Pagina’s en structuur",
+      "pagina": "Pagina",
+      "geenSelectie": "Kies in het voorbeeld een onderdeel om te zien waar het in de pagina zit.",
+      "plek": "Plek in de pagina"
+    },
+    "project": {
+      "titel": "Dit project",
+      "naam": "Naam",
+      "map": "Map op je computer",
+      "soort": "Soort project",
+      "aangemaakt": "Aangemaakt",
+      "standaard": "Standaardaccount",
+      "sluit": "Project sluiten",
+      "algemeen": "Voor alle projecten"
+    }
+  },
+  "eigenschappen": {
+    "titel": "Eigenschappen",
+    "uitleg": "Kies in het voorbeeld een onderdeel van je pagina. Dan zie je hier wat het is en hoe het eruitziet."
   }
 }

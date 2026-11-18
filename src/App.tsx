@@ -28,11 +28,9 @@ import { Button } from "@/components/ui/button";
 import {
   ArrowLeftIcon,
   CircleAlertIcon,
-  KeyRoundIcon,
-  SettingsIcon,
 } from "lucide-react";
-import Workspace from "./components/Workspace";
-import InfoPanel from "./components/InfoPanel";
+import ProjectWorkspace from "@/components/app/workspace/ProjectWorkspace";
+import type { PanelId } from "@/lib/layout";
 import NewProjectDialog from "./components/NewProjectDialog";
 import AccountsScreen from "./components/AccountsScreen";
 import PreviewNotice from "./components/PreviewNotice";
@@ -41,7 +39,6 @@ import type {
   CommunicationMode,
   PermissionMode,
 } from "./components/SettingsScreen";
-import type { Tab } from "./components/Workspace";
 import type { Session } from "./components/TerminalPanel";
 
 export default function App() {
@@ -59,7 +56,8 @@ export default function App() {
     {},
   );
   const [reloadNonce, setReloadNonce] = useState<Record<number, number>>({});
-  const [tab, setTab] = useState<Tab>("maken");
+  const [request, setRequest] = useState<{ id: PanelId; nonce: number } | null>(null);
+  const ask = (id: PanelId) => setRequest((r) => ({ id, nonce: (r?.nonce ?? 0) + 1 }));
   const [communication, setCommunication] =
     useState<CommunicationMode>("simple");
   const [permission, setPermission] = useState<PermissionMode>("important");
@@ -197,7 +195,6 @@ export default function App() {
     setPreview((m) => ({ ...m, [id]: null }));
     if (selectedId === id) {
       setSelectedId(null);
-      setTab("maken");
     }
     if (melding) toast.success(t("info.gesloten"));
   }
@@ -226,7 +223,6 @@ export default function App() {
     const id = selectedId;
     setView("project");
     setSelectedId(null);
-    setTab("maken");
     if (id != null) void captureThumbnail(id);
   }
 
@@ -234,8 +230,11 @@ export default function App() {
   const availableRef = useRef<(id: number) => void>(() => undefined);
   useEffect(() => {
     availableRef.current = (id: number) => {
-      if (autoSwitch) {
-        void select(id).then(() => setTab("maken"));
+      if (id === selectedId) {
+        // Het project staat al open: het voorbeeld gewoon naar voren halen, zonder melding.
+        ask("preview");
+      } else if (autoSwitch) {
+        void select(id).then(() => ask("preview"));
       } else {
         setNotice(id);
       }
@@ -245,54 +244,18 @@ export default function App() {
     notice != null ? projects.find((p) => p.id === notice) : null;
 
   const accountsPage = view === "accounts";
-  const bar = (
-    <div className="flex items-center gap-2 border-b border-border px-4 py-2">
-      <Button
-        variant="ghost"
-        onClick={accountsPage && selected ? () => setView("project") : goHome}
-      >
-        <ArrowLeftIcon aria-hidden="true" />
-        {accountsPage && selected ? selected.naam : t("home.alleProjecten")}
-      </Button>
-      {selected && !accountsPage && (
-        <h1 className="min-w-0 flex-1 truncate text-lg font-semibold">
-          {selected.naam}
-        </h1>
-      )}
-      {(!selected || accountsPage) && <div className="flex-1" />}
-      {!accountsPage && (
-        <>
-          <Button variant="ghost" onClick={() => setView("accounts")}>
-            <KeyRoundIcon aria-hidden="true" />
-            {t("accounts.titel")}
-          </Button>
-          <Button variant="ghost" onClick={() => setSettingsOpen(true)}>
-            <SettingsIcon aria-hidden="true" />
-            {t("sidebar.instellingen")}
-          </Button>
-        </>
-      )}
-    </div>
-  );
 
   return (
     <TooltipProvider>
       <div className="flex h-full min-h-0 flex-col">
         {error && (
-          <Alert
-            variant="destructive"
-            className="rounded-none border-0 border-b border-destructive/50 bg-destructive/10"
-          >
+          <Alert variant="destructive" className="rounded-none border-0 border-b border-destructive/50 bg-destructive/10">
             <CircleAlertIcon aria-hidden="true" />
             <AlertDescription className="flex items-center justify-between gap-3 text-base text-foreground">
               <span role="alert" className="min-w-0 break-words">
                 {error}
               </span>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setError(null)}
-              >
+              <Button size="sm" variant="outline" onClick={() => setError(null)}>
                 {t("fout.sluit")}
               </Button>
             </AlertDescription>
@@ -305,19 +268,20 @@ export default function App() {
             onView={() => {
               const id = noticeProject.id;
               setNotice(null);
-              void select(id).then(() => setTab("maken"));
+              void select(id).then(() => ask("preview"));
             }}
           />
         )}
         {accountsPage ? (
           <>
-            {bar}
+            <div className="flex items-center gap-2 border-b border-border px-4 py-2">
+              <Button variant="ghost" onClick={() => setView("project")}>
+                <ArrowLeftIcon aria-hidden="true" />
+                {selected ? selected.naam : t("home.alleProjecten")}
+              </Button>
+            </div>
             <main className="flex min-h-0 min-w-0 flex-1 flex-col">
-              <AccountsScreen
-                accounts={accounts}
-                onChanged={refreshAccounts}
-                onError={setError}
-              />
+              <AccountsScreen accounts={accounts} onChanged={refreshAccounts} onError={setError} />
             </main>
           </>
         ) : !selected ? (
@@ -342,59 +306,54 @@ export default function App() {
             />
           </main>
         ) : (
-          <>
-            {bar}
-            <div className="flex min-h-0 flex-1">
-              <main className="flex min-w-0 flex-1 flex-col">
-                <Workspace
-                  project={selected}
-                  accounts={accounts}
-                  sessions={sessions[selected.id] ?? []}
-                  mcp={mcp[selected.id] ?? null}
-                  preview={preview[selected.id] ?? null}
-                  reloadNonce={reloadNonce[selected.id] ?? 0}
-                  autoSwitch={autoSwitch}
-                  onAutoSwitch={(v) => {
-                    setAutoSwitch(v);
-                    void setUiSetting(
-                      "preview_auto_switch",
-                      v ? "1" : "0",
-                    ).catch(() => undefined);
-                  }}
-                  tab={tab}
-                  onTab={setTab}
-                  technical={communication === "technical"}
-                  onOpenAccounts={() => setView("accounts")}
-                  onNewProject={() => setDialogOpen(true)}
-                  onSessionsChange={(fn) =>
-                    setSessions((s) => ({
-                      ...s,
-                      [selected.id]: fn(s[selected.id] ?? []),
-                    }))
-                  }
-                  onError={setError}
-                  onRetryMcp={() => select(selected.id)}
-                />
-              </main>
-              <InfoPanel
-                project={selected}
-                accounts={accounts}
-                onDefaultAccount={async (accountId) => {
-                  try {
-                    await setDefaultAccount(selected.id, accountId);
-                    await refresh();
-                  } catch (e) {
-                    fail(e);
-                  }
-                }}
-                onClose={() => void close(selected.id)}
-                mcp={mcp[selected.id] ?? null}
-                tick={tick[selected.id] ?? 0}
-                onError={setError}
-                quietUnlessWide={tab === "maken"}
-              />
-            </div>
-          </>
+          <ProjectWorkspace
+            key={selected.id}
+            project={selected}
+            accounts={accounts}
+            sessions={sessions[selected.id] ?? []}
+            mcp={mcp[selected.id] ?? null}
+            preview={preview[selected.id] ?? null}
+            reloadNonce={reloadNonce[selected.id] ?? 0}
+            autoSwitch={autoSwitch}
+            onAutoSwitch={(v) => {
+              setAutoSwitch(v);
+              void setUiSetting("preview_auto_switch", v ? "1" : "0").catch(() => undefined);
+            }}
+            technical={communication === "technical"}
+            tick={tick[selected.id] ?? 0}
+            settings={{
+              communication,
+              permission,
+              loopThreshold,
+              onLoopThreshold: (n) => {
+                setLoopThreshold(n);
+                void setUiSetting("loop_threshold", String(n)).catch(fail);
+              },
+              onCommunication: (v) => {
+                setCommunication(v);
+                void setUiSetting("communication_mode", v).catch(fail);
+              },
+              onPermission: (v) => {
+                setPermission(v);
+                void setUiSetting("permission_mode", v).catch(fail);
+              },
+            }}
+            request={request}
+            onSessionsChange={(fn) => setSessions((s) => ({ ...s, [selected.id]: fn(s[selected.id] ?? []) }))}
+            onError={setError}
+            onRetryMcp={() => select(selected.id)}
+            onDefaultAccount={async (accountId) => {
+              try {
+                await setDefaultAccount(selected.id, accountId);
+                await refresh();
+              } catch (e) {
+                fail(e);
+              }
+            }}
+            onAccountsChanged={refreshAccounts}
+            onHome={goHome}
+            onCloseProject={() => void close(selected.id)}
+          />
         )}
         <SettingsSheet
           open={settingsOpen}
@@ -423,7 +382,7 @@ export default function App() {
               await refresh();
               await select(p.id);
               // Een startklaar web-project: eerst een uiterlijk laten kiezen.
-              if (p.template !== "leeg") setTab("uiterlijk");
+              if (p.template !== "leeg") ask("uiterlijk");
             }}
           />
         )}
