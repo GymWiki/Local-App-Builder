@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { listen } from "@tauri-apps/api/event";
 import { githubState, type GhState } from "@/lib/api";
 
-const LEEG: GhState = { werkt: false, account: null, link: null, versies: 0, nieuw: 0, bezig: false };
+const LEEG: GhState = { werkt: false, account: null, link: null, versies: 0, nieuw: 0, bezig: false, nu: 0 };
 export interface Voortgang {
   stap: string;
   klaar: number;

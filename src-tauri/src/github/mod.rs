@@ -87,7 +87,6 @@ impl Uitkomst {
         self.status == "uitgevoerd"
     }
 
-    #[allow(dead_code)] // gebruikt door de MCP-tools (deel 4)
     /// De tekst voor de AI (gewoon Nederlands, kort en eerlijk). De gebruiker ziet in de app zijn eigen tekst uit `nl.json`.
     pub fn ai_tekst(&self) -> String {
         let n = |k: &str| self.params[k].as_u64().unwrap_or(0);

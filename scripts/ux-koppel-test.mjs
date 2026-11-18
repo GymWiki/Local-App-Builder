@@ -98,7 +98,9 @@ try {
         await p.evaluate(() => window.__connectDone("github"));
         await gh.getByText(/Gelukt!/).waitFor();
         await gh.getByRole("button", { name: "Klaar" }).click();
-        check(t("na verbinden toont de plek de accountnaam met ✓"), /GitHub: pieter/.test(await sectie.getByRole("button", { name: "Opties voor GitHub" }).innerText()));
+        // Na het verbinden gaat de gebruiker door met waar hij mee bezig was: de eerste back-up maken.
+        await sectie.getByTestId("github-eerste").waitFor();
+        check(t("na verbinden gaat de plek door met de eerste back-up"), await sectie.getByTestId("github-maak").isVisible());
 
         // ---- Geweigerd: duidelijke fout met oplossing
         await ov.scrollIntoViewIfNeeded().catch(() => undefined);

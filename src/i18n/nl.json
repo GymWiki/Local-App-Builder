@@ -1521,7 +1521,8 @@
       "veilig": "Je hebt de veiligheid laten controleren.",
       "kopie": "Je hebt een kopie van je project gemaakt.",
       "plek": "Je hebt een plek op internet gekozen.",
-      "klaar": "Ik heb mijn project online gezet."
+      "klaar": "Ik heb mijn project online gezet.",
+      "backup": "Een back-up op GitHub gemaakt (niet verplicht, wel verstandig)"
     },
     "klaarMelding": "Je project staat als ‘online’ gemarkeerd.",
     "nogNiet": "Studio kan je project nog niet zelf online zetten. Maak een kopie, kies een bedrijf waar je website mag staan (een ‘hostingbedrijf’) en zet de kopie daar neer. Je kunt de AI vragen om je daarbij te helpen.",

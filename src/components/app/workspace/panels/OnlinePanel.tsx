@@ -52,6 +52,9 @@ export default function OnlinePanel() {
             <Regel id="kopie" klaar={kopie}>
               {t("online.checklist.kopie")}
             </Regel>
+            <Regel id="backup" klaar={w.signalen.backup === "recent"}>
+              {t("online.checklist.backup")}
+            </Regel>
             <Regel id="plek" klaar={online}>
               {t("online.checklist.plek")}
             </Regel>

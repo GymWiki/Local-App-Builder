@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { chatHistory, kitCurrent, lastChecks, projectFlags, projectFlagSet, projectPages, projectSignals, runtime, type Checkpoint, type McpInfo, type PreviewInfo, type Project, type ProjectSignals } from "@/lib/api";
 import { supaSecurityCheck, supaStatus } from "@/lib/api";
-import { geenSignalen, type Koppelingen, type Signalen } from "@/lib/menu";
+import { backupStatus, geenSignalen, type Koppelingen, type Signalen } from "@/lib/menu";
+import { useGithub } from "@/components/app/github/use-github";
 import { useConnections } from "@/components/app/connect/connections-provider";
 import type { WorkspaceCtx } from "./workspace-context";
 
@@ -46,6 +47,7 @@ export function useProjectSignals(project: Project, mcp: McpInfo | null, preview
         aantalSchermen: val(pagina, []).length,
         koppelingen: {},
         databaseProbleem: false,
+        backup: "geen",
       };
       setRuw(s);
       setVlaggen(val(flags, {}));
@@ -87,6 +89,8 @@ export function useProjectSignals(project: Project, mcp: McpInfo | null, preview
   );
 
   // De koppelingen komen uit hun eigen context en veranderen los van de rest; ze worden hier bij de signalen gevoegd.
-  const metKoppelingen = useMemo(() => ({ ...signalen, koppelingen, databaseProbleem: supaWerkt && databaseProbleem }), [signalen, koppelingen, supaWerkt, databaseProbleem]);
+  const { state: gh } = useGithub(project.id, tick + nonce);
+  const backup = useMemo(() => (gh.werkt ? backupStatus(gh, gh.nu) : "geen"), [gh]);
+  const metKoppelingen = useMemo(() => ({ ...signalen, koppelingen, databaseProbleem: supaWerkt && databaseProbleem, backup }), [signalen, koppelingen, supaWerkt, databaseProbleem, backup]);
   return { signalen: metKoppelingen, ruw, vlaggen, ververs, setVlag };
 }

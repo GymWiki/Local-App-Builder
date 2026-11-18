@@ -31,7 +31,6 @@ pub enum Actor {
     Gebruiker,
     Ai,
     /// Automatisch na een opgeslagen versie (instelling van de gebruiker).
-    #[allow(dead_code)] // deel 5
     Auto,
 }
 
@@ -75,6 +74,8 @@ pub struct State {
     /// Versies sinds de laatste back-up (alleen lokaal geteld; zonder internet).
     pub nieuw: usize,
     pub bezig: bool,
+    /// De tijd volgens Studio (voor "X uur geleden" en de achterstand); zo hoeft de frontend de klok niet te lezen.
+    pub nu: i64,
 }
 
 struct BusyGuard<'a>(&'a Engine, i64);
@@ -178,6 +179,7 @@ impl Engine {
             versies,
             nieuw,
             bezig: self.busy.lock().unwrap().contains(&project),
+            nu: (self.now)(),
         }
     }
 
@@ -420,7 +422,6 @@ impl Engine {
         })
     }
 
-    #[allow(dead_code)] // deel 4
     /// De status voor de AI: gekoppeld, accountnaam, repository, laatste back-up, uiteengelopen ja/nee. Nooit een token.
     pub fn ai_status(&self, project: i64) -> Value {
         let s = self.state(project);

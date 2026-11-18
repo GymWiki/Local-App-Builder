@@ -107,3 +107,48 @@ pub async fn github_import(app: AppHandle, eigenaar: String, repo: String, priva
     })
     .await
 }
+
+/// Opdrachten van de MCP-tools (Node → app). De AI krijgt alleen gewone gegevens; nooit een token.
+pub fn host(app: &AppHandle, project: i64, cmd: &str, _args: &Value) -> Result<Value, String> {
+    let e = engine(app);
+    let reply = |status: &'static str, tekst: String, data: Option<Value>| serde_json::to_value(crate::supa::engine::Reply { status, tekst, data }).map_err(|x| x.to_string());
+    match cmd {
+        "github.status" => reply("uitgevoerd", "GitHub-status van dit project.".into(), Some(e.ai_status(project))),
+        "github.list_repos" => match e.list_repos() {
+            Ok(l) => {
+                let namen: Vec<Value> = l.iter().take(200).map(|r| json!({ "repository": format!("{}/{}", r.eigenaar, r.naam), "privaat": r.privaat })).collect();
+                reply("uitgevoerd", format!("{} repositories.", namen.len()), Some(Value::Array(namen)))
+            }
+            Err(err) => {
+                let u = Uitkomst::fout(&err);
+                reply("mislukt", u.ai_tekst(), None)
+            }
+        },
+        "github.backup" => {
+            // "Eerst overleggen": de AI mag dan niets versturen.
+            if app.state::<crate::chat::ChatManager>().mode(project) == "plan" {
+                let u = Uitkomst::nee("plan_modus", json!({}));
+                return reply("geweigerd", u.ai_tekst(), None);
+            }
+            let u = e.backup(project, Actor::Ai);
+            reply(u.status, u.ai_tekst(), None)
+        }
+        _ => Err("Onbekende opdracht aan Studio.".into()),
+    }
+}
+
+/// Na een opgeslagen versie: is "automatisch een back-up maken" aan voor dit project? Dan een korte wachttijd (meer versies kort na
+/// elkaar worden samen verstuurd) en daarna een gewone back-up. Zonder koppeling of bij een probleem gebeurt er niets bijzonders:
+/// een uiteengelopen of mislukte back-up wordt alleen in de status getoond.
+pub fn auto_backup(app: &AppHandle, project: i64) {
+    let e = engine(app);
+    if !e.link(project).map(|l| l.auto_backup).unwrap_or(false) {
+        return;
+    }
+    std::thread::spawn(move || {
+        std::thread::sleep(std::time::Duration::from_secs(AUTO_WAIT_SECS));
+        let _ = e.backup(project, Actor::Auto);
+    });
+}
+
+const AUTO_WAIT_SECS: u64 = 5;

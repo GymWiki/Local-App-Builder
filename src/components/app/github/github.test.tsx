@@ -17,7 +17,7 @@ vi.mock("@tauri-apps/api/event", () => ({
 const stuur = (naam: string, payload: unknown) => act(async () => handlers[naam]?.({ payload }));
 
 const link = { eigenaar: "pieter", repo: "mijn-app", privaat: true, url: "https://github.com/pieter/mijn-app", tak: "main", laatste: null, laatste_aantal: null, auto: false, ai_vraagt: true, uiteengelopen: null, probleem: null } as const;
-const staat = (over: Partial<GhState> = {}): GhState => ({ werkt: true, account: "pieter", link: null, versies: 2, nieuw: 0, bezig: false, ...over });
+const staat = (over: Partial<GhState> = {}): GhState => ({ werkt: true, account: "pieter", link: null, versies: 2, nieuw: 0, bezig: false, nu: Math.floor(Date.now() / 1000), ...over });
 const toon = () =>
   render(
     <ConnectionsProvider>

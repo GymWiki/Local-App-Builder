@@ -178,6 +178,18 @@ export function registerTools(server: McpServer, ctx: ProjectCtx, record: (r: Ca
   const NAAM = z.string().min(1).max(80);
   const LEES = "Alleen lezen en altijd toegestaan. ";
   const SCHRIJF = "Studio voert dit zelf uit met de gekoppelde Supabase-account van de gebruiker; je krijgt nooit sleutels te zien. Afhankelijk van het bedieningsniveau en de risicoklasse vraagt Studio de gebruiker om bevestiging in de app (dat kan even duren) of weigert het. De uitslag begint met UITGEVOERD, GEWEIGERD of MISLUKT: doe nooit alsof een geweigerde actie is gelukt. ";
+  // ---- GitHub-back-up. Alleen vooruit sturen; geen tool voor force-push, verwijderen of instellingen. Het token blijft in Studio.
+  const GITHUB = "Studio voert dit zelf uit met het GitHub-account van de gebruiker; je krijgt nooit een token te zien. ";
+  dbTool("github_status", "github.status", LEES + "Is GitHub gekoppeld, onder welke accountnaam, bij welke repository hoort dit project, wanneer was de laatste back-up, hoeveel nieuwe versies zijn er sinds die back-up en zijn de versies uiteengelopen (ja/nee)?", {}, false);
+  dbTool("github_list_repos", "github.list_repos", LEES + "De namen en zichtbaarheid (privé of openbaar) van de repositories van de gebruiker. Geen inhoud, geen tokens.", {}, false);
+  dbTool(
+    "git_backup",
+    "github.backup",
+    GITHUB +
+      "Stuurt nieuwe opgeslagen versies naar de GitHub-back-up van dit project (alleen vooruit; er wordt nooit iets overschreven of verwijderd). Werkt alleen als de gebruiker de back-up al heeft ingesteld. Studio controleert eerst op geheimen en te grote bestanden en blokkeert als die er zijn. Afhankelijk van de instelling vraagt Studio de gebruiker om bevestiging in de app. De uitslag begint met UITGEVOERD, GEWEIGERD of MISLUKT: doe nooit alsof een geweigerde back-up is gelukt, en probeer nooit te forceren als de versies zijn uiteengelopen.",
+    {},
+    true,
+  );
   dbTool("db_status", "db.status", LEES + "Is het project gekoppeld aan Supabase, hoe heet het, in welke regio, is het gepauzeerd en welk bedieningsniveau geldt?", {}, false);
   dbTool("db_get_public_config", "db.public_config", LEES + "De project-URL en de publiceerbare sleutel (veilig voor in de app). Nooit de geheime sleutel of het wachtwoord.", {}, false);
   dbTool("db_list_tables", "db.list_tables", LEES + "Tabellen in het publieke schema met kolommen, of RLS aan staat en welk beleid er is.", {}, false);

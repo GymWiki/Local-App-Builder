@@ -441,3 +441,41 @@ fn project_ophalen_kloont_naar_een_nieuwe_map_en_zet_de_back_up_gelijk() {
     assert_eq!((l[0].naam.as_str(), l[0].privaat), ("oud-project", true));
     assert!(!serde_json::to_string(&l).unwrap().contains(TOKEN));
 }
+
+#[test]
+fn de_status_voor_de_ai_bevat_alleen_gewone_gegevens() {
+    let r = rig();
+    let leeg = r.e.ai_status(1);
+    assert_eq!((leeg["gekoppeld"].as_bool(), leeg["repository"].is_null(), leeg["uiteengelopen"].as_bool()), (Some(true), true, Some(false)));
+    assert!(eerste(&r).is_ok());
+    let s = r.e.ai_status(1);
+    assert_eq!((s["repository"].as_str(), s["privaat"].as_bool(), s["nieuwe_versies_sinds_back_up"].as_u64()), (Some("pieter/mijn-eerste-app"), Some(true), Some(0)));
+    let tekst = s.to_string();
+    assert!(!tekst.contains(TOKEN) && !tekst.contains("token"), "{tekst}");
+    // Elke uitkomst heeft een eerlijke tekst voor de AI zonder token.
+    for code in ["back_up_klaar", "al_bijgewerkt", "niet_ingesteld", "niet_bevestigd", "uiteengelopen", "online_nieuwer", "geheimen", "te_groot", "geen_versies", "plan_modus", "bezig", "naam_bezet", "geen_rechten", "ongeldig_token", "geen_internet", "time_out", "te_veel_verzoeken"] {
+        let t = Uitkomst::nee(code, json!({ "aantal": 2 })).ai_tekst();
+        assert!(!t.is_empty() && !t.contains(TOKEN), "{code}");
+    }
+}
+
+#[test]
+fn automatisch_stuurt_zonder_vraag_maar_met_dezelfde_controles() {
+    let r = rig();
+    assert!(eerste(&r).is_ok());
+    r.e.set_auto(1, true);
+    r.schrijf("nieuw.txt", "x");
+    r.versie("nieuw");
+    // Automatisch vraagt de gebruiker niet (die heeft het zelf aangezet) en stuurt gewoon.
+    let u = r.e.backup(1, Actor::Auto);
+    assert!(u.is_ok(), "{u:?}");
+    assert!(r.ja.asked.lock().unwrap().is_empty());
+    assert_eq!(r.bare_aantal(), 3);
+    // Met een geheim: geblokkeerd, ook automatisch.
+    // (Een .env wordt door het aangevulde .gitignore al niet meer meegenomen; een sleutel in de code wel.)
+    r.schrijf("src/geheim.ts", &format!("export const t = '{}';", geheim_token()));
+    r.versie("met geheim");
+    let u = r.e.backup(1, Actor::Auto);
+    assert_eq!((u.status, u.code.as_str()), ("geweigerd", "geheimen"));
+    assert_eq!(r.bare_aantal(), 3);
+}

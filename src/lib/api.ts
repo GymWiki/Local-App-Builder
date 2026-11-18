@@ -593,6 +593,7 @@ export interface GhState {
   versies: number;
   nieuw: number;
   bezig: boolean;
+  nu: number;
 }
 /** Het resultaat van een actie; de tekst staat in nl.json (github.uitkomst.<code>). */
 export interface GhUitkomst {

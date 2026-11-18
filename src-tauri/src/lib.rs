@@ -324,6 +324,7 @@ pub fn run() {
                                 let _ = h.state::<McpManager>().call(project_id, "host.answer", answer, std::time::Duration::from_secs(5));
                             });
                         }
+                        Some("git") => github::app::auto_backup(&handle, project_id),
                         Some("permission_expired") => {
                             if let Some(id) = payload["id"].as_str() {
                                 handle

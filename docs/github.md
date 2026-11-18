@@ -88,7 +88,27 @@ Voorbereid voor later: GitHub Actions (bouwen van iOS-apps) gebruikt dezelfde ko
 4. Zet een nepsleutel in een bestand: de back-up wordt geblokkeerd.
 5. Controleer dat het token nergens in de remote-URL staat (`git remote -v` in de projectmap).
 
-## 8. Open punten
+## 8. Wat er gebouwd is
+
+| Onderdeel | Plek |
+|---|---|
+| API (account, bestaat naam, aanmaken, lijst) | `src-tauri/src/github/api.rs` |
+| Git via libgit2 (ophalen, vergelijken, vooruit sturen, klonen) | `github/repo.rs` |
+| Motor (eerste back-up, bijwerken, bevestiging door de AI, status) | `github/engine.rs` |
+| Scan op geheimen en grote bestanden, `.gitignore`-herstel | `github/scan.rs`, `github/gitignore.rs` |
+| Project ophalen (herkennen wat Studio ziet) | `github/importer.rs`, `projects::register_existing` |
+| Opslag (alleen repository, tijdstip en instellingen; nooit een token) | `github/store.rs`, migratie `0008_github.sql` |
+| MCP-tools `github_status`, `github_list_repos`, `git_backup` | `mcp-server/src/tools.ts` → `github/app.rs::host` |
+| Scherm: Back-up op GitHub (Eerdere versies), Ophalen (homescherm), bolletje, Online zetten-regel | `src/components/app/github/`, `src/lib/menu` |
+| Algemene bevestiging voor acties van de AI | `src-tauri/src/confirm.rs`, `ActieBevestig.tsx` |
+
+**Netwerk (deel 6):** de REST-verzoeken lopen via `connect/http.rs` met de vaste lijst `api.github.com`/`github.com`. De gitverbinding van libgit2 gaat alleen naar een URL die `name::remote_url` bouwt (host `github.com`). Wat online komt, en dat alles in het eigen account blijft, staat in het scherm (`github.eerste.*`). GitHub Actions (voor iOS-bouw) kan dezelfde koppeling en repository gebruiken; daar is nu niets voor gebouwd.
+
+**Bewust niet gebouwd:** force-push of andere manieren om te overschrijven; repositories verwijderen of instellingen wijzigen; automatisch samenvoegen bij uiteengelopen versies (de gebruiker kan de AI vragen het voorzichtig te doen); automatisch geheimen uit eerdere versies verwijderen (dat herschrijft geschiedenis); een SSH-route.
+
+**Tests:** `cargo test github` (lokale kale repository als nagebootst GitHub: eerste back-up, bijwerken, naam bezet, 401/403/429/time-out, uiteengelopen, geheimen, `.gitignore`, klonen, token nergens), `src/components/app/github/*.test.tsx`, `npm run ux:github` (1280×720, 1366×768, 1920×1080).
+
+## 9. Open punten
 
 - Lokale versies leunen op systeem-git; op een schone Windows-pc moet Git nog worden geïnstalleerd. Aparte opdracht.
 - Gebruikersnaam/token-gedrag van libgit2 tegen github.com kon hier niet met het echte GitHub worden getest.

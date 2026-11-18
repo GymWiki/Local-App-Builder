@@ -1,4 +1,4 @@
-import { geenSignalen, gegevensZichtbaar, GROEPEN, MAX_ZICHTBAAR, menuStatus, stappen, verborgenItems, volgendeStap, zichtbareItems, type Signalen } from "./index";
+import { backupStatus, geenSignalen, gegevensZichtbaar, GROEPEN, MAX_ZICHTBAAR, menuStatus, stappen, verborgenItems, volgendeStap, zichtbareItems, type Signalen } from "./index";
 
 const met = (o: Partial<Signalen>): Signalen => ({ ...geenSignalen(), ...o });
 
@@ -122,5 +122,28 @@ describe("koppelingen in het menu", () => {
     expect(menuStatus(met({ supabase: "werkt" })).gegevens?.punt).toBe("klaar");
     expect(menuStatus(met({ github: "niet_gekoppeld" })).versies?.punt).toBe("leeg");
     expect(menuStatus(met({ github: "bezig" }, { aantalVersies: 2 })).versies).toEqual({ punt: "klaar", telling: 2 });
+  });
+});
+
+describe("backup-status (GitHub)", () => {
+  const nu = 1_000_000;
+  const link = (o: Partial<{ probleem: string | null; uiteengelopen: string | null; laatste: number | null }> = {}) => ({ probleem: null, uiteengelopen: null, laatste: nu - 60, ...o });
+  it("niet ingesteld = geen; alles gelijk = recent; probleem of uiteengelopen = probleem", () => {
+    expect(backupStatus({ link: null, nieuw: 3 }, nu)).toBe("geen");
+    expect(backupStatus({ link: link(), nieuw: 0 }, nu)).toBe("recent");
+    expect(backupStatus({ link: link({ probleem: "geen_internet" }), nieuw: 0 }, nu)).toBe("probleem");
+    expect(backupStatus({ link: link({ uiteengelopen: "uiteengelopen" }), nieuw: 0 }, nu)).toBe("probleem");
+  });
+  it("nieuwe versies zonder recente back-up is een achterstand", () => {
+    expect(backupStatus({ link: link({ laatste: nu - 3600 }), nieuw: 2 }, nu)).toBe("recent");
+    expect(backupStatus({ link: link({ laatste: nu - 3 * 86_400 }), nieuw: 2 }, nu)).toBe("achter");
+    expect(backupStatus({ link: link({ laatste: null }), nieuw: 1 }, nu)).toBe("achter");
+  });
+  it("bepaalt het bolletje van Eerdere versies", () => {
+    const met = (o: Partial<Signalen>) => ({ ...geenSignalen(), ...o });
+    expect(menuStatus(met({ aantalVersies: 3, backup: "achter" })).versies?.punt).toBe("actie");
+    expect(menuStatus(met({ aantalVersies: 3, backup: "probleem" })).versies?.punt).toBe("actie");
+    expect(menuStatus(met({ aantalVersies: 3, backup: "recent" })).versies?.punt).toBe("klaar");
+    expect(menuStatus(met({ aantalVersies: 0, backup: "geen" })).versies?.punt).toBe("leeg");
   });
 });

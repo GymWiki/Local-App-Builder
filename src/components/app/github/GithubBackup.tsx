@@ -133,6 +133,8 @@ export default function GithubBackup({ projectId, onVraagAi, tick = 0 }: Props) 
   const { state, geladen, voortgang, ververs } = useGithub(projectId, tick);
   const [uitkomst, setUitkomst] = useState<GhUitkomst | null>(null);
   const [bezig, setBezig] = useState(false);
+  // De Verbinden-dialoog blijft staan tot hij dicht is, ook als de koppeling intussen werkt; daarna gaat de plek door met de eerste back-up.
+  const [dialoogOpen, setDialoogOpen] = useState(false);
 
   async function bijwerken() {
     setBezig(true);
@@ -155,10 +157,10 @@ export default function GithubBackup({ projectId, onVraagAi, tick = 0 }: Props) 
       <h3 id="github-titel" className="text-lg font-semibold">
         {t("github.titel")}
       </h3>
-      {!geladen ? null : !state.werkt ? (
+      {!geladen ? null : !state.werkt || dialoogOpen ? (
         <>
           <p className="text-base text-muted-foreground">{t("github.nietGekoppeld")}</p>
-          <VerbindKnop id="github" onConnected={() => void ververs()} />
+          <VerbindKnop id="github" onConnected={() => void ververs()} onDialoogGeopend={() => setDialoogOpen(true)} onDialoogGesloten={() => setDialoogOpen(false)} />
           <p className="text-sm text-muted-foreground">{t("github.privacy")}</p>
         </>
       ) : !link ? (
@@ -172,7 +174,7 @@ export default function GithubBackup({ projectId, onVraagAi, tick = 0 }: Props) 
               <span className="text-muted-foreground">({link.privaat ? t("github.privaat") : t("github.openbaar")})</span>
             </p>
             <p data-testid="github-laatste" className="text-muted-foreground">
-              {link.laatste ? t("github.laatste", { wanneer: tijdGeleden(t, link.laatste) }) : t("github.nogNiet")}
+              {link.laatste ? t("github.laatste", { wanneer: tijdGeleden(t, link.laatste, state.nu) }) : t("github.nogNiet")}
             </p>
             <p className="text-muted-foreground" data-testid="github-nieuw">
               {state.nieuw === 0 ? t("github.nieuwGeen") : state.nieuw === 1 ? t("github.nieuwEen") : t("github.nieuwMeer", { aantal: state.nieuw })}

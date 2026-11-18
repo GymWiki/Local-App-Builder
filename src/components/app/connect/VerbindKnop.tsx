@@ -40,6 +40,8 @@ interface Props {
   /** Voor de wizard "Alles verbinden": open meteen de dialoog. */
   startOpen?: boolean;
   onDialoogGesloten?: () => void;
+  /** De dialoog is geopend (de plek kan de knop dan laten staan tot hij weer dicht is). */
+  onDialoogGeopend?: () => void;
 }
 
 /**
@@ -51,12 +53,19 @@ export default function VerbindKnop({
   onConnected,
   startOpen = false,
   onDialoogGesloten,
+  onDialoogGeopend,
 }: Props) {
   const [dialoog, setDialoog] = useState(startOpen);
   // De dialoog staat los van de knop, zodat hij blijft staan als de knop verandert (bijvoorbeeld van "niet gekoppeld" naar "gekoppeld").
   return (
     <>
-      <Knop id={id} onOpen={() => setDialoog(true)} />
+      <Knop
+        id={id}
+        onOpen={() => {
+          setDialoog(true);
+          onDialoogGeopend?.();
+        }}
+      />
       <VerbindDialoog
         id={id}
         open={dialoog}

@@ -39,6 +39,21 @@ export interface Signalen {
   koppelingen: Koppelingen;
   /** Het gekoppelde Supabase-project is gepauzeerd of heeft beveiligingsproblemen (tabellen zonder RLS enzovoort). */
   databaseProbleem: boolean;
+  /** De GitHub-back-up: nog niet ingesteld, recent bijgewerkt, achterstand of een probleem. */
+  backup: BackupStatus;
+}
+
+export type BackupStatus = "geen" | "recent" | "achter" | "probleem";
+
+/** Hoe oud de laatste back-up mag zijn (met nieuwe versies erna) voordat het een achterstand heet: één dag. */
+export const BACKUP_ACHTERSTAND_SECS = 86_400;
+
+/** De status van de back-up uit de gegevens van Rust. Zonder koppeling: "geen" (leeg bolletje). */
+export function backupStatus(g: { link: { probleem: string | null; uiteengelopen: string | null; laatste: number | null } | null; nieuw: number }, nu: number): BackupStatus {
+  if (!g.link) return "geen";
+  if (g.link.probleem || g.link.uiteengelopen) return "probleem";
+  if (g.nieuw === 0) return "recent";
+  return g.link.laatste === null || nu - g.link.laatste > BACKUP_ACHTERSTAND_SECS ? "achter" : "recent";
 }
 
 export const geenSignalen = (): Signalen => ({
@@ -55,6 +70,7 @@ export const geenSignalen = (): Signalen => ({
   aantalSchermen: 0,
   koppelingen: {},
   databaseProbleem: false,
+  backup: "geen",
 });
 
 export type StapId = "idee" | "voorbeeld" | "aanpassen" | "online";
@@ -99,7 +115,8 @@ export function menuStatus(s: Signalen): Partial<Record<MenuId, ItemStatus>> {
     // Een koppeling die niet meer werkt vraagt actie ("!"); een werkende koppeling telt als gezond.
     gegevens: { punt: kapot(s, "supabase") || s.databaseProbleem || (s.needsData && !s.heeftDatabase) ? "actie" : s.heeftDatabase || s.koppelingen.supabase === "werkt" ? "klaar" : "leeg" },
     onlinezetten: { punt: s.checksFalen || kapot(s, "vercel") ? "actie" : s.online ? "klaar" : "leeg" },
-    versies: { punt: kapot(s, "github") ? "actie" : s.aantalVersies > 0 ? "klaar" : "leeg", telling: s.aantalVersies },
+    // Is de back-up ingesteld, dan bepaalt die het bolletje: ✓ recent, ! achterstand of probleem.
+    versies: { punt: kapot(s, "github") || s.backup === "probleem" || s.backup === "achter" ? "actie" : s.aantalVersies > 0 || s.backup === "recent" ? "klaar" : "leeg", telling: s.aantalVersies },
   };
 }
 

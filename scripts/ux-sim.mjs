@@ -77,6 +77,13 @@ function mock({ demoUrl, scenario, THUMB }) {
     ),
   });
   S.supaState = () => ({ ...S.supa });
+  // ---- GitHub-back-up (nagebootst): koppeling, eerste back-up, bijwerken, uitkomsten
+  S.ghLink = scenario.ghLink ?? null;
+  S.ghNieuw = scenario.ghNieuw ?? 0;
+  S.ghUitkomst = scenario.ghUitkomst ?? null; // een vaste uitkomst voor de volgende back-up (bijvoorbeeld geheimen)
+  S.ghVrij = scenario.ghVrij ?? true;
+  S.ghState = () => ({ werkt: S.conn.github.status === "werkt", account: S.conn.github.account, link: S.ghLink, versies: 3, nieuw: S.ghNieuw, bezig: false, nu: Math.floor(Date.now() / 1000) });
+  window.__stuurActie = (req) => emit("actie-confirm", req);
   window.__stuurBevestiging = (req) => emit("db-confirm", req);
   S.connLijst = () =>
     Object.values(S.conn).map((c) => ({
@@ -234,6 +241,34 @@ function mock({ demoUrl, scenario, THUMB }) {
     supa_sql: () => ({ status: "uitgevoerd", tekst: "Resultaat.", data: [] }),
     project_storage_get: (a) => S.opslag[a.projectId] ?? null,
     project_storage_set: (a) => void (S.opslag[a.projectId] = a.keuze),
+    github_state: () => S.ghState(),
+    github_suggest_name: (a) => ({ naam: a.naam ?? "hovenier-joke", geldig: /^[a-z0-9][a-z0-9_-]*$/.test(a.naam ?? "hovenier-joke"), vrij: S.ghVrij }),
+    github_first_backup: (a) => {
+      if (a.openbaar && !a.openbaarBevestigd) return { status: "geweigerd", code: "openbaar_bevestig", params: {} };
+      if (S.ghUitkomst) return S.ghUitkomst;
+      S.ghLink = { eigenaar: "pieter", repo: a.naam, privaat: !a.openbaar, url: `https://github.com/pieter/${a.naam}`, tak: "main", laatste: Math.floor(Date.now() / 1000), laatste_aantal: 3, auto: false, ai_vraagt: true, uiteengelopen: null, probleem: null };
+      S.ghNieuw = 0;
+      emit("github-voortgang", { project_id: 1, stap: "gewijzigd", klaar: 0, totaal: 0 });
+      return { status: "uitgevoerd", code: "back_up_klaar", params: { aantal: 3 } };
+    },
+    github_backup: () => {
+      if (S.ghUitkomst) return S.ghUitkomst;
+      const n = S.ghNieuw;
+      S.ghLink = { ...S.ghLink, laatste: Math.floor(Date.now() / 1000), laatste_aantal: n };
+      S.ghNieuw = 0;
+      emit("github-voortgang", { project_id: 1, stap: "gewijzigd", klaar: 0, totaal: 0 });
+      return n ? { status: "uitgevoerd", code: "back_up_klaar", params: { aantal: n } } : { status: "uitgevoerd", code: "al_bijgewerkt", params: {} };
+    },
+    github_set_auto: (a) => void ((S.ghLink = { ...S.ghLink, auto: a.aan }), emit("github-voortgang", { project_id: 1, stap: "gewijzigd", klaar: 0, totaal: 0 })),
+    github_set_ai_ask: (a) => void ((S.ghLink = { ...S.ghLink, ai_vraagt: a.vraagt }), emit("github-voortgang", { project_id: 1, stap: "gewijzigd", klaar: 0, totaal: 0 })),
+    github_unlink: () => void ((S.ghLink = null), emit("github-voortgang", { project_id: 1, stap: "gewijzigd", klaar: 0, totaal: 0 })),
+    github_list_repos: () => ({ repos: [{ eigenaar: "pieter", naam: "winkel", privaat: true, beschrijving: "Mijn webwinkel", bijgewerkt: "" }, { eigenaar: "pieter", naam: "blog", privaat: false, beschrijving: "", bijgewerkt: "" }] }),
+    github_import: (a) => {
+      const p = { id: S.next++, naam: a.repo, pad: `${a.bovenliggendPad}/${a.repo}`, template: "leeg", created_at: now(), default_account_id: null, last_used_at: null };
+      S.projects.push(p);
+      return { project: p, herkend: { soort: "static", template: "leeg", studio_json: false, niet_herkend: ["geen_studio_json"] } };
+    },
+    actie_confirm_answer: (a) => void (S.actieAntwoorden = [...(S.actieAntwoorden || []), [a.id, a.toestaan]]),
     // ---- koppelingen (GitHub: apparaatcode, Vercel en Supabase: sleutel plakken)
     connect_list: () => S.connLijst(),
     connect_start: (a) => {
