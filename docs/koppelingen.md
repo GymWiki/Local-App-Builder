@@ -60,3 +60,24 @@ Voor **Vercel**, **Supabase**: niets registreren (gebruikers plakken een eigen t
 - Geen eigen server of proxy voor tokenuitwisseling.
 - Geen client-geheim in de app.
 - Geen OAuth voor Supabase en Vercel (zie hierboven).
+
+---
+
+# Resultaat: wat er is gebouwd (2026-11-18)
+
+## Welke methode per dienst werkt
+| Dienst | Methode nu | Waarom |
+|---|---|---|
+| **GitHub** | **Apparaatcode** (`oauth_device`) zodra het client-ID in `config/koppelingen.json` staat; anders **sleutel plakken** | geen geheim nodig. Dit is de enige dienst met echte OAuth. |
+| **Vercel** | **Sleutel plakken** | "Sign in with Vercel" vraagt een client-geheim en geeft geen rechten voor projecten of deployments |
+| **Supabase** | **Sleutel plakken** | OAuth voor de Management API vraagt een client-geheim; zonder geheim niet bevestigd |
+De strategie **OAuth met PKCE en terugkeer op 127.0.0.1** (`oauth_loopback_pkce`) is gebouwd en getest (één terugkeer, `state`-controle, sluit na gebruik of na 5 minuten) maar wordt nu door geen enkele dienst gebruikt.
+
+## Wat er staat
+- **Raamwerk** (`src-tauri/src/connect/`): provider-interface, kluis (OS-keychain, per dienst gescheiden), HTTP met vaste hostlijst (`api.github.com`, `github.com`, `api.vercel.com`, `api.supabase.com`), device flow, PKCE-loopback, verversen op de achtergrond (elke minuut; mislukt het dan "verlopen" met "Opnieuw verbinden"), status in SQLite (`connections`, zonder geheimen).
+- **Knop** (`VerbindKnop`): niet gekoppeld, bezig, gekoppeld (accountnaam met ✓ en menu met testen, opnieuw verbinden, ontkoppelen) en verlopen. Staat bij Online zetten (Vercel), Wat je app onthoudt (Supabase) en Eerdere versies (GitHub), en in Instellingen > Mijn programma > Koppelingen met "Alles testen" en "Alles verbinden" (met Overslaan en voortgang). Statusbolletjes via de Status-service.
+- **AI**: MCP-tools `koppelingen_status` (alleen gekoppeld ja/nee en werkt ja/nee, nooit sleutels of accountnamen) en `koppeling_voorstellen` (een kaartje met de knop in het gesprek; de gebruiker verbindt zelf).
+- **Ontkoppelen**: sleutel uit de kluis; GitHub en Vercel laten intrekken zonder geheim of token-ID niet toe, dus Studio legt uit hoe en geeft een link.
+
+## Wat ik zelf niet kon controleren
+Met een echte GitHub-app, een echt GitHub-, Vercel- of Supabase-account: de apparaatcode, de echte antwoordvelden van de diensten en "verlopen simuleren". In de echte app (Xvfb, zonder keychain en met een geblokkeerd netwerk) heb ik de knop, de wizard en de foutmelding gezien.

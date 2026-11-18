@@ -537,7 +537,7 @@ fn section_set(dir: &Path, kop: &str, text: &str) -> Result<()> {
         v.join("\n") + "\n"
     } else {
         let blok = if text.is_empty() { String::new() } else { format!("{text}\n") };
-        format!("{}\n{kop}\n\n{blok}", md.trim_end())
+        format!("{}\n\n{kop}\n\n{blok}", md.trim_end())
     };
     fs::write(path, out)?;
     Ok(())
@@ -808,6 +808,10 @@ mod tests {
         let md = fs::read_to_string(o.path().join("PROJECT.md")).unwrap();
         assert!(md.contains("## Doel") && md.contains("Tuin") && md.contains("## Notities") && md.contains("## Gegevensopslag"));
         assert_eq!(md.matches("## Gegevensopslag").count(), 1);
+        let leeg = tempfile::tempdir().unwrap();
+        fs::write(leeg.path().join("PROJECT.md"), "# P\n\n- punt\n").unwrap();
+        storage_set(leeg.path(), "lokaal").unwrap();
+        assert!(fs::read_to_string(leeg.path().join("PROJECT.md")).unwrap().contains("- punt\n\n## Gegevensopslag"), "een lege regel voor de nieuwe kop");
         assert!(storage_set(o.path(), "anders").is_err());
         description_set(d.path(), "  Een site voor mijn tuinbedrijf.  ").unwrap();
         assert_eq!(description_get(d.path()), "Een site voor mijn tuinbedrijf.");

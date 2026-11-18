@@ -112,7 +112,7 @@ try {
         await p.getByTestId("menu-meer").click();
         await p.getByRole("menuitem", { name: "Wat je app onthoudt" }).click();
         await p.getByTestId("menu-gegevens").click();
-        const gg = p.getByTestId("gegevens-koppeling");
+        const gg = p.getByTestId("supabase-koppeling");
         await gg.waitFor();
         check(t("Gegevens heeft de Supabase-knop"), await gg.getByRole("button", { name: "Verbind met Supabase" }).isVisible());
       }

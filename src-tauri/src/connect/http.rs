@@ -93,7 +93,7 @@ impl UreqHttp {
 fn map_err(e: ureq::Error) -> ConnectError {
     match e {
         ureq::Error::Timeout(_) => ConnectError::Timeout,
-        ureq::Error::HostNotFound | ureq::Error::ConnectionFailed | ureq::Error::Io(_) => ConnectError::Offline,
+        ureq::Error::HostNotFound | ureq::Error::ConnectionFailed | ureq::Error::ConnectProxyFailed(_) | ureq::Error::Io(_) => ConnectError::Offline,
         _ => ConnectError::Unexpected,
     }
 }

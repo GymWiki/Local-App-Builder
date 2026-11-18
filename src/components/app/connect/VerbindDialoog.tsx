@@ -102,7 +102,7 @@ function Wizard({ id, onClose, onConnected, reeks }: Props) {
 
   return (
     <Dialog open onOpenChange={(o) => !o && sluit()}>
-      <DialogContent className="max-w-lg" data-testid={`verbind-dialoog-${id}`}>
+      <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto" data-testid={`verbind-dialoog-${id}`}>
         {reeks && (
           <div data-testid="reeks-voortgang" className="space-y-1">
             <p className="text-sm font-semibold">{t("koppelingen.overzicht.voortgang", { nu: reeks.nu, totaal: reeks.totaal })}</p>
