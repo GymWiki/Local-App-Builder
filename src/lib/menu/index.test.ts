@@ -106,3 +106,21 @@ describe("structuur van het menu", () => {
     expect(zichtbareItems(geenSignalen(), {})[0].items).toEqual(["start", "schermen", "uiterlijk", "bestanden"]);
   });
 });
+
+describe("koppelingen in het menu", () => {
+  const met = (k: Signalen["koppelingen"], extra: Partial<Signalen> = {}): Signalen => ({ ...geenSignalen(), koppelingen: k, ...extra });
+
+  it("een verlopen of kapotte koppeling vraagt actie bij het onderdeel dat hem nodig heeft", () => {
+    expect(menuStatus(met({ vercel: "verlopen" })).onlinezetten?.punt).toBe("actie");
+    expect(menuStatus(met({ supabase: "fout" })).gegevens?.punt).toBe("actie");
+    expect(menuStatus(met({ github: "verlopen" })).versies?.punt).toBe("actie");
+  });
+
+  it("een werkende of ontbrekende koppeling is geen reden voor actie; een werkende Supabase telt als gezond", () => {
+    expect(menuStatus(met({ vercel: "werkt" })).onlinezetten?.punt).toBe("leeg");
+    expect(menuStatus(met({})).onlinezetten?.punt).toBe("leeg");
+    expect(menuStatus(met({ supabase: "werkt" })).gegevens?.punt).toBe("klaar");
+    expect(menuStatus(met({ github: "niet_gekoppeld" })).versies?.punt).toBe("leeg");
+    expect(menuStatus(met({ github: "bezig" }, { aantalVersies: 2 })).versies).toEqual({ punt: "klaar", telling: 2 });
+  });
+});

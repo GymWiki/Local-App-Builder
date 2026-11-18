@@ -10,7 +10,7 @@ Status: onderzoek gedaan op 2026-11-18. Alle feiten komen uit de officiële docu
 
 | Dienst | Methode | Waarom | Terugval |
 |---|---|---|---|
-| **GitHub** | **OAuth device flow** (`oauth_device`) | Device flow heeft geen client-geheim nodig ("The client_secret is not needed for the device flow"); alleen de publieke client-ID. Verversen van een device-flow-token vraagt ook geen geheim. | Toegangstoken plakken (fijnmazig token) |
+| **GitHub** | **OAuth device flow** (`oauth_device`) | Device flow heeft geen client-geheim nodig ("The client_secret is not needed for the device flow"); alleen de publieke client-ID. Verversen van een device-flow-token vraagt ook geen geheim. | Toegangstoken plakken (klassiek token met het recht `repo`) |
 | **Vercel** | **Toegangstoken plakken** (`token_plakken`) | "Sign in with Vercel" vraagt een `client_secret` bij het token-eindpunt en geeft alleen identiteitsrechten (openid, email, profile, offline_access), geen REST-rechten voor projecten en deployments. Het oudere "Integrations"-pad werkt met een geheim en een webserver. | n.v.t. (dit is de terugval zelf) |
 | **Supabase** | **Toegangstoken plakken** (`token_plakken`) | OAuth voor de Management API vraagt `client_id` én `client_secret` (Basic auth op het token-eindpunt). Een publieke client zonder geheim staat niet in de documentatie (niet bevestigd). | n.v.t. |
 | Google Play, Apple | later | nog niet onderzocht | |
@@ -27,7 +27,7 @@ De strategie **OAuth met PKCE en loopback-terugkeer** (`oauth_loopback_pkce`) is
 - Tokens: standaard lang geldig; verlopende tokens zijn een optie van de app ("8 uur, refresh-token 6 maanden zonder gebruik"). Een refresh-token is eenmalig. Verversen vraagt `client_secret` **tenzij** het token met de device flow is gemaakt.
 - Rechten: een OAuth-app gebruikt scopes. `public_repo` geeft alleen publieke repositories; `repo` geeft volledige toegang tot publieke en privé-repositories. Voor een back-up in een **privé**-repository is `repo` nodig. Dat is veel; de uitleg in Studio zegt dat eerlijk. Zonder scope geeft GitHub alleen publieke gegevens.
 - Intrekken: `DELETE /applications/{client_id}/token` staat genoemd; welke authenticatie die vraagt (waarschijnlijk Basic met client-geheim) is **niet bevestigd**. Daarom kan Studio bij GitHub niet zelf intrekken zonder geheim; de gebruiker beheert toegang op https://github.com/settings/applications (URL **niet bevestigd** in de gelezen pagina's, wel de vorm `/settings/connections/applications/:client_id`).
-- GitHub-apps (met fijnmazige rechten) kunnen ook device flow, maar de rechtennamen voor "repository maken en pushen" heb ik niet kunnen bevestigen. Daarom kies ik de OAuth-app.
+- GitHub-apps (met fijnmazige rechten) kunnen ook device flow, maar de rechtennamen voor "repository maken en pushen" heb ik niet kunnen bevestigen. Daarom kies ik de OAuth-app. Om dezelfde reden vraagt de terugvalmethode een **klassiek** token met het recht `repo` (bekend en gedocumenteerd) in plaats van een fijnmazig token: of een fijnmazig token een repository onder een gebruikersaccount mag maken, heb ik niet kunnen bevestigen.
 
 ### Vercel
 - "Sign in with Vercel": `GET https://vercel.com/oauth/authorize` (PKCE `S256` verplicht), `POST https://api.vercel.com/login/oauth/token` met `client_secret` verplicht. Scopes `openid email profile offline_access`. Geen REST-scopes. Publieke client **niet bevestigd**.

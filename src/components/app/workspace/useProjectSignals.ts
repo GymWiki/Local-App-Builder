@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { chatHistory, kitCurrent, lastChecks, projectFlags, projectFlagSet, projectPages, projectSignals, runtime, type Checkpoint, type McpInfo, type PreviewInfo, type Project, type ProjectSignals } from "@/lib/api";
-import { geenSignalen, type Signalen } from "@/lib/menu";
+import { geenSignalen, type Koppelingen, type Signalen } from "@/lib/menu";
+import { useConnections } from "@/components/app/connect/connections-provider";
 import type { WorkspaceCtx } from "./workspace-context";
 
 /** Verzamelt de signalen voor voortgang en menu uit het project en houdt ze actueel (bij elke gebeurtenis van de runtime en bij verversen). */
@@ -9,6 +10,8 @@ export function useProjectSignals(project: Project, mcp: McpInfo | null, preview
   const [ruw, setRuw] = useState<ProjectSignals | null>(null);
   const [vlaggen, setVlaggen] = useState<Record<string, string>>({});
   const [nonce, setNonce] = useState(0);
+  const { lijst } = useConnections();
+  const koppelingen = useMemo(() => Object.fromEntries(lijst.map((k) => [k.id, k.status])) as Koppelingen, [lijst]);
   const up = mcp?.state === "running" || mcp?.state === "connected";
   const draait = preview?.status === "running";
   const bezig = useRef(0);
@@ -40,6 +43,7 @@ export function useProjectSignals(project: Project, mcp: McpInfo | null, preview
         needsData: s?.needs_data ?? false,
         aantalFotos: s?.aantal_assets ?? 0,
         aantalSchermen: val(pagina, []).length,
+        koppelingen: {},
       };
       setRuw(s);
       setVlaggen(val(flags, {}));
@@ -56,5 +60,7 @@ export function useProjectSignals(project: Project, mcp: McpInfo | null, preview
     [project.id],
   );
 
-  return { signalen, ruw, vlaggen, ververs, setVlag };
+  // De koppelingen komen uit hun eigen context en veranderen los van de rest; ze worden hier bij de signalen gevoegd.
+  const metKoppelingen = useMemo(() => ({ ...signalen, koppelingen }), [signalen, koppelingen]);
+  return { signalen: metKoppelingen, ruw, vlaggen, ververs, setVlag };
 }

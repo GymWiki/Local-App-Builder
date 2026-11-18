@@ -9,6 +9,7 @@ import ActionCard from "./ActionCard";
 import ErrorCard from "./ErrorCard";
 import FormattedText from "./formatText";
 import LoopAlertCard from "./LoopAlertCard";
+import ConnectOfferCard from "./ConnectOfferCard";
 
 interface Props {
   message: ChatMessage;
@@ -48,6 +49,8 @@ export default function MessageView({ message, live, technical, canRetry, onRetr
           </Avatar>
         </div>
       );
+    case "connect_offer":
+      return <ConnectOfferCard message={message} />;
     case "assistant":
       return (
         <div className="flex items-end justify-start gap-2">

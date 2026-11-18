@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { ArrowLeftIcon, DatabaseIcon, TableIcon } from "lucide-react";
 import { chatSend, dataOverview, dataRows, type DataFile, type TableRows } from "@/lib/api";
+import VerbindKnop from "@/components/app/connect/VerbindKnop";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -48,6 +49,11 @@ export default function GegevensPanel() {
 
   return (
     <Frame titel={t("gegevens.titel")} uitleg={t("gegevens.uitleg")}>
+      <section className="space-y-2 rounded-xl border-2 border-border p-4" data-testid="gegevens-koppeling">
+        <h3 className="text-lg font-semibold">{t("koppelingen.supabase.naam")}</h3>
+        <p className="text-base text-muted-foreground">{t("koppelingen.plek.gegevens")}</p>
+        <VerbindKnop id="supabase" />
+      </section>
       {w.signals?.needs_data && w.signals.needs_data_reden && (
         <Alert role="status" data-testid="gegevens-nodig" className="border-warning/50 bg-warning/10">
           <AlertDescription className="text-base text-foreground">{t("gegevens.nodig", { reden: w.signals.needs_data_reden })}</AlertDescription>
