@@ -106,7 +106,10 @@ export default function WorkspaceMenu({ projectNaam, signalen, vlaggen, status, 
                 {ingeklapt ? <PanelLeftOpenIcon aria-hidden="true" /> : <PanelLeftCloseIcon aria-hidden="true" />}
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="right">{ingeklapt ? t("menu.klapOpen") : t("menu.klap")}</TooltipContent>
+            <TooltipContent side="right">
+              <div>{ingeklapt ? t("menu.klapOpen") : t("menu.klap")}</div>
+              <div className="text-xs opacity-80">{t("menu.sneltoets", { toets: "Ctrl + Shift + L" })}</div>
+            </TooltipContent>
           </Tooltip>
         </div>
         <div className={`flex items-center gap-1 ${ingeklapt ? "flex-col" : "justify-between"}`}>

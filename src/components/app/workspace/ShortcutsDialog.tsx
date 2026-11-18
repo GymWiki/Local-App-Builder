@@ -2,7 +2,9 @@ import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-export const SNELTOETSEN: { id: "chat" | "eigenschappen" | "links" | "groot" | "volgende" | "vorige" | "wissel"; toets: string }[] = [
+export const SNELTOETSEN: { id: "start" | "voorbeeld" | "chat" | "eigenschappen" | "links" | "groot" | "volgende" | "vorige" | "wissel"; toets: string }[] = [
+  { id: "start", toets: "Ctrl + Shift + S" },
+  { id: "voorbeeld", toets: "Ctrl + Shift + P" },
   { id: "chat", toets: "Ctrl + Shift + G" },
   { id: "eigenschappen", toets: "Ctrl + Shift + E" },
   { id: "links", toets: "Ctrl + Shift + L" },

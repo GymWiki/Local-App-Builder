@@ -13,6 +13,8 @@ interface Props {
   /** Wordt verhoogd bij elke checks/git-gebeurtenis zodat de lijsten verversen. */
   tick: number;
   onError: (msg: string) => void;
+  /** Actie in de lege staat van de lijst met eerdere versies (naar het gesprek). */
+  onLeegActie?: () => void;
 }
 
 const ICON: Record<string, string> = { passed: "✓", failed: "✗", timeout: "⏱", skipped: "–", warned: "!" };
@@ -29,7 +31,7 @@ function fmt(date: string): string {
   return Number.isNaN(d.getTime()) ? date : d.toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" });
 }
 
-export default function ActivityPanel({ project, mcp, tick, onError }: Props) {
+export default function ActivityPanel({ project, mcp, tick, onError, onLeegActie }: Props) {
   const { t } = useTranslation();
   const up = mcp?.state === "running" || mcp?.state === "connected";
   const [points, setPoints] = useState<Checkpoint[]>([]);
@@ -106,7 +108,11 @@ export default function ActivityPanel({ project, mcp, tick, onError }: Props) {
         {!up ? (
           <p className="text-muted-foreground">{t("preview.geenRuntime")}</p>
         ) : points.length === 0 ? (
-          <p className="text-muted-foreground">{t("activiteit.nogGeenCheckpoints")}</p>
+          <div role="status" data-testid="versies-leeg" className="flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-border p-6 text-center">
+            <h4 className="text-lg font-semibold">{t("activiteit.leeg.titel")}</h4>
+            <p className="max-w-md text-base text-muted-foreground">{t("activiteit.nogGeenCheckpoints")}</p>
+            {onLeegActie && <Button onClick={onLeegActie}>{t("activiteit.leeg.knop")}</Button>}
+          </div>
         ) : (
           <ol data-testid="timeline" className="space-y-2 border-l border-border pl-3">
             {points.map((p, i) => (

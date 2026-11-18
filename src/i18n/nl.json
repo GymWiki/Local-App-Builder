@@ -295,7 +295,7 @@
       "warned": "waarschuwing"
     },
     "tijdlijn": "Eerdere versies",
-    "nogGeenCheckpoints": "Nog geen eerdere versies. Die komen vanzelf als de AI klaar is.",
+    "nogGeenCheckpoints": "Zodra de AI iets heeft aangepast, bewaart Studio hier vanzelf een opgeslagen versie. Dan kun je altijd terug naar een eerdere versie.",
     "terug": "Terug naar vorige versie",
     "zetTerug": "Terugzetten",
     "bevestig": "Terugzetten naar “{{bericht}}” ({{datum}})?",
@@ -314,6 +314,10 @@
       "links": "links",
       "console": "console",
       "kit": "Uiterlijk"
+    },
+    "leeg": {
+      "titel": "Nog geen eerdere versies",
+      "knop": "Naar het gesprek"
     }
   },
   "notice": {
@@ -935,9 +939,11 @@
     "sneltoetsen": {
       "titel": "Sneltoetsen",
       "uitleg": "Met deze toetsen werk je sneller, ook zonder muis.",
+      "start": "Naar Start (wat is de volgende stap?)",
+      "voorbeeld": "Naar het voorbeeld",
       "chat": "Naar het gesprek (typen)",
       "eigenschappen": "Eigenschappen tonen of verbergen",
-      "links": "Linkerpaneel tonen of verbergen",
+      "links": "Menu klein of groot maken",
       "groot": "Voorbeeld groot maken of weer normaal",
       "volgende": "Naar de volgende groep panelen",
       "vorige": "Naar de vorige groep panelen",
