@@ -178,6 +178,37 @@ export function registerTools(server: McpServer, ctx: ProjectCtx, record: (r: Ca
   const NAAM = z.string().min(1).max(80);
   const LEES = "Alleen lezen en altijd toegestaan. ";
   const SCHRIJF = "Studio voert dit zelf uit met de gekoppelde Supabase-account van de gebruiker; je krijgt nooit sleutels te zien. Afhankelijk van het bedieningsniveau en de risicoklasse vraagt Studio de gebruiker om bevestiging in de app (dat kan even duren) of weigert het. De uitslag begint met UITGEVOERD, GEWEIGERD of MISLUKT: doe nooit alsof een geweigerde actie is gelukt. ";
+  // ---- Projectkaart: gericht opvragen in plaats van bestanden lezen. Antwoorden zijn kort en begrensd; de kaart kan achterlopen, dus lees bij twijfel het echte bestand.
+  const kaartTool = (naam: string, cmd: string, beschrijving: string, inputSchema: z.ZodRawShape) =>
+    server.registerTool(naam, { description: beschrijving, inputSchema }, (args: Record<string, unknown>) =>
+      run(naam, "lezen", async () => {
+        const r = (await rt.hostCall(cmd, args, 60_000)) as { tekst?: string };
+        const t = String(r?.tekst ?? "");
+        return t.length > 12_000 ? `${t.slice(0, 12_000)}\n… ingekort; vraag gerichter of blader met vanaf/pagina.` : t;
+      }),
+    );
+  kaartTool("project_kaart", "kaart.kaart", "Compact overzicht van het project: schermen, routes, bestanden met hun doel en de database. Begin hiermee in plaats van mappen door te lezen. Met uitgebreid=true krijg je meer detail per pagina.", {
+    uitgebreid: z.boolean().optional(),
+    pagina: z.number().int().min(1).max(500).optional(),
+  });
+  kaartTool("zoek_symbool", "kaart.zoek_symbool", "Waar staat een functie, component of type en welke bestanden gebruiken het? Geeft bestand en regelnummer. Lees daarna alleen dat stuk van het bestand.", {
+    naam: z.string().min(1).max(80),
+    vanaf: z.number().int().min(0).max(10_000).optional(),
+    limiet: z.number().int().min(1).max(40).optional(),
+  });
+  kaartTool("bestanden_voor_taak", "kaart.bestanden_voor_taak", "Geeft op basis van een korte omschrijving van de taak de 3 tot 8 meest waarschijnlijke bestanden, met reden. Gebruik dit vóór je zelf gaat zoeken.", {
+    omschrijving: z.string().min(2).max(300),
+    limiet: z.number().int().min(1).max(8).optional(),
+  });
+  kaartTool("afhankelijkheden", "kaart.afhankelijkheden", "Wat gebruikt dit bestand en welke bestanden raakt een wijziging erin? Handig om te zien wat je kunt breken.", {
+    pad: z.string().min(1).max(300),
+    vanaf: z.number().int().min(0).max(10_000).optional(),
+    limiet: z.number().int().min(1).max(40).optional(),
+  });
+  kaartTool("schema_database", "kaart.schema", "De databasetabellen en kolommen zoals die uit de migraties van het project volgen. Geen gegevens, alleen de opbouw.", {});
+  kaartTool("kit_componenten", "kaart.kit", "Welke kit-componenten (components/ui) heeft dit project en wat leveren ze? Geef namen mee voor alleen die onderdelen.", {
+    namen: z.array(z.string().min(1).max(60)).max(20).optional(),
+  });
   // ---- GitHub-back-up. Alleen vooruit sturen; geen tool voor force-push, verwijderen of instellingen. Het token blijft in Studio.
   const GITHUB = "Studio voert dit zelf uit met het GitHub-account van de gebruiker; je krijgt nooit een token te zien. ";
   dbTool("github_status", "github.status", LEES + "Is GitHub gekoppeld, onder welke accountnaam, bij welke repository hoort dit project, wanneer was de laatste back-up, hoeveel nieuwe versies zijn er sinds die back-up en zijn de versies uiteengelopen (ja/nee)?", {}, false);

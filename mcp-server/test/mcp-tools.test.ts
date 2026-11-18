@@ -35,6 +35,8 @@ describe("MCP-tools (fase 3)", () => {
   it("toont alle tools", async () => {
     const names = (await client.listTools()).tools.map((t) => t.name).sort();
     expect(names).toEqual([
+      "afhankelijkheden",
+      "bestanden_voor_taak",
       "db_apply_migration",
       "db_configure_auth",
       "db_create_project",
@@ -62,13 +64,16 @@ describe("MCP-tools (fase 3)", () => {
       "git_list_checkpoints",
       "github_list_repos",
       "github_status",
+      "kit_componenten",
       "koppeling_voorstellen",
       "koppelingen_status",
       "needs_data",
       "permission_prompt",
+      "project_kaart",
       "project_status",
       "read_project_notes",
       "run_checks",
+      "schema_database",
       "security_check",
       "update_project_notes",
       "vercel_deploy_live",
@@ -81,6 +86,7 @@ describe("MCP-tools (fase 3)", () => {
       "winkel_klaarcheck",
       "winkel_schrijf_teksten",
       "winkel_status",
+      "zoek_symbool",
     ]);
   });
 

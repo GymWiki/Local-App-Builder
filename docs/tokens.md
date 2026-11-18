@@ -91,4 +91,21 @@ en na elk deel opnieuw met een ander label (`na-deel-1` …). De uitvoer komt in
 | Deel | Status |
 |---|---|
 | 0 Meten | meetinstrument + tests + onderzoek klaar; taakmeting wacht op de eigenaar (kost AI-gebruik) |
-| 1–8 | nog niet gedaan |
+| 1 Projectkaart | klaar: index, kaart, zes MCP-tools, instructie (zie §5); taakmeting wacht op de eigenaar |
+| 2–8 | nog niet gedaan |
+
+## 5. Deel 1 — de projectkaart
+
+**Wat er is gebouwd** (`src-tauri/src/kaart/`, geen AI-tokens, geen netwerk)
+- `parse.rs`: regelparsers voor TypeScript/JavaScript (incl. React-routes en `@/components/ui/…` als kit-gebruik), Dart/Flutter (schermen, routes), HTML, CSS (variabelen) en SQL-migraties (tabellen en kolommen). Bewuste keuze: **geen tree-sitter**. Dat vraagt per taal een C-bouwstap en de kaart is op bestandsniveau; bij twijfel valt een bestand terug op alleen de naam. Letterlijke tekstwaarden komen nooit in de index.
+- `index.rs`: SQLite in `<project>/.studio/kaart.db` (al genegeerd door `.gitignore`-blok en export). Incrementeel met een SHA-256 van de inhoud; verwijderde bestanden verdwijnen; annuleerbaar; begrensd (6.000 bestanden, 400 kB per bestand; groter = alleen de naam, gemeld). Één ignorelijst voor alles: `config/kaart-ignore.json` (ook `.env`, sleutelbestanden via `github::scan::by_name`).
+- `render.rs`: korte kaart `.studio/kaart.md` (budget ± 2.000 tokens; bij meer bestanden worden regels ingekort met een verwijzing) en de uitgebreide kaart per pagina op aanvraag.
+- `zoek.rs`: `zoek_symbool`, `bestanden_voor_taak` (woordscore op pad, routes, symbolen, doel, tabellen; synoniemen tellen minder; testbestanden minder), `afhankelijkheden` (beide richtingen), `schema_database`, `kit_componenten`. Alles begrensd met `vanaf` om door te bladeren.
+- MCP-tools (dunne laag in `mcp-server/src/tools.ts`): `project_kaart`, `zoek_symbool`, `bestanden_voor_taak`, `afhankelijkheden`, `schema_database`, `kit_componenten`. Elke vraag werkt eerst de index bij (alleen gewijzigde bestanden), dus de kaart loopt nooit achter.
+- Bijhouden: bij het openen van een project en na rustige wijzigingen (bestaande watcher), op een eigen thread. De instructie staat in het altijd-aanwezige blok `control-loop` (voor CLAUDE.md, GEMINI.md en AGENTS.md): eerst de kaart, dan de tools, lees alleen het nodige stuk, en lees bij twijfel het echte bestand.
+
+**Meting op een groot project** (Studio zelf, 253 bron- en testbestanden; debugbuild, dus een bovengrens): eerste index 0,49 s, daarna 0,06 s als niets veranderde; de korte kaart is ± **1.805 tokens**. `bestanden_voor_taak` vindt bij vier proeftaken de bedoelde bestanden bovenaan (voorbeeld: "voeg een pagina toe voor de appwinkel teksten" → `AppwinkelPanel.tsx`, `Teksten.tsx`); Nederlandse woorden tegenover Engelse bestandsnamen ("homescherm" → `HomeScreen`) lossen we met een kleine synoniemenlijst op, en dat blijft een zwak punt.
+
+**Wat deze stap nog niet bewijst:** of de AI de tools ook daadwerkelijk gebruikt en daardoor minder leest. Dat zie je pas in de taakmeting (§2c): kijk daar naar "bestanden gelezen" en "tool-aanroepen" vóór en na.
+
+**Nog niet gedaan uit deel 1:** de schakelaar voor Graphify (de licentie is tegenstrijdig gemeld, zie §3; Studio werkt zonder), en weergave van de index-voortgang in de interface (komt bij deel 7).

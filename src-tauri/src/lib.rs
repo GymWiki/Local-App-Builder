@@ -14,6 +14,7 @@ mod host;
 mod improve;
 mod herstel;
 mod instructions;
+mod kaart;
 mod layouts;
 mod mcp;
 mod mcp_config;
@@ -460,6 +461,8 @@ pub fn run() {
             route::route_feiten,
             herstel::start_info,
             rapport::maak_probleemrapport,
+            kaart::app::kaart_vernieuw,
+            kaart::app::kaart_tekst,
             updates::update_check,
             updates::update_install,
             confirm::actie_confirm_answer,

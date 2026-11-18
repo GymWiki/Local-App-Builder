@@ -445,7 +445,18 @@ impl PreviewManager {
         if !exists {
             let plan = detect::detect(&dir);
             let inner = self.inner.clone();
-            let watch = watcher::start(&dir, Arc::new(move |t| inner.on_trigger(id, t)));
+            let kaart_dir = dir.clone();
+            // Na rustige wijzigingen de projectkaart bijwerken (op een eigen thread, nooit tijdens het typen).
+            crate::kaart::vernieuw_achtergrond(dir.clone(), true);
+            let watch = watcher::start(
+                &dir,
+                Arc::new(move |t| {
+                    if matches!(t, watcher::Trigger::Changes { .. }) {
+                        crate::kaart::vernieuw_achtergrond(kaart_dir.clone(), true);
+                    }
+                    inner.on_trigger(id, t)
+                }),
+            );
             let watch_error = watch.error.clone();
             self.inner.sessions.lock().unwrap().insert(
                 id,

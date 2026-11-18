@@ -15,6 +15,10 @@ Je hoeft de preview dus niet zelf te starten of te configureren. Gebruik de tool
 4. **Fouten?** Los die eerst op en begin weer bij stap 2. Ga niet verder met nieuwe functionaliteit zolang checks falen, en zet geen tests of regels uit om groen te worden.
 5. **Alles groen?** Maak een checkpoint met `git_checkpoint`. De titel is **maximaal 8 woorden in gewone taal, zonder jargon** (bijvoorbeeld "Inlogscherm toegevoegd"); de gebruiker ziet die in zijn tijdlijn met versies. Eén checkpoint per afgeronde stap. Doe je het niet, dan bewaart Studio na je beurt zelf een versie.
 
+## Eerst de kaart, dan pas bestanden
+- Studio houdt `.studio/kaart.md` bij: schermen, bestanden met hun doel, en de database. Lees die eerst. Is iets niet duidelijk, gebruik dan `bestanden_voor_taak`, `zoek_symbool` of `afhankelijkheden` in plaats van mappen door te lezen.
+- Lees van een bestand alleen het stuk dat je nodig hebt (regelbereik). De kaart kan achterlopen: klopt iets niet, lees dan het echte bestand.
+
 ## Overige afspraken
 - Lees `PROJECT.md` aan het begin (`read_project_notes`) en werk het bij (`update_project_notes`) bij beslissingen en statuswijzigingen. Het is de overdracht naar de volgende AI of sessie.
 - Zegt een tool dat de preview niet draait of dat scripts nog niet zijn goedgekeurd? Dan wacht Studio op de gebruiker: vraag die op ‘Start’ of ‘Vertrouwen’ te klikken in de Preview-tab. Wijzig `studio.json` of de scripts in `package.json` niet stiekem om commando's te laten draaien; gewijzigde scripts moeten opnieuw worden goedgekeurd.
