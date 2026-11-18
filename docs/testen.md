@@ -1,7 +1,7 @@
 # De app zelf testen
 
 ## 1. Starten (Windows, macOS of Linux)
-1. Installeer Node.js 20+, Rust (stable) en Git. Windows: ook de Microsoft C++ Build Tools en WebView2. Linux: `libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libssl-dev`.
+1. Installeer Node.js 22.22+ of 24.15+ (lager werkt niet: `npm install` stopt dan met een duidelijke melding), Rust (stable) en Git. Windows: ook de Microsoft C++ Build Tools en WebView2. Linux: `libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libssl-dev`.
 2. In de projectmap:
    ```
    npm install

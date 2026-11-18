@@ -3,7 +3,7 @@
 Lokale desktop-app om apps te maken met je eigen AI-CLI's. Fase 1: projecten en SQLite. Fase 2: terminal, lokale MCP-server, AI-accounts. Fase 3: de feedbackloop (preview, checks, screenshots, checkpoints).
 
 ## Vereisten
-- Node.js 20+ (ook nodig tijdens gebruik: de MCP-server draait op Node; staat het op een ongebruikelijke plek, zet dan `STUDIO_NODE_PATH` naar `node.exe`), Rust (stable), `git` in je PATH
+- Node.js 22.22+ of 24.15+ om te ontwikkelen (`npm install` weigert oudere versies; de test-onderdelen vragen dat). Tijdens gebruik van Studio zelf is Node.js 20+ genoeg: de MCP-server draait op Node; staat het op een ongebruikelijke plek, zet dan `STUDIO_NODE_PATH` naar `node.exe`), Rust (stable), `git` in je PATH
 - Minstens één AI-CLI: Claude Code of Gemini CLI (Studio toont installatie-uitleg als hij ontbreekt)
 - Tauri-systeemvereisten: https://v2.tauri.app/start/prerequisites/
   - Linux: `libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libssl-dev`
