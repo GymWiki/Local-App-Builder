@@ -9,6 +9,7 @@ mod error;
 mod export;
 mod improve;
 mod instructions;
+mod layouts;
 mod mcp;
 mod mcp_config;
 mod node;
@@ -337,6 +338,12 @@ pub fn run() {
             commands::list_projects,
             commands::create_project,
             commands::delete_project,
+            commands::rename_project,
+            commands::layout_get,
+            commands::layout_set,
+            commands::layout_reset,
+            commands::project_thumbnail_get,
+            commands::project_thumbnail_set,
             commands::set_default_account,
             commands::list_accounts,
             commands::create_account,

@@ -7,6 +7,7 @@ use crate::claude_approval;
 use crate::cli::{self, CliStatus};
 use crate::error::{AppError, Result};
 use crate::instructions;
+use crate::layouts;
 use crate::mcp::{self, McpInfo, McpManager};
 use crate::mcp_config;
 use crate::preview::{PreviewInfo, PreviewManager};
@@ -71,6 +72,7 @@ pub fn create_project(
 #[tauri::command(async)]
 pub fn delete_project(
     db: State<Db>,
+    profiles: State<Profiles>,
     mcp: State<McpManager>,
     previews: State<PreviewManager>,
     chat: State<ChatManager>,
@@ -80,7 +82,59 @@ pub fn delete_project(
     chat.stop(id);
     previews.close(id);
     mcp.stop(id);
-    projects::delete(&*db.conn()?, id)
+    projects::delete(&*db.conn()?, id)?;
+    layouts::thumbnail_delete(&thumbnails_dir(&profiles), id);
+    Ok(())
+}
+
+/// Wijzigt alleen de naam in Studio; de map op schijf blijft zoals ze is.
+#[tauri::command]
+pub fn rename_project(db: State<Db>, id: i64, naam: String) -> Result<Project> {
+    projects::rename(&*db.conn()?, id, &naam)
+}
+
+fn thumbnails_dir(profiles: &Profiles) -> PathBuf {
+    profiles
+        .0
+        .parent()
+        .unwrap_or(&profiles.0)
+        .join("thumbnails")
+}
+
+// ---------- indeling en miniaturen ----------
+
+#[derive(serde::Serialize)]
+pub struct LayoutInfo {
+    pub versie: i64,
+    pub json: String,
+}
+
+#[tauri::command]
+pub fn layout_get(db: State<Db>, project_id: i64) -> Result<Option<LayoutInfo>> {
+    Ok(layouts::get(&*db.conn()?, project_id)?.map(|l| LayoutInfo {
+        versie: l.versie,
+        json: l.json,
+    }))
+}
+
+#[tauri::command]
+pub fn layout_set(db: State<Db>, project_id: i64, versie: i64, json: String) -> Result<()> {
+    layouts::set(&*db.conn()?, project_id, versie, &json)
+}
+
+#[tauri::command]
+pub fn layout_reset(db: State<Db>, project_id: i64) -> Result<()> {
+    layouts::reset(&*db.conn()?, project_id)
+}
+
+#[tauri::command]
+pub fn project_thumbnail_get(profiles: State<Profiles>, id: i64) -> Option<String> {
+    layouts::thumbnail_get(&thumbnails_dir(&profiles), id)
+}
+
+#[tauri::command]
+pub fn project_thumbnail_set(profiles: State<Profiles>, id: i64, data_url: String) -> Result<()> {
+    layouts::thumbnail_set(&thumbnails_dir(&profiles), id, &data_url)
 }
 
 #[tauri::command]
@@ -171,6 +225,7 @@ pub fn open_project(
     id: i64,
 ) -> Result<McpInfo> {
     let p = projects::get(&*db.conn()?, id)?;
+    let _ = projects::touch(&*db.conn()?, id);
     // Vaste werkwijze (CLAUDE.md / GEMINI.md / AGENTS.md) bijwerken; mislukken mag het openen niet blokkeren.
     let simple = crate::db::communication_simple(&*db.conn()?);
     let _ = instructions::ensure(Path::new(&p.pad), simple);
@@ -603,6 +658,7 @@ pub fn chat_send(
     attachments: Option<Vec<String>>,
 ) -> Result<()> {
     let dir = project_dir(&projects::get(&*db.conn()?, project_id)?)?;
+    let _ = projects::touch(&*db.conn()?, project_id);
     let attachments = attachments_from_paths(&dir, attachments.unwrap_or_default())?;
     let launch = prepare_chat(&app, &db, &mcp, &chat, &profiles, project_id)?;
     chat.send_with(
