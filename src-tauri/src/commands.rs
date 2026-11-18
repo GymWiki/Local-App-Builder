@@ -1394,6 +1394,17 @@ pub fn project_description_set(db: State<Db>, project_id: i64, text: String) -> 
     projectinfo::description_set(&dir_of(&db, project_id)?, &text)
 }
 
+/// Waar de app zijn gegevens bewaart (`lokaal` of `online`), uit PROJECT.md.
+#[tauri::command]
+pub fn project_storage_get(db: State<Db>, project_id: i64) -> Result<Option<String>> {
+    Ok(projectinfo::storage_get(&dir_of(&db, project_id)?).map(String::from))
+}
+
+#[tauri::command]
+pub fn project_storage_set(db: State<Db>, project_id: i64, keuze: String) -> Result<()> {
+    projectinfo::storage_set(&dir_of(&db, project_id)?, &keuze)
+}
+
 // Kleine vlaggen per project (bijvoorbeeld "online gezet", "Gegevens tonen"): alleen bekende sleutels en korte waarden.
 const PROJECT_FLAGS: &[&str] = &[
     "online_gezet",

@@ -21,6 +21,7 @@ import HomeScreen from "@/components/app/home/HomeScreen";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
+import BevestigDialoog from "@/components/app/supabase/BevestigDialoog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -340,6 +341,7 @@ export default function App() {
             }}
           />
         )}
+        <BevestigDialoog />
         <Toaster position="top-center" richColors />
       </div>
     </TooltipProvider>

@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { previewRestart } from "@/lib/api";
+import SqlVenster from "@/components/app/supabase/SqlVenster";
 import McpProblem from "@/components/McpProblem";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -55,6 +56,7 @@ export default function StatusPanel() {
           </Button>
         </CardContent>
       </Card>
+      <SqlVenster projectId={w.project.id} />
     </Frame>
   );
 }

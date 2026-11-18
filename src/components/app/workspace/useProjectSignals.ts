@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { chatHistory, kitCurrent, lastChecks, projectFlags, projectFlagSet, projectPages, projectSignals, runtime, type Checkpoint, type McpInfo, type PreviewInfo, type Project, type ProjectSignals } from "@/lib/api";
+import { supaSecurityCheck, supaStatus } from "@/lib/api";
 import { geenSignalen, type Koppelingen, type Signalen } from "@/lib/menu";
 import { useConnections } from "@/components/app/connect/connections-provider";
 import type { WorkspaceCtx } from "./workspace-context";
@@ -44,12 +45,37 @@ export function useProjectSignals(project: Project, mcp: McpInfo | null, preview
         aantalFotos: s?.aantal_assets ?? 0,
         aantalSchermen: val(pagina, []).length,
         koppelingen: {},
+        databaseProbleem: false,
       };
       setRuw(s);
       setVlaggen(val(flags, {}));
       setSignalen(next);
     })();
   }, [project.id, tick, up, draait, nonce]);
+
+  // Een gekoppeld Supabase-project: gepauzeerd of tabellen zonder beveiliging geven een "!" bij Wat je app onthoudt.
+  const [databaseProbleem, setDatabaseProbleem] = useState(false);
+  const supaWerkt = koppelingen.supabase === "werkt";
+  useEffect(() => {
+    if (!supaWerkt) return;
+    let weg = false;
+    void (async () => {
+      try {
+        const st = await supaStatus(project.id);
+        const d = st?.data as { gekoppeld?: boolean; gepauzeerd?: boolean } | undefined;
+        if (!d?.gekoppeld) return !weg && setDatabaseProbleem(false);
+        if (d.gepauzeerd) return !weg && setDatabaseProbleem(true);
+        const c = await supaSecurityCheck(project.id);
+        const ernstig = (c.bevindingen ?? []).some((b) => b.code === "rls_uit" || b.code === "beleid_alles_schrijfbaar");
+        if (!weg) setDatabaseProbleem(ernstig);
+      } catch {
+        /* geen probleem melden bij een tijdelijke storing */
+      }
+    })();
+    return () => {
+      weg = true;
+    };
+  }, [project.id, supaWerkt, tick, nonce]);
 
   const ververs = useCallback(() => setNonce((n) => n + 1), []);
   const setVlag: WorkspaceCtx["setVlag"] = useCallback(
@@ -61,6 +87,6 @@ export function useProjectSignals(project: Project, mcp: McpInfo | null, preview
   );
 
   // De koppelingen komen uit hun eigen context en veranderen los van de rest; ze worden hier bij de signalen gevoegd.
-  const metKoppelingen = useMemo(() => ({ ...signalen, koppelingen }), [signalen, koppelingen]);
+  const metKoppelingen = useMemo(() => ({ ...signalen, koppelingen, databaseProbleem: supaWerkt && databaseProbleem }), [signalen, koppelingen, supaWerkt, databaseProbleem]);
   return { signalen: metKoppelingen, ruw, vlaggen, ververs, setVlag };
 }

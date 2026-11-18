@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import type { McpInfo, PreviewInfo } from "@/lib/api";
 import { PRESETS, type PresetId } from "@/lib/layout";
+import { useSupa } from "@/components/app/supabase/use-supa";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +19,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 interface Props {
+  projectId: number;
   mcp: McpInfo | null;
   preview: PreviewInfo | null;
   maximized: boolean;
@@ -45,6 +47,7 @@ const MCP_TOON: Record<string, string> = {
 
 /** Bovenbalk van de werkruimte: status van voorbeeld en AI-koppeling en het indelingsmenu. (Terug en projectnaam staan bovenaan het menu.) */
 export default function WorkspaceBar({
+  projectId,
   mcp,
   preview,
   maximized,
@@ -55,6 +58,7 @@ export default function WorkspaceBar({
   onShortcuts,
 }: Props) {
   const { t } = useTranslation();
+  const { state: supa } = useSupa(projectId);
   const pStatus = preview?.status ?? "idle";
   const mStatus = mcp?.state ?? "uit";
   const mTekst = {
@@ -80,6 +84,11 @@ export default function WorkspaceBar({
             status: t(`preview.status.${pStatus}`),
           })}
         </Badge>
+        {supa.gekoppeld && (
+          <Badge data-testid="status-niveau" className={supa.niveau === "volledig" ? "border-transparent bg-destructive text-destructive-foreground" : "border-transparent bg-muted text-muted-foreground"}>
+            {t("gegevens.niveau.balkKort", { niveau: t(`gegevens.niveau.${supa.niveau}.naam`) })}
+          </Badge>
+        )}
         <Badge data-testid="status-mcp" className={MCP_TOON[mStatus]}>
           {t("werkruimte.balk.mcp", { status: t(`werkruimte.balk.${mTekst}`) })}
         </Badge>

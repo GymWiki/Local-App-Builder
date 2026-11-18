@@ -117,11 +117,12 @@ impl Engine {
             Some(sleutel) => {
                 let pk_sql = format!("select a.attname as kolom from pg_index i join pg_attribute a on a.attrelid = i.indrelid and a.attnum = any(i.indkey) where i.indrelid = 'public.{}'::regclass and i.indisprimary", q_ident(tabel).replace('\'', "''"));
                 let pk: Vec<String> = self.api(&self.secrets_for(&link), |c| c.query(&link.reference, &pk_sql, true)).ok().and_then(|v| v.as_array().map(|a| a.iter().filter_map(|r| r["kolom"].as_str().map(String::from)).collect())).unwrap_or_default();
-                if pk.is_empty() || pk.iter().any(|p| !sleutel.contains_key(p)) || sleutel.len() != pk.len() {
+                if pk.is_empty() || pk.iter().any(|p| !sleutel.contains_key(p)) {
                     return Reply::nee("Geweigerd: deze rij is niet veilig aan te wijzen (de tabel heeft geen hoofdsleutel). Laat de AI dit aanpassen.");
                 }
                 let set = waarden.iter().map(|(k, v)| format!("{} = {}", q_ident(k), lit(v))).collect::<Vec<_>>().join(", ");
-                let waar = sleutel.iter().map(|(k, v)| format!("{} = {}", q_ident(k), lit(v))).collect::<Vec<_>>().join(" and ");
+                // Alleen de hoofdsleutel-kolommen bepalen welke rij het is (de app geeft de hele oude rij mee).
+                let waar = pk.iter().map(|k| format!("{} = {}", q_ident(k), lit(&sleutel[k]))).collect::<Vec<_>>().join(" and ");
                 format!("update public.{} set {set} where {waar}", q_ident(tabel))
             }
         };

@@ -473,3 +473,99 @@ export const connectTest = (id: DienstId) => invoke<KoppelInfo>("connect_test", 
 export const connectTestAll = () => invoke<KoppelInfo[]>("connect_test_all");
 export const connectDisconnect = (id: DienstId) => invoke<{ ingetrokken: boolean; beheer_url: string }>("connect_disconnect", { id });
 export const connectOpen = (url: string) => invoke<void>("connect_open", { url });
+
+// ---------- Supabase (eigen account van de gebruiker; Studio voert alle acties uit, sleutels blijven in de kluis) ----------
+export type SupaNiveau = "voorzichtig" | "zelfstandig" | "volledig";
+export interface SupaState {
+  gekoppeld: boolean;
+  naam: string;
+  referentie: string;
+  regio: string;
+  niveau: SupaNiveau;
+  volledig_resterend: number | null;
+  volledig_secs: number;
+}
+export interface SupaChange {
+  code: string;
+  params: Record<string, string>;
+}
+export interface SupaFinding {
+  code: string;
+  tabel: string | null;
+  ernst: "waarschuw" | "weiger";
+}
+export interface SupaConfirm {
+  id: string;
+  project_id: number;
+  tool: string;
+  actor: "ai" | "gebruiker";
+  class: number;
+  level: SupaNiveau;
+  redenen: string[];
+  changes: SupaChange[];
+  rijen: number | null;
+  verlies: boolean;
+  backup: "gemaakt" | "mislukt" | "niet_nodig";
+  kosten: { plan: "gratis_plan" | "betaald_plan" | "onbekend_plan"; per_maand: number | null } | null;
+  waarschuwingen: SupaFinding[];
+  sql: string;
+  uitleg: string;
+}
+export interface SupaReply {
+  status: "uitgevoerd" | "geweigerd" | "mislukt";
+  tekst: string;
+  data?: unknown;
+}
+export interface SupaAction {
+  id: number;
+  at: number;
+  tool: string;
+  class: number;
+  level: string;
+  status: string;
+  summary: SupaChange[] | null;
+  detail: { code?: string; backup?: string } | null;
+  kan_ongedaan: boolean;
+  undone: boolean;
+}
+export interface SupaProject {
+  reference: string;
+  name: string;
+  region: string;
+  status: string;
+}
+export interface SupaTable {
+  tabel: string;
+  rls: boolean;
+  rijen: number | null;
+  kolommen: { kolom: string; type: string; verplicht: boolean }[];
+  beleid: unknown[];
+}
+export interface SupaRows {
+  kolommen: string[];
+  rijen: string[][];
+  meer: boolean;
+  pagina: number;
+}
+export const supaState = (projectId: number) => invoke<SupaState>("supa_state", { projectId });
+export const supaProjects = () => invoke<{ projecten?: SupaProject[]; organisaties?: { slug: string; name: string; plan: string | null }[]; fout?: string }>("supa_projects");
+export const supaLink = (projectId: number, reference: string) => invoke<SupaReply>("supa_link", { projectId, reference });
+export const supaCreate = (projectId: number, naam: string) => invoke<SupaReply>("supa_create", { projectId, naam });
+export const supaUnlink = (projectId: number) => invoke<void>("supa_unlink", { projectId });
+export const supaWake = (projectId: number) => invoke<SupaReply>("supa_wake", { projectId });
+export const supaSetLevel = (projectId: number, niveau: SupaNiveau, bevestiging?: string) => invoke<void>("supa_set_level", { projectId, niveau, bevestiging });
+export const supaSetDuration = (projectId: number, seconden: number) => invoke<void>("supa_set_duration", { projectId, seconden });
+export const supaEmergency = (projectId: number) => invoke<void>("supa_emergency", { projectId });
+export const supaActions = (projectId: number) => invoke<SupaAction[]>("supa_actions", { projectId });
+export const supaUndo = (projectId: number, actie: number) => invoke<SupaReply>("supa_undo", { projectId, actie });
+export const supaConfirmAnswer = (id: string, toestaan: boolean) => invoke<boolean>("supa_confirm_answer", { id, toestaan });
+export const supaTables = (projectId: number) => invoke<{ tabellen?: SupaTable[]; fout?: string }>("supa_tables", { projectId });
+export const supaRows = (projectId: number, tabel: string, pagina: number) => invoke<SupaRows & { fout?: string }>("supa_rows", { projectId, tabel, pagina });
+export const supaRowSave = (projectId: number, tabel: string, sleutel: Record<string, string> | null, waarden: Record<string, string | null>) => invoke<SupaReply>("supa_row_save", { projectId, tabel, sleutel, waarden });
+export const supaUsers = (projectId: number) => invoke<{ gebruikers?: Record<string, string | null>[]; fout?: string }>("supa_users", { projectId });
+export const supaSecurityCheck = (projectId: number) => invoke<{ bevindingen?: { code: string; tabel: string }[]; fout?: string }>("supa_security_check", { projectId });
+export const supaSql = (projectId: number, sql: string) => invoke<SupaReply>("supa_sql", { projectId, sql });
+export const supaStatus = (projectId: number) => invoke<SupaReply>("supa_status", { projectId });
+export const supaWriteConfig = (projectId: number) => invoke<SupaReply>("supa_write_config", { projectId });
+export const projectStorageGet = (projectId: number) => invoke<"lokaal" | "online" | null>("project_storage_get", { projectId });
+export const projectStorageSet = (projectId: number, keuze: "lokaal" | "online") => invoke<void>("project_storage_set", { projectId, keuze });

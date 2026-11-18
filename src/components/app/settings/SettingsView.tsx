@@ -17,6 +17,8 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import KoppelingenOverzicht from "@/components/app/connect/KoppelingenOverzicht";
+import NiveauKiezer from "@/components/app/supabase/NiveauKiezer";
+import { useSupa } from "@/components/app/supabase/use-supa";
 import Keuze from "./Keuze";
 import Rij from "./Rij";
 
@@ -84,6 +86,11 @@ export default function SettingsView({ scope, project, accounts, mcp, groep, onG
                   ))}
                 </SelectContent>
               </Select>
+            </Rij>
+          )}
+          {metProject && project && (
+            <Rij id="inst-niveau" label={t("gegevens.niveau.titel")} uitleg={t("gegevens.niveau.uitleg")} bereik="dit">
+              <NiveauInstelling projectId={project.id} />
             </Rij>
           )}
           <Rij id="inst-toestemming" label={t("inst.ai.toestemming.label")} uitleg={t("inst.ai.toestemming.uitleg")} bereik="alle" herstel={{ onReset: () => void reset("permission_mode"), isStandaard: s.permission_mode === d.permission_mode }}>
@@ -384,4 +391,12 @@ function Gevorderd({ project, mcp }: { project: Project | null; mcp: McpInfo | n
       </CollapsibleContent>
     </Collapsible>
   );
+}
+
+/** Hetzelfde bedieningsniveau als in "Wat je app onthoudt"; zonder koppeling een korte uitleg. */
+function NiveauInstelling({ projectId }: { projectId: number }) {
+  const { t } = useTranslation();
+  const { state } = useSupa(projectId);
+  if (!state.gekoppeld) return <p className="text-base text-muted-foreground">{t("gegevens.niveau.nietGekoppeld")}</p>;
+  return <NiveauKiezer projectId={projectId} />;
 }

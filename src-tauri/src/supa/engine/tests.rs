@@ -708,3 +708,30 @@ fn wakker_maken_door_de_gebruiker_vraagt_geen_extra_bevestiging() {
     assert!(r.vragen().is_empty());
     assert!(r.http.calls.lock().unwrap().iter().any(|c| c.1.ends_with("/restore")));
 }
+
+// ---------------------------------------------------------------- publieke configuratie in het project
+
+#[test]
+fn publieke_configuratie_komt_in_env_local_en_nooit_de_geheime_sleutel() {
+    let r = rig();
+    std::fs::write(r.haken.dir.path().join("package.json"), r#"{"devDependencies":{"vite":"7","react":"19"}}"#).unwrap();
+    std::fs::write(r.haken.dir.path().join(".env.local"), "ANDERS=blijft\n").unwrap();
+    let x = r.e.write_project_config(1);
+    assert_eq!(x.status, "uitgevoerd", "{}", x.tekst);
+    let env = std::fs::read_to_string(r.haken.dir.path().join(".env.local")).unwrap();
+    assert!(env.contains("ANDERS=blijft"));
+    assert!(env.contains(&format!("VITE_SUPABASE_URL=https://{REF}.supabase.co")));
+    assert!(env.contains("VITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_OPENBAAR"));
+    // Nergens in het project staat een geheim.
+    for f in [".env.local", ".env.example", ".gitignore", "src/lib/supabase.ts"] {
+        let t = std::fs::read_to_string(r.haken.dir.path().join(f)).unwrap();
+        assert!(!t.contains("GEHEIM") && !t.contains("sb_secret") && !t.contains("service_role"), "{f}");
+    }
+    assert!(std::fs::read_to_string(r.haken.dir.path().join(".gitignore")).unwrap().contains(".env*"));
+    let client = std::fs::read_to_string(r.haken.dir.path().join("src/lib/supabase.ts")).unwrap();
+    assert!(client.contains("createClient"));
+    // Het databasewachtwoord (in de kluis) komt niet in het project.
+    r.kluis.set("connect/supabase/dbpass:abcdefghij", "WACHTWOORD-123456").unwrap();
+    r.e.write_project_config(1);
+    assert!(!std::fs::read_to_string(r.haken.dir.path().join(".env.local")).unwrap().contains("WACHTWOORD"));
+}

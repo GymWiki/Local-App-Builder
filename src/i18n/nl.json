@@ -1203,7 +1203,26 @@
     "titel": "Wat je app onthoudt",
     "uitleg": "Hier zie je wat je app onthoudt, zoals bestellingen of inschrijvingen.",
     "nodig": "De AI zegt dat je app iets moet onthouden: {{reden}}",
-    "tabellen": "Bestanden met gegevens",
+    "tabellen": {
+      "titel": "Je tabellen",
+      "aantal": "{{aantal}} rij(en)",
+      "rlsAan": "Beveiligd",
+      "rlsUit": "Niet beveiligd",
+      "kolommen": "Kolommen",
+      "toegangsregels": "Toegangsregels: {{aantal}}",
+      "geen": "Je app onthoudt nog niets.",
+      "terug": "Terug naar de tabellen",
+      "vorige": "Vorige",
+      "volgende": "Volgende",
+      "pagina": "Pagina {{nu}}",
+      "rijToevoegen": "Rij toevoegen",
+      "wijzig": "Wijzigen",
+      "bewaar": "Bewaren",
+      "annuleer": "Annuleren",
+      "opslaanUitleg": "Studio vraagt eerst om je bevestiging.",
+      "leeg": "Deze tabel is leeg.",
+      "geenSleutel": "Deze rij kan hier niet veilig worden aangepast, omdat de tabel geen hoofdsleutel heeft. Laat de AI dit aanpassen."
+    },
     "rijen": "{{aantal}} rijen",
     "bekijk": "{{naam}} bekijken",
     "alleenLezen": "Je kunt de gegevens hier bekijken. Wijzigen doe je voorlopig via de AI, zodat er niets per ongeluk verdwijnt.",
@@ -1216,7 +1235,233 @@
     },
     "geenBestand": "Er staat nog geen bestand met gegevens in je project. Heb je een database bij een andere dienst, dan zie je die hier nog niet.",
     "prompt": "Mijn app moet gegevens kunnen onthouden. Leg in eenvoudige woorden uit welke mogelijkheden er zijn en wat je aanraadt. Verander nog niets zonder dat ik het goedvind.",
-    "verstuurd": "De vraag is naar de AI gestuurd."
+    "verstuurd": "De vraag is naar de AI gestuurd.",
+    "wijziging": {
+      "tabel_toevoegen": "Er komt een tabel ‘{{tabel}}’ bij",
+      "kolom_toevoegen": "Tabel ‘{{tabel}}’ krijgt een kolom ‘{{kolom}}’ erbij",
+      "regel_toevoegen": "Tabel ‘{{tabel}}’ krijgt een extra regel",
+      "rls_aan": "De beveiliging per rij gaat aan voor ‘{{tabel}}’",
+      "rls_uit": "De beveiliging per rij gaat UIT voor ‘{{tabel}}’: iedereen kan er dan bij",
+      "rls_aan_automatisch": "Studio zet de beveiliging per rij voor de nieuwe tabel ook aan",
+      "kolom_regel": "Kolom ‘{{kolom}}’ van ‘{{tabel}}’ krijgt een regel",
+      "index_toevoegen": "Tabel ‘{{tabel}}’ wordt sneller doorzocht (index)",
+      "beleid_toevoegen": "Er komt een toegangsregel ‘{{naam}}’ bij voor ‘{{tabel}}’",
+      "extensie_aan": "De extra functie ‘{{naam}}’ wordt aangezet",
+      "schema_toevoegen": "Er komt een nieuwe afdeling ‘{{naam}}’ bij",
+      "object_toevoegen": "Er komt een nieuw onderdeel bij",
+      "weergave_toevoegen": "Er komt een weergave ‘{{naam}}’ bij",
+      "functie_toevoegen": "Er komt een functie ‘{{naam}}’ bij",
+      "trigger_toevoegen": "Er komt een automatische actie bij",
+      "opmerking": "Er komt een opmerking bij",
+      "rijen_toevoegen": "Er komen rijen bij in ‘{{tabel}}’ ({{aantal}})",
+      "rijen_wijzigen": "Rijen in ‘{{tabel}}’ worden aangepast",
+      "rijen_verwijderen": "Rijen uit ‘{{tabel}}’ verdwijnen",
+      "tabel_leegmaken": "Alle rijen uit ‘{{tabel}}’ verdwijnen",
+      "tabel_verwijderen": "De tabel ‘{{tabel}}’ verdwijnt",
+      "kolom_verwijderen": "Een kolom van ‘{{tabel}}’ verdwijnt",
+      "object_verwijderen": "‘{{naam}}’ verdwijnt",
+      "tabel_aanpassen": "Tabel ‘{{tabel}}’ wordt aangepast",
+      "rechten_wijzigen": "De rechten van gebruikers worden aangepast",
+      "onbekend": "Een opdracht die Studio niet goed kan lezen",
+      "functie_plaatsen": "Er wordt een functie ‘{{naam}}’ geplaatst",
+      "geheim_toevoegen": "Er komt een geheim ‘{{naam}}’ bij voor je functies",
+      "geheim_overschrijven": "Het geheim ‘{{naam}}’ wordt overschreven",
+      "map_toevoegen": "Er komt een privé-opslagmap ‘{{naam}}’ bij",
+      "inlog_instelling": "De inlog-instelling ‘{{naam}}’ verandert",
+      "project_pauzeren": "Het project ‘{{naam}}’ wordt gepauzeerd: je app is dan offline",
+      "project_wakker": "Het project ‘{{naam}}’ wordt wakker gemaakt",
+      "project_maken": "Er komt een nieuw project ‘{{naam}}’ (regio {{regio}})"
+    },
+    "vraag": {
+      "titelAi": "De AI wil iets veranderen",
+      "titelGebruiker": "Weet je het zeker?",
+      "titelKosten": "Dit kan geld kosten",
+      "uitleg": "Je gaf de AI toegang tot je Supabase-account. Studio voert dit pas uit als jij het goed vindt.",
+      "wijzigingen": "Dit gaat er gebeuren:",
+      "uitlegAi": "De AI zegt:",
+      "verlies": "Let op: hiermee verdwijnen gegevens van je app.",
+      "rijen": "Het gaat om {{aantal}} rij(en).",
+      "backupGemaakt": "Studio heeft eerst een back-up op deze computer gemaakt. Daarna kun je het ongedaan maken.",
+      "backupMislukt": "Er is GEEN back-up. Gegevens die verdwijnen komen niet terug.",
+      "redenenTitel": "Waarom vraagt Studio dit?",
+      "reden": {
+        "niveau": "Op het niveau ‘Voorzichtig’ vraagt Studio altijd eerst.",
+        "gevaarlijk": "Dit kan gegevens veranderen of weghalen.",
+        "kosten": "Dit kan geld kosten.",
+        "onleesbaar": "Studio kan deze opdracht niet goed lezen, daarom vraagt hij het voor de zekerheid.",
+        "veel_rijen": "Het gaat om veel rijen.",
+        "geen_backup": "Er kon geen back-up worden gemaakt.",
+        "gebruiker": "Je past dit zelf aan in het scherm."
+      },
+      "kosten": {
+        "gratis_plan": "Op het gratis plan kost dit niets. Je mag er twee gratis projecten hebben.",
+        "betaald_plan": "Op een betaald plan kost een nieuw project ongeveer {{bedrag}} dollar per maand.",
+        "onbekend_plan": "Heb je het gratis plan? Dan kost dit niets (je mag twee gratis projecten hebben). Heb je een betaald plan? Dan kost een nieuw project ongeveer {{bedrag}} dollar per maand."
+      },
+      "waarschuwingen": {
+        "rls_automatisch_aan": "Studio zet de beveiliging per rij vanzelf aan voor nieuwe tabellen.",
+        "beleid_alles_leesbaar": "Iedereen kan de rijen van ‘{{tabel}}’ lezen.",
+        "beleid_alles_schrijfbaar": "Iedereen kan rijen van ‘{{tabel}}’ toevoegen of aanpassen.",
+        "rls_uit": "De beveiliging per rij gaat uit voor ‘{{tabel}}’."
+      },
+      "sql": "Bekijk de technische opdracht",
+      "toestaan": "Toestaan",
+      "nietToestaan": "Niet toestaan",
+      "wachtend": "Nog {{aantal}} vraag(en) wachten."
+    },
+    "niveau": {
+      "titel": "Hoeveel mag de AI zelf doen met je gegevens?",
+      "uitleg": "Kies wat de AI in je Supabase-project zelf mag doen. Kosten vragen altijd jouw toestemming, op elk niveau.",
+      "huidig": "Nu: {{niveau}}",
+      "voorzichtig": {
+        "naam": "Voorzichtig",
+        "uitleg": "De AI mag alles bekijken. Voor elke wijziging vraagt Studio eerst jouw toestemming.",
+        "voorbeeld": "Voorbeeld: de AI wil een tabel ‘bestellingen’ maken. Jij beslist eerst."
+      },
+      "zelfstandig": {
+        "naam": "Zelfstandig",
+        "uitleg": "De AI mag zelf iets toevoegen, zoals een tabel, een kolom of een toegangsregel. Dingen weghalen of aanpassen vraagt nog steeds jouw toestemming.",
+        "voorbeeld": "Voorbeeld: de AI maakt zelf een tabel. Een tabel weghalen vraagt toestemming."
+      },
+      "volledig": {
+        "naam": "Volledige controle",
+        "uitleg": "De AI mag ook dingen weghalen en aanpassen zonder te vragen. Je gegevens kunnen verloren gaan. Alleen voor even, en alleen als je zeker weet wat je doet.",
+        "voorbeeld": "Voorbeeld: de AI ruimt oude gegevens op, zonder te vragen."
+      },
+      "volledigWaarschuwing": {
+        "titel": "Volledige controle aanzetten?",
+        "tekst": "Met volledige controle kan de AI gegevens van je app weghalen en aanpassen zonder te vragen. Dat kan niet altijd ongedaan worden gemaakt. Studio maakt wel een back-up waar dat kan, en vraagt nog steeds toestemming bij veel rijen en bij kosten.",
+        "duurLabel": "Hoe lang?",
+        "typ": "Typ het woord ‘volledig’ om te bevestigen",
+        "aan": "Zet volledige controle aan",
+        "fout": "Typ precies het woord ‘volledig’."
+      },
+      "duur": {
+        "uur1": "1 uur",
+        "uur2": "2 uur",
+        "minuten15": "15 minuten",
+        "uur4": "4 uur"
+      },
+      "balk": {
+        "tekst": "Volledige controle staat aan: de AI mag gegevens weghalen zonder te vragen. Nog {{tijd}}.",
+        "terug": "Terug naar Zelfstandig"
+      },
+      "noodknop": "Stop de AI direct",
+      "noodknopUitleg": "Stopt alles wat de AI nu doet en zet het niveau terug naar Voorzichtig.",
+      "noodknopKlaar": "Gestopt. Het niveau is weer Voorzichtig.",
+      "balkKort": "Database: {{niveau}}",
+      "nietGekoppeld": "Dit geldt zodra je bij ‘Wat je app onthoudt’ een Supabase-project hebt gekoppeld. Tot die tijd kan de AI niets in een online database doen."
+    },
+    "koppeling": {
+      "titel": "Online bewaren met Supabase",
+      "uitleg": "Supabase bewaart de gegevens van je app online, met inloggen en delen tussen apparaten. Je gebruikt je eigen Supabase-account; Studio host niets.",
+      "privacy": "Je gegevens lopen alleen tussen deze computer en je eigen Supabase-account.",
+      "gekoppeld": "Gekoppeld aan project ‘{{naam}}’ ({{regio}})",
+      "ontkoppel": "Project ontkoppelen",
+      "ontkoppelUitleg": "Studio vergeet alleen de koppeling met dit project. Er verandert niets bij Supabase en je gegevens blijven staan.",
+      "gepauzeerd": "Dit Supabase-project is gepauzeerd. Gratis projecten worden na een week zonder gebruik gepauzeerd.",
+      "wakker": "Project weer wakker maken",
+      "wakkerKlaar": "Het project wordt wakker gemaakt. Dit kan een paar minuten duren.",
+      "opstarten": "Het project wordt gemaakt. Dit duurt ongeveer twee minuten.",
+      "klaarVoor": "Wat de AI nu kan doen: tabellen bekijken, voorstellen doen voor wijzigingen en (met jouw toestemming) die uitvoeren. Sleutels ziet de AI nooit."
+    },
+    "wizard": {
+      "titel": "Kies waar je app zijn gegevens bewaart",
+      "uitleg": "Kies een bestaand Supabase-project, of maak een nieuw project.",
+      "bestaand": "Kies een bestaand project",
+      "nieuw": "Maak een nieuw project",
+      "naamLabel": "Naam van het nieuwe project",
+      "naamPlaats": "Bijvoorbeeld: Mijn webwinkel",
+      "regio": "Regio: Europa (standaard)",
+      "wachtwoord": "Studio maakt zelf een sterk wachtwoord voor de database en bewaart dat veilig op deze computer. Je hoeft het niet te onthouden.",
+      "wachttijd": "Het maken duurt ongeveer twee minuten. Je kunt intussen gewoon doorwerken.",
+      "maak": "Project maken",
+      "kies": "Dit project gebruiken",
+      "geenProjecten": "Je hebt nog geen Supabase-projecten. Maak hieronder een nieuw project.",
+      "laden": "Je projecten ophalen…",
+      "limiet": "Je Supabase-account zit aan de grens van het gratis plan (twee gratis projecten). Kies een bestaand project, of haal in Supabase een project weg.",
+      "klaar": "Klaar! Dit project bewaart nu de gegevens van je app."
+    },
+    "opslag": {
+      "titel": "Waar moet je app zijn gegevens bewaren?",
+      "uitleg": "Je app moet iets onthouden. Kies hoe.",
+      "lokaal": {
+        "naam": "Alleen op dit apparaat",
+        "uitleg": "Geen account nodig. De gegevens staan alleen op deze computer."
+      },
+      "online": {
+        "naam": "Online, met inloggen en delen tussen apparaten",
+        "uitleg": "Je gebruikt je eigen Supabase-account. Handig als anderen moeten inloggen of als je app op meer apparaten werkt."
+      },
+      "advies": "Advies: ‘Alleen op dit apparaat’ is het eenvoudigst en past bij een app die alleen jij gebruikt. Kies ‘Online’ als mensen moeten kunnen inloggen of gegevens moeten delen.",
+      "gekozen": "Gekozen: {{keuze}}",
+      "wijzig": "Kies opnieuw",
+      "opgeslagen": "Je keuze staat in PROJECT.md."
+    },
+    "gebruikers": {
+      "titel": "Gebruikers van je app",
+      "uitleg": "Mensen die zich hebben aangemeld bij je app.",
+      "geen": "Er zijn nog geen gebruikers.",
+      "email": "E-mail",
+      "sinds": "Aangemeld",
+      "laatst": "Laatst ingelogd"
+    },
+    "log": {
+      "titel": "Wat heeft de AI gedaan?",
+      "uitleg": "Alles wat de AI (of jij) in je database deed, met de mogelijkheid om het ongedaan te maken.",
+      "leeg": "De AI heeft nog niets in je database gedaan.",
+      "status": {
+        "uitgevoerd": "Uitgevoerd",
+        "geweigerd": "Niet uitgevoerd",
+        "mislukt": "Mislukt",
+        "afgebroken": "Afgebroken"
+      },
+      "ongedaan": "Maak ongedaan",
+      "ongedaanKlaar": "Ongedaan gemaakt.",
+      "isOngedaan": "Ongedaan gemaakt",
+      "nietOngedaan": "Dit kan niet worden teruggedraaid.",
+      "redenen": {
+        "niveau": "Je hebt het niet toegestaan.",
+        "niet_toegestaan": "Je hebt het niet toegestaan.",
+        "rls_uit": "Geweigerd door een veiligheidsregel: de beveiliging per rij mag niet uit.",
+        "beleid_alles_schrijfbaar": "Geweigerd door een veiligheidsregel: een regel die iedereen laat schrijven.",
+        "limiet_minuut": "Geweigerd: te veel wijzigingen per minuut.",
+        "limiet_sessie": "Geweigerd: te veel wijzigingen in deze sessie.",
+        "noodknop": "Afgebroken door de noodknop."
+      },
+      "niveauBij": "Niveau: {{niveau}}",
+      "backup": "Back-up gemaakt",
+      "klasse": {
+        "1": "Bekijken",
+        "2": "Toevoegen",
+        "3": "Gevaarlijk",
+        "4": "Kosten"
+      }
+    },
+    "leegOnline": {
+      "titel": "Je app onthoudt nog niets",
+      "uitleg": "Laat de AI voorstellen welke gegevens je app moet bewaren. Hij maakt een voorstel; jij beslist.",
+      "knop": "Laat de AI iets voorstellen",
+      "prompt": "Welke gegevens moet mijn app onthouden? Doe een voorstel voor tabellen in Supabase met `db_propose_migration` en leg het uit in gewone woorden. Voer nog niets uit."
+    },
+    "veiligheid": {
+      "titel": "Controle van je database",
+      "rls_uit": "Tabel ‘{{tabel}}’ is niet beveiligd per rij: iedereen met de publieke sleutel kan er bij.",
+      "geen_beleid": "Tabel ‘{{tabel}}’ is beveiligd maar heeft nog geen toegangsregel, dus de app kan er niets mee.",
+      "beleid_alles_schrijfbaar": "Op ‘{{tabel}}’ mag iedereen schrijven.",
+      "beleid_alles_leesbaar": "Op ‘{{tabel}}’ mag iedereen lezen.",
+      "alleGoed": "Je database lijkt veilig ingesteld.",
+      "herstel": "Laat de AI dit herstellen",
+      "herstelPrompt": "Controleer de beveiliging van mijn Supabase-database (`db_list_tables`, `db_get_advisors`) en los dit op: {{lijst}}. Doe een voorstel met `db_propose_migration`; gebruik beleid per rol met een voorwaarde en zet RLS nooit uit. Voer niets uit zonder mijn toestemming.",
+      "laden": "Je database controleren…"
+    },
+    "sql": {
+      "titel": "Database-opdrachten (SQL)",
+      "uitleg": "Voor mensen die SQL kennen. Opdrachten die iets veranderen vragen altijd eerst jouw bevestiging.",
+      "plaats": "Bijvoorbeeld: select * from klanten limit 10",
+      "voer": "Uitvoeren",
+      "resultaat": "Resultaat"
+    }
   },
   "logs": {
     "titel": "Logs",

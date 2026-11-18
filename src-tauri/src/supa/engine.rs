@@ -346,6 +346,7 @@ fn trim_value(v: &Value) -> Value {
 }
 
 mod admin;
+mod config;
 mod data;
 mod write;
 

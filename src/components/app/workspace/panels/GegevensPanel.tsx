@@ -3,7 +3,15 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { ArrowLeftIcon, DatabaseIcon, TableIcon } from "lucide-react";
 import { chatSend, dataOverview, dataRows, type DataFile, type TableRows } from "@/lib/api";
-import VerbindKnop from "@/components/app/connect/VerbindKnop";
+import { listen } from "@tauri-apps/api/event";
+import ActieLog from "@/components/app/supabase/ActieLog";
+import Controle from "@/components/app/supabase/Controle";
+import Gebruikers from "@/components/app/supabase/Gebruikers";
+import NiveauKiezer from "@/components/app/supabase/NiveauKiezer";
+import OpslagKeuze from "@/components/app/supabase/OpslagKeuze";
+import SupabaseKoppeling from "@/components/app/supabase/SupabaseKoppeling";
+import Tabellen from "@/components/app/supabase/Tabellen";
+import { useSupa } from "@/components/app/supabase/use-supa";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -12,7 +20,7 @@ import EmptyState from "./EmptyState";
 import Frame from "./Frame";
 
 /** Wat de app onthoudt: een overzicht van de gegevensbestanden (alleen lezen) met de eerste rijen van elke tabel. */
-export default function GegevensPanel() {
+function LokaalOverzicht() {
   const { t } = useTranslation();
   const w = useWorkspace();
   const [bestanden, setBestanden] = useState<DataFile[] | null>(null);
@@ -48,12 +56,7 @@ export default function GegevensPanel() {
   const leeg = bestanden && bestanden.length === 0;
 
   return (
-    <Frame titel={t("gegevens.titel")} uitleg={t("gegevens.uitleg")}>
-      <section className="space-y-2 rounded-xl border-2 border-border p-4" data-testid="gegevens-koppeling">
-        <h3 className="text-lg font-semibold">{t("koppelingen.supabase.naam")}</h3>
-        <p className="text-base text-muted-foreground">{t("koppelingen.plek.gegevens")}</p>
-        <VerbindKnop id="supabase" />
-      </section>
+    <>
       {w.signals?.needs_data && w.signals.needs_data_reden && (
         <Alert role="status" data-testid="gegevens-nodig" className="border-warning/50 bg-warning/10">
           <AlertDescription className="text-base text-foreground">{t("gegevens.nodig", { reden: w.signals.needs_data_reden })}</AlertDescription>
@@ -113,6 +116,44 @@ export default function GegevensPanel() {
           {leeg && <EmptyState icon={<DatabaseIcon className="size-10" />} titel={t("gegevens.leeg.titel")} uitleg={w.signals?.heeft_database ? t("gegevens.geenBestand") : t("gegevens.leeg.uitleg")} knop={t("gegevens.leeg.knop")} onKnop={() => void vraag()} />}
         </>
       )}
+    </>
+  );
+}
+
+/** Wat je app onthoudt: de keuze van de opslag, de koppeling met Supabase (met niveau en vangnet) en de lokale gegevens. */
+export default function GegevensPanel() {
+  const { t } = useTranslation();
+  const w = useWorkspace();
+  const { state } = useSupa(w.project.id);
+  const [keuze, setKeuze] = useState<"lokaal" | "online" | null>(null);
+  const [tick, setTick] = useState(0);
+  // Elke wijziging in de database (of het log) ververst de lijsten.
+  useEffect(() => {
+    let off: (() => void) | undefined;
+    let weg = false;
+    void listen<{ project_id: number }>("supa-changed", (e) => e.payload?.project_id === w.project.id && setTick((n) => n + 1))
+      .then((u) => (weg ? u() : (off = u)))
+      .catch(() => undefined);
+    return () => {
+      weg = true;
+      off?.();
+    };
+  }, [w.project.id]);
+  const online = keuze === "online" || state.gekoppeld;
+  return (
+    <Frame titel={t("gegevens.titel")} uitleg={t("gegevens.uitleg")}>
+      <OpslagKeuze projectId={w.project.id} onKeuze={setKeuze} />
+      {(online || keuze === null) && <SupabaseKoppeling projectId={w.project.id} />}
+      {state.gekoppeld && (
+        <>
+          <NiveauKiezer projectId={w.project.id} />
+          <Controle projectId={w.project.id} tick={tick} actief />
+          <Tabellen projectId={w.project.id} tick={tick + w.tick} />
+          <Gebruikers projectId={w.project.id} />
+          <ActieLog projectId={w.project.id} tick={tick} />
+        </>
+      )}
+      {keuze !== "online" && !state.gekoppeld && <LokaalOverzicht />}
     </Frame>
   );
 }

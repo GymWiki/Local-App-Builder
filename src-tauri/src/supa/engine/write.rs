@@ -134,7 +134,7 @@ impl Engine {
         };
         let a = analyze(sql);
         let level = self.level(project);
-        if a.read_only && actor == Actor::Ai {
+        if a.read_only {
             // Klasse 1: vrij, zonder bevestiging, en via het alleen-lezen-eindpunt (zodat een verborgen schrijfactie toch faalt).
             return match self.api(&self.secrets_for(&link), |c| c.query(&link.reference, sql, true)) {
                 Ok(v) => {

@@ -210,6 +210,17 @@ pub async fn supa_security_check(app: AppHandle, project_id: i64) -> Result<Valu
     .await
 }
 
+/// Vrije SQL van de gebruiker zelf (alleen onder "Voor gevorderden"). Lezen is vrij; schrijven vraagt altijd een bevestiging.
+#[tauri::command]
+pub async fn supa_sql(app: AppHandle, project_id: i64, sql: String) -> Result<Reply, String> {
+    blocking(&app, move |e| e.run_sql(project_id, "sql_venster", &sql, Actor::Gebruiker)).await
+}
+
+#[tauri::command]
+pub async fn supa_write_config(app: AppHandle, project_id: i64) -> Result<Reply, String> {
+    blocking(&app, move |e| e.write_project_config(project_id)).await
+}
+
 #[tauri::command]
 pub async fn supa_status(app: AppHandle, project_id: i64) -> Result<Reply, String> {
     blocking(&app, move |e| e.status(project_id)).await

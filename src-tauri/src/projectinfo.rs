@@ -507,10 +507,9 @@ pub fn table_rows(dir: &Path, rel: &str, tabel: &str, limiet: usize) -> Result<T
 
 const DOEL_KOP: &str = "## Doel";
 
-/// De korte beschrijving van het project: de tekst onder de kop "Doel" in PROJECT.md (leeg als die er niet is).
-pub fn description_get(dir: &Path) -> String {
+fn section_get(dir: &Path, kop: &str) -> String {
     let md = fs::read_to_string(dir.join("PROJECT.md")).unwrap_or_default();
-    let mut lines = md.lines().skip_while(|l| l.trim() != DOEL_KOP).skip(1);
+    let mut lines = md.lines().skip_while(|l| l.trim() != kop).skip(1);
     let mut out = vec![];
     for l in lines.by_ref() {
         if l.starts_with("## ") || l.starts_with("# ") {
@@ -521,6 +520,34 @@ pub fn description_get(dir: &Path) -> String {
     out.join("\n").trim().to_string()
 }
 
+/// Schrijft de tekst onder een kop in PROJECT.md en laat de rest ongemoeid. Een ontbrekende kop wordt toegevoegd.
+fn section_set(dir: &Path, kop: &str, text: &str) -> Result<()> {
+    let path = dir.join("PROJECT.md");
+    let md = fs::read_to_string(&path).unwrap_or_default();
+    let lines: Vec<&str> = md.lines().collect();
+    let out = if let Some(start) = lines.iter().position(|l| l.trim() == kop) {
+        let end = lines.iter().skip(start + 1).position(|l| l.starts_with("## ") || l.starts_with("# ")).map(|e| start + 1 + e).unwrap_or(lines.len());
+        let mut v: Vec<String> = lines[..=start].iter().map(|l| l.to_string()).collect();
+        v.push(String::new());
+        if !text.is_empty() {
+            v.push(text.to_string());
+            v.push(String::new());
+        }
+        v.extend(lines[end..].iter().map(|l| l.to_string()));
+        v.join("\n") + "\n"
+    } else {
+        let blok = if text.is_empty() { String::new() } else { format!("{text}\n") };
+        format!("{}\n{kop}\n\n{blok}", md.trim_end())
+    };
+    fs::write(path, out)?;
+    Ok(())
+}
+
+/// De korte beschrijving van het project: de tekst onder de kop "Doel" in PROJECT.md (leeg als die er niet is).
+pub fn description_get(dir: &Path) -> String {
+    section_get(dir, DOEL_KOP)
+}
+
 /// Schrijft de beschrijving onder de kop "Doel" en laat de rest van PROJECT.md ongemoeid. Een ontbrekende kop wordt toegevoegd.
 pub fn description_set(dir: &Path, text: &str) -> Result<()> {
     let text = text.trim();
@@ -528,38 +555,35 @@ pub fn description_set(dir: &Path, text: &str) -> Result<()> {
         return Err(invalid("De beschrijving is te lang (maximaal 600 tekens)."));
     }
     if text.lines().any(|l| l.starts_with('#')) {
-        return Err(invalid(
-            "Begin een regel niet met een #; dat zijn koppen in PROJECT.md.",
-        ));
+        return Err(invalid("Begin een regel niet met een #; dat zijn koppen in PROJECT.md."));
     }
-    let path = dir.join("PROJECT.md");
-    let md = fs::read_to_string(&path).unwrap_or_default();
-    let lines: Vec<&str> = md.lines().collect();
-    let new_block = if text.is_empty() {
-        String::new()
+    section_set(dir, DOEL_KOP, text)
+}
+
+const OPSLAG_KOP: &str = "## Gegevensopslag";
+const OPSLAG_LOKAAL: &str = "Alleen op dit apparaat (SQLite, geen account nodig).";
+const OPSLAG_ONLINE: &str = "Online met Supabase (eigen account van de gebruiker; inloggen en delen tussen apparaten).";
+
+/// Waar de app zijn gegevens bewaart: `lokaal`, `online` of `None` als er nog niet gekozen is.
+pub fn storage_get(dir: &Path) -> Option<&'static str> {
+    let t = section_get(dir, OPSLAG_KOP);
+    if t.starts_with("Alleen op dit apparaat") {
+        Some("lokaal")
+    } else if t.starts_with("Online met Supabase") {
+        Some("online")
     } else {
-        format!("{text}\n")
+        None
+    }
+}
+
+/// Legt de keuze vast in PROJECT.md, zodat de AI het ook weet.
+pub fn storage_set(dir: &Path, keuze: &str) -> Result<()> {
+    let tekst = match keuze {
+        "lokaal" => OPSLAG_LOKAAL,
+        "online" => OPSLAG_ONLINE,
+        _ => return Err(invalid("Onbekende keuze.")),
     };
-    let out = if let Some(start) = lines.iter().position(|l| l.trim() == DOEL_KOP) {
-        let end = lines
-            .iter()
-            .skip(start + 1)
-            .position(|l| l.starts_with("## ") || l.starts_with("# "))
-            .map(|e| start + 1 + e)
-            .unwrap_or(lines.len());
-        let mut v: Vec<String> = lines[..=start].iter().map(|l| l.to_string()).collect();
-        v.push(String::new());
-        if !new_block.is_empty() {
-            v.push(text.to_string());
-            v.push(String::new());
-        }
-        v.extend(lines[end..].iter().map(|l| l.to_string()));
-        v.join("\n") + "\n"
-    } else {
-        format!("{}\n{DOEL_KOP}\n\n{new_block}", md.trim_end())
-    };
-    fs::write(path, out)?;
-    Ok(())
+    section_set(dir, OPSLAG_KOP, tekst)
 }
 
 #[cfg(test)]
@@ -773,6 +797,18 @@ mod tests {
             "# App\n\n## Doel\n\n## Doelgroep\n\nMensen.\n\n## Status\n",
         );
         assert_eq!(description_get(d.path()), "");
+        // Gegevensopslag: een eigen kop, de rest blijft ongemoeid.
+        let o = tempfile::tempdir().unwrap();
+        fs::write(o.path().join("PROJECT.md"), "# P\n\n## Doel\n\nTuin\n\n## Notities\n\nx\n").unwrap();
+        assert_eq!(storage_get(o.path()), None);
+        storage_set(o.path(), "online").unwrap();
+        assert_eq!(storage_get(o.path()), Some("online"));
+        storage_set(o.path(), "lokaal").unwrap();
+        assert_eq!(storage_get(o.path()), Some("lokaal"));
+        let md = fs::read_to_string(o.path().join("PROJECT.md")).unwrap();
+        assert!(md.contains("## Doel") && md.contains("Tuin") && md.contains("## Notities") && md.contains("## Gegevensopslag"));
+        assert_eq!(md.matches("## Gegevensopslag").count(), 1);
+        assert!(storage_set(o.path(), "anders").is_err());
         description_set(d.path(), "  Een site voor mijn tuinbedrijf.  ").unwrap();
         assert_eq!(description_get(d.path()), "Een site voor mijn tuinbedrijf.");
         let md = fs::read_to_string(d.path().join("PROJECT.md")).unwrap();

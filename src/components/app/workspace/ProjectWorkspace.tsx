@@ -22,6 +22,7 @@ import HistoryPanel from "./panels/HistoryPanel";
 import HulpPanel from "./panels/HulpPanel";
 import LogsPanel from "./panels/LogsPanel";
 import OnlinePanel from "./panels/OnlinePanel";
+import NoodBalk from "@/components/app/supabase/NoodBalk";
 import SettingsView from "@/components/app/settings/SettingsView";
 import SchermenPanel from "./panels/SchermenPanel";
 import StartPanel from "./panels/StartPanel";
@@ -346,7 +347,9 @@ export default function ProjectWorkspace(props: Props) {
   return (
     <WorkspaceProvider value={ctx}>
       <div className="flex min-h-0 flex-1 flex-col" data-testid="workspace">
+        <NoodBalk projectId={project.id} />
         <WorkspaceBar
+          projectId={project.id}
           mcp={mcp}
           preview={preview}
           maximized={model ? isPreviewMaximized(model) : false}

@@ -37,6 +37,8 @@ export interface Signalen {
   aantalSchermen: number;
   /** Status van de gekoppelde diensten; ontbrekend = nog niet bekend of niet gekoppeld. */
   koppelingen: Koppelingen;
+  /** Het gekoppelde Supabase-project is gepauzeerd of heeft beveiligingsproblemen (tabellen zonder RLS enzovoort). */
+  databaseProbleem: boolean;
 }
 
 export const geenSignalen = (): Signalen => ({
@@ -52,6 +54,7 @@ export const geenSignalen = (): Signalen => ({
   aantalFotos: 0,
   aantalSchermen: 0,
   koppelingen: {},
+  databaseProbleem: false,
 });
 
 export type StapId = "idee" | "voorbeeld" | "aanpassen" | "online";
@@ -94,7 +97,7 @@ export function menuStatus(s: Signalen): Partial<Record<MenuId, ItemStatus>> {
     uiterlijk: { punt: s.kitGekozen ? "klaar" : "leeg" },
     bestanden: { punt: s.aantalFotos > 0 ? "klaar" : "leeg", telling: s.aantalFotos },
     // Een koppeling die niet meer werkt vraagt actie ("!"); een werkende koppeling telt als gezond.
-    gegevens: { punt: kapot(s, "supabase") || (s.needsData && !s.heeftDatabase) ? "actie" : s.heeftDatabase || s.koppelingen.supabase === "werkt" ? "klaar" : "leeg" },
+    gegevens: { punt: kapot(s, "supabase") || s.databaseProbleem || (s.needsData && !s.heeftDatabase) ? "actie" : s.heeftDatabase || s.koppelingen.supabase === "werkt" ? "klaar" : "leeg" },
     onlinezetten: { punt: s.checksFalen || kapot(s, "vercel") ? "actie" : s.online ? "klaar" : "leeg" },
     versies: { punt: kapot(s, "github") ? "actie" : s.aantalVersies > 0 ? "klaar" : "leeg", telling: s.aantalVersies },
   };
