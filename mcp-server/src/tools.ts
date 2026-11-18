@@ -131,6 +131,35 @@ export function registerTools(server: McpServer, ctx: ProjectCtx, record: (r: Ca
   const rt = ctx.runtime;
   if (!rt) return;
 
+  // Koppelingen met diensten van de gebruiker (GitHub, Vercel, Supabase). De AI ziet alleen óf iets gekoppeld is, nooit sleutels.
+  server.registerTool(
+    "koppelingen_status",
+    {
+      description:
+        "Toont welke diensten de gebruiker aan Studio heeft gekoppeld (github, vercel, supabase) en of die werken. Geeft nooit sleutels of accountgegevens. Is een dienst niet gekoppeld, zeg dat dan in gewone woorden en gebruik `koppeling_voorstellen`; probeer nooit zelf een sleutel te vragen of te gebruiken.",
+      inputSchema: {},
+    },
+    () =>
+      run("koppelingen_status", "", async () => {
+        const r = (await rt.hostCall("connect.status", {}, 15_000)) as { id: string; gekoppeld: boolean; werkt: boolean }[];
+        return JSON.stringify({ koppelingen: r });
+      }),
+  );
+
+  server.registerTool(
+    "koppeling_voorstellen",
+    {
+      description:
+        "Laat de gebruiker in het gesprek een knop ‘Verbinden’ zien voor een dienst die nodig is (github, vercel of supabase). De gebruiker verbindt altijd zelf; er gebeurt niets zonder zijn klik. Geef in `reden` één korte zin in gewone taal waarom dit nodig is.",
+      inputSchema: { dienst: z.enum(["github", "vercel", "supabase"]), reden: z.string().min(1).max(200) },
+    },
+    ({ dienst, reden }) =>
+      run("koppeling_voorstellen", `dienst=${dienst}`, async () => {
+        await rt.hostCall("connect.propose", { dienst, reden: reden.slice(0, 200) }, 15_000);
+        return "De knop staat in het gesprek. Wacht tot de gebruiker heeft verbonden; vraag nooit zelf om een sleutel.";
+      }),
+  );
+
   // Toestemmingen voor de chat-weergave: `claude --permission-prompt-tool mcp__studio__permission_prompt`.
   // Moet één tekstblok met JSON teruggeven en geen structuredContent (dus geen outputSchema), zie docs/cli-notes.md.
   server.registerTool(

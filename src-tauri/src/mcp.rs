@@ -368,6 +368,7 @@ impl McpManager {
                         | Some("checks")
                         | Some("git")
                         | Some("permission_request")
+                        | Some("host_request")
                         | Some("permission_expired") => sink(McpEvent::Runtime {
                             project_id,
                             payload: v.clone(),

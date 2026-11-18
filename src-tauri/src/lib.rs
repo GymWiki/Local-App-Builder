@@ -4,9 +4,11 @@ mod chat;
 mod claude_approval;
 mod cli;
 mod commands;
+mod connect;
 mod db;
 mod error;
 mod export;
+mod host;
 mod improve;
 mod instructions;
 mod layouts;
@@ -183,6 +185,7 @@ fn mcp_scripts(app: &tauri::App) -> Vec<PathBuf> {
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_opener::init())
         .setup(|app| {
             let dir = app.path().app_data_dir()?;
             std::fs::create_dir_all(&dir)?;
@@ -200,6 +203,42 @@ pub fn run() {
                     let _ = handle.emit("pty-exit", e);
                 }
             })));
+
+            // Koppelingen met diensten: kluis (OS-keychain), vaste lijst hosts, status in SQLite.
+            {
+                use connect::{config::Config, http::UreqHttp, manager::Manager as ConnManager, providers, store, vault};
+                struct DbSource(tauri::AppHandle);
+                impl store::ConnSource for DbSource {
+                    fn with(&self, f: &mut dyn FnMut(&rusqlite::Connection)) {
+                        if let Ok(c) = self.0.state::<commands::Db>().conn() {
+                            f(&c);
+                        }
+                    }
+                }
+                // Alleen in een ontwikkelbouw en alleen met opzet: een kluis in het geheugen (voor machines zonder keychain).
+                let secrets: Arc<dyn vault::SecretStore> = if cfg!(debug_assertions) && std::env::var("STUDIO_VAULT").as_deref() == Ok("memory") {
+                    Arc::new(vault::MemoryStore::default())
+                } else {
+                    Arc::new(vault::KeyringStore)
+                };
+                let notify = app.handle().clone();
+                let manager = ConnManager::new(
+                    providers::all(),
+                    secrets,
+                    Arc::new(UreqHttp::new(providers::allowed_hosts())),
+                    Arc::new(store::SqliteMeta(Box::new(DbSource(app.handle().clone())))),
+                    Config::embedded(),
+                    Arc::new(move || {
+                        let _ = notify.emit("connect-changed", ());
+                    }),
+                );
+                app.manage(manager.clone());
+                // Verversen op de achtergrond: elke minuut kijken of een token bijna verloopt.
+                std::thread::spawn(move || loop {
+                    std::thread::sleep(std::time::Duration::from_secs(60));
+                    manager.refresh_due();
+                });
+            }
 
             let handle = app.handle().clone();
             let sink: mcp::McpSink = Arc::new(move |ev| match ev {
@@ -240,6 +279,17 @@ pub fn run() {
                                     h.state::<ChatManager>()
                                         .on_permission_request(project_id, &dir, &p);
                                 }
+                            });
+                        }
+                        Some("host_request") => {
+                            let (h, p) = (handle.clone(), payload.clone());
+                            std::thread::spawn(move || {
+                                let res = host::handle(&h, project_id, p["cmd"].as_str().unwrap_or(""), &p["args"]);
+                                let answer = match res {
+                                    Ok(v) => serde_json::json!({ "id": p["id"], "ok": true, "result": v }),
+                                    Err(e) => serde_json::json!({ "id": p["id"], "ok": false, "error": e }),
+                                };
+                                let _ = h.state::<McpManager>().call(project_id, "host.answer", answer, std::time::Duration::from_secs(5));
                             });
                         }
                         Some("permission_expired") => {
@@ -336,6 +386,14 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            connect::commands::connect_list,
+            connect::commands::connect_start,
+            connect::commands::connect_paste,
+            connect::commands::connect_cancel,
+            connect::commands::connect_test,
+            connect::commands::connect_test_all,
+            connect::commands::connect_disconnect,
+            connect::commands::connect_open,
             commands::list_projects,
             commands::create_project,
             commands::delete_project,
