@@ -1,3 +1,4 @@
+import { samenvattingChecks, ontdubbel, logsKort } from "./uitvoer.js";
 import { securityCheck } from "./security.js";
 import { execFile } from "node:child_process";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
@@ -285,22 +286,21 @@ export function registerTools(server: McpServer, ctx: ProjectCtx, record: (r: Ca
     "run_checks",
     {
       description:
-        "Draait de checks van het project en geeft per stap geslaagd/mislukt met de relevante foutregels (max 200). Heeft het project een gekozen UI-kit, dan draait ook de stap ‘kit’: die meldt losse kleuren, losse pixelwaarden, gewone HTML-onderdelen waar de kit een component voor heeft en imports uit andere UI-bibliotheken (status ‘warned’ = waarschuwing, ‘failed’ = geblokkeerd; herstel ze). Bij een project met lint-/build-/test-scripts (package.json of studio.json) draaien die; bij een statisch project (index.html) controleert het: html (aanwezig), links (geen kapotte lokale verwijzingen) en console (geen console- of netwerkfouten in de preview). Roep dit aan na elke wijziging.",
-      inputSchema: { steps: z.array(z.enum(["lint", "build", "test", "kit", "html", "links", "console"])).optional() },
+        "Draait de checks van het project en geeft per stap geslaagd/mislukt, bij een fout de eerste echte fout met bestand en regel en hooguit 12 relevante regels. Vraag uitgebreid=true alleen als je de hele log nodig hebt. Heeft het project een gekozen UI-kit, dan draait ook de stap ‘kit’: die meldt losse kleuren, losse pixelwaarden, gewone HTML-onderdelen waar de kit een component voor heeft en imports uit andere UI-bibliotheken (status ‘warned’ = waarschuwing, ‘failed’ = geblokkeerd; herstel ze). Bij een project met lint-/build-/test-scripts (package.json of studio.json) draaien die; bij een statisch project (index.html) controleert het: html (aanwezig), links (geen kapotte lokale verwijzingen) en console (geen console- of netwerkfouten in de preview). Roep dit aan na elke wijziging.",
+      inputSchema: {
+        steps: z.array(z.enum(["lint", "build", "test", "kit", "html", "links", "console"])).optional(),
+        uitgebreid: z.boolean().optional(),
+      },
     },
-    ({ steps }) =>
-      run("run_checks", `steps=${(steps ?? ["lint", "build", "test"]).join(",")}`, async () => {
-        const r = await rt.runChecks(steps);
-        const head = r.ok ? "ALLE CHECKS GESLAAGD" : "CHECKS MISLUKT";
-        return `${head}\n` + JSON.stringify(r, null, 2);
-      }),
+    ({ steps, uitgebreid }) =>
+      run("run_checks", `steps=${(steps ?? ["lint", "build", "test"]).join(",")}`, async () => samenvattingChecks(await rt.runChecks(steps), uitgebreid === true)),
   );
 
   server.registerTool(
     "get_preview_screenshot",
     {
       description:
-        "Screenshot (JPEG) van de preview, genomen met een onzichtbare browser. Werkt voor statische projecten (index.html) en dev-servers; de preview moet draaien (Studio start hem vanzelf). Optioneel viewport (desktop 1280x800 of mobile 390x844), een pad binnen de preview (bijv. /over) en fullPage.",
+        "Screenshot (JPEG) van de preview, genomen met een onzichtbare browser. Werkt voor statische projecten (index.html) en dev-servers; de preview moet draaien (Studio start hem vanzelf). Een screenshot kost aanzienlijk meer dan tekst: neem er een na een zichtbare wijziging of als je het resultaat echt moet zien, niet na elke kleine stap. Optioneel viewport (desktop 1280x800 of mobile 390x844), een pad binnen de preview (bijv. /over) en fullPage (hoger dan 2400 px wordt afgekapt).",
       inputSchema: {
         viewport: z.enum(["desktop", "mobile"]).default("desktop"),
         path: z.string().max(500).optional(),
@@ -321,26 +321,26 @@ export function registerTools(server: McpServer, ctx: ProjectCtx, record: (r: Ca
     "get_console_errors",
     {
       description:
-        "Console-errors, uncaught exceptions en mislukte netwerkverzoeken van de preview sinds de vorige aanroep. Laadt de pagina standaard opnieuw. Let op: dit is een onzichtbare browser; handelingen die de gebruiker zelf in de preview doet zie je hier niet.",
+        "Console-errors, uncaught exceptions en mislukte netwerkverzoeken van de preview sinds de vorige aanroep, ontdubbeld met een telling. Laadt de pagina standaard opnieuw. Let op: dit is een onzichtbare browser; handelingen die de gebruiker zelf in de preview doet zie je hier niet.",
       inputSchema: { reload: z.boolean().default(true) },
     },
     ({ reload }) =>
       run("get_console_errors", `reload=${reload}`, async () => {
         const e = await rt.observer.consoleErrors(reload);
-        return e.length ? JSON.stringify(e, null, 2) : "Geen console- of netwerkfouten sinds de vorige aanroep.";
+        return ontdubbel(e);
       }),
   );
 
   server.registerTool(
     "get_dev_logs",
     {
-      description: "De laatste regels uitvoer van het dev-proces (standaard 100, max 500).",
-      inputSchema: { lines: z.number().int().min(1).max(500).default(100) },
+      description: "De laatste regels uitvoer van het dev-proces (standaard 60, max 500). Bij veel uitvoer eerst de foutregels.",
+      inputSchema: { lines: z.number().int().min(1).max(500).default(60) },
     },
     ({ lines }) =>
       run("get_dev_logs", `lines=${lines}`, async () => {
         const st = rt.dev.status();
-        const logs = rt.dev.logs.last(lines);
+        const logs = lines <= 20 ? rt.dev.logs.last(lines) : logsKort(rt.dev.logs.last(500), lines);
         const plan = rt.getPlan();
         if (!logs.length && plan?.kind === "static") {
           return `Statische preview${plan.staticUrl ? ` op ${plan.staticUrl}` : ""}: er is geen dev-proces en dus geen dev-logs. Gebruik get_console_errors voor fouten in de browser.`;

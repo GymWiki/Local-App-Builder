@@ -92,7 +92,8 @@ en na elk deel opnieuw met een ander label (`na-deel-1` …). De uitvoer komt in
 |---|---|
 | 0 Meten | meetinstrument + tests + onderzoek klaar; taakmeting wacht op de eigenaar (kost AI-gebruik) |
 | 1 Projectkaart | klaar: index, kaart, zes MCP-tools, instructie (zie §5); taakmeting wacht op de eigenaar |
-| 2–8 | nog niet gedaan |
+| 3 Slimme uitvoer | klaar (zie §6); taakmeting wacht op de eigenaar |
+| 2, 4–8 | nog niet gedaan |
 
 ## 5. Deel 1 — de projectkaart
 
@@ -109,3 +110,19 @@ en na elk deel opnieuw met een ander label (`na-deel-1` …). De uitvoer komt in
 **Wat deze stap nog niet bewijst:** of de AI de tools ook daadwerkelijk gebruikt en daardoor minder leest. Dat zie je pas in de taakmeting (§2c): kijk daar naar "bestanden gelezen" en "tool-aanroepen" vóór en na.
 
 **Nog niet gedaan uit deel 1:** de schakelaar voor Graphify (de licentie is tegenstrijdig gemeld, zie §3; Studio werkt zonder), en weergave van de index-voortgang in de interface (komt bij deel 7).
+
+## 6. Deel 3 — zuinige uitvoer van tools
+
+Alles in `mcp-server/src/uitvoer.ts` (pure functies, met tests in `mcp-server/test/uitvoer.test.ts`).
+
+| Tool | Voorheen | Nu |
+|---|---|---|
+| `run_checks` | volledige JSON met ingesprongen regels, tot 200 regels per stap | korte samenvatting per stap; bij een fout de **eerste echte fout** (liefst met bestand en regel) en hooguit 12 relevante regels; de hele log alleen met `uitgebreid=true` |
+| `get_console_errors` | alle meldingen als ingesprongen JSON | ontdubbeld met telling ("50×"), eerste 10 verschillende meldingen |
+| `get_dev_logs` | laatste 100 regels | standaard 60; bij veel uitvoer eerst de foutregels met context plus de staart |
+| `get_preview_screenshot` | hele pagina onbegrensd | hele pagina afgekapt op 2.400 px; de beschrijving en de instructie zeggen dat een screenshot meer kost dan tekst en alleen na een zichtbare wijziging nodig is (voorheen: "na elke wijziging") |
+
+Voorbeeld uit de test: een mislukte build met 150 logregels geeft nu minder dan 30 regels antwoord.
+
+**Wat dit niet is:** een gemeten besparing in tokens. De verkorting is in regels aangetoond; de echte winst zie je in de taakmeting (§2c).
+**Niet gedaan:** het verkleinen van de afbeelding zelf (de browser levert al JPEG kwaliteit 70; verder verkleinen vraagt een afbeeldingsbibliotheek of een andere viewport, en dat kan de leesbaarheid raken), en "lezen op regelbereik" door onze eigen tool: de AI leest bestanden met de ingebouwde leestool van de CLI, die wij niet kunnen vervangen. We sturen daar via de kaart (regelnummers bij elk symbool) en de instructie op aan.

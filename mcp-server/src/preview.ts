@@ -7,6 +7,9 @@ export interface ConsoleEntry {
   at: string;
 }
 
+/** Hoger dan dit knippen we een schermafbeelding van de hele pagina af (pixels). */
+export const MAX_FULLPAGE_HOOGTE = 2400;
+
 export type Viewport = "desktop" | "mobile";
 const VIEWPORTS = {
   desktop: { viewport: { width: 1280, height: 800 } },
@@ -143,8 +146,16 @@ export class PreviewObserver {
       this.attach(page, new URL(base).origin);
       await this.goto(page, target.toString());
       // JPEG houdt het resultaat klein genoeg voor de uitvoerlimiet van de AI-CLI.
-      const data: Buffer = await page.screenshot({ type: "jpeg", quality: 70, fullPage: opts.fullPage ?? false, timeout: NAV_TIMEOUT });
-      return { data, width: vp.viewport.width, height: vp.viewport.height, url: target.toString() };
+      // Een volledige pagina kan enorm lang zijn; dat kost veel AI-gebruik zonder dat het meer helpt. We kappen af op MAX_FULLPAGE_HOOGTE.
+      let hoogte: number = vp.viewport.height;
+      let clip: { x: number; y: number; width: number; height: number } | undefined;
+      if (opts.fullPage) {
+        const volledig = await page.evaluate(() => document.documentElement.scrollHeight).catch(() => vp.viewport.height);
+        hoogte = Math.max(vp.viewport.height, Math.min(volledig, MAX_FULLPAGE_HOOGTE));
+        if (volledig > MAX_FULLPAGE_HOOGTE) clip = { x: 0, y: 0, width: vp.viewport.width, height: MAX_FULLPAGE_HOOGTE };
+      }
+      const data: Buffer = await page.screenshot({ type: "jpeg", quality: 70, fullPage: opts.fullPage ?? false, ...(clip ? { clip } : {}), timeout: NAV_TIMEOUT });
+      return { data, width: vp.viewport.width, height: hoogte, url: target.toString() };
     } finally {
       await ctx.close().catch(() => undefined);
     }

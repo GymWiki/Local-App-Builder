@@ -397,6 +397,12 @@ pub fn classify(tool: &str, input: &Value, project_dir: &Path) -> Classified {
                     | "get_preview_screenshot"
                     | "koppelingen_status"
                     | "koppeling_voorstellen"
+                    | "project_kaart"
+                    | "zoek_symbool"
+                    | "bestanden_voor_taak"
+                    | "afhankelijkheden"
+                    | "schema_database"
+                    | "kit_componenten"
             );
             c.kind = match name {
                 "run_checks" => ActionKind::RunChecks,
@@ -407,6 +413,7 @@ pub fn classify(tool: &str, input: &Value, project_dir: &Path) -> Classified {
                 "git_list_checkpoints" => ActionKind::ListVersions,
                 "read_project_notes" | "project_status" => ActionKind::ReadNotes,
                 "update_project_notes" => ActionKind::UpdateNotes,
+                "project_kaart" | "zoek_symbool" | "bestanden_voor_taak" | "afhankelijkheden" | "schema_database" | "kit_componenten" => ActionKind::Search,
                 _ => ActionKind::Other,
             };
             if name == "git_checkpoint" {
@@ -492,6 +499,14 @@ mod tests {
             (ActionKind::RunCommand, false, false)
         );
         assert_eq!(bash_info("").kind, ActionKind::RunCommand);
+    }
+
+    #[test]
+    fn kaarttools_zijn_alleen_lezen_en_tellen_als_zoeken() {
+        for n in ["project_kaart", "zoek_symbool", "bestanden_voor_taak", "afhankelijkheden", "schema_database", "kit_componenten"] {
+            let c = classify(&format!("mcp__studio__{n}"), &json!({}), &dir());
+            assert!(c.read_only && c.kind == ActionKind::Search, "{n}");
+        }
     }
 
     #[test]
