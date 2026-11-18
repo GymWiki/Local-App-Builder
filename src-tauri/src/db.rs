@@ -12,6 +12,7 @@ const MIGRATIONS: &[&str] = &[
     include_str!("../migrations/0005_indeling.sql"),
     include_str!("../migrations/0006_koppelingen.sql"),
     include_str!("../migrations/0007_supabase.sql"),
+    include_str!("../migrations/0008_github.sql"),
 ];
 
 pub fn open(path: &Path) -> Result<Connection> {
@@ -99,6 +100,7 @@ mod tests {
                 "check_runs",
                 "connections",
                 "db_actions",
+                "github_links",
                 "mcp_calls",
                 "project_layouts",
                 "projects",

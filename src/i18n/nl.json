@@ -1843,5 +1843,181 @@
       },
       "stap2": "Klik op ‘Generate new token’ en geef hem de naam ‘Studio’. Kopieer daarna de sleutel; je ziet hem maar één keer. Let op: een gewone sleutel geeft toegang tot je hele Supabase-account."
     }
+  },
+  "github": {
+    "titel": "Back-up op GitHub",
+    "nietGekoppeld": "Bewaar een kopie van je project op je eigen GitHub-account. Dan is je werk veilig als er iets met je computer gebeurt. Eerst verbind je GitHub.",
+    "privacy": "Er gaat niets naar GitHub zonder dat jij erom vraagt. Het blijft in jouw account.",
+    "privaat": "privé",
+    "openbaar": "openbaar",
+    "laatste": "Laatste back-up: {{wanneer}}",
+    "nogNiet": "Er is nog geen back-up gemaakt.",
+    "nieuwGeen": "Alles staat al in de back-up.",
+    "nieuwEen": "1 nieuwe versie sinds de laatste back-up.",
+    "nieuwMeer": "{{aantal}} nieuwe versies sinds de laatste back-up.",
+    "bijwerken": "Back-up bijwerken",
+    "openRepo": "Open op GitHub",
+    "voortgang": "Voortgang van de back-up",
+    "klaarMelding": "De back-up is bijgewerkt.",
+    "auto": "Maak automatisch een back-up na elke opgeslagen versie",
+    "aiVraagt": "De AI vraagt eerst of hij een back-up mag maken",
+    "alleenVooruit": "Studio stuurt alleen nieuwe versies erbij. Er wordt nooit iets op GitHub overschreven of verwijderd.",
+    "ontkoppel": "Back-up loskoppelen (de kopie op GitHub blijft staan)",
+    "tijd": {
+      "zojuist": "zojuist",
+      "minuten": "{{aantal}} minuten geleden",
+      "uren": "{{aantal}} uur geleden",
+      "dagen": "{{aantal}} dagen geleden"
+    },
+    "stap": {
+      "vergelijken": "Kijken wat er al online staat…",
+      "versturen": "Versies worden verstuurd…",
+      "bezig": "Bezig…"
+    },
+    "eerste": {
+      "uitleg": "Maak een kopie van dit project op GitHub. Zo blijft je werk bewaard, ook als je computer kapotgaat.",
+      "punt1": "Wat online komt: je bestanden en alle opgeslagen versies.",
+      "punt2": "Wachtwoorden, sleutels en gegevensbestanden gaan niet mee; Studio controleert dat vooraf.",
+      "punt3": "Alles blijft in je eigen GitHub-account.",
+      "naam": "Naam van de kopie",
+      "naamHulp": "Alleen kleine letters, cijfers en streepjes.",
+      "naamVrij": "Deze naam is nog vrij.",
+      "naamBezet": "Deze naam is al in gebruik op jouw GitHub. Kies een andere naam.",
+      "naamOngeldig": "Gebruik alleen kleine letters, cijfers en streepjes.",
+      "zichtbaarheid": "Wie mag de kopie zien?",
+      "privaat": "Privé (aanbevolen)",
+      "privaatUitleg": "alleen jij kunt het zien.",
+      "openbaar": "Openbaar",
+      "openbaarUitleg": "iedereen op internet kan het zien en kopiëren.",
+      "openbaarWaarschuwing": "Bij een openbare kopie kan iedereen je bestanden lezen, ook wat er in eerdere versies stond. Studio controleert strenger op geheimen, maar kan niet alles zien.",
+      "openbaarSnap": "Ik snap dat iedereen dit kan zien",
+      "knop": "Back-up op GitHub maken"
+    },
+    "uiteen": {
+      "uiteengelopen": {
+        "titel": "De versies zijn uiteengelopen",
+        "uitleg": "Er staan op GitHub versies die jij hier niet hebt, en jij hebt versies die daar nog niet staan. Studio doet daarom niets, zodat er niets kwijtraakt."
+      },
+      "online_nieuwer": {
+        "titel": "Op GitHub staat iets nieuwers",
+        "uitleg": "Er staan op GitHub nieuwere versies dan op deze computer. Studio doet daarom niets, zodat er niets kwijtraakt."
+      },
+      "opties": "Dit kun je doen:",
+      "optieNiets": "Niets doen. Je werk blijft veilig op deze computer.",
+      "optieAi": "De AI de verschillen laten samenvoegen (jij kijkt het na).",
+      "optieNieuw": "Een nieuwe back-up maken onder een andere naam (eerst loskoppelen).",
+      "vraagAi": "Vraag de AI om de verschillen samen te voegen",
+      "prompt": "De versies van mijn project op GitHub en op mijn computer zijn uiteengelopen. Haal de nieuwe versies van GitHub op en voeg ze voorzichtig samen met mijn werk. Gebruik nooit een geforceerde push en herschrijf geen geschiedenis. Leg in gewone woorden uit wat je doet en vraag mij bij twijfel."
+    },
+    "uitkomst": {
+      "back_up_klaar": "Back-up bijgewerkt: {{aantal}} nieuwe versies.",
+      "back_up_klaar_een": "Back-up bijgewerkt: 1 nieuwe versie.",
+      "al_bijgewerkt": "De back-up was al bijgewerkt. Er was niets nieuws.",
+      "niet_ingesteld": "De back-up is nog niet ingesteld.",
+      "niet_bevestigd": "Je hebt de back-up niet toegestaan. Er is niets verstuurd.",
+      "uiteengelopen": "De versies zijn uiteengelopen. Er is niets verstuurd.",
+      "online_nieuwer": "Op GitHub staat iets nieuwers. Er is niets verstuurd.",
+      "geheimen": "Er staan geheimen in je bestanden. Er is niets verstuurd.",
+      "te_groot": "Sommige bestanden zijn te groot voor GitHub. Er is niets verstuurd.",
+      "geen_versies": "Er is nog geen opgeslagen versie. Sla eerst een versie op.",
+      "bezig": "Er loopt al een back-up. Even geduld.",
+      "al_gekoppeld": "Dit project heeft al een back-up.",
+      "naam_ongeldig": "Deze naam kan niet. Gebruik kleine letters, cijfers en streepjes.",
+      "openbaar_bevestig": "Bevestig eerst dat je de kopie openbaar wilt maken.",
+      "andere_tak": "Je werkt nu op een andere tak dan de back-up. Er is niets verstuurd.",
+      "naam_bezet": "Deze naam is al in gebruik op jouw GitHub. Kies een andere naam.",
+      "geen_rechten": "GitHub geeft Studio hier geen toestemming voor. Maak de koppeling opnieuw en geef toegang tot je repositories.",
+      "ongeldig_token": "De koppeling met GitHub werkt niet meer. Verbind opnieuw.",
+      "geen_internet": "Geen verbinding met GitHub. Controleer je internet en probeer het opnieuw.",
+      "time_out": "GitHub reageerde niet op tijd. Probeer het later opnieuw.",
+      "te_veel_verzoeken": "GitHub vraagt om even te wachten. Probeer het over een paar minuten opnieuw.",
+      "afgewezen": "GitHub heeft de versies niet aangenomen. Er is niets overschreven.",
+      "onverwacht": "Er ging iets mis. Er is niets overschreven. Probeer het later opnieuw.",
+      "onbekend": "Er ging iets mis. Er is niets overschreven."
+    },
+    "scan": {
+      "regel": "regel {{regel}}",
+      "groot": "{{mb}} MB, te groot",
+      "historie": "(staat in een eerdere versie)",
+      "uitleg": "Studio heeft niets verstuurd. In deze bestanden staat iets wat geheim hoort te blijven, zoals een sleutel of wachtwoord. Staat het online, dan kan een ander het gebruiken.",
+      "uitlegGroot": "Studio heeft niets verstuurd. Deze bestanden zijn groter dan GitHub toestaat (100 MB). Verplaats of verwijder ze en probeer het opnieuw.",
+      "openbaarStrenger": "Bij een openbare kopie controleert Studio strenger.",
+      "herstel": "Laat de AI dit herstellen",
+      "historieUitleg": "De back-up is gemaakt, maar in eerdere versies stond iets wat geheim hoort te zijn. Dat wordt niet automatisch verwijderd. Vervang de sleutel of het wachtwoord door een nieuwe, want de oude kan nu ook in je GitHub-kopie staan.",
+      "grootUitleg": "Deze bestanden zijn erg groot (meer dan 50 MB). GitHub wordt er traag van. Overweeg ze buiten het project te bewaren.",
+      "gitignore": "Studio heeft {{aantal}} regels toegevoegd aan .gitignore, zodat geheimen en tijdelijke bestanden niet meegaan.",
+      "prompt": "Studio wil een back-up naar GitHub sturen, maar vond geheimen of te grote bestanden in: {{lijst}}. Haal de geheimen uit die bestanden en bewaar ze veilig buiten het project (bijvoorbeeld als omgevingsvariabele). Zorg dat zulke bestanden in .gitignore staan en sla een nieuwe versie op zonder geheimen. Vertel mij ook welke sleutels of wachtwoorden ik moet vervangen, want die kunnen al in eerdere versies staan. Gebruik nooit een geforceerde push en herschrijf geen geschiedenis. Leg alles in gewone woorden uit.",
+      "soort": {
+        "onbekend": "Mogelijk een geheim",
+        "privesleutel": "Een privésleutel",
+        "github_token": "Een GitHub-token",
+        "aws_sleutel": "Een AWS-sleutel",
+        "anthropic_sleutel": "Een sleutel van Anthropic",
+        "api_sleutel": "Een API-sleutel",
+        "stripe_sleutel": "Een Stripe-sleutel",
+        "slack_token": "Een Slack-token",
+        "google_sleutel": "Een Google-sleutel",
+        "supabase_sleutel": "Een geheime Supabase-sleutel",
+        "supabase_token": "Een Supabase-toegangstoken",
+        "vercel_token": "Een Vercel-token",
+        "jwt_token": "Een geheime inlogsleutel (token)",
+        "npm_token": "Een npm-token",
+        "geheim_in_code": "Een geheim in de code",
+        "wachtwoord_in_code": "Een vast wachtwoord in de code",
+        "wachtwoord_in_adres": "Een wachtwoord in een internetadres",
+        "env_bestand": "Een .env-bestand met instellingen en geheimen",
+        "sleutelbestand": "Een sleutelbestand",
+        "certificaat": "Een certificaat of ondertekeningsbestand",
+        "inloggegevens": "Een bestand met inloggegevens",
+        "database_bestand": "Een lokaal gegevensbestand"
+      }
+    },
+    "ophalen": {
+      "knopHome": "Ophalen van GitHub",
+      "titel": "Project ophalen van GitHub",
+      "uitleg": "Kies een project uit je eigen GitHub. Studio zet een kopie in een nieuwe map op je computer. Er wordt niets op GitHub gewijzigd.",
+      "eerstVerbinden": "Verbind eerst je GitHub-account om je projecten te zien.",
+      "zoek": "Zoek in je projecten",
+      "laden": "Je projecten worden opgehaald…",
+      "geen": "Geen projecten gevonden.",
+      "knop": "Project ophalen",
+      "bezig": "Bezig met ophalen…",
+      "klaar": "‘{{naam}}’ staat nu op je computer en in Studio.",
+      "open": "Project openen",
+      "nietTitel": "Dit herkent Studio nog niet:",
+      "soort": {
+        "static": "Dit is een gewone website. Studio kan er meteen een voorbeeld van tonen.",
+        "node": "Dit is een webproject met een eigen startcommando. Studio kan er een voorbeeld van tonen zodra je het startcommando goedkeurt.",
+        "config": "Dit project heeft een eigen instellingenbestand (studio.json). Studio vraagt eerst jouw goedkeuring voordat er iets wordt gestart.",
+        "flutter": "Dit is een Flutter-app. Een voorbeeld in Studio is hier nog niet mogelijk.",
+        "unsupported": "Studio herkent dit soort project nog niet helemaal. Je kunt er wel mee werken met de AI.",
+        "empty": "Deze map bevat nog niets wat Studio kan tonen."
+      },
+      "niet": {
+        "geen_studio_json": "Er is geen studio.json. Studio weet daarom niet hoe het project gestart en gecontroleerd wordt. De AI kan dat voor je instellen.",
+        "studio_json_onleesbaar": "Het bestand studio.json is niet leesbaar. Laat de AI het herstellen.",
+        "geen_voorbeeld": "Studio kan hier nog geen voorbeeld van tonen.",
+        "geen_project_md": "Er was geen PROJECT.md. Studio heeft een leeg exemplaar gemaakt dat je samen met de AI kunt invullen."
+      },
+      "fout": {
+        "naam_ongeldig": "Deze naam kan niet als mapnaam worden gebruikt.",
+        "locatie_bestaat_niet": "De gekozen locatie bestaat niet.",
+        "map_bestaat": "Er staat al een map met deze naam op die plek. Kies een andere locatie.",
+        "niet_gevonden": "Dit project is niet gevonden of je hebt er geen toegang toe.",
+        "geen_rechten": "GitHub geeft Studio hier geen toegang toe. Maak de koppeling opnieuw.",
+        "geen_internet": "Geen verbinding met GitHub. Controleer je internet.",
+        "time_out": "GitHub reageerde niet op tijd. Probeer het later opnieuw.",
+        "te_veel_verzoeken": "GitHub vraagt om even te wachten. Probeer het later opnieuw.",
+        "onverwacht": "Het ophalen is niet gelukt. Er is niets gewijzigd op GitHub."
+      }
+    }
+  },
+  "bevestig": {
+    "knopJa": "Toestaan",
+    "knopNee": "Niet toestaan",
+    "github_backup": {
+      "titel": "Mag de AI een back-up maken?",
+      "uitleg": "De AI wil nieuwe versies van je project naar je GitHub-kopie {{repo}} sturen. Er wordt niets overschreven of verwijderd."
+    }
   }
 }

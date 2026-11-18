@@ -570,3 +570,57 @@ export const supaStatus = (projectId: number) => invoke<SupaReply>("supa_status"
 export const supaWriteConfig = (projectId: number) => invoke<SupaReply>("supa_write_config", { projectId });
 export const projectStorageGet = (projectId: number) => invoke<"lokaal" | "online" | null>("project_storage_get", { projectId });
 export const projectStorageSet = (projectId: number, keuze: "lokaal" | "online") => invoke<void>("project_storage_set", { projectId, keuze });
+
+// ---------- GitHub-back-up ----------
+// Het token blijft in Rust. De frontend krijgt alleen codes en gewone gegevens.
+export interface GhLink {
+  eigenaar: string;
+  repo: string;
+  privaat: boolean;
+  url: string;
+  tak: string;
+  laatste: number | null;
+  laatste_aantal: number | null;
+  auto: boolean;
+  ai_vraagt: boolean;
+  uiteengelopen: "uiteengelopen" | "online_nieuwer" | null;
+  probleem: string | null;
+}
+export interface GhState {
+  werkt: boolean;
+  account: string | null;
+  link: GhLink | null;
+  versies: number;
+  nieuw: number;
+  bezig: boolean;
+}
+/** Het resultaat van een actie; de tekst staat in nl.json (github.uitkomst.<code>). */
+export interface GhUitkomst {
+  status: "uitgevoerd" | "geweigerd" | "mislukt" | "wacht";
+  code: string;
+  params: Record<string, unknown>;
+}
+export interface GhRepo {
+  eigenaar: string;
+  naam: string;
+  privaat: boolean;
+  beschrijving: string;
+  bijgewerkt: string;
+}
+export const githubState = (projectId: number) => invoke<GhState>("github_state", { projectId });
+export const githubSuggestName = (projectId: number, naam?: string) => invoke<{ naam: string; geldig?: boolean; vrij?: boolean | null; fout?: string }>("github_suggest_name", { projectId, naam: naam ?? null });
+export const githubFirstBackup = (projectId: number, naam: string, openbaar: boolean, openbaarBevestigd: boolean) => invoke<GhUitkomst>("github_first_backup", { projectId, naam, openbaar, openbaarBevestigd });
+export const githubBackup = (projectId: number) => invoke<GhUitkomst>("github_backup", { projectId });
+export const githubUnlink = (projectId: number) => invoke<void>("github_unlink", { projectId });
+export const githubSetAuto = (projectId: number, aan: boolean) => invoke<void>("github_set_auto", { projectId, aan });
+export const githubSetAiAsk = (projectId: number, vraagt: boolean) => invoke<void>("github_set_ai_ask", { projectId, vraagt });
+export const githubListRepos = () => invoke<{ repos?: GhRepo[]; fout?: string }>("github_list_repos");
+export const actieConfirmAnswer = (id: string, toestaan: boolean) => invoke<boolean>("actie_confirm_answer", { id, toestaan });
+export const githubScan = (projectId: number, openbaar: boolean) => invoke<{ gescand?: number; blokkades?: { bestand: string; regel: number | null; soort: string; historie: boolean }[]; waarschuwingen?: { bestand: string; regel: number | null; soort: string; historie: boolean }[]; te_groot?: [string, number][]; groot?: [string, number][]; gitignore_ontbreekt?: number; fout?: string }>("github_scan", { projectId, openbaar });
+export interface GhHerkend {
+  soort: string;
+  template: string;
+  studio_json: boolean;
+  niet_herkend: string[];
+}
+export const githubImport = (eigenaar: string, repo: string, privaat: boolean, bovenliggendPad: string) => invoke<{ project?: Project; herkend?: GhHerkend; fout?: string }>("github_import", { eigenaar, repo, privaat, bovenliggendPad });

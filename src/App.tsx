@@ -22,6 +22,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import BevestigDialoog from "@/components/app/supabase/BevestigDialoog";
+import ActieBevestig from "@/components/app/ActieBevestig";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -273,6 +274,10 @@ export default function App() {
                 await refresh();
                 toast.success(t("home.hernoem.klaar"));
               }}
+              onImported={async (p) => {
+                await refresh();
+                await select(p.id);
+              }}
               onRemove={async (p) => {
                 await close(p.id, false);
                 await deleteProject(p.id).catch(fail);
@@ -342,6 +347,7 @@ export default function App() {
           />
         )}
         <BevestigDialoog />
+        <ActieBevestig />
         <Toaster position="top-center" richColors />
       </div>
     </TooltipProvider>

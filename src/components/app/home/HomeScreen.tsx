@@ -6,6 +6,7 @@ import {
   SearchIcon,
   SettingsIcon,
   XIcon,
+  CloudDownloadIcon,
 } from "lucide-react";
 import { projectThumbnailGet, type PreviewInfo, type Project } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ import {
 import ProjectCard, { projectStatus } from "./ProjectCard";
 import RenameProjectDialog from "./RenameProjectDialog";
 import RemoveProjectDialog from "./RemoveProjectDialog";
+import OphalenDialoog from "@/components/app/github/OphalenDialoog";
 
 type Sort = "laatst" | "naam";
 
@@ -35,6 +37,8 @@ interface Props {
   onSettings: () => void;
   onRenamed: (p: Project) => void | Promise<void>;
   onRemove: (p: Project) => void | Promise<void>;
+  /** Een project is van GitHub opgehaald en moet geopend worden. */
+  onImported?: (p: Project) => void | Promise<void>;
 }
 
 export function sortProjects(list: Project[], sort: Sort): Project[] {
@@ -60,6 +64,7 @@ export default function HomeScreen({
   onSettings,
   onRenamed,
   onRemove,
+  onImported,
 }: Props) {
   const { t } = useTranslation();
   const [zoek, setZoek] = useState("");
@@ -67,6 +72,7 @@ export default function HomeScreen({
   const [thumbs, setThumbs] = useState<Record<number, string | null>>({});
   const [renaming, setRenaming] = useState<Project | null>(null);
   const [removing, setRemoving] = useState<Project | null>(null);
+  const [ophalen, setOphalen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -95,6 +101,12 @@ export default function HomeScreen({
     <div className="flex items-center justify-between gap-3 border-b border-border px-6 py-3">
       <div className="text-xl font-semibold">{t("app.naam")}</div>
       <div className="flex gap-2">
+        {onImported && (
+          <Button variant="ghost" data-testid="home-ophalen" onClick={() => setOphalen(true)}>
+            <CloudDownloadIcon aria-hidden="true" />
+            {t("github.ophalen.knopHome")}
+          </Button>
+        )}
         <Button variant="ghost" onClick={onAccounts}>
           <KeyRoundIcon aria-hidden="true" />
           {t("accounts.titel")}
@@ -218,6 +230,15 @@ export default function HomeScreen({
           onRenamed={async (p) => {
             setRenaming(null);
             await onRenamed(p);
+          }}
+        />
+      )}
+      {ophalen && onImported && (
+        <OphalenDialoog
+          onClose={() => setOphalen(false)}
+          onImported={async (p) => {
+            setOphalen(false);
+            await onImported(p);
           }}
         />
       )}

@@ -4,10 +4,12 @@ mod chat;
 mod claude_approval;
 mod cli;
 mod commands;
+mod confirm;
 mod connect;
 mod db;
 mod error;
 mod export;
+mod github;
 mod host;
 mod improve;
 mod instructions;
@@ -248,6 +250,21 @@ pub fn run() {
                     Arc::new(connect::manager::real_now),
                 );
                 app.manage(engine);
+                // De GitHub-motor: dezelfde koppelingen, dezelfde kluis; bevestigingen via de algemene dialoog.
+                let action_confirmer = confirm::UiActionConfirmer::new(app.handle().clone());
+                app.manage(action_confirmer.clone());
+                let progress_app = app.handle().clone();
+                let gh = github::engine::Engine::new(
+                    manager.clone(),
+                    Box::new(DbSource(app.handle().clone())),
+                    action_confirmer,
+                    Arc::new(supa::app::AppHooks { app: app.handle().clone() }),
+                    Arc::new(connect::manager::real_now),
+                    Arc::new(move |project_id, stap, klaar, totaal| {
+                        let _ = progress_app.emit("github-voortgang", serde_json::json!({ "project_id": project_id, "stap": stap, "klaar": klaar, "totaal": totaal }));
+                    }),
+                );
+                app.manage(gh);
                 // Verversen op de achtergrond: elke minuut kijken of een token bijna verloopt.
                 std::thread::spawn(move || loop {
                     std::thread::sleep(std::time::Duration::from_secs(60));
@@ -401,6 +418,17 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            confirm::actie_confirm_answer,
+            github::app::github_state,
+            github::app::github_suggest_name,
+            github::app::github_first_backup,
+            github::app::github_backup,
+            github::app::github_unlink,
+            github::app::github_set_auto,
+            github::app::github_set_ai_ask,
+            github::app::github_list_repos,
+            github::app::github_scan,
+            github::app::github_import,
             supa::app::supa_status,
             supa::app::supa_security_check,
             supa::app::supa_users,

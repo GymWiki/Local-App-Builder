@@ -223,6 +223,22 @@ pub fn create(
     result
 }
 
+/// Neemt een map die er al is (bijvoorbeeld een van GitHub opgehaalde) op in de lijst. Er wordt niets overschreven: PROJECT.md en
+/// de instructies voor de AI worden alleen aangevuld als ze ontbreken.
+pub fn register_existing(conn: &Connection, naam: &str, dir: &Path, template: &str) -> Result<Project> {
+    let naam = naam.trim();
+    if naam.is_empty() || !dir.is_dir() {
+        return Err(AppError::Invalid("Deze map bestaat niet.".into()));
+    }
+    if !dir.join("PROJECT.md").exists() {
+        fs::write(dir.join("PROJECT.md"), project_md(naam))?;
+    }
+    crate::instructions::ensure(dir, crate::db::communication_simple(conn))?;
+    let pad = dir.to_string_lossy().to_string();
+    conn.execute("INSERT INTO projects (naam, pad, template) VALUES (?1, ?2, ?3)", params![naam, pad, template])?;
+    get(conn, conn.last_insert_rowid())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -31,6 +31,7 @@ keyring = "4.2.0"
 sha2 = "0.10"
 tauri-plugin-opener = "2"
 git2 = { version = "0.20", default-features = false, features = ["https", "vendored-libgit2"] }
+regex = "1"
 
 [dev-dependencies]
 tempfile = "3"
