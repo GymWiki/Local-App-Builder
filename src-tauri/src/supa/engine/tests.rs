@@ -735,3 +735,47 @@ fn publieke_configuratie_komt_in_env_local_en_nooit_de_geheime_sleutel() {
     r.e.write_project_config(1);
     assert!(!std::fs::read_to_string(r.haken.dir.path().join(".env.local")).unwrap().contains("WACHTWOORD"));
 }
+
+// ---------------------------------------------------------------- instructies voor de AI
+
+#[test]
+fn veiligheidsregels_komen_bij_koppelen_in_de_instructiebestanden_en_gaan_weg_bij_ontkoppelen() {
+    let r = rig();
+    std::fs::write(r.haken.dir.path().join("CLAUDE.md"), "# Mijn eigen notities\n\nblijft staan\n").unwrap();
+    assert_eq!(r.e.link_project(1, REF).status, "uitgevoerd");
+    for f in ["CLAUDE.md", "GEMINI.md", "AGENTS.md"] {
+        let t = std::fs::read_to_string(r.haken.dir.path().join(f)).unwrap();
+        assert!(t.contains("<!-- studio:supabase-veilig:start") && t.contains("RLS (beveiliging per rij) staat altijd aan"), "{f}");
+        assert!(t.contains("Nooit de service-role- of geheime sleutel"), "{f}");
+    }
+    assert!(std::fs::read_to_string(r.haken.dir.path().join("CLAUDE.md")).unwrap().contains("blijft staan"));
+    assert!(r.haken.dir.path().join(".claude/skills/supabase-veilig/SKILL.md").exists());
+    r.e.unlink(1);
+    let t = std::fs::read_to_string(r.haken.dir.path().join("CLAUDE.md")).unwrap();
+    assert!(!t.contains("supabase-veilig") && t.contains("blijft staan"));
+    assert!(!r.haken.dir.path().join("GEMINI.md").exists(), "een bestand met alleen ons blok verdwijnt weer");
+    assert!(!r.haken.dir.path().join(".claude/skills/supabase-veilig").exists());
+}
+
+#[test]
+fn een_eigen_skill_met_dezelfde_naam_blijft_ongemoeid() {
+    let r = rig();
+    let map = r.haken.dir.path().join(".claude/skills/supabase-veilig");
+    std::fs::create_dir_all(&map).unwrap();
+    std::fs::write(map.join("SKILL.md"), "mijn eigen skill").unwrap();
+    r.e.link_project(1, REF);
+    assert_eq!(std::fs::read_to_string(map.join("SKILL.md")).unwrap(), "mijn eigen skill");
+    r.e.unlink(1);
+    assert_eq!(std::fs::read_to_string(map.join("SKILL.md")).unwrap(), "mijn eigen skill");
+}
+
+#[test]
+fn de_inlog_skill_staat_er_alleen_op_verzoek() {
+    let d = tempfile::tempdir().unwrap();
+    assert!(!d.path().join(".claude/skills/supabase-inloggen").exists());
+    crate::instructions::ensure_auth_skill(d.path(), true).unwrap();
+    let t = std::fs::read_to_string(d.path().join(".claude/skills/supabase-inloggen/SKILL.md")).unwrap();
+    assert!(t.contains("uri_allow_list") && t.contains("30 nieuwe gebruikers per uur") && t.contains("Alleen gebruiken als de gebruiker inloggen kiest"));
+    crate::instructions::ensure_auth_skill(d.path(), false).unwrap();
+    assert!(!d.path().join(".claude/skills/supabase-inloggen").exists());
+}

@@ -42,6 +42,8 @@ const KEY_PATTERNS: { re: RegExp; label: string }[] = [
   { re: /\bAKIA[0-9A-Z]{16}\b/g, label: "AWS-sleutel" },
   { re: /\bxox[baprs]-[A-Za-z0-9-]{10,}/g, label: "Slack-token" },
   { re: /\bAIza[0-9A-Za-z_-]{35}\b/g, label: "Google-sleutel" },
+  { re: /\bsb_secret_[A-Za-z0-9_-]{16,}/g, label: "Supabase geheime sleutel" },
+  { re: /\bsbp_[A-Za-z0-9]{30,}/g, label: "Supabase toegangstoken" },
   { re: /\beyJ[A-Za-z0-9_-]{15,}\.eyJ[A-Za-z0-9_-]{15,}\.[A-Za-z0-9_-]{10,}/g, label: "JWT-token" },
 ];
 const PRIVATE_KEY = /-----BEGIN (?:RSA |EC |DSA |OPENSSH |PGP )?PRIVATE KEY(?: BLOCK)?-----/;
@@ -63,6 +65,16 @@ export function scanText(rel: string, text: string): SecurityFinding[] {
   lines.forEach((line, i) => {
     if (line.length > 4000) return;
     for (const p of KEY_PATTERNS) for (const m of line.matchAll(p.re)) out.push({ code: "api_key", severity: "hoog", file: rel, line: i + 1, detail: `${p.label}: ${mask(m[0])}` });
+    // Een JWT met de rol "service_role" is de geheime Supabase-sleutel (de "anon"-sleutel is openbaar en mag wel in de app).
+    for (const m of line.matchAll(/\beyJ[A-Za-z0-9_-]{15,}\.(eyJ[A-Za-z0-9_-]{15,})\.[A-Za-z0-9_-]{10,}/g)) {
+      try {
+        if ((JSON.parse(Buffer.from(m[1], "base64url").toString("utf8")) as { role?: string }).role === "service_role") out.push({ code: "api_key", severity: "hoog", file: rel, line: i + 1, detail: `Supabase service-sleutel (geheim): ${mask(m[0])}` });
+      } catch {
+        /* geen leesbare JWT: de gewone controle hierboven geldt */
+      }
+    }
+    // Een geheime sleutel met een naam die de browser te zien krijgt (VITE_ of NEXT_PUBLIC_) lekt altijd.
+    if (/\b(?:VITE|NEXT_PUBLIC|PUBLIC|REACT_APP)_[A-Z0-9_]*(?:SERVICE_ROLE|SECRET)[A-Z0-9_]*\b/.test(line) && !isTest) out.push({ code: "api_key", severity: "hoog", file: rel, line: i + 1, detail: "Een geheime sleutel met een openbare naam: de browser krijgt hem te zien." });
     if (PRIVATE_KEY.test(line)) out.push({ code: "private_key", severity: "hoog", file: rel, line: i + 1, detail: "Een privésleutel staat in dit bestand." });
     for (const m of line.matchAll(GENERIC_KEY)) if (!isPlaceholder(m[1])) out.push({ code: "api_key", severity: "hoog", file: rel, line: i + 1, detail: `Geheim in de code: ${mask(m[1])}` });
     if (!isTest) for (const m of line.matchAll(PASSWORD)) if (!isPlaceholder(m[1])) out.push({ code: "password", severity: "midden", file: rel, line: i + 1, detail: `Vast wachtwoord in de code: ${mask(m[1])}` });

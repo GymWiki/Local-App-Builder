@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { CheckIcon, CircleIcon } from "lucide-react";
 import { stappen } from "@/lib/menu";
+import Controle from "@/components/app/supabase/Controle";
+import { useSupa } from "@/components/app/supabase/use-supa";
 import VerbindKnop from "@/components/app/connect/VerbindKnop";
 import PublishPanel from "@/components/app/PublishPanel";
 import { Badge } from "@/components/ui/badge";
@@ -29,6 +31,7 @@ export default function OnlinePanel() {
   const [kopie, setKopie] = useState(false);
   const voorbeeld = stappen(w.signalen)[1].klaar;
   const online = w.signalen.online;
+  const { state: supa } = useSupa(w.project.id);
   // Een plek kiezen kan pas nadat de rest klaar is; pas dan hebben we een inlogsleutel nodig.
   const sleutelsNodig = voorbeeld && veilig && kopie;
 
@@ -86,6 +89,8 @@ export default function OnlinePanel() {
           </CardContent>
         </Card>
       )}
+
+      {supa.gekoppeld && <Controle projectId={w.project.id} tick={w.tick} actief />}
 
       <PublishPanel project={w.project} onError={w.onError} inline onChecked={(schoon) => setVeilig(schoon)} onExported={() => setKopie(true)} />
     </Frame>

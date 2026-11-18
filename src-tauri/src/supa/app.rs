@@ -221,6 +221,12 @@ pub async fn supa_write_config(app: AppHandle, project_id: i64) -> Result<Reply,
     blocking(&app, move |e| e.write_project_config(project_id)).await
 }
 
+/// Zet de skill voor e-mail-inloggen in het project (alleen als de gebruiker inloggen kiest) of haalt hem weg.
+#[tauri::command]
+pub async fn supa_auth_skill(app: AppHandle, project_id: i64, aan: bool) -> Result<bool, String> {
+    blocking(&app, move |e| e.set_auth_skill(project_id, aan)).await
+}
+
 #[tauri::command]
 pub async fn supa_status(app: AppHandle, project_id: i64) -> Result<Reply, String> {
     blocking(&app, move |e| e.status(project_id)).await

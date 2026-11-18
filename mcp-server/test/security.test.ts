@@ -94,3 +94,33 @@ describe("veiligheidscheck", () => {
     expect(scanText("a.ts", "-----BEGIN RSA PRIVATE KEY-----")[0].code).toBe("private_key");
   });
 });
+
+describe("Supabase-sleutels", () => {
+  const b64 = (o: object) => Buffer.from(JSON.stringify(o)).toString("base64url");
+  const jwt = (role: string) => `eyJ${b64({ alg: "HS256", typ: "JWT" }).slice(3)}.${b64({ iss: "supabase", ref: "abcdefghijklmnop", role, iat: 1, exp: 2 })}.${"x".repeat(40)}`;
+
+  it("vindt een service-role-sleutel in code, maar niet de openbare anon-sleutel", () => {
+    const geheim = scanText("src/lib/supabase.ts", `const key = "${jwt("service_role")}";`);
+    expect(geheim.some((f) => f.detail.includes("service-sleutel"))).toBe(true);
+    expect(geheim.every((f) => !f.detail.includes(jwt("service_role")))).toBe(true); // nooit volledig tonen
+    const openbaar = scanText("src/lib/supabase.ts", `const key = "${jwt("anon")}";`);
+    expect(openbaar.some((f) => f.detail.includes("service-sleutel"))).toBe(false);
+  });
+
+  it("vindt nieuwe geheime sleutels, toegangstokens en geheimen met een openbare naam", () => {
+    expect(scanText("a.ts", `const k = '${"sb"}_secret_ABCDEFGHIJKLMNOPQRSTUV123456';`).some((f) => f.detail.startsWith("Supabase geheime sleutel"))).toBe(true);
+    expect(scanText("a.ts", `token: ${"sbp"}_0123456789abcdef0123456789abcdef01234567`).some((f) => f.detail.startsWith("Supabase toegangstoken"))).toBe(true);
+    expect(scanText("vite.config.ts", "define: { VITE_SUPABASE_SERVICE_ROLE_KEY: x }").some((f) => f.detail.includes("openbare naam"))).toBe(true);
+    expect(scanText("a.ts", "const k = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;")).toEqual([]);
+    expect(scanText("a.ts", "const k = import.meta.env.NEXT_PUBLIC_SUPABASE_URL;")).toEqual([]);
+  });
+
+  it("een .env.local met alleen publieke gegevens staat niet in git en geeft geen melding", async () => {
+    const dir = await project({ ".env.local": "VITE_SUPABASE_URL=https://x.supabase.co\nVITE_SUPABASE_PUBLISHABLE_KEY=sb_publishable_abc\n", ".gitignore": ".env*\n", "src/a.ts": "export {}" });
+    // Zonder `git add -f` blijft .env.local ongevolgd (zoals bij een gewoon project); dan is er geen melding.
+    execFileSync("git", ["add", "-A"], { cwd: dir });
+    const r = await securityCheck(dir);
+    expect(codes(r)).not.toContain("env_in_git");
+    expect(codes(r)).not.toContain("secret_file_in_git");
+  });
+});

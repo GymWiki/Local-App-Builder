@@ -1461,6 +1461,14 @@
       "plaats": "Bijvoorbeeld: select * from klanten limit 10",
       "voer": "Uitvoeren",
       "resultaat": "Resultaat"
+    },
+    "inloggen": {
+      "titel": "Inloggen voor de gebruikers van je app",
+      "uitleg": "Moeten mensen kunnen inloggen in je app? De AI kan e-mail-inloggen met Supabase toevoegen. Dat is optioneel; zonder jouw keuze gebeurt er niets.",
+      "uitlegMail": "Let op: de ingebouwde e-mail van Supabase stuurt alleen naar jou en je teamleden. Voor echte gebruikers heb je een eigen e-mailaccount nodig; de AI legt je stap voor stap uit hoe dat gaat.",
+      "knop": "Laat de AI e-mail-inloggen toevoegen",
+      "prompt": "Voeg e-mail-inloggen toe aan mijn app met Supabase, volgens de skill ‘supabase-inloggen’. Begin met een voorstel in gewone woorden en leg de e-mailinstellingen en de omleidings-adressen uit. Voer niets uit zonder mijn toestemming.",
+      "verstuurd": "De AI gaat aan de slag."
     }
   },
   "logs": {

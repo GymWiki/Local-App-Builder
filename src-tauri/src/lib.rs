@@ -421,6 +421,7 @@ pub fn run() {
             supa::app::supa_state,
             supa::app::supa_write_config,
             supa::app::supa_sql,
+            supa::app::supa_auth_skill,
             connect::commands::connect_list,
             connect::commands::connect_start,
             connect::commands::connect_paste,

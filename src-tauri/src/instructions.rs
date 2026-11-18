@@ -19,6 +19,17 @@ pub const SIMPLE_TALK: Block = Block {
     body: include_str!("../../skills/eenvoudig-communiceren/instructions.md"),
 };
 
+/// De veiligheidsregels voor Supabase (bron: skills/supabase-veilig/instructions.md). Alleen in projecten die aan Supabase gekoppeld zijn.
+pub const SUPABASE_VEILIG: Block = Block {
+    name: "supabase-veilig",
+    body: include_str!("../../skills/supabase-veilig/instructions.md"),
+};
+const SUPABASE_SKILL: &str = include_str!("../../skills/supabase-veilig/SKILL.md");
+const SUPABASE_SKILL_MARKER: &str = "<!-- studio:managed:supabase-veilig";
+/// De skill voor e-mail-inloggen: alleen op verzoek van de gebruiker (zie `ensure_auth_skill`).
+const AUTH_SKILL: &str = include_str!("../../skills/supabase-inloggen/SKILL.md");
+const AUTH_SKILL_MARKER: &str = "<!-- studio:managed:supabase-inloggen";
+
 /// Inhoud van het skill-bestand `.claude/skills/eenvoudig-communiceren/SKILL.md`.
 pub const SKILL_FILE: &str = include_str!("../../skills/eenvoudig-communiceren/SKILL.md");
 const SKILL_MARKER: &str = "<!-- studio:managed:eenvoudig-communiceren";
@@ -159,6 +170,52 @@ pub fn ensure(dir: &Path, simple: bool) -> Result<Vec<(&'static str, Change)>> {
     }
     ensure_skill(dir, simple)?;
     Ok(out)
+}
+
+/// Zet (of haalt weg) het blok "supabase-veilig" in CLAUDE.md, GEMINI.md en AGENTS.md plus de skill. Raakt alleen eigen blokken aan.
+pub fn ensure_supabase(dir: &Path, want: bool) -> Result<()> {
+    for name in FILES {
+        let path = dir.join(name);
+        let existing = read_opt(&path)?;
+        let (next, _) = apply(existing.as_deref(), &SUPABASE_VEILIG, want);
+        if let Some(content) = next {
+            if content.trim().is_empty() {
+                let _ = fs::remove_file(&path);
+            } else {
+                write_atomic(&path, &content)?;
+            }
+        }
+    }
+    managed_skill(dir, "supabase-veilig", SUPABASE_SKILL, SUPABASE_SKILL_MARKER, want)
+}
+
+/// De skill voor e-mail-inloggen toevoegen of weghalen (alleen als de gebruiker inloggen kiest).
+pub fn ensure_auth_skill(dir: &Path, want: bool) -> Result<()> {
+    managed_skill(dir, "supabase-inloggen", AUTH_SKILL, AUTH_SKILL_MARKER, want)
+}
+
+/// Een skill-bestand dat Studio beheert. Een bestand zonder onze markering is van de gebruiker en blijft altijd ongemoeid.
+fn managed_skill(dir: &Path, naam: &str, inhoud: &str, marker: &str, want: bool) -> Result<()> {
+    let path = dir.join(".claude").join("skills").join(naam).join("SKILL.md");
+    let existing = read_opt(&path)?;
+    match (&existing, want) {
+        (None, true) => write_atomic_any(&path, inhoud),
+        (Some(t), _) if !t.contains(marker) => Ok(()),
+        (Some(t), true) => {
+            if t != inhoud {
+                write_atomic_any(&path, inhoud)?;
+            }
+            Ok(())
+        }
+        (Some(_), false) => {
+            let _ = fs::remove_file(&path);
+            if let Some(d) = path.parent() {
+                let _ = fs::remove_dir(d);
+            }
+            Ok(())
+        }
+        (None, false) => Ok(()),
+    }
 }
 
 /// `.claude/skills/eenvoudig-communiceren/SKILL.md`: alleen in de stand "Eenvoudige taal". Een bestand zonder onze

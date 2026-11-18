@@ -6,6 +6,7 @@ import { chatSend, dataOverview, dataRows, type DataFile, type TableRows } from 
 import { listen } from "@tauri-apps/api/event";
 import ActieLog from "@/components/app/supabase/ActieLog";
 import Controle from "@/components/app/supabase/Controle";
+import InloggenKeuze from "@/components/app/supabase/InloggenKeuze";
 import Gebruikers from "@/components/app/supabase/Gebruikers";
 import NiveauKiezer from "@/components/app/supabase/NiveauKiezer";
 import OpslagKeuze from "@/components/app/supabase/OpslagKeuze";
@@ -150,6 +151,7 @@ export default function GegevensPanel() {
           <Controle projectId={w.project.id} tick={tick} actief />
           <Tabellen projectId={w.project.id} tick={tick + w.tick} />
           <Gebruikers projectId={w.project.id} />
+          <InloggenKeuze projectId={w.project.id} />
           <ActieLog projectId={w.project.id} tick={tick} />
         </>
       )}

@@ -565,6 +565,7 @@ export const supaRowSave = (projectId: number, tabel: string, sleutel: Record<st
 export const supaUsers = (projectId: number) => invoke<{ gebruikers?: Record<string, string | null>[]; fout?: string }>("supa_users", { projectId });
 export const supaSecurityCheck = (projectId: number) => invoke<{ bevindingen?: { code: string; tabel: string }[]; fout?: string }>("supa_security_check", { projectId });
 export const supaSql = (projectId: number, sql: string) => invoke<SupaReply>("supa_sql", { projectId, sql });
+export const supaAuthSkill = (projectId: number, aan: boolean) => invoke<boolean>("supa_auth_skill", { projectId, aan });
 export const supaStatus = (projectId: number) => invoke<SupaReply>("supa_status", { projectId });
 export const supaWriteConfig = (projectId: number) => invoke<SupaReply>("supa_write_config", { projectId });
 export const projectStorageGet = (projectId: number) => invoke<"lokaal" | "online" | null>("project_storage_get", { projectId });

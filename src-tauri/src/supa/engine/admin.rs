@@ -305,6 +305,7 @@ impl Engine {
                     return Reply::fout("Het project is gemaakt, maar het wachtwoord kon niet in de kluis worden bewaard. Verwijder het project in Supabase en probeer het opnieuw.");
                 }
                 self.with_db(|c| store::link_set(c, project, &p.reference, &p.name, &p.region, self.now()).ok());
+                self.instructions(project, true);
                 let summary = json!([{ "code": "project_maken", "params": { "naam": p.name } }]);
                 self.with_db(|c| store::action_add(c, &NewAction { project_id: project, at: self.now(), tool: "db_create_project", class: 4, level: level.as_str(), status: "uitgevoerd", summary: &summary, sql: None, detail: &json!({}), undo: None }).ok());
                 self.hooks.changed(project);
@@ -322,6 +323,7 @@ impl Engine {
         match self.api(&[], |c| c.project(reference)) {
             Ok(p) => {
                 self.with_db(|c| store::link_set(c, project, &p.reference, &p.name, &p.region, self.now()).ok());
+                self.instructions(project, true);
                 self.hooks.changed(project);
                 Reply::ok("Gekoppeld.", Some(json!({ "naam": p.name, "status": p.status })))
             }
@@ -335,7 +337,23 @@ impl Engine {
             let _ = self.vault.delete(&Self::dbpass_key(&l.reference));
         }
         self.with_db(|c| store::link_remove(c, project));
+        self.instructions(project, false);
         self.hooks.changed(project);
+    }
+
+    /// De skill voor e-mail-inloggen in het project zetten of weghalen. Alleen met een koppeling.
+    pub fn set_auth_skill(&self, project: i64, aan: bool) -> bool {
+        if self.link(project).is_none() {
+            return false;
+        }
+        self.hooks.project_dir(project).is_some_and(|d| crate::instructions::ensure_auth_skill(&d, aan).is_ok())
+    }
+
+    /// De veiligheidsregels voor de AI (blok in CLAUDE.md, GEMINI.md, AGENTS.md en de skill) toevoegen of weghalen.
+    fn instructions(&self, project: i64, want: bool) {
+        if let Some(dir) = self.hooks.project_dir(project) {
+            let _ = crate::instructions::ensure_supabase(&dir, want);
+        }
     }
 
     /// Zet het bedieningsniveau. "Volledige controle" kan alleen met de getypte bevestiging en heeft een einde (standaard 1 uur).
