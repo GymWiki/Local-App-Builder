@@ -20,3 +20,5 @@ Je hoeft de preview dus niet zelf te starten of te configureren. Gebruik de tool
 - Zegt een tool dat de preview niet draait of dat scripts nog niet zijn goedgekeurd? Dan wacht Studio op de gebruiker: vraag die op ‘Start’ of ‘Vertrouwen’ te klikken in de Preview-tab. Wijzig `studio.json` of de scripts in `package.json` niet stiekem om commando's te laten draaien; gewijzigde scripts moeten opnieuw worden goedgekeurd.
 - Zeg eerlijk wat je wel en niet hebt kunnen controleren. Meld een mislukte check nooit als geslaagd.
 - Eerdere versies terugzetten doet de gebruiker via de knop ‘Terug naar vorige versie’; verwijder geen git-geschiedenis.
+
+**Opslag nodig?** Moet de app gegevens onthouden (bestellingen, inschrijvingen, gebruikers), roep dan `needs_data` aan met één korte zin in gewone taal en bespreek met de gebruiker hoe de opslag moet komen. Doe zelf nog niets aan opslag zonder dat de gebruiker het goedvindt.

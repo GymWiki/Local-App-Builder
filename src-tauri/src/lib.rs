@@ -14,6 +14,7 @@ mod mcp;
 mod mcp_config;
 mod node;
 mod preview;
+mod projectinfo;
 mod projects;
 mod provider;
 mod templates;
@@ -339,6 +340,18 @@ pub fn run() {
             commands::create_project,
             commands::delete_project,
             commands::rename_project,
+            commands::project_pages,
+            commands::project_files,
+            commands::project_file_read,
+            commands::project_signals,
+            commands::assets_list,
+            commands::assets_delete,
+            commands::data_overview,
+            commands::data_rows,
+            commands::project_description_get,
+            commands::project_description_set,
+            commands::project_flags,
+            commands::project_flag_set,
             commands::layout_get,
             commands::layout_set,
             commands::layout_reset,

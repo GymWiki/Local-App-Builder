@@ -109,6 +109,25 @@ export function registerTools(server: McpServer, ctx: ProjectCtx, record: (r: Ca
       }),
   );
 
+  // De AI meldt dat de app opslag nodig heeft (bijvoorbeeld bestellingen). Studio toont dan het onderdeel "Gegevens" in het menu.
+  // Alleen een klein bestand in .studio/ binnen het project; er wordt niets geïnstalleerd of uitgevoerd.
+  server.registerTool(
+    "needs_data",
+    {
+      description:
+        "Meld aan Studio dat deze app gegevens moet onthouden (zoals bestellingen, inschrijvingen of gebruikers) en dus opslag nodig heeft. Studio laat de gebruiker dan het onderdeel ‘Gegevens’ zien. Geef in `reden` één korte zin in gewone taal. Er wordt niets aangemaakt of geïnstalleerd; kies zelf eerst met de gebruiker hoe de opslag moet komen.",
+      inputSchema: { reden: z.string().min(1).max(300) },
+    },
+    ({ reden }) =>
+      run("needs_data", `len=${reden.length}`, async () => {
+        const dir = await resolveInside(ctx.projectDir, ".studio");
+        await mkdir(dir, { recursive: true });
+        const file = await resolveInside(ctx.projectDir, ".studio/needs-data.json");
+        await writeFile(file, JSON.stringify({ reden: reden.slice(0, 300), op: new Date().toISOString() }) + "\n");
+        return "Genoteerd: Studio laat de gebruiker nu het onderdeel ‘Gegevens’ zien.";
+      }),
+  );
+
   const rt = ctx.runtime;
   if (!rt) return;
 

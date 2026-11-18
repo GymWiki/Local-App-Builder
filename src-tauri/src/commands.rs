@@ -11,6 +11,7 @@ use crate::layouts;
 use crate::mcp::{self, McpInfo, McpManager};
 use crate::mcp_config;
 use crate::preview::{PreviewInfo, PreviewManager};
+use crate::projectinfo;
 use crate::projects::{self, Project};
 use crate::provider::Provider;
 use crate::templates;
@@ -1286,5 +1287,125 @@ mod target_tests {
             db.0.try_lock().is_ok(),
             "de database is na een fout nog vergrendeld"
         );
+    }
+}
+
+// ---------- werkruimte: pagina's, bestanden, foto's, signalen en gegevens ----------
+
+fn dir_of(db: &Db, project_id: i64) -> Result<PathBuf> {
+    project_dir(&projects::get(&*db.conn()?, project_id)?)
+}
+
+#[tauri::command(async)]
+pub fn project_pages(db: State<Db>, project_id: i64) -> Result<Vec<projectinfo::PageInfo>> {
+    projectinfo::pages(&dir_of(&db, project_id)?)
+}
+
+#[tauri::command(async)]
+pub fn project_files(db: State<Db>, project_id: i64) -> Result<Vec<projectinfo::FileEntry>> {
+    projectinfo::files(&dir_of(&db, project_id)?)
+}
+
+#[tauri::command(async)]
+pub fn project_file_read(
+    db: State<Db>,
+    project_id: i64,
+    path: String,
+) -> Result<projectinfo::FileContent> {
+    projectinfo::read_file(&dir_of(&db, project_id)?, &path)
+}
+
+#[tauri::command(async)]
+pub fn project_signals(db: State<Db>, project_id: i64) -> Result<projectinfo::Signals> {
+    Ok(projectinfo::signals(&dir_of(&db, project_id)?))
+}
+
+#[tauri::command(async)]
+pub fn assets_list(db: State<Db>, project_id: i64) -> Result<Vec<projectinfo::AssetInfo>> {
+    projectinfo::assets_list(&dir_of(&db, project_id)?)
+}
+
+#[tauri::command(async)]
+pub fn assets_delete(db: State<Db>, project_id: i64, path: String) -> Result<()> {
+    projectinfo::assets_delete(&dir_of(&db, project_id)?, &path)
+}
+
+#[tauri::command(async)]
+pub fn data_overview(db: State<Db>, project_id: i64) -> Result<Vec<projectinfo::DataFile>> {
+    projectinfo::data_overview(&dir_of(&db, project_id)?)
+}
+
+#[tauri::command(async)]
+pub fn data_rows(
+    db: State<Db>,
+    project_id: i64,
+    file: String,
+    table: String,
+    limit: Option<usize>,
+) -> Result<projectinfo::TableRows> {
+    projectinfo::table_rows(
+        &dir_of(&db, project_id)?,
+        &file,
+        &table,
+        limit.unwrap_or(50),
+    )
+}
+
+#[tauri::command(async)]
+pub fn project_description_get(db: State<Db>, project_id: i64) -> Result<String> {
+    Ok(projectinfo::description_get(&dir_of(&db, project_id)?))
+}
+
+#[tauri::command(async)]
+pub fn project_description_set(db: State<Db>, project_id: i64, text: String) -> Result<()> {
+    projectinfo::description_set(&dir_of(&db, project_id)?, &text)
+}
+
+// Kleine vlaggen per project (bijvoorbeeld "online gezet", "Gegevens tonen"): alleen bekende sleutels en korte waarden.
+const PROJECT_FLAGS: &[&str] = &[
+    "online_gezet",
+    "gegevens_aan",
+    "meer_onderdelen",
+    "start_verborgen",
+];
+
+fn flag_key(project_id: i64, key: &str) -> Result<String> {
+    if !PROJECT_FLAGS.contains(&key) {
+        return Err(AppError::Invalid("Onbekende projectinstelling.".into()));
+    }
+    Ok(format!("project:{project_id}:{key}"))
+}
+
+#[tauri::command]
+pub fn project_flags(
+    db: State<Db>,
+    project_id: i64,
+) -> Result<std::collections::HashMap<String, String>> {
+    let c = db.conn()?;
+    let mut out = std::collections::HashMap::new();
+    for k in PROJECT_FLAGS {
+        if let Some(v) = crate::db::get_setting(&c, &flag_key(project_id, k)?)? {
+            out.insert((*k).to_string(), v);
+        }
+    }
+    Ok(out)
+}
+
+#[tauri::command]
+pub fn project_flag_set(
+    db: State<Db>,
+    project_id: i64,
+    key: String,
+    value: Option<String>,
+) -> Result<()> {
+    let k = flag_key(project_id, &key)?;
+    let c = db.conn()?;
+    match value {
+        Some(v) if v.len() <= 20 => crate::db::set_setting(&c, &k, &v),
+        Some(_) => Err(AppError::Invalid("Die waarde is te lang.".into())),
+        None => {
+            c.execute("DELETE FROM settings WHERE key = ?1", [&k])?;
+            Ok(())
+        }
     }
 }

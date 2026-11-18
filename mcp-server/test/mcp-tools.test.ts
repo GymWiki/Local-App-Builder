@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { startServer, type Running } from "../src/server.js";
 import { makeExample, waitFor, type Example } from "./helpers.js";
@@ -41,6 +41,7 @@ describe("MCP-tools (fase 3)", () => {
       "get_preview_screenshot",
       "git_checkpoint",
       "git_list_checkpoints",
+      "needs_data",
       "permission_prompt",
       "project_status",
       "read_project_notes",
@@ -48,6 +49,16 @@ describe("MCP-tools (fase 3)", () => {
       "security_check",
       "update_project_notes",
     ]);
+  });
+
+  it("needs_data schrijft alleen .studio/needs-data.json in het project en weigert een lege reden", async () => {
+    const r = await call("needs_data", { reden: "Bestellingen moeten bewaard blijven." });
+    expect(r.isError).not.toBe(true);
+    const file = JSON.parse(await readFile(path.join(ex.dir, ".studio", "needs-data.json"), "utf8"));
+    expect(file.reden).toBe("Bestellingen moeten bewaard blijven.");
+    expect(typeof file.op).toBe("string");
+    const leeg = await call("needs_data", { reden: "" });
+    expect(leeg.isError).toBe(true);
   });
 
   it("run_checks weigert niet-goedgekeurde studio.json met een duidelijke melding", async () => {
