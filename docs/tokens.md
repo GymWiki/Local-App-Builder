@@ -39,10 +39,12 @@ Lees dit zo: een simpele "Hallo" kost al ± 41.000 tokens vaste context. Die kom
 | Instructieblok eenvoudig-communiceren (alleen in "Eenvoudige taal") | 1.483 | 371 |
 | Instructieblok supabase-veilig (alleen met Supabase) | 3.106 | 777 |
 | PROJECT.md van een startproject | 580–690 | 145–173 |
-| MCP-tool-beschrijvingen (15 stuks, alleen de tekst) | 3.659 | 915 |
-| **Totaal per taak, ruim genomen** | | **± 2.800 + PROJECT.md** |
+| MCP-tool-beschrijvingen, alleen de tekst van een deel (15 stuks) | 3.659 | 915 |
+| **Totaal van deze regels** | | **± 2.800 + PROJECT.md** |
 
-**Eerste conclusie (eerlijk):** Studio's vaste tekst is ± 3.000 tokens, ongeveer 7% van wat Claude Code zelf al meebrengt. Het grote verlies zit dus niet in onze instructiebestanden maar in wat de AI tijdens een taak leest en herhaalt: bestanden doorzoeken, volledige logs, schermafbeeldingen, en vastlopen in een lus. Daar richten de volgende delen zich op. Het inkorten van CLAUDE.md levert weinig op; dat meten we eerst voordat we het doen.
+**Correctie (gemeten in deel 2):** de regel over tool-beschrijvingen telde maar 15 van de 52 tools. Alle 52 tools samen, met hun invoerschema's, zijn ± **5.958 tokens** (tekens/4, een schatting). Dat is dus de grootste vaste post van Studio zelf (zie §8).
+
+**Eerste conclusie (eerlijk, daarna gecorrigeerd):** de instructieblokken zijn ± 2.000 tokens; met de tool-definities komt Studio's vaste deel op ± 8.000 tokens (zie correctie), ruim een zesde van wat Claude Code zelf al meebrengt. Het grote verlies zit dus niet in onze instructiebestanden maar in wat de AI tijdens een taak leest en herhaalt: bestanden doorzoeken, volledige logs, schermafbeeldingen, en vastlopen in een lus. Daar richten de volgende delen zich op. Het inkorten van CLAUDE.md levert weinig op; de tool-definities wel (zie §8).
 
 ### 2c. Taken op de startprojecten
 
@@ -94,7 +96,8 @@ en na elk deel opnieuw met een ander label (`na-deel-1` …). De uitvoer komt in
 | 1 Projectkaart | klaar: index, kaart, zes MCP-tools, instructie (zie §5); taakmeting wacht op de eigenaar |
 | 3 Slimme uitvoer | klaar (zie §6); taakmeting wacht op de eigenaar |
 | 4 Sessiebeheer | gedeeltelijk klaar (zie §7) |
-| 2, 5–8 | nog niet gedaan |
+| 2 Korte vaste context | gedeeltelijk klaar (zie §8) |
+| 5–8 | nog niet gedaan |
 
 ## 5. Deel 1 — de projectkaart
 
@@ -138,3 +141,21 @@ Voorbeeld uit de test: een mislukte build met 150 logregels geeft nu minder dan 
 **Niet gedaan (met reden)**
 - **CLI-eigen compact:** `/compact` (Claude) en `/compress` (Gemini) bestaan (§3), maar we sturen ze niet automatisch: de Claude-docs zeggen dat compacten zelf "a large request" is, en we hebben geen meting dat het hier netto bespaart. De frisse start is voorspelbaarder.
 - **Subagents standaard aan:** niet aangezet. Ze tellen volgens de docs mee voor dezelfde limiet en kosten eigen tokens; zonder meting (§2c) zetten we ze niet aan.
+
+## 8. Deel 2 — korte, stabiele vaste context
+
+**Cache niet onnodig breken — nagekeken:**
+- De chat-adapter (`chat/claude.rs`) geeft de CLI alleen vaste argumenten mee (geen tijdstempel, geen status in een systeemprompt). De instructies staan in CLAUDE.md/GEMINI.md/AGENTS.md uit vaste tekst (`include_str!`); die wijzigt alleen als de gebruiker de stand "Eenvoudige taal" wisselt.
+- Wisselende gegevens (PROJECT.md, de kaart, checkpoints) staan nooit in de vaste voorkant: de AI haalt ze via een tool op en ze komen dus achteraan in de context.
+- Nieuw: een test (`mcp-tools.test.ts`) bewaakt dat de toollijst bij twee aanroepen identiek is, geen tijdstempels bevat en binnen een tekenbudget blijft (nu 23.833 tekens; budget 60.000, bewust ruim, zodat groei opvalt maar niet blokkeert).
+- De MCP-server heeft nu een vaste, korte `instructions`-tekst die naar `project_kaart` wijst.
+
+**Tools alleen laden als ze nodig zijn (gemeten):**
+- Studio had **52** tools (± 5.958 tokens aan beschrijvingen en schema's, schatting). Voor een gebruiker zonder gekoppelde diensten zijn de 24 `db_*`-tools, de GitHub- en de Vercel-tools onbruikbaar.
+- Nu worden die per dienst alleen getoond als die dienst gekoppeld is (`toolGroepen` vraagt Studio hoogstens elke 20 seconden; bij een fout of time-out blijft alles zichtbaar). Zonder koppelingen: **24 tools, ± 2.518 tokens** (−58%). `koppelingen_status` en `koppeling_voorstellen` blijven altijd, zodat de AI een koppeling kan voorstellen als die nodig is. Getest in `toolgroepen.test.ts`.
+- Uit de Claude-docs (§3): MCP-tools zijn daar standaard al uitgesteld geladen ("tool search"); voor Claude is de winst dus kleiner. Voor Gemini en andere CLI's die alles vooraf laden, is dit wel de volle besparing. Dat verschil hebben we niet gemeten.
+
+**Nog niet gedaan uit deel 2**
+- **Budget en automatisch inkorten van CLAUDE.md/PROJECT.md:** de instructieblokken zijn klein (≈ 760 tokens het grootste) en eigen tekst van de gebruiker buiten onze blokken raken we bewust niet aan. Een waarschuwing bij een te lang PROJECT.md komt in het scherm "Wat gaat er naar de AI?" (deel 7).
+- **Kit-catalogus per taak laden:** de kit-instructies worden al in een vaste, begrensde vorm geschreven (`fitEntries` in `kits/catalog.ts`); een taakgerichte selectie volgt niet zonder meting van hoe groot die in de praktijk is.
+- **Skills inkorten:** de beschrijvingen zijn al kort; niet aangepast.

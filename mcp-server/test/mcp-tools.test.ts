@@ -31,6 +31,8 @@ afterEach(async () => {
   await srv.close();
 });
 
+const BUDGET_TEKENS = 60_000;
+
 describe("MCP-tools (fase 3)", () => {
   it("toont alle tools", async () => {
     const names = (await client.listTools()).tools.map((t) => t.name).sort();
@@ -88,6 +90,19 @@ describe("MCP-tools (fase 3)", () => {
       "winkel_status",
       "zoek_symbool",
     ]);
+  });
+
+  it("de toollijst is stabiel (cache) en de beschrijvingen blijven binnen het budget", async () => {
+    const a = (await client.listTools()).tools;
+    const b = (await client.listTools()).tools;
+    expect(JSON.stringify(a)).toBe(JSON.stringify(b));
+    const totaal = a.reduce((n, t) => n + (t.description?.length ?? 0) + JSON.stringify(t.inputSchema).length, 0);
+    console.log(`tools: ${a.length}, beschrijvingen+schema's: ${totaal} tekens ≈ ${Math.round(totaal / 4)} tokens (schatting)`);
+    // Budget: groei bewust, niet per ongeluk. Pas dit getal alleen aan met een reden (docs/tokens.md).
+    expect(totaal).toBeLessThan(BUDGET_TEKENS);
+    for (const t of a) expect((t.description ?? "").length, t.name).toBeLessThan(1800);
+    // Geen wisselende gegevens in de beschrijvingen (tijd, willekeurige id's).
+    expect(JSON.stringify(a)).not.toMatch(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/);
   });
 
   it("needs_data schrijft alleen .studio/needs-data.json in het project en weigert een lege reden", async () => {

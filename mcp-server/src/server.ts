@@ -3,7 +3,7 @@ import { timingSafeEqual } from "node:crypto";
 import type { AddressInfo } from "node:net";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
-import { registerTools, type CallRecord } from "./tools.js";
+import { registerTools, toolGroepen, type CallRecord } from "./tools.js";
 import { Runtime } from "./runtime.js";
 
 export interface StartOptions {
@@ -72,8 +72,9 @@ export async function startServer(opts: StartOptions): Promise<Running> {
       opts.onClient?.();
       const body = await readBody(req);
       // Stateless: per verzoek een verse server+transport.
-      const server = new McpServer({ name: "studio", version: "0.1.0" });
-      registerTools(server, ctx, (r) => opts.onToolCall?.(r));
+      // Vaste tekst (geen tijd of status): een stabiele voorkant houdt de cache van de aanbieder geldig.
+      const server = new McpServer({ name: "studio", version: "0.1.0" }, { instructions: "Studio-tools voor dit project. Begin met project_kaart; gebruik bestanden_voor_taak, zoek_symbool en afhankelijkheden voordat je zelf mappen doorzoekt. Lees alleen het stuk van een bestand dat je nodig hebt." });
+      registerTools(server, ctx, (r) => opts.onToolCall?.(r), await toolGroepen(ctx.runtime));
       const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined, enableJsonResponse: true });
       res.on("close", () => {
         void transport.close();

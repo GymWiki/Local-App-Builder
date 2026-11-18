@@ -67,7 +67,34 @@ export async function gitStatus(ctx: ProjectCtx): Promise<string> {
   }
 }
 
-export function registerTools(server: McpServer, ctx: ProjectCtx, record: (r: CallRecord) => void): void {
+/** Welke groepen diensttools nu zichtbaar zijn. Tools van een niet-gekoppelde dienst zijn voor de AI alleen ruis (en kosten tokens). */
+export interface Groepen {
+  db: boolean;
+  github: boolean;
+  vercel: boolean;
+}
+export const ALLE_GROEPEN: Groepen = { db: true, github: true, vercel: true };
+
+let groepenCache: { at: number; g: Groepen } | null = null;
+/** Vraagt Studio welke diensten gekoppeld zijn (maximaal één keer per 20 seconden). Bij twijfel of een fout: alles tonen. */
+export async function toolGroepen(rt: Runtime | undefined, nu = Date.now()): Promise<Groepen> {
+  if (!rt) return ALLE_GROEPEN;
+  if (groepenCache && nu - groepenCache.at < 20_000) return groepenCache.g;
+  try {
+    const r = (await rt.hostCall("connect.status", {}, 1500)) as { id: string; gekoppeld: boolean }[];
+    if (!Array.isArray(r)) return ALLE_GROEPEN;
+    const aan = (id: string) => r.some((x) => x.id === id && x.gekoppeld);
+    const g = { db: aan("supabase"), github: aan("github"), vercel: aan("vercel") };
+    groepenCache = { at: nu, g };
+    return g;
+  } catch {
+    // Studio antwoordt niet (bijvoorbeeld tijdens het opstarten): alles tonen, en niet bij elk verzoek opnieuw wachten.
+    groepenCache = { at: nu, g: ALLE_GROEPEN };
+    return ALLE_GROEPEN;
+  }
+}
+
+export function registerTools(server: McpServer, ctx: ProjectCtx, record: (r: CallRecord) => void, groepen: Groepen = ALLE_GROEPEN): void {
   async function run(tool: string, summary: string, fn: () => Promise<string | Content[]>): Promise<Result> {
     const start = Date.now();
     try {
@@ -163,7 +190,10 @@ export function registerTools(server: McpServer, ctx: ProjectCtx, record: (r: Ca
 
   // ---- Supabase (de gebruiker koppelt zijn eigen account). Studio voert alles zelf uit en bewaart alle sleutels; de AI krijgt alleen een uitslag.
   type HostReply = { status: "uitgevoerd" | "geweigerd" | "mislukt"; tekst: string; data?: unknown };
-  const dbTool = (naam: string, cmd: string, beschrijving: string, inputSchema: z.ZodRawShape, schrijft: boolean) =>
+  const groepVan = (naam: string): keyof Groepen | null => (naam.startsWith("db_") ? "db" : naam.startsWith("github_") || naam === "git_backup" ? "github" : naam.startsWith("vercel_") ? "vercel" : null);
+  const dbTool = (naam: string, cmd: string, beschrijving: string, inputSchema: z.ZodRawShape, schrijft: boolean) => {
+    const groep = groepVan(naam);
+    if (groep && !groepen[groep]) return;
     server.registerTool(naam, { description: beschrijving, inputSchema }, (args: Record<string, unknown>) =>
       run(naam, schrijft ? "schrijfactie" : "lezen", async () => {
         const r = (await rt.hostCall(cmd, args, schrijft ? 12 * 60 * 1000 : 60_000)) as HostReply;
@@ -174,6 +204,7 @@ export function registerTools(server: McpServer, ctx: ProjectCtx, record: (r: Ca
         return tekst;
       }),
     );
+  };
   const SQL = z.string().min(1).max(100_000);
   const UITLEG = z.string().max(500).optional();
   const NAAM = z.string().min(1).max(80);
