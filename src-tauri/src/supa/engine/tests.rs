@@ -65,7 +65,7 @@ impl Http for Fake {
             if body.contains("json_agg(x") {
                 return ok(201, r#"[{"data":[{"tabel":"klanten","rls":true}]}]"#);
             }
-            if body.contains("SELECT * FROM") {
+            if body.to_lowercase().contains("select * from") {
                 return ok(201, &Value::Array(self.rows.lock().unwrap().clone()).to_string());
             }
             return ok(201, r#"[{"id":1,"naam":"Jan"}]"#);
@@ -580,7 +580,7 @@ fn migratiemap_die_naar_buiten_het_project_wijst_wordt_geweigerd() {
 #[test]
 fn migratie_toepassen_vraagt_bevestiging_op_het_juiste_niveau_en_terugdraaien_werkt() {
     let r = rig();
-    let x = r.e.apply_migration(1, "tabel a", "CREATE TABLE a (id int)");
+    let x = r.e.apply_migration(1, "tabel a", "CREATE TABLE a (id int)", "Ik maak een tabel");
     assert_eq!(x.status, "uitgevoerd", "{}", x.tekst);
     assert_eq!(r.vragen().len(), 1); // Voorzichtig: vraagt
     assert_eq!(r.log()[0].tool, "db_apply_migration");
@@ -656,4 +656,55 @@ fn de_vraag_aan_de_gebruiker_bevat_nooit_een_sleutel() {
     r.e.run_sql(1, "db_run_sql", "DELETE FROM klanten WHERE id = 1", Actor::Ai);
     let j = serde_json::to_string(&r.vragen()).unwrap();
     assert!(!j.contains(TOKEN) && !j.contains("sbp_"));
+}
+
+// ---------------------------------------------------------------- scherm Gegevens
+
+#[test]
+fn overzicht_rijen_en_paginering_gebruiken_alleen_bestaande_tabellen() {
+    let r = rig();
+    *r.http.rows.lock().unwrap() = (0..30).map(|i| json!({ "id": i, "naam": format!("n{i}") })).collect();
+    // Het overzicht (de nagebootste database kent de tabel `klanten`).
+    let o = r.e.overview(1).unwrap();
+    assert_eq!(o[0].tabel, "klanten");
+    // Een onbekende tabel of een poging tot SQL-injectie wordt geweigerd, zonder verdere aanroep.
+    for slecht in ["bestaat_niet", "klanten\"; drop table x; --", "../x"] {
+        assert_eq!(r.e.rows(1, slecht, 0).unwrap_err().status, "geweigerd", "{slecht}");
+    }
+    assert!(r.schrijf_aanroepen().is_empty());
+    // Een pagina: 25 rijen en `meer`.
+    let p = r.e.rows(1, "klanten", 0).unwrap();
+    assert_eq!(p.rijen.len(), super::data::PAGE);
+    assert!(p.meer);
+    let sql = r.http.calls.lock().unwrap().iter().rev().find(|c| c.2.contains("offset")).unwrap().2.clone();
+    assert!(sql.contains("limit 26 offset 0"), "{sql}");
+    let p2 = r.e.rows(1, "klanten", 1).unwrap();
+    assert!(r.http.calls.lock().unwrap().last().unwrap().2.contains("offset 25"));
+    assert_eq!(p2.pagina, 1);
+}
+
+#[test]
+fn rij_wijzigen_gaat_door_de_pijplijn_met_bevestiging_en_kent_alleen_echte_kolommen() {
+    let r = rig();
+    r.niveau(Level::Volledig);
+    let mut w = serde_json::Map::new();
+    w.insert("kolom_bestaat_niet".into(), json!("x"));
+    assert_eq!(r.e.row_save(1, "klanten", None, &w).status, "geweigerd");
+    assert_eq!(r.e.row_save(1, "klanten", None, &serde_json::Map::new()).status, "geweigerd");
+}
+
+#[test]
+fn veiligheidscheck_vindt_tabellen_zonder_rls() {
+    let r = rig();
+    // De nagebootste tabel heeft RLS aan maar geen beleid.
+    let f = r.e.security_check(1).unwrap();
+    assert!(f.iter().any(|x| x.code == "geen_beleid" && x.tabel == "klanten"), "{f:?}");
+}
+
+#[test]
+fn wakker_maken_door_de_gebruiker_vraagt_geen_extra_bevestiging() {
+    let r = rig();
+    assert_eq!(r.e.wake(1).status, "uitgevoerd");
+    assert!(r.vragen().is_empty());
+    assert!(r.http.calls.lock().unwrap().iter().any(|c| c.1.ends_with("/restore")));
 }

@@ -22,6 +22,7 @@ pub fn handle(app: &AppHandle, project_id: i64, cmd: &str, args: &Value) -> Resu
             app.state::<ChatManager>().post_message(project_id, "connect_offer", json!({ "provider": dienst, "reason": reden }));
             Ok(json!({ "ok": true }))
         }
+        c if c.starts_with("db.") => crate::supa::app::host(app, project_id, c, args),
         _ => Err("Onbekende opdracht aan Studio.".into()),
     }
 }

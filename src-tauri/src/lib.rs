@@ -222,6 +222,7 @@ pub fn run() {
                 } else {
                     Arc::new(vault::KeyringStore)
                 };
+                let secrets_for_engine = secrets.clone();
                 let notify = app.handle().clone();
                 let manager = ConnManager::new(
                     providers::all(),
@@ -234,6 +235,19 @@ pub fn run() {
                     }),
                 );
                 app.manage(manager.clone());
+                // De Supabase-motor: dezelfde kluis, bevestigingen in de app, checkpoint en noodknop via de bestaande onderdelen.
+                let confirmer = supa::app::UiConfirmer::new(app.handle().clone());
+                app.manage(confirmer.clone());
+                let engine = supa::engine::Engine::new(
+                    manager.clone(),
+                    secrets_for_engine,
+                    Box::new(DbSource(app.handle().clone())),
+                    confirmer,
+                    Arc::new(supa::app::AppHooks { app: app.handle().clone() }),
+                    dir.join("backups"),
+                    Arc::new(connect::manager::real_now),
+                );
+                app.manage(engine);
                 // Verversen op de achtergrond: elke minuut kijken of een token bijna verloopt.
                 std::thread::spawn(move || loop {
                     std::thread::sleep(std::time::Duration::from_secs(60));
@@ -387,6 +401,24 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            supa::app::supa_status,
+            supa::app::supa_security_check,
+            supa::app::supa_users,
+            supa::app::supa_row_save,
+            supa::app::supa_rows,
+            supa::app::supa_tables,
+            supa::app::supa_confirm_answer,
+            supa::app::supa_undo,
+            supa::app::supa_actions,
+            supa::app::supa_emergency,
+            supa::app::supa_set_duration,
+            supa::app::supa_set_level,
+            supa::app::supa_wake,
+            supa::app::supa_unlink,
+            supa::app::supa_create,
+            supa::app::supa_link,
+            supa::app::supa_projects,
+            supa::app::supa_state,
             connect::commands::connect_list,
             connect::commands::connect_start,
             connect::commands::connect_paste,

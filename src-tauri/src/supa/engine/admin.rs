@@ -36,12 +36,12 @@ impl Engine {
     }
 
     /// Past een migratie toe: bestand bijwerken en de SQL door de schrijf-pijplijn halen.
-    pub fn apply_migration(&self, project: i64, name: &str, sql: &str) -> Reply {
+    pub fn apply_migration(&self, project: i64, name: &str, sql: &str, uitleg: &str) -> Reply {
         let voorstel = self.propose_migration(project, name, sql);
         if voorstel.status != "uitgevoerd" {
             return voorstel;
         }
-        self.run_sql(project, "db_apply_migration", sql, Actor::Ai)
+        self.run_sql_with(project, "db_apply_migration", sql, Actor::Ai, uitleg)
     }
 
     /// Draait de laatste toegepaste migratie met deze naam terug (alleen als dat netjes kan).
@@ -67,7 +67,7 @@ impl Engine {
         let level = self.level(project);
         let a = Analysis { statements: vec![], class: Class::Veilig, read_only: false, findings: vec![], onleesbaar: false, final_sql: String::new() };
         if level == Level::Voorzichtig {
-            let req = ConfirmRequest { id: format!("{}-{}", self.now(), rand_id()), project_id: project, tool: "db_deploy_edge_function".into(), actor: Actor::Ai, class: 2, level, redenen: vec!["niveau"], changes: vec![Change { code: "functie_plaatsen", params: [("naam", slug.to_string())].into_iter().collect() }], rijen: None, verlies: false, backup: "niet_nodig", kosten: None, waarschuwingen: vec![], sql: clip(source, SQL_PREVIEW) };
+            let req = ConfirmRequest { id: format!("{}-{}", self.now(), rand_id()), project_id: project, tool: "db_deploy_edge_function".into(), actor: Actor::Ai, class: 2, level, redenen: vec!["niveau"], changes: vec![Change { code: "functie_plaatsen", params: [("naam", slug.to_string())].into_iter().collect() }], rijen: None, verlies: false, backup: "niet_nodig", kosten: None, waarschuwingen: vec![], sql: clip(source, SQL_PREVIEW), uitleg: String::new() };
             if !self.confirm.ask(&req) {
                 self.log(project, "db_deploy_edge_function", &a, level, "geweigerd", None, json!({ "code": "niet_toegestaan" }), None);
                 return Reply::nee("De gebruiker heeft dit niet toegestaan. Er is niets uitgevoerd.");
@@ -106,7 +106,7 @@ impl Engine {
         let ask = matches!((level, class), (Level::Voorzichtig, _) | (Level::Zelfstandig, Class::Gevaarlijk));
         let changes = vec![Change { code: if bestaat { "geheim_overschrijven" } else { "geheim_toevoegen" }, params: [("naam", name.to_string())].into_iter().collect() }];
         if ask {
-            let req = ConfirmRequest { id: format!("{}-{}", self.now(), rand_id()), project_id: project, tool: "db_set_edge_secret".into(), actor: Actor::Ai, class: class as u8, level, redenen: vec![if level == Level::Voorzichtig { "niveau" } else { "gevaarlijk" }], changes: changes.clone(), rijen: None, verlies: bestaat, backup: "niet_nodig", kosten: None, waarschuwingen: vec![], sql: String::new() };
+            let req = ConfirmRequest { id: format!("{}-{}", self.now(), rand_id()), project_id: project, tool: "db_set_edge_secret".into(), actor: Actor::Ai, class: class as u8, level, redenen: vec![if level == Level::Voorzichtig { "niveau" } else { "gevaarlijk" }], changes: changes.clone(), rijen: None, verlies: bestaat, backup: "niet_nodig", kosten: None, waarschuwingen: vec![], sql: String::new(), uitleg: String::new() };
             if !self.confirm.ask(&req) {
                 return Reply::nee("De gebruiker heeft dit niet toegestaan. Er is niets uitgevoerd.");
             }
@@ -157,7 +157,7 @@ impl Engine {
         };
         let level = self.level(project);
         if level == Level::Voorzichtig {
-            let req = ConfirmRequest { id: format!("{}-{}", self.now(), rand_id()), project_id: project, tool: tool.into(), actor: Actor::Ai, class: 2, level, redenen: vec!["niveau"], changes: vec![change.clone()], rijen: None, verlies: false, backup: "niet_nodig", kosten: None, waarschuwingen: vec![], sql: clip(sql, SQL_PREVIEW) };
+            let req = ConfirmRequest { id: format!("{}-{}", self.now(), rand_id()), project_id: project, tool: tool.into(), actor: Actor::Ai, class: 2, level, redenen: vec!["niveau"], changes: vec![change.clone()], rijen: None, verlies: false, backup: "niet_nodig", kosten: None, waarschuwingen: vec![], sql: clip(sql, SQL_PREVIEW), uitleg: String::new() };
             if !self.confirm.ask(&req) {
                 return Reply::nee("De gebruiker heeft dit niet toegestaan. Er is niets uitgevoerd.");
             }
@@ -188,7 +188,7 @@ impl Engine {
         let level = self.level(project);
         if level != Level::Volledig {
             let changes: Vec<Change> = obj.keys().map(|k| Change { code: "inlog_instelling", params: [("naam", k.clone())].into_iter().collect() }).collect();
-            let req = ConfirmRequest { id: format!("{}-{}", self.now(), rand_id()), project_id: project, tool: "db_configure_auth".into(), actor: Actor::Ai, class: 3, level, redenen: vec![if level == Level::Voorzichtig { "niveau" } else { "gevaarlijk" }], changes, rijen: None, verlies: false, backup: "niet_nodig", kosten: None, waarschuwingen: vec![], sql: clip(&patch.to_string(), SQL_PREVIEW) };
+            let req = ConfirmRequest { id: format!("{}-{}", self.now(), rand_id()), project_id: project, tool: "db_configure_auth".into(), actor: Actor::Ai, class: 3, level, redenen: vec![if level == Level::Voorzichtig { "niveau" } else { "gevaarlijk" }], changes, rijen: None, verlies: false, backup: "niet_nodig", kosten: None, waarschuwingen: vec![], sql: clip(&patch.to_string(), SQL_PREVIEW), uitleg: String::new() };
             if !self.confirm.ask(&req) {
                 return Reply::nee("De gebruiker heeft dit niet toegestaan. Er is niets uitgevoerd.");
             }
@@ -216,7 +216,7 @@ impl Engine {
         };
         let level = self.level(project);
         if level != Level::Volledig {
-            let req = ConfirmRequest { id: format!("{}-{}", self.now(), rand_id()), project_id: project, tool: "db_pause_project".into(), actor: Actor::Ai, class: 3, level, redenen: vec![if level == Level::Voorzichtig { "niveau" } else { "gevaarlijk" }], changes: vec![Change { code: "project_pauzeren", params: [("naam", link.name.clone())].into_iter().collect() }], rijen: None, verlies: false, backup: "niet_nodig", kosten: None, waarschuwingen: vec![], sql: String::new() };
+            let req = ConfirmRequest { id: format!("{}-{}", self.now(), rand_id()), project_id: project, tool: "db_pause_project".into(), actor: Actor::Ai, class: 3, level, redenen: vec![if level == Level::Voorzichtig { "niveau" } else { "gevaarlijk" }], changes: vec![Change { code: "project_pauzeren", params: [("naam", link.name.clone())].into_iter().collect() }], rijen: None, verlies: false, backup: "niet_nodig", kosten: None, waarschuwingen: vec![], sql: String::new(), uitleg: String::new() };
             if !self.confirm.ask(&req) {
                 return Reply::nee("De gebruiker heeft dit niet toegestaan. Er is niets uitgevoerd.");
             }
@@ -239,7 +239,7 @@ impl Engine {
         };
         let level = self.level(project);
         if level == Level::Voorzichtig {
-            let req = ConfirmRequest { id: format!("{}-{}", self.now(), rand_id()), project_id: project, tool: "db_restore_project".into(), actor: Actor::Ai, class: 2, level, redenen: vec!["niveau"], changes: vec![Change { code: "project_wakker", params: [("naam", link.name.clone())].into_iter().collect() }], rijen: None, verlies: false, backup: "niet_nodig", kosten: None, waarschuwingen: vec![], sql: String::new() };
+            let req = ConfirmRequest { id: format!("{}-{}", self.now(), rand_id()), project_id: project, tool: "db_restore_project".into(), actor: Actor::Ai, class: 2, level, redenen: vec!["niveau"], changes: vec![Change { code: "project_wakker", params: [("naam", link.name.clone())].into_iter().collect() }], rijen: None, verlies: false, backup: "niet_nodig", kosten: None, waarschuwingen: vec![], sql: String::new(), uitleg: String::new() };
             if !self.confirm.ask(&req) {
                 return Reply::nee("De gebruiker heeft dit niet toegestaan. Er is niets uitgevoerd.");
             }
@@ -291,6 +291,7 @@ impl Engine {
             kosten: Some(cost),
             waarschuwingen: vec![],
             sql: String::new(),
+            uitleg: String::new(),
         };
         if !self.confirm.ask(&req) {
             return Reply::nee("De gebruiker heeft dit niet toegestaan (kostenbevestiging). Er is niets aangemaakt.");

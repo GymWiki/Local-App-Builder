@@ -160,6 +160,43 @@ export function registerTools(server: McpServer, ctx: ProjectCtx, record: (r: Ca
       }),
   );
 
+  // ---- Supabase (de gebruiker koppelt zijn eigen account). Studio voert alles zelf uit en bewaart alle sleutels; de AI krijgt alleen een uitslag.
+  type HostReply = { status: "uitgevoerd" | "geweigerd" | "mislukt"; tekst: string; data?: unknown };
+  const dbTool = (naam: string, cmd: string, beschrijving: string, inputSchema: z.ZodRawShape, schrijft: boolean) =>
+    server.registerTool(naam, { description: beschrijving, inputSchema }, (args: Record<string, unknown>) =>
+      run(naam, schrijft ? "schrijfactie" : "lezen", async () => {
+        const r = (await rt.hostCall(cmd, args, schrijft ? 12 * 60 * 1000 : 60_000)) as HostReply;
+        const kop = r.status === "uitgevoerd" ? "UITGEVOERD" : r.status === "geweigerd" ? "GEWEIGERD" : "MISLUKT";
+        const tekst = `${kop}: ${r.tekst}${r.data === undefined || r.data === null ? "" : `\n${JSON.stringify(r.data)}`}`;
+        // Een geweigerde of mislukte actie is voor de AI een fout, zodat hij niet doet alsof het gelukt is.
+        if (r.status !== "uitgevoerd") throw new Error(tekst);
+        return tekst;
+      }),
+    );
+  const SQL = z.string().min(1).max(100_000);
+  const UITLEG = z.string().max(500).optional();
+  const NAAM = z.string().min(1).max(80);
+  const LEES = "Alleen lezen en altijd toegestaan. ";
+  const SCHRIJF = "Studio voert dit zelf uit met de gekoppelde Supabase-account van de gebruiker; je krijgt nooit sleutels te zien. Afhankelijk van het bedieningsniveau en de risicoklasse vraagt Studio de gebruiker om bevestiging in de app (dat kan even duren) of weigert het. De uitslag begint met UITGEVOERD, GEWEIGERD of MISLUKT: doe nooit alsof een geweigerde actie is gelukt. ";
+  dbTool("db_status", "db.status", LEES + "Is het project gekoppeld aan Supabase, hoe heet het, in welke regio, is het gepauzeerd en welk bedieningsniveau geldt?", {}, false);
+  dbTool("db_get_public_config", "db.public_config", LEES + "De project-URL en de publiceerbare sleutel (veilig voor in de app). Nooit de geheime sleutel of het wachtwoord.", {}, false);
+  dbTool("db_list_tables", "db.list_tables", LEES + "Tabellen in het publieke schema met kolommen, of RLS aan staat en welk beleid er is.", {}, false);
+  dbTool("db_run_readonly_query", "db.readonly", LEES + "Voert één SELECT uit (anders weigert Studio). Het resultaat is begrensd op maximaal 200 rijen.", { sql: SQL, limiet: z.number().int().min(1).max(200).optional() }, false);
+  dbTool("db_get_logs", "db.logs", LEES + "De laatste logregels van een onderdeel.", { bron: z.enum(["api", "database", "auth", "functies", "opslag"]), minuten: z.number().int().min(1).max(1440).optional() }, false);
+  dbTool("db_get_advisors", "db.advisors", LEES + "Adviezen van Supabase over veiligheid en snelheid.", {}, false);
+  dbTool("db_generate_types", "db.types", LEES + "TypeScript-typen van het publieke schema.", {}, false);
+  dbTool("db_propose_migration", "db.propose", "Schrijft een voorstel voor een migratie als bestand in supabase/migrations/ (met tijdstempel). Voert NIETS uit; de gebruiker kan het eerst bekijken. Nieuwe tabellen in het publieke schema krijgen automatisch RLS aan; schrijf er beleid per rol bij. Gebruik `db_apply_migration` om het toe te passen.", { naam: NAAM, sql: SQL, uitleg: UITLEG }, true);
+  dbTool("db_apply_migration", "db.apply", SCHRIJF + "Past een migratie toe (schrijft ook het bestand in supabase/migrations/). Geef in `uitleg` één korte zin in gewone taal waarom.", { naam: NAAM, sql: SQL, uitleg: UITLEG }, true);
+  dbTool("db_rollback_migration", "db.rollback", SCHRIJF + "Draait de laatste toegepaste migratie terug, alleen als Studio weet hoe (bijvoorbeeld een nieuwe tabel weer weghalen). Anders: schrijf een nieuwe migratie.", { naam: NAAM }, true);
+  dbTool("db_run_sql", "db.run_sql", SCHRIJF + "Voert SQL uit (één of meer instructies). Studio deelt elke instructie in: lezen, veilig schrijven, gevaarlijk (verwijderen, wijzigen, RLS uit, rechten) of onleesbaar (telt als gevaarlijk). Maakt vooraf een checkpoint, een momentopname van het schema en bij gevaarlijke acties een back-up. Geef in `uitleg` één korte zin in gewone taal waarom.", { sql: SQL, uitleg: UITLEG }, true);
+  dbTool("db_deploy_edge_function", "db.deploy", SCHRIJF + "Plaatst een edge function (één bestand, Deno/TypeScript).", { naam: NAAM, code: z.string().min(1).max(200_000) }, true);
+  dbTool("db_set_edge_secret", "db.secret", SCHRIJF + "Zet een geheim voor edge functions (alleen schrijven; niemand kan de waarde daarna nog lezen, ook jij niet). Overschrijven van een bestaand geheim is gevaarlijk.", { naam: NAAM, waarde: z.string().min(1).max(48 * 1024) }, true);
+  dbTool("db_manage_storage", "db.storage", SCHRIJF + "Opslagmappen: `lijst` of `maken` (altijd privé). Beleid voor bestanden zet je met db_run_sql op storage.objects (dat is altijd gevaarlijk).", { actie: z.enum(["lijst", "maken"]), naam: z.string().max(63).optional(), publiek: z.boolean().optional() }, true);
+  dbTool("db_configure_auth", "db.auth", SCHRIJF + "Wijzigt inlog-instellingen (alleen site_url, uri_allow_list, mailer_autoconfirm, disable_signup en external_email_enabled). Altijd gevaarlijk.", { instellingen: z.record(z.string(), z.unknown()) }, true);
+  dbTool("db_pause_project", "db.pause", SCHRIJF + "Pauzeert het Supabase-project (gevaarlijk: de app is dan offline).", {}, true);
+  dbTool("db_restore_project", "db.restore", SCHRIJF + "Maakt een gepauzeerd project weer wakker.", {}, true);
+  dbTool("db_create_project", "db.create", SCHRIJF + "Maakt een nieuw Supabase-project (regio Europa) en koppelt het. Dit kan geld kosten en vraagt daarom ALTIJD een kostenbevestiging van de gebruiker, in elk niveau.", { naam: NAAM, organisatie: z.string().max(80).optional() }, true);
+
   // Toestemmingen voor de chat-weergave: `claude --permission-prompt-tool mcp__studio__permission_prompt`.
   // Moet één tekstblok met JSON teruggeven en geen structuredContent (dus geen outputSchema), zie docs/cli-notes.md.
   server.registerTool(

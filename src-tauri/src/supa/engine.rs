@@ -48,6 +48,8 @@ pub struct ConfirmRequest {
     pub kosten: Option<Cost>,
     pub waarschuwingen: Vec<Finding>,
     pub sql: String,
+    /// De uitleg van de AI in zijn eigen woorden (ongecontroleerde tekst; de app toont hem als gewone tekst).
+    pub uitleg: String,
 }
 
 pub trait Confirmer: Send + Sync {
@@ -344,6 +346,7 @@ fn trim_value(v: &Value) -> Value {
 }
 
 mod admin;
+mod data;
 mod write;
 
 #[cfg(test)]

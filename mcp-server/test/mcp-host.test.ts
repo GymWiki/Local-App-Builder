@@ -69,4 +69,44 @@ describe("vragen aan de app (host_request)", () => {
     const r = await pending;
     expect(r.isError).toBe(true);
   });
+
+  it("db-tools sturen alleen gewone gegevens naar Studio en geven een duidelijke uitslag terug", async () => {
+    const pending = call("db_run_sql", { sql: "CREATE TABLE a (id int)", uitleg: "Ik maak een tabel." });
+    await waitFor("vraag aan de app", () => requests().length === 1);
+    expect(requests()[0]).toMatchObject({ cmd: "db.run_sql", args: { sql: "CREATE TABLE a (id int)", uitleg: "Ik maak een tabel." } });
+    await srv.runtime.control("host.answer", { id: requests()[0].id, ok: true, result: { status: "uitgevoerd", tekst: "Uitgevoerd.", data: { actie: 7 } } });
+    const r = await pending;
+    expect(r.isError).not.toBe(true);
+    expect(r.content[0].text).toBe('UITGEVOERD: Uitgevoerd.\n{"actie":7}');
+  });
+
+  it("een geweigerde of mislukte database-actie is voor de AI een fout, zodat hij niet doet alsof het gelukt is", async () => {
+    for (const status of ["geweigerd", "mislukt"] as const) {
+      events.length = 0;
+      const pending = call("db_apply_migration", { naam: "x", sql: "DROP TABLE a" });
+      await waitFor("vraag aan de app", () => requests().length === 1);
+      await srv.runtime.control("host.answer", { id: requests()[0].id, ok: true, result: { status, tekst: "De gebruiker heeft dit niet toegestaan." } });
+      const r = await pending;
+      expect(r.isError).toBe(true);
+      expect(r.content[0].text).toMatch(new RegExp(`^${status === "geweigerd" ? "GEWEIGERD" : "MISLUKT"}: `));
+    }
+  });
+
+  it("de AI kan geen sleutel meegeven of opvragen: er bestaat geen tool of veld daarvoor", async () => {
+    const tools = (await client.listTools()).tools;
+    const db = tools.filter((t) => t.name.startsWith("db_"));
+    expect(db.length).toBeGreaterThanOrEqual(18);
+    for (const t of db) {
+      const velden = Object.keys((t.inputSchema as { properties?: Record<string, unknown> }).properties ?? {});
+      expect(velden.filter((v) => /token|sleutel|wachtwoord|password|key/i.test(v)), t.name).toEqual([]);
+    }
+    // Het enige veld met een geheime waarde is die van een edge-geheim, en dat is schrijf-only.
+    expect(db.find((t) => t.name === "db_set_edge_secret")).toBeTruthy();
+  });
+
+  it("een lege of te lange SQL en onbekende velden worden door de tool geweigerd voordat Studio iets hoort", async () => {
+    expect((await call("db_run_sql", { sql: "" })).isError).toBe(true);
+    expect((await call("db_run_readonly_query", { sql: "SELECT 1", limiet: 5000 })).isError).toBe(true);
+    expect(requests()).toHaveLength(0);
+  });
 });

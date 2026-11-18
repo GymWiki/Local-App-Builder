@@ -100,14 +100,14 @@ pub struct Client<'a> {
     pub secrets: Vec<String>,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub struct Org {
     pub slug: String,
     pub name: String,
     pub plan: Option<String>,
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
 pub struct Proj {
     pub reference: String,
     pub name: String,

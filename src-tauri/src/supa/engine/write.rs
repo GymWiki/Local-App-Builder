@@ -124,6 +124,10 @@ impl Engine {
 
     /// De pijplijn. `tool` is de naam van de MCP-tool (of "gegevens_scherm" / "ongedaan_maken").
     pub fn run_sql(&self, project: i64, tool: &str, sql: &str, actor: Actor) -> Reply {
+        self.run_sql_with(project, tool, sql, actor, "")
+    }
+
+    pub fn run_sql_with(&self, project: i64, tool: &str, sql: &str, actor: Actor, uitleg: &str) -> Reply {
         let link = match self.need_link(project) {
             Ok(l) => l,
             Err(r) => return r,
@@ -193,6 +197,7 @@ impl Engine {
                     kosten: None,
                     waarschuwingen: a.findings.clone(),
                     sql: clip(&a.final_sql, SQL_PREVIEW),
+                    uitleg: clip(uitleg, 500),
                 };
                 if !self.confirm.ask(&req) {
                     Self::drop_backups(&files);
