@@ -28,6 +28,7 @@
     "ux:winkels": "node scripts/ux-winkels-test.mjs",
     "ux:startprojecten": "node scripts/ux-templates-test.mjs",
     "ux:a11y": "node scripts/ux-a11y.mjs",
+    "ux:tokens": "node scripts/ux-tokens-test.mjs",
     "ux:start": "node scripts/ux-start-check.mjs",
     "dev:check": "node scripts/dev-check.mjs",
     "setup:updates": "node scripts/setup-updates.mjs",

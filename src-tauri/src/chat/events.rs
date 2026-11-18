@@ -111,6 +111,14 @@ pub enum ChatEvent {
         code: ErrorCode,
         technical: String,
     },
+    /// Het AI-gebruik van een beurt, rechtstreeks uit het resultaat van de CLI (geen schatting).
+    Usage {
+        input: u64,
+        output: u64,
+        cache_read: u64,
+        cache_write: u64,
+        turns: u64,
+    },
     TurnDone {
         ok: bool,
     },

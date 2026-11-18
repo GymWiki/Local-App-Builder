@@ -163,6 +163,11 @@ impl McpManager {
             .map(|s| s.info.lock().unwrap().clone())
     }
 
+    /// De projecten waarvan de runtime nu draait.
+    pub fn running_ids(&self) -> Vec<i64> {
+        self.servers.lock().unwrap().keys().copied().collect()
+    }
+
     pub fn info(&self, project_id: i64) -> Option<McpInfo> {
         self.running_info(project_id)
             .or_else(|| {

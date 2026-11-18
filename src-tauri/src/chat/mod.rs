@@ -1,5 +1,10 @@
 //! Chat-weergave bovenop een AI-CLI: het gestructureerde proces, de geschiedenis en de toestemmingen.
 //! Per CLI zit het verschil in een adapter; CLI's zonder (geverifieerde) gestructureerde uitvoer vallen terug op de terminal.
+/// Vanaf zoveel stappen (of zoveel nieuw verwerkte woorddelen) in één klus noemen we hem groot.
+pub const GROTE_KLUS_BEURTEN: u64 = 25;
+pub const GROTE_KLUS_NIEUW: u64 = 150_000;
+
+pub mod beleid;
 pub mod claude;
 pub mod events;
 pub mod guard;
@@ -31,6 +36,8 @@ pub struct LaunchCtx {
     pub permission_tool: Option<String>,
     /// Overleg-modus: de CLI start in zijn planmodus.
     pub plan: bool,
+    /// Model en inspanning volgens het model-beleid (leeg = standaard van de CLI).
+    pub keuze: beleid::Keuze,
 }
 
 pub struct Launch {
@@ -208,6 +215,10 @@ struct Inner {
     turns: Mutex<HashMap<i64, versions::TurnInfo>>,
     /// Bug-lus bewaker per project.
     guards: Mutex<HashMap<i64, guard::LoopGuard>>,
+    /// Het niveau (model en inspanning) dat bij de volgende start van het AI-proces hoort, per project.
+    niveaus: Mutex<HashMap<i64, beleid::Niveau>>,
+    /// Projecten waar een eerdere poging vastliep: de volgende start gebruikt het sterkste model.
+    escalatie: Mutex<std::collections::HashSet<i64>>,
 }
 
 #[derive(Clone)]
@@ -320,6 +331,15 @@ fn handle_event(
         }
         ChatEvent::Status { state } => inner.status(project, state, true),
         ChatEvent::Error { code, technical } => inner.error(project, code, &technical),
+        ChatEvent::Usage { input, output, cache_read, cache_write, turns } => {
+            // Echte cijfers van de CLI. "Groot" = veel stappen in één klus: dan stellen we voor het in delen te doen.
+            let nieuw = input + output + cache_write;
+            inner.push(
+                project,
+                "usage",
+                json!({ "nieuw": nieuw, "hergebruikt": cache_read, "totaal": nieuw + cache_read, "beurten": turns, "groot": turns >= GROTE_KLUS_BEURTEN || nieuw >= GROTE_KLUS_NIEUW, "bron": "cli" }),
+            );
+        }
         ChatEvent::TurnDone { ok } => {
             let left = pending.load(Ordering::SeqCst).saturating_sub(1);
             pending.store(left, Ordering::SeqCst);
@@ -371,6 +391,9 @@ fn guard_check(
         let g = guards.entry(project).or_default();
         (g.record(check, threshold), g.streak())
     };
+    if check.ok {
+        inner.escalatie.lock().unwrap().remove(&project);
+    }
     let Some(reason) = reason else { return };
     ingrijpen(inner, project, reason, streak, threshold, pending, st);
 }
@@ -384,8 +407,10 @@ fn ingrijpen(inner: &Arc<Inner>, project: i64, reason: guard::Reason, streak: us
     inner.push(
         project,
         "loop_alert",
-        json!({ "reason": reason.as_str(), "streak": streak, "threshold": threshold.clamp(guard::MIN_THRESHOLD, guard::MAX_THRESHOLD), "last_working": last_working }),
+        json!({ "reason": reason.as_str(), "streak": streak, "threshold": threshold.clamp(guard::MIN_THRESHOLD, guard::MAX_THRESHOLD), "last_working": last_working, "escalated": true }),
     );
+    // De volgende poging gebruikt het sterkste model in plaats van hetzelfde nog eens te proberen.
+    inner.escalatie.lock().unwrap().insert(project);
     st.aborted = true;
     pending.store(0, Ordering::SeqCst);
     inner.turns.lock().unwrap().remove(&project);
@@ -416,6 +441,8 @@ impl ChatManager {
                 git: Mutex::new(None),
                 turns: Mutex::new(HashMap::new()),
                 guards: Mutex::new(HashMap::new()),
+                niveaus: Mutex::new(HashMap::new()),
+                escalatie: Mutex::new(Default::default()),
             }),
         }
     }
@@ -433,6 +460,12 @@ impl ChatManager {
             .get(&project)
             .map(|l| l.pending.load(Ordering::SeqCst) > 0)
             .unwrap_or(false)
+    }
+
+    /// Model en inspanning voor het proces dat nu start (zie `beleid`).
+    fn keuze_voor(&self, project: i64, provider: Provider) -> beleid::Keuze {
+        let niveau = self.inner.niveaus.lock().unwrap().get(&project).copied().unwrap_or(beleid::Niveau::Gebalanceerd);
+        beleid::keuze(provider, niveau, self.inner.store.setting("ui:model_eigen").as_deref())
     }
 
     fn spawn_live(&self, project: i64, launch: &ChatLaunch, plan: bool) -> Result<()> {
@@ -453,6 +486,7 @@ impl ChatManager {
             mcp_config: launch.mcp_config.clone(),
             permission_tool: launch.permission_tool.clone(),
             plan,
+            keuze: self.keuze_voor(project, launch.provider),
         });
         let mut cmd = Command::new(&l.program);
         cmd.args(&l.args)
@@ -724,6 +758,12 @@ impl ChatManager {
             )
         );
         let line = adapter.encode_user(&plan_text(&prompt, plan && !adapter.supports_plan_mode()));
+        {
+            // Het niveau wordt gekozen als het proces start; een lopend proces houdt zijn model (anders breekt de cache).
+            let esc = self.inner.escalatie.lock().unwrap().contains(&project);
+            let b = beleid::Beleid::parse(self.inner.store.setting("ui:model_beleid").as_deref());
+            self.inner.niveaus.lock().unwrap().insert(project, beleid::kies(b, text, plan, esc));
+        }
         let attempt = |this: &Self| -> Result<()> {
             this.ensure_live(project, launch, plan && adapter.supports_plan_mode())?;
             this.write_line(project, &line)

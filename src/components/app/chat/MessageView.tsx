@@ -9,6 +9,7 @@ import ActionCard from "./ActionCard";
 import ErrorCard from "./ErrorCard";
 import FormattedText from "./formatText";
 import LoopAlertCard from "./LoopAlertCard";
+import GebruikRegel from "./GebruikRegel";
 import ConnectOfferCard from "./ConnectOfferCard";
 
 interface Props {
@@ -18,10 +19,11 @@ interface Props {
   canRetry: boolean;
   onRetry: () => void;
   onOpenAccounts: () => void;
+  usage?: { active: boolean; onSplit: () => void };
   loop?: { active: boolean; onRestore: (hash: string, title: string) => Promise<void> | void; onDiscuss: () => void; onNewApproach: () => void; onOtherAi: () => void };
 }
 
-export default function MessageView({ message, live, technical, canRetry, onRetry, onOpenAccounts, loop }: Props) {
+export default function MessageView({ message, live, technical, canRetry, onRetry, onOpenAccounts, loop, usage }: Props) {
   const { t } = useTranslation();
   const p = message.payload;
   switch (message.kind) {
@@ -84,6 +86,8 @@ export default function MessageView({ message, live, technical, canRetry, onRetr
           <span>{t("chat.versieOpgeslagen", { titel: p.title })}</span>
         </div>
       );
+    case "usage":
+      return usage ? <GebruikRegel message={message} active={usage.active} onSplit={usage.onSplit} /> : null;
     case "loop_alert":
       return loop ? (
         <LoopAlertCard message={message} active={loop.active} onRestore={loop.onRestore} onDiscuss={loop.onDiscuss} onNewApproach={loop.onNewApproach} onOtherAi={loop.onOtherAi} />

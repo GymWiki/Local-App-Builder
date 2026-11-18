@@ -380,6 +380,25 @@ describe("ChatPanel: bug-lus bewaker", () => {
   });
 });
 
+describe("ChatPanel: AI-gebruik", () => {
+  it("toont het gebruik van een klus in gewone taal en legt uit dat een abonnement geen geld kost", async () => {
+    setup([msg("assistant", { text: "Klaar" }), msg("usage", { nieuw: 12400, hergebruikt: 70000, totaal: 82400, beurten: 4, groot: false })]);
+    const regel = await screen.findByTestId("gebruik-regel");
+    expect(regel).toHaveTextContent("± 82.400 woorddelen");
+    expect(regel).toHaveTextContent("12.400 nieuw");
+    fireEvent.click(within(regel).getByRole("button", { name: "Wat betekent dit?" }));
+    expect(regel).toHaveTextContent("kost het geen extra geld");
+    expect(screen.queryByTestId("gebruik-groot")).toBeNull();
+  });
+  it("waarschuwt vriendelijk bij een grote klus en biedt 'Splits dit in stappen' aan", async () => {
+    setup([msg("usage", { nieuw: 400000, hergebruikt: 2000000, totaal: 2400000, beurten: 31, groot: true })]);
+    const groot = await screen.findByTestId("gebruik-groot");
+    expect(groot).toHaveTextContent("31 stappen");
+    fireEvent.click(within(groot).getByRole("button", { name: "Splits dit in stappen" }));
+    await waitFor(() => expect(api.chatSend).toHaveBeenCalledWith(1, expect.stringContaining("Voer alleen stap 1 uit")));
+  });
+});
+
 describe("ChatPanel: lang gesprek", () => {
   it("stelt na veel berichten een frisse start voor en gebruikt dezelfde AI", async () => {
     (api.chatSwitch as Mock).mockResolvedValue({ provider: "claude", account_id: null, account_label: null, structured: true, mode: "build" });

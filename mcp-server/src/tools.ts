@@ -1,4 +1,6 @@
 import { samenvattingChecks, ontdubbel, logsKort } from "./uitvoer.js";
+import { ALLE_GROEPEN, type Groepen } from "./groepen.js";
+export { ALLE_GROEPEN, type Groepen } from "./groepen.js";
 import { securityCheck } from "./security.js";
 import { execFile } from "node:child_process";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
@@ -64,33 +66,6 @@ export async function gitStatus(ctx: ProjectCtx): Promise<string> {
     return stdout.trim();
   } catch (e) {
     return `git-status niet beschikbaar: ${(e as Error).message.split("\n")[0]}`;
-  }
-}
-
-/** Welke groepen diensttools nu zichtbaar zijn. Tools van een niet-gekoppelde dienst zijn voor de AI alleen ruis (en kosten tokens). */
-export interface Groepen {
-  db: boolean;
-  github: boolean;
-  vercel: boolean;
-}
-export const ALLE_GROEPEN: Groepen = { db: true, github: true, vercel: true };
-
-let groepenCache: { at: number; g: Groepen } | null = null;
-/** Vraagt Studio welke diensten gekoppeld zijn (maximaal één keer per 20 seconden). Bij twijfel of een fout: alles tonen. */
-export async function toolGroepen(rt: Runtime | undefined, nu = Date.now()): Promise<Groepen> {
-  if (!rt) return ALLE_GROEPEN;
-  if (groepenCache && nu - groepenCache.at < 20_000) return groepenCache.g;
-  try {
-    const r = (await rt.hostCall("connect.status", {}, 1500)) as { id: string; gekoppeld: boolean }[];
-    if (!Array.isArray(r)) return ALLE_GROEPEN;
-    const aan = (id: string) => r.some((x) => x.id === id && x.gekoppeld);
-    const g = { db: aan("supabase"), github: aan("github"), vercel: aan("vercel") };
-    groepenCache = { at: nu, g };
-    return g;
-  } catch {
-    // Studio antwoordt niet (bijvoorbeeld tijdens het opstarten): alles tonen, en niet bij elk verzoek opnieuw wachten.
-    groepenCache = { at: nu, g: ALLE_GROEPEN };
-    return ALLE_GROEPEN;
   }
 }
 

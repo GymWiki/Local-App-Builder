@@ -19,7 +19,7 @@ pub fn anoniem(tekst: &str, home: Option<&Path>) -> String {
 
 fn instellingen(c: &Connection) -> Vec<String> {
     // Alleen schakelaars en keuzes, nooit een map of een tekst van de gebruiker.
-    const OK: &[&str] = &["communication_mode", "permission_mode", "plan_default", "loop_threshold", "theme", "text_scale", "preview_auto_switch", "menu_collapsed", "update_check", "eerste_start_klaar"];
+    const OK: &[&str] = &["communication_mode", "permission_mode", "plan_default", "loop_threshold", "theme", "text_scale", "preview_auto_switch", "menu_collapsed", "update_check", "eerste_start_klaar", "model_beleid", "kaart_aan"];
     OK.iter().filter_map(|k| crate::db::get_setting(c, &format!("ui:{k}")).ok().flatten().map(|v| format!("  {k} = {v}"))).collect()
 }
 

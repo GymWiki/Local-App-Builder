@@ -16,6 +16,7 @@ import { checkProject, setStrictness } from "./kits/check.js";
 import { refreshCatalogIfStale } from "./kits/catalog.js";
 import { applyWithSafety, current as kitCurrent, listKits, runScripts, tailor as kitTailor, type KitHost } from "./kits/ops.js";
 import type { Tailor } from "./kits/tokens.js";
+import { ALLE_GROEPEN, groepenUitArgs, type Groepen } from "./groepen.js";
 
 export type CheckName = "lint" | "build" | "test" | "kit" | "html" | "links" | "console";
 export const CHECK_ORDER: CheckName[] = ["lint", "build", "test", "kit", "html", "links", "console"];
@@ -74,6 +75,8 @@ export class Runtime {
   private readonly emit: Emit;
   private readonly permissionTimeoutMs: number;
   private readonly permissions = new Map<string, (r: { allow: boolean; message?: string }) => void>();
+  /** Welke diensttools zichtbaar zijn (Studio stuurt dit; standaard alles). */
+  toolGroepen: Groepen = ALLE_GROEPEN;
   private readonly hostCalls = new Map<string, (r: { ok: boolean; result?: unknown; error?: string }) => void>();
 
   constructor(o: RuntimeOptions) {
@@ -319,6 +322,9 @@ export class Runtime {
       }
       case "permission.answer":
         this.answerPermission(String(args.id ?? ""), args.allow === true, typeof args.message === "string" ? args.message : undefined);
+        return { ok: true };
+      case "tools.set":
+        this.toolGroepen = groepenUitArgs(args);
         return { ok: true };
       case "plan.set":
         this.plan = (args && typeof args === "object" ? (args as unknown as PlanPush) : null) ?? null;

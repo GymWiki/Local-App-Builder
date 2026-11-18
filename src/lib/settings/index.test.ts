@@ -27,6 +27,9 @@ describe("instellingen: standaarden en controle", () => {
       menu_collapsed: false,
       update_check: true,
       eerste_start_klaar: false,
+      model_beleid: "auto",
+      model_eigen: "",
+      kaart_aan: true,
     });
   });
 
@@ -38,6 +41,11 @@ describe("instellingen: standaarden en controle", () => {
     expect(parseSetting("loop_threshold", "11")).toBe(3);
     expect(parseSetting("loop_threshold", "abc")).toBe(3);
     expect(parseSetting("loop_threshold", "7")).toBe(7);
+    expect(parseSetting("model_beleid", "onzin")).toBe("auto");
+    expect(parseSetting("model_beleid", "best")).toBe("best");
+    expect(parseSetting("model_eigen", "opus; rm -rf")).toBe("");
+    expect(parseSetting("model_eigen", "claude-opus-5-5")).toBe("claude-opus-5-5");
+    expect(parseSetting("kaart_aan", "0")).toBe(false);
     expect(parseSetting("text_scale", "500")).toBe(100);
     expect(parseSetting("text_scale", "130")).toBe(130);
     expect(parseSetting("theme", "paars")).toBe("system");

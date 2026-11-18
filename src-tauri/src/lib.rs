@@ -249,6 +249,7 @@ pub fn run() {
                     Config::embedded(),
                     Arc::new(move || {
                         let _ = notify.emit("connect-changed", ());
+                        host::push_toolgroepen_alle(&notify);
                     }),
                 );
                 app.manage(manager.clone());
@@ -463,6 +464,7 @@ pub fn run() {
             rapport::maak_probleemrapport,
             kaart::app::kaart_vernieuw,
             kaart::app::kaart_tekst,
+            kaart::app::kaart_context,
             updates::update_check,
             updates::update_install,
             confirm::actie_confirm_answer,

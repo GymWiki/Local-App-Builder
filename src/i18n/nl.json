@@ -578,6 +578,14 @@
       "uitleg": "Een lang gesprek kost de AI steeds meer gebruik, en hij kan details vergeten. Met een frisse start begint hij opnieuw met je projectnotities en de laatste versies. Je werk en je eerdere gesprek blijven bewaard.",
       "fris": "Ga verder met een frisse start",
       "blijf": "Blijf in dit gesprek"
+    },
+    "gebruik": {
+      "regel": "AI-gebruik van deze klus: ± {{totaal}} woorddelen ({{nieuw}} nieuw, {{hergebruikt}} hergebruikt).",
+      "uitleg": "Wat betekent dit?",
+      "tekst": "Studio gebruikt je eigen AI-account. Heb je een abonnement, dan telt dit mee voor je limiet en kost het geen extra geld. Betaal je per gebruik, dan kan dit geld kosten. De cijfers komen van de AI zelf; Studio rekent geen bedragen uit. ‘Hergebruikt’ is wat de AI al in zijn geheugen had en kost veel minder.",
+      "groot": "Dit was een grote klus ({{beurten}} stappen). Een volgende keer gaat het zuiniger en betrouwbaarder in kleine stappen.",
+      "splits": "Splits dit in stappen",
+      "splitsPrompt": "Maak een kort plan in kleine stappen voor wat er nog moet gebeuren. Voer alleen stap 1 uit, controleer het resultaat en wacht dan op mijn akkoord voor de volgende stap."
     }
   },
   "instellingen": {
@@ -1648,6 +1656,18 @@
         "label": "Waarschuw als dezelfde fout steeds terugkomt",
         "uitleg": "Na zoveel keer dezelfde mislukte controle onderbreekt Studio de AI en krijg je keuzes. Standaard: 3.",
         "fout": "Kies een heel getal van 2 tot 10."
+      },
+      "beleid": {
+        "label": "Hoeveel mag de AI nadenken?",
+        "uitleg": "Meer nadenken geeft vaak een beter resultaat, maar kost meer van je AI-gebruik. Automatisch kiest Studio per klus.",
+        "auto": "Automatisch (aanbevolen)",
+        "autoUitleg": "Kleine aanpassingen gaan zuinig. Plannen, inloggen, gegevens en online zetten krijgen de meeste denkkracht.",
+        "zuinig": "Zuinig",
+        "zuinigUitleg": "Snel en met weinig gebruik. Handig voor kleine aanpassingen.",
+        "gebalanceerd": "Gebalanceerd",
+        "gebalanceerdUitleg": "Een goede middenweg voor de meeste klussen.",
+        "best": "Zo goed mogelijk",
+        "bestUitleg": "De meeste denkkracht. Kost meer gebruik en duurt langer."
       }
     },
     "programma": {
@@ -1744,6 +1764,35 @@
         "label": "Omgevingsvariabelen",
         "uitleg": "Waarden voor verschillende omgevingen. De waarden komen straks in een veilige kluis, nooit in je project.",
         "binnenkort": "Komt binnenkort"
+      },
+      "model": {
+        "label": "Eigen modelnaam",
+        "uitleg": "Laat leeg als je dat niet weet. Studio gebruikt dan de keuze hierboven. Een eigen naam gaat voor die keuze. Alleen letters, cijfers en . - _ [ ] :",
+        "opslaan": "Opslaan",
+        "placeholder": "Bijvoorbeeld: sonnet"
+      },
+      "kaart": {
+        "label": "Projectkaart",
+        "uitleg": "Een overzicht van je project dat Studio zelf maakt (zonder AI). De AI vindt zo sneller het goede bestand en hoeft minder te lezen.",
+        "aan": "Projectkaart gebruiken",
+        "vernieuw": "Kaart vernieuwen",
+        "bekijk": "Kaart bekijken",
+        "sluit": "Sluiten",
+        "status": "{{bestanden}} bestanden, ongeveer {{tokens}} woorddelen.",
+        "terugval": "{{aantal}} bestanden konden niet gelezen worden; daarvan staat alleen de naam in de kaart.",
+        "uit": "De projectkaart staat uit. De AI leest dan zelf je bestanden.",
+        "bezig": "Bezig met bijwerken…",
+        "fout": "De kaart kon niet worden bijgewerkt.",
+        "geenProject": "Open eerst een project."
+      },
+      "context": {
+        "label": "Wat gaat er naar de AI?",
+        "uitleg": "Dit gaat bij elke klus mee, plus je bericht. Hoe kleiner, hoe zuiniger. Het zijn schattingen.",
+        "instructies": "Werkafspraken voor de AI (CLAUDE.md)",
+        "notities": "Projectnotities (PROJECT.md)",
+        "kaart": "Projectkaart",
+        "tokens": "± {{tokens}} woorddelen",
+        "teGroot": "Dit is vrij groot. Laat de AI het inkorten, bijvoorbeeld: ‘Maak PROJECT.md korter en bewaar de details in een apart bestand.’"
       }
     },
     "versie": {

@@ -5,7 +5,7 @@
  */
 export const SETTINGS_VERSION = 1;
 
-export type SettingKey = "communication_mode" | "permission_mode" | "plan_default" | "loop_threshold" | "theme" | "text_scale" | "preview_auto_switch" | "default_project_dir" | "menu_collapsed" | "update_check" | "eerste_start_klaar";
+export type SettingKey = "communication_mode" | "permission_mode" | "plan_default" | "loop_threshold" | "theme" | "text_scale" | "preview_auto_switch" | "default_project_dir" | "menu_collapsed" | "update_check" | "eerste_start_klaar" | "model_beleid" | "model_eigen" | "kaart_aan";
 
 export interface Settings {
   communication_mode: "simple" | "technical";
@@ -21,6 +21,12 @@ export interface Settings {
   update_check: boolean;
   /** De eerste-startschermen zijn doorlopen (of overgeslagen). */
   eerste_start_klaar: boolean;
+  /** Hoeveel denkkracht de AI inzet: Studio kiest zelf, of een vaste keuze. */
+  model_beleid: "auto" | "zuinig" | "gebalanceerd" | "best";
+  /** Voor gevorderden: een eigen modelnaam; leeg = Studio kiest. */
+  model_eigen: string;
+  /** De projectkaart helpt de AI sneller het goede bestand te vinden. */
+  kaart_aan: boolean;
 }
 
 interface Def<K extends SettingKey> {
@@ -47,6 +53,9 @@ export const REGISTER: { [K in SettingKey]: Def<K> } = {
   menu_collapsed: { standaard: "0", lees: (r) => (r === "1" ? true : r === "0" ? false : null) },
   update_check: { standaard: "1", lees: (r) => (r === "1" ? true : r === "0" ? false : null) },
   eerste_start_klaar: { standaard: "0", lees: (r) => (r === "1" ? true : r === "0" ? false : null) },
+  model_beleid: { standaard: "auto", lees: oneOf("auto", "zuinig", "gebalanceerd", "best") },
+  model_eigen: { standaard: "", lees: (r) => (r.length <= 60 && /^[A-Za-z0-9._\-[\]:]*$/.test(r) ? r : null) },
+  kaart_aan: { standaard: "1", lees: (r) => (r === "1" ? true : r === "0" ? false : null) },
 };
 
 export const SETTING_KEYS = Object.keys(REGISTER) as SettingKey[];

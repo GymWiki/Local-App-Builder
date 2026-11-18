@@ -240,7 +240,7 @@ export type ChatErrorCode =
 export interface ChatMessage {
   id: number;
   project_id: number;
-  kind: "user" | "assistant" | "action" | "permission" | "error" | "divider" | "notice" | "version" | "loop_alert" | "connect_offer";
+  kind: "user" | "assistant" | "action" | "permission" | "error" | "divider" | "notice" | "version" | "loop_alert" | "connect_offer" | "usage";
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload: Record<string, any>;
   created_at: string;
@@ -804,3 +804,19 @@ export interface StartInfo {
   laatste_project: Project | null;
 }
 export const startInfo = () => invoke<StartInfo>("start_info");
+
+// ---------- projectkaart en AI-gebruik ----------
+export interface KaartStatus {
+  aan: boolean;
+  bestanden: number;
+  tokens: number;
+  terugval: number;
+}
+export interface ContextItem {
+  id: "instructies" | "notities" | "kaart";
+  tokens: number;
+  te_groot: boolean;
+}
+export const kaartVernieuw = (projectId: number) => invoke<KaartStatus>("kaart_vernieuw", { projectId });
+export const kaartTekst = (projectId: number) => invoke<string>("kaart_tekst", { projectId });
+export const kaartContext = (projectId: number) => invoke<ContextItem[]>("kaart_context", { projectId });

@@ -130,4 +130,44 @@ describe("SettingsView", () => {
     expect((await screen.findAllByText("/usr/bin/claude", { exact: false })).length).toBeGreaterThan(0);
     expect(screen.getByText("Dit project heeft geen studio.json.")).toBeInTheDocument();
   });
+
+  it("Mijn AI: 'Hoeveel mag de AI nadenken?' staat standaard op Automatisch en bewaart een keuze", async () => {
+    setup("project");
+    open("Mijn AI");
+    const auto = await screen.findByRole("radio", { name: /Automatisch/ });
+    expect(auto).toHaveAttribute("aria-checked", "true");
+    fireEvent.click(screen.getByRole("radio", { name: /Zuinig/ }));
+    await waitFor(() => expect(api.setUiSetting).toHaveBeenCalledWith("model_beleid", "zuinig"));
+    expect(screen.getByTestId("inst-beleid-bereik")).toHaveTextContent("Voor alle projecten");
+  });
+
+  it("Voor gevorderden: projectkaart vernieuwen, bekijken en 'Wat gaat er naar de AI?'", async () => {
+    (api.kaartContext as Mock).mockResolvedValue([
+      { id: "instructies", tokens: 900, te_groot: false },
+      { id: "notities", tokens: 2100, te_groot: true },
+      { id: "kaart", tokens: 700, te_groot: false },
+    ]);
+    (api.kaartVernieuw as Mock).mockResolvedValue({ aan: true, bestanden: 12, tokens: 640, terugval: 2 });
+    (api.kaartTekst as Mock).mockResolvedValue("# Projectkaart\n- app.js");
+    setup("project");
+    open("Voor gevorderden");
+    fireEvent.click(await screen.findByRole("button", { name: /Voor gevorderden|Meer opties|openen|Toon/i }));
+    fireEvent.click(await screen.findByTestId("kaart-vernieuw"));
+    expect(await screen.findByTestId("kaart-status")).toHaveTextContent("12 bestanden, ongeveer 640");
+    expect(screen.getByTestId("kaart-status")).toHaveTextContent("2 bestanden konden niet gelezen worden");
+    const lijst = await screen.findByTestId("context-lijst");
+    expect(lijst).toHaveTextContent("Projectnotities (PROJECT.md): ± 2100");
+    expect(lijst).toHaveTextContent("Laat de AI het inkorten");
+    fireEvent.click(screen.getByTestId("kaart-bekijk"));
+    expect(await screen.findByTestId("kaart-tekst")).toHaveTextContent("# Projectkaart");
+  });
+
+  it("de projectkaart uitzetten bewaart de keuze en verbergt de knoppen", async () => {
+    (api.kaartContext as Mock).mockResolvedValue([]);
+    setup("project");
+    open("Voor gevorderden");
+    fireEvent.click(await screen.findByRole("button", { name: /Voor gevorderden|Meer opties|openen|Toon/i }));
+    fireEvent.click(await screen.findByRole("switch", { name: "Projectkaart gebruiken" }));
+    await waitFor(() => expect(api.setUiSetting).toHaveBeenCalledWith("kaart_aan", "0"));
+  });
 });

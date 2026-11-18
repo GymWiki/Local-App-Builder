@@ -30,3 +30,22 @@ pub fn handle(app: &AppHandle, project_id: i64, cmd: &str, args: &Value) -> Resu
         _ => Err("Onbekende opdracht aan Studio.".into()),
     }
 }
+
+/// Stuurt de runtime van een project welke diensten gekoppeld zijn, zodat de AI alleen de tools van gekoppelde diensten ziet
+/// (minder tools = minder tokens). Mislukt dit, dan blijven alle tools zichtbaar; er gaat niets stuk.
+pub fn push_toolgroepen(app: &AppHandle, project_id: i64) {
+    let status = app.state::<Arc<Manager>>().ai_status();
+    let aan = |id: &str| status.iter().any(|s| s.id == id && s.gekoppeld);
+    let args = json!({ "db": aan("supabase"), "github": aan("github"), "vercel": aan("vercel") });
+    let _ = app.state::<crate::mcp::McpManager>().call(project_id, "tools.set", args, std::time::Duration::from_secs(3));
+}
+
+/// Na een wijziging in de koppelingen: alle draaiende projecten bijwerken (op een eigen thread).
+pub fn push_toolgroepen_alle(app: &AppHandle) {
+    let app = app.clone();
+    std::thread::spawn(move || {
+        for id in app.state::<crate::mcp::McpManager>().running_ids() {
+            push_toolgroepen(&app, id);
+        }
+    });
+}

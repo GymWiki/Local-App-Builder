@@ -23,6 +23,7 @@ import NiveauKiezer from "@/components/app/supabase/NiveauKiezer";
 import { useSupa } from "@/components/app/supabase/use-supa";
 import Keuze from "./Keuze";
 import Rij from "./Rij";
+import { AiGebruikGevorderd, BeleidRij } from "./AiGebruikRijen";
 
 export type InstellingGroep = "project" | "ai" | "programma" | "gevorderd";
 
@@ -95,6 +96,7 @@ export default function SettingsView({ scope, project, accounts, mcp, groep, onG
               <NiveauInstelling projectId={project.id} />
             </Rij>
           )}
+          <BeleidRij />
           <Rij id="inst-toestemming" label={t("inst.ai.toestemming.label")} uitleg={t("inst.ai.toestemming.uitleg")} bereik="alle" herstel={{ onReset: () => void reset("permission_mode"), isStandaard: s.permission_mode === d.permission_mode }}>
             <Keuze
               naam="toestemming"
@@ -399,6 +401,7 @@ function Gevorderd({ project, mcp }: { project: Project | null; mcp: McpInfo | n
             <p className="text-base">{t("inst.gevorderd.opdrachten.geen")}</p>
           )}
         </Rij>
+        <AiGebruikGevorderd project={project} />
         <Rij id="inst-omgeving" label={t("inst.gevorderd.omgeving.label")} uitleg={t("inst.gevorderd.omgeving.uitleg")} bereik="dit">
           <p className="text-sm text-muted-foreground">{t("inst.gevorderd.omgeving.binnenkort")}</p>
         </Rij>

@@ -97,7 +97,9 @@ en na elk deel opnieuw met een ander label (`na-deel-1` …). De uitvoer komt in
 | 3 Slimme uitvoer | klaar (zie §6); taakmeting wacht op de eigenaar |
 | 4 Sessiebeheer | gedeeltelijk klaar (zie §7) |
 | 2 Korte vaste context | gedeeltelijk klaar (zie §8) |
-| 5–8 | nog niet gedaan |
+| 5 Model en inspanning | klaar voor Claude (zie §9) |
+| 7 Duidelijk voor de gebruiker | grotendeels klaar (zie §10) |
+| 6, 8 | zie §11 |
 
 ## 5. Deel 1 — de projectkaart
 
@@ -152,10 +154,37 @@ Voorbeeld uit de test: een mislukte build met 150 logregels geeft nu minder dan 
 
 **Tools alleen laden als ze nodig zijn (gemeten):**
 - Studio had **52** tools (± 5.958 tokens aan beschrijvingen en schema's, schatting). Voor een gebruiker zonder gekoppelde diensten zijn de 24 `db_*`-tools, de GitHub- en de Vercel-tools onbruikbaar.
-- Nu worden die per dienst alleen getoond als die dienst gekoppeld is (`toolGroepen` vraagt Studio hoogstens elke 20 seconden; bij een fout of time-out blijft alles zichtbaar). Zonder koppelingen: **24 tools, ± 2.518 tokens** (−58%). `koppelingen_status` en `koppeling_voorstellen` blijven altijd, zodat de AI een koppeling kan voorstellen als die nodig is. Getest in `toolgroepen.test.ts`.
+- Nu worden die per dienst alleen getoond als die dienst gekoppeld is (Studio stuurt de stand naar de runtime bij het starten en bij elke wijziging in de koppelingen, `tools.set`; komt dat bericht niet aan, dan blijven alle tools zichtbaar). Zonder koppelingen: **24 tools, ± 2.518 tokens** (−58%). `koppelingen_status` en `koppeling_voorstellen` blijven altijd, zodat de AI een koppeling kan voorstellen als die nodig is. Getest in `toolgroepen.test.ts`.
 - Uit de Claude-docs (§3): MCP-tools zijn daar standaard al uitgesteld geladen ("tool search"); voor Claude is de winst dus kleiner. Voor Gemini en andere CLI's die alles vooraf laden, is dit wel de volle besparing. Dat verschil hebben we niet gemeten.
 
 **Nog niet gedaan uit deel 2**
 - **Budget en automatisch inkorten van CLAUDE.md/PROJECT.md:** de instructieblokken zijn klein (≈ 760 tokens het grootste) en eigen tekst van de gebruiker buiten onze blokken raken we bewust niet aan. Een waarschuwing bij een te lang PROJECT.md komt in het scherm "Wat gaat er naar de AI?" (deel 7).
 - **Kit-catalogus per taak laden:** de kit-instructies worden al in een vaste, begrensde vorm geschreven (`fitEntries` in `kits/catalog.ts`); een taakgerichte selectie volgt niet zonder meting van hoe groot die in de praktijk is.
 - **Skills inkorten:** de beschrijvingen zijn al kort; niet aangepast.
+
+## 9. Deel 5 — model- en inspanningsbeleid
+
+**Nagekeken (niet uit het geheugen):** `claude --help` van Claude Code 2.1.327, lokaal gelezen: `--model` (aliassen o.a. `sonnet`, `opus`, `fable`) en `--effort` met `low`, `medium`, `high`, `xhigh`, `max`. Gemini: `-m` met `auto`, `pro`, `flash`, `flash-lite` staat in de docs, maar een inspanning-instelling is niet gevonden en Gemini heeft in Studio geen chatweergave. Codex: niet na te kijken. Daarom past Studio het beleid **alleen op Claude** toe; de andere twee staan als "niet geverifieerd" in `config/model-beleid.json` en krijgen niets.
+
+**Hoe het werkt** (`src-tauri/src/chat/beleid.rs`, getest)
+- Keuze voor de gebruiker: **Automatisch (aanbevolen)**, **Zuinig**, **Gebalanceerd**, **Zo goed mogelijk** (Instellingen → Mijn AI). Geen modelnamen in de gewone weergave; die staan onder Voor gevorderden ("Eigen modelnaam", wint van het beleid, alleen letters/cijfers/`.-_[]:`).
+- Vertaling in `config/model-beleid.json`: zuinig = sonnet + low, gebalanceerd = sonnet + medium, best = opus + high. Dit zijn **keuzes van mij, niet gemeten**: of "sonnet low" goed genoeg is voor kleine aanpassingen moet de taakmeting (§2c) uitwijzen. Haiku gebruiken we niet: te riskant voor bouwwerk zonder meting.
+- Automatisch kiest per klus, deterministisch: korte opmaak/tekst-verzoeken → zuinig; plan-modus, lange verzoeken, of woorden als database, inloggen, betalen, online zetten, beveiliging → best; de rest → gebalanceerd.
+- **Het niveau wordt gekozen als het AI-proces start, niet per bericht**: een ander model midden in een gesprek breekt de cache van de aanbieder, wat duurder is dan het wint.
+- **Escalatie:** loopt de bug-loopbewaking vast (zelfde fout, hetzelfde bestand steeds herschreven, slechter), dan gebruikt de volgende poging automatisch het sterkste model, tot een controle weer slaagt. Dat gaat zonder extra bevestiging omdat de gebruiker de pauzekaart al ziet en zelf een keuze maakt.
+- Cache-vlag: Studio geeft `--exclude-dynamic-system-prompt-sections` mee **als `--help` die vlag kent** (de helptekst zegt: verplaatst per-computergegevens uit de systeemprompt naar het eerste bericht, "improves cross-user prompt-cache reuse"). Voor één gebruiker is de winst vooral bij een frisse sessie; niet gemeten.
+
+## 10. Deel 7 — duidelijk voor de gebruiker
+
+- **AI-gebruik per klus:** onder elke afgeronde klus één rustige regel met de echte cijfers uit het `result`-bericht van de CLI (nieuw verwerkt en hergebruikt uit het geheugen van de AI). Een uitklapper legt in één alinea uit: bij een abonnement telt het mee voor de limiet en kost het geen geld; bij betalen per gebruik kan het wel geld kosten; **Studio toont en berekent geen bedragen** (de CLI geeft een `total_cost_usd`, maar dat is een lijstprijs en misleidend voor abonnementen).
+- **Grote klus:** na 25 stappen of 150.000 nieuw verwerkte woorddelen (mijn keuze, niet gemeten) een vriendelijke melding met "Splits dit in stappen". Dit is een melding achteraf; een voorspelling vooraf kan Studio niet doen.
+- Het gebruik is alleen zo precies als de CLI het geeft: **Claude geeft het; Gemini heeft geen chatweergave, dus daar toont Studio niets** (geen schatting verzonnen).
+- **Instellingen onder Voor gevorderden:** eigen modelnaam, projectkaart (aan/uit, vernieuwen, bekijken, status) en **Wat gaat er naar de AI?** (werkafspraken, projectnotities, kaart, in geschatte woorddelen, met een waarschuwing als PROJECT.md te groot wordt (> 1.500) of de instructiebestanden (> 2.500)). Het beleid staat bij Mijn AI. Standaard is alles aan.
+- **Graphify-schakelaar: niet gebouwd.** De licentie wordt tegenstrijdig gemeld (§3) en het vraagt Python; de eigen kaart dekt de kern. Als de licentie is uitgezocht kan dit later bij Voor gevorderden.
+- Playwright: `npm run ux:tokens` (1280×720, 1366×768, 1920×1080, licht en donker).
+
+## 11. Deel 6 en 8
+
+**Deel 8 (veiligheid en betrouwbaarheid), wat er al staat:** index, kaart en tools sluiten `.env`, sleutelbestanden en de gedeelde ignorelijst uit (`config/kaart-ignore.json`, getest, incl. een nepsleutel die nergens in kaart of database mag staan); letterlijke tekstwaarden komen niet in signaturen; de tools lopen via de bestaande MCP-server (alleen 127.0.0.1, token). Een foute of oude kaart: elke vraag werkt eerst de index bij, bestanden die niet gelezen kunnen worden staan met alleen hun naam erin en dat wordt gemeld; de instructie zegt bij twijfel het echte bestand te lezen. Spaties, hoofdletters en Unicode in paden zijn getest; de index is annuleerbaar en begrensd (6.000 bestanden, 400 kB). **Niet gedaan:** een voortgangsbalk in de interface voor de index (de eerste index duurt bij 250 bestanden ongeveer een halve seconde; bij een veel groter project is dit nog niet bekeken) en een melding in het activiteitenlog bij een leesfout (die staat nu alleen als aantal in het antwoord).
+
+**Deel 6 (zuinige startpunten): grotendeels niet gedaan.** De startprojecten (takenlijst, portfolio, webshop, kassa) en de kit-componenten bestaan al en zijn deterministisch. Nieuw zijn *geen* vaste, geteste bouwstenen voor "nieuw scherm", "inlogscherm" of "databasetabel met schermen": die vragen per kit een eigen gegenereerde variant en moeten per bouwsteen getest worden; dat is een eigen opdracht. Hergebruik tussen AI's is er wel: PROJECT.md en `.studio/kaart.md` zijn gedeeld en de overdracht verwijst ernaar.

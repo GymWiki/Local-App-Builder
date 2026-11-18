@@ -209,6 +209,7 @@ fn begin_mcp(app: &tauri::AppHandle, p: &Project) -> McpInfo {
                     json!({ "hash": trusted }),
                     Duration::from_secs(5),
                 );
+                crate::host::push_toolgroepen(&app, id);
             }
             let _ = app.emit("mcp-status", json!({ "project_id": id, "info": info }));
             // De runtime is er (of juist niet): preview opnieuw beoordelen (plan doorgeven, dev-server starten, melding tonen).
@@ -286,6 +287,9 @@ const UI_SETTINGS: &[&str] = &[
     "menu_collapsed",
     "update_check",
     "eerste_start_klaar",
+    "model_beleid",
+    "model_eigen",
+    "kaart_aan",
 ];
 
 fn valid_setting(key: &str, value: &str) -> bool {
@@ -295,7 +299,9 @@ fn valid_setting(key: &str, value: &str) -> bool {
         "plan_default" => matches!(value, "0" | "1"),
         "settings_version" => value.parse::<u32>().is_ok_and(|n| n <= 1000),
         "text_scale" => matches!(value, "90" | "100" | "115" | "130"),
-        "menu_collapsed" | "update_check" | "eerste_start_klaar" => matches!(value, "0" | "1"),
+        "menu_collapsed" | "update_check" | "eerste_start_klaar" | "kaart_aan" => matches!(value, "0" | "1"),
+        "model_beleid" => matches!(value, "auto" | "zuinig" | "gebalanceerd" | "best"),
+        "model_eigen" => value.len() <= 60 && value.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '-' | '_' | '[' | ']' | ':')),
         "default_project_dir" => value.len() <= 1000 && !value.contains('\0'),
         "theme" => matches!(value, "system" | "light" | "dark"),
         "loop_threshold" => value

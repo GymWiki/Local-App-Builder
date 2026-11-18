@@ -272,6 +272,7 @@ export default function ChatPanel({
 
   const toonLang = !langNegeren && !busy && !!target?.structured && berichtenSindsScheiding(messages.map((x) => x.kind)) >= LANG_GESPREK;
 
+  const lastUsageId = [...messages].reverse().find((x) => x.kind === "usage")?.id;
   const lastLoopId = [...messages]
     .reverse()
     .find((x) => x.kind === "loop_alert")?.id;
@@ -383,6 +384,7 @@ export default function ChatPanel({
               }
               onRetry={() => void chatRetry(id).catch(fail)}
               onOpenAccounts={onOpenAccounts}
+              usage={{ active: m.id === lastUsageId && !busy, onSplit: () => void chatSend(id, t("chat.gebruik.splitsPrompt")).catch(fail) }}
               loop={{
                 active: m.id === lastLoopId && !busy,
                 onRestore: async (hash) => {

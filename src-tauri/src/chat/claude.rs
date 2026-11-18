@@ -171,6 +171,30 @@ pub fn check_info(detail: &str, ok: bool, text: &str) -> Option<CheckInfo> {
     })
 }
 
+/// Kent deze versie van de CLI een vlag? Eén keer per programma nagekeken met `--help` (lokaal, geen netwerk, geen AI-gebruik).
+fn ondersteunt(binary: &str, vlag: &str) -> bool {
+    use std::collections::HashMap;
+    use std::sync::{Mutex, OnceLock};
+    static HELP: OnceLock<Mutex<HashMap<String, String>>> = OnceLock::new();
+    let kaart = HELP.get_or_init(Default::default);
+    if let Some(h) = kaart.lock().unwrap().get(binary) {
+        return h.contains(vlag);
+    }
+    let (program, args) = cli::launch(Path::new(binary), vec!["--help".to_string()]);
+    let (tx, rx) = std::sync::mpsc::channel();
+    std::thread::spawn(move || {
+        let uit = std::process::Command::new(program).args(args).stdin(std::process::Stdio::null()).stderr(std::process::Stdio::null()).output();
+        let _ = tx.send(uit.map(|o| String::from_utf8_lossy(&o.stdout).to_string()).unwrap_or_default());
+    });
+    let help = rx.recv_timeout(std::time::Duration::from_secs(5)).unwrap_or_default();
+    let ok = help.contains(vlag);
+    // Alleen onthouden als de help echt gelezen is (anders de volgende keer opnieuw proberen).
+    if !help.is_empty() {
+        kaart.lock().unwrap().insert(binary.to_string(), help);
+    }
+    ok
+}
+
 impl ChatAdapter for ClaudeAdapter {
     fn launch(&self, ctx: &LaunchCtx) -> Launch {
         let mut args: Vec<String> = [
@@ -197,6 +221,18 @@ impl ChatAdapter for ClaudeAdapter {
         }
         if let Some(id) = &ctx.resume {
             args.extend(["--resume".into(), id.clone()]);
+        }
+        // Model en inspanning volgens het beleid (alleen als de gebruiker of het beleid er een vraagt).
+        if let Some(m) = &ctx.keuze.model {
+            args.extend(["--model".into(), m.clone()]);
+        }
+        if let Some(e) = &ctx.keuze.effort {
+            args.extend(["--effort".into(), e.clone()]);
+        }
+        // Vaste voorkant voor de cache: per-computergegevens (map, git-status) verhuizen van de systeemprompt naar het eerste bericht,
+        // zodat een nieuwe sessie dezelfde voorkant heeft. Alleen als deze versie van de CLI de vlag kent (gecontroleerd met --help).
+        if ondersteunt(&ctx.binary.to_string_lossy(), "--exclude-dynamic-system-prompt-sections") {
+            args.push("--exclude-dynamic-system-prompt-sections".into());
         }
         let (program, args) = cli::launch(Path::new(&ctx.binary), args);
         Launch { program, args }
@@ -384,6 +420,16 @@ impl ChatAdapter for ClaudeAdapter {
                     }
                 }
                 self.turn_error_sent = false;
+                if let Some(u) = v["usage"].as_object() {
+                    let n = |k: &str| u.get(k).and_then(|x| x.as_u64()).unwrap_or(0);
+                    out.push(ChatEvent::Usage {
+                        input: n("input_tokens"),
+                        output: n("output_tokens"),
+                        cache_read: n("cache_read_input_tokens"),
+                        cache_write: n("cache_creation_input_tokens"),
+                        turns: v["num_turns"].as_u64().unwrap_or(0),
+                    });
+                }
                 out.push(ChatEvent::TurnDone { ok: !is_error });
             }
             _ => {}
@@ -649,7 +695,7 @@ mod tests {
     #[test]
     fn echte_opname_hallo_met_mislukte_studio_koppeling() {
         let ev = run(REAL_HELLO);
-        assert_eq!(ev.len(), 4, "{ev:?}");
+        assert_eq!(ev.len(), 5, "{ev:?} (sessie, fout, tekst, gebruik, einde)");
         assert!(matches!(&ev[0], ChatEvent::Session { session_id } if session_id.len() == 36));
         assert!(
             matches!(
@@ -668,7 +714,8 @@ mod tests {
                 text: "Hallo! 👋 Waar kan ik je vandaag mee helpen?".into()
             }
         );
-        assert_eq!(ev[3], ChatEvent::TurnDone { ok: true });
+        assert!(matches!(ev[3], ChatEvent::Usage { cache_write: 41259, .. }));
+        assert_eq!(ev[4], ChatEvent::TurnDone { ok: true });
     }
 
     fn ev_text_id(e: &ChatEvent) -> String {
@@ -733,6 +780,7 @@ mod tests {
             mcp_config: Some(PathBuf::from("/data/chat/1/mcp.json")),
             permission_tool: Some("mcp__studio__permission_prompt".into()),
             plan: false,
+            keuze: Default::default(),
         });
         let args = l.args.join(" ");
         for must in [
@@ -754,6 +802,7 @@ mod tests {
             mcp_config: None,
             permission_tool: None,
             plan: true,
+            keuze: Default::default(),
         });
         assert!(plan.args.join(" ").contains("--permission-mode plan"));
         assert!(a.supports_plan_mode());
@@ -763,8 +812,22 @@ mod tests {
             mcp_config: None,
             permission_tool: None,
             plan: false,
+            keuze: Default::default(),
         });
         assert!(!fresh.args.join(" ").contains("--resume"));
+        assert!(!fresh.args.join(" ").contains("--model"), "zonder keuze geen model-vlag");
+        let gekozen = a.launch(&LaunchCtx {
+            binary: PathBuf::from("/bestaat/niet/claude"),
+            resume: None,
+            mcp_config: None,
+            permission_tool: None,
+            plan: false,
+            keuze: crate::chat::beleid::Keuze { model: Some("sonnet".into()), effort: Some("low".into()) },
+        });
+        let g = gekozen.args.join(" ");
+        assert!(g.contains("--model sonnet") && g.contains("--effort low"), "{g}");
+        // een onbekend programma kan de cache-vlag niet bevestigen: dan niet meegeven (een onbekende vlag zou de start breken)
+        assert!(!g.contains("--exclude-dynamic-system-prompt-sections"));
     }
 
     #[test]
@@ -835,5 +898,17 @@ mod tests {
     fn mislukte_studio_controle_zonder_leesbare_json_geeft_toch_een_mislukking() {
         let c = check_info("", true, "CHECKS MISLUKT\n(kapotte uitvoer)").unwrap();
         assert!(!c.ok && c.count == 1);
+    }
+
+    #[test]
+    fn echt_gebruik_uit_een_opgenomen_beurt() {
+        let ev = run(REAL_WRITE);
+        let u = ev.iter().find_map(|e| if let ChatEvent::Usage { input, output, cache_read, cache_write, turns } = e { Some((*input, *output, *cache_read, *cache_write, *turns)) } else { None });
+        assert_eq!(u, Some((4, 233, 70245, 12392, 2)));
+        // het gebruik komt vóór het einde van de beurt
+        let pos = |f: &dyn Fn(&ChatEvent) -> bool| ev.iter().position(f).unwrap();
+        assert!(pos(&|e| matches!(e, ChatEvent::Usage { .. })) < pos(&|e| matches!(e, ChatEvent::TurnDone { .. })));
+        // een oude opname zonder gebruik geeft geen gebruiksbericht
+        assert!(!run(SIMPLE).iter().any(|e| matches!(e, ChatEvent::Usage { .. })));
     }
 }
