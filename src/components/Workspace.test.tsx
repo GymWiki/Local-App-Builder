@@ -13,7 +13,7 @@ vi.mock("./app/chat/ChatPanel", () => ({
 vi.mock("./PreviewPanel", () => ({ default: () => <div data-testid="preview" /> }));
 vi.mock("./TerminalPanel", () => ({ default: () => <div data-testid="terminal" /> }));
 
-const project: Project = { id: 1, naam: "P", pad: "/p", template: "leeg", created_at: "", default_account_id: null };
+const project: Project = { id: 1, naam: "P", pad: "/p", template: "leeg", created_at: "", default_account_id: null, last_used_at: null };
 
 describe("Workspace", () => {
   it("toont de tabs Maken, Publiceren en Geavanceerd (geen losse Terminal/Preview-tab)", () => {

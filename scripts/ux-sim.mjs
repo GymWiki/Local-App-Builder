@@ -4,12 +4,13 @@
 // Uitvoer: docs/ux/<persoon>/<nn>-<stap>-<thema>.png en docs/ux/<persoon>/metingen.json
 import { spawn } from "node:child_process";
 import { createServer } from "node:http";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const THUMB = `data:image/jpeg;base64,${readFileSync(path.join(root, "scripts/fixtures/thumb-demo.jpg")).toString("base64")}`;
 const require = createRequire(path.join(root, "mcp-server", "package.json"));
 const { chromium } = require("playwright-core");
 
@@ -30,11 +31,13 @@ for (let i = 0; i < 100; i++) {
 }
 
 // ---- de nagebootste Tauri-kant, mét toestand (draait in de pagina) ----
-function mock({ demoUrl, scenario }) {
+function mock({ demoUrl, scenario, THUMB }) {
   const now = () => new Date().toISOString().slice(0, 19).replace("T", " ");
   const S = (window.__S = {
-    projects: [],
-    next: 1,
+    projects: (scenario.seed || []).map((x, i) => ({ id: i + 1, naam: x.naam, pad: `/home/joke/Documenten/${x.naam}`, template: "leeg", created_at: "2026-11-01 10:00:00", default_account_id: null, last_used_at: x.last ?? null })),
+    next: (scenario.seed || []).length + 1,
+    layouts: {},
+    thumbs: Object.fromEntries((scenario.seed || []).map((x, i) => [i + 1, x.thumb === "demo" ? THUMB : (x.thumb ?? null)])),
     accounts: [],
     nextAcc: 1,
     messages: {},
@@ -112,13 +115,27 @@ function mock({ demoUrl, scenario }) {
   const handlers = {
     list_projects: () => S.projects,
     create_project: (a) => {
-      const p = { id: S.next++, naam: a.naam, pad: `${a.bovenliggendPad}/${a.naam}`, template: a.template || "leeg", created_at: now(), default_account_id: null };
+      const p = { id: S.next++, naam: a.naam, pad: `${a.bovenliggendPad}/${a.naam}`, template: a.template || "leeg", created_at: now(), default_account_id: null, last_used_at: null };
       S.projects.push(p);
       return p;
     },
     delete_project: (a) => void (S.projects = S.projects.filter((p) => p.id !== a.id)),
+    rename_project: (a) => {
+      const p = S.projects.find((x) => x.id === a.id);
+      p.naam = a.naam.trim();
+      return p;
+    },
+    layout_get: (a) => S.layouts[a.projectId] ?? null,
+    layout_set: (a) => void (S.layouts[a.projectId] = { versie: a.versie, json: a.json }),
+    layout_reset: (a) => void delete S.layouts[a.projectId],
+    project_thumbnail_get: (a) => S.thumbs[a.id] ?? null,
+    project_thumbnail_set: (a) => void (S.thumbs[a.id] = a.dataUrl),
     close_project: () => null,
-    open_project: () => mcp(),
+    open_project: (a) => {
+      const p = S.projects.find((x) => x.id === a.id);
+      if (p) p.last_used_at = new Date().toISOString();
+      return mcp();
+    },
     mcp_status: () => mcp(),
     preview_info: (a) => S.preview[a.id] || emptyPreview,
     preview_start: (a) => S.preview[a.id] || emptyPreview,
@@ -155,6 +172,7 @@ function mock({ demoUrl, scenario }) {
         return { hash: "terug00000", unchanged: false, safety: "bak0000" };
       }
       if (a.cmd === "security.check") return { scanned: 6, findings: [] };
+      if (a.cmd === "preview.thumbnail") return { data_url: THUMB };
       return {};
     },
     start_shell: () => ({ id: "s" + nextId, kind: "shell", provider: null, account_id: null, account_label: null, project_id: 1, warnings: [] }),
@@ -236,7 +254,7 @@ export async function openApp({ w, h, scale = 1, theme = "licht", scenario = {} 
   const errors = [];
   page.on("pageerror", (e) => errors.push(String(e.message).slice(0, 200)));
   page.on("console", (m) => m.type() === "error" && !/favicon|Failed to load resource/.test(m.text()) && errors.push(m.text().slice(0, 200)));
-  await page.addInitScript(mock, { demoUrl, scenario: { ...scenario, theme: theme === "licht" ? "light" : "dark" } });
+  await page.addInitScript(mock, { THUMB, demoUrl, scenario: { ...scenario, theme: theme === "licht" ? "light" : "dark" } });
   await page.goto(`http://127.0.0.1:${PORT}/`);
   await page.waitForLoadState("networkidle");
   return { page, ctx, errors };

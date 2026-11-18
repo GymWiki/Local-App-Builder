@@ -13,6 +13,55 @@
     "annuleer": "Annuleren",
     "verwijderKnop": "Uit de lijst halen"
   },
+  "home": {
+    "titel": "Je projecten",
+    "uitleg": "Kies een project om verder te werken, of begin met een nieuw project.",
+    "zoek": "Zoek in je projecten",
+    "zoekPlaceholder": "Zoek op naam…",
+    "sorteer": "Sorteren",
+    "sorteerLaatst": "Laatst gebruikt",
+    "sorteerNaam": "Naam (A-Z)",
+    "nieuw": "Nieuw project",
+    "nieuwUitleg": "Begin met een leeg project of een startklare website.",
+    "laatst": "Laatst bewerkt: {{wanneer}}",
+    "nooit": "Nog niet geopend",
+    "openen": "Openen",
+    "hernoemen": "Naam wijzigen",
+    "uitLijst": "Uit lijst verwijderen",
+    "menu": "Meer acties voor {{naam}}",
+    "geenResultaat": "Geen projecten gevonden voor ‘{{zoek}}’.",
+    "wisZoek": "Zoekopdracht wissen",
+    "plaatshouder": "Nog geen voorbeeld",
+    "miniatuur": "Voorbeeld van {{naam}}",
+    "kaart": "Open {{naam}}",
+    "alleProjecten": "Alle projecten",
+    "status": {
+      "running": "Draait",
+      "starting": "Start op",
+      "error": "Fout",
+      "stopped": "Gestopt",
+      "idle": "Niet actief",
+      "nieuw": "Nieuw",
+      "stopping": "Stopt"
+    },
+    "leeg": {
+      "titel": "Welkom bij Studio",
+      "uitleg": "Hier maak je een website of app samen met een AI. Je vertelt in gewone woorden wat je wilt. Techniek hoef je niet te snappen.",
+      "knop": "Maak je eerste project"
+    },
+    "hernoem": {
+      "titel": "Naam wijzigen",
+      "label": "Nieuwe naam",
+      "uitleg": "Alleen de naam in Studio verandert. De map op je computer houdt haar naam.",
+      "knop": "Opslaan",
+      "klaar": "De naam is gewijzigd."
+    },
+    "verwijder": {
+      "titel": "Project uit de lijst halen?",
+      "uitleg": "“{{naam}}” verdwijnt uit deze lijst. De bestanden op je computer blijven staan.",
+      "knop": "Uit de lijst halen"
+    }
+  },
   "welkom": {
     "titel": "Welkom bij Studio",
     "uitleg": "Hier maak je een website of app samen met een AI. Je vertelt in gewone woorden wat je wilt. Techniek hoef je niet te snappen.",

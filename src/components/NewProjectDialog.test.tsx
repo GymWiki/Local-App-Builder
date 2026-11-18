@@ -5,7 +5,7 @@ import * as api from "@/lib/api";
 
 vi.mock("@/lib/api");
 
-const project = { id: 5, naam: "Mila", pad: "/p/Mila", template: "leeg", created_at: "", default_account_id: null };
+const project = { id: 5, naam: "Mila", pad: "/p/Mila", template: "leeg", created_at: "", default_account_id: null, last_used_at: null };
 
 function setup() {
   const onCreated = vi.fn();

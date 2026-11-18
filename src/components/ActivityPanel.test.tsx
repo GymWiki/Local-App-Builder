@@ -6,7 +6,7 @@ import * as api from "../lib/api";
 
 vi.mock("../lib/api");
 
-const project: Project = { id: 1, naam: "P", pad: "/p", template: "leeg", created_at: "", default_account_id: null };
+const project: Project = { id: 1, naam: "P", pad: "/p", template: "leeg", created_at: "", default_account_id: null, last_used_at: null };
 const up = { state: "connected" as const, port: 1, error: null };
 const points = [
   { hash: "b".repeat(40), short: "bbbbbbb", date: "2026-11-16T10:00:00+01:00", message: "Inlog toegevoegd" },

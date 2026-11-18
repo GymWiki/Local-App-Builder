@@ -9,7 +9,7 @@ import * as api from "../lib/api";
 vi.mock("../lib/api");
 vi.mock("./TerminalView", () => ({ default: () => <div /> }));
 
-const project: Project = { id: 1, naam: "P", pad: "/p", template: "leeg", created_at: "", default_account_id: null };
+const project: Project = { id: 1, naam: "P", pad: "/p", template: "leeg", created_at: "", default_account_id: null, last_used_at: null };
 const crashed: McpInfo = {
   state: "unavailable",
   port: null,

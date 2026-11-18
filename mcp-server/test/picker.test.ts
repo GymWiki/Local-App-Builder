@@ -161,4 +161,25 @@ describe("klik-en-beschrijf: schermafbeelding van het onderdeel", () => {
     expect(nergens.found).toBe(false); // valt terug op het hele scherm
     await expect(rt.control("picker.shot", { selector: "h1", path: "http://evil.example/" })).rejects.toThrow(/buiten de preview/);
   });
+
+  it("preview.thumbnail geeft een JPEG-data-URL voor het homescherm en schrijft niets in het project (zonder browser: overgeslagen)", async (ctx) => {
+    const up = await upstream();
+    const dir = await tmp();
+    execFileSync("git", ["init", "-q"], { cwd: dir });
+    await writeFile(path.join(dir, "index.html"), "<h1>Hoi</h1>");
+    await writeFile(path.join(dir, "studio.json"), JSON.stringify({ previewUrl: up.url }));
+    const before = (await readdir(dir)).sort();
+    const rt = new Runtime({ projectDir: dir, projectName: "t" });
+    closers.push(() => rt.close());
+    let r: { data_url: string };
+    try {
+      r = (await rt.control("preview.thumbnail")) as typeof r;
+    } catch (e) {
+      if (/Geen browser/.test((e as Error).message)) return ctx.skip();
+      throw e;
+    }
+    expect(r.data_url).toMatch(/^data:image\/jpeg;base64,/);
+    expect(Buffer.from(r.data_url.split(",")[1], "base64").subarray(0, 2).toString("hex")).toBe("ffd8");
+    expect((await readdir(dir)).sort()).toEqual(before);
+  });
 });

@@ -16,7 +16,7 @@ vi.mock("@tauri-apps/api/event", () => ({
 }));
 const emit = (out: ChatOut) => act(() => handlers["chat-out"]({ payload: out }));
 
-const project: Project = { id: 1, naam: "Mijn site", pad: "/p", template: "leeg", created_at: "", default_account_id: null };
+const project: Project = { id: 1, naam: "Mijn site", pad: "/p", template: "leeg", created_at: "", default_account_id: null, last_used_at: null };
 const claude: ChatTarget = { provider: "claude", account_id: null, account_label: null, structured: true, mode: "build" };
 let nextId = 100;
 const msg = (kind: ChatMessage["kind"], payload: ChatMessage["payload"]): ChatMessage => ({ id: nextId++, project_id: 1, kind, payload, created_at: "" });

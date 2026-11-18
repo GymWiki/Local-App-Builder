@@ -7,7 +7,7 @@ import { toast } from "sonner";
 vi.mock("@/lib/api");
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
-const project = { id: 3, naam: "Kapsalon", pad: "/p", template: "leeg", created_at: "", default_account_id: null };
+const project = { id: 3, naam: "Kapsalon", pad: "/p", template: "leeg", created_at: "", default_account_id: null, last_used_at: null };
 
 describe("PublishPanel: online zetten", () => {
   it("legt uit wat nodig is en laat de AI helpen", async () => {

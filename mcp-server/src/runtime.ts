@@ -356,6 +356,11 @@ export class Runtime {
         const shot = await this.observer.elementShot(String(args.selector ?? "").slice(0, 500), String(args.path ?? "/"));
         return { path: await writePick(this.projectDir, shot.data), found: shot.found };
       }
+      case "preview.thumbnail": {
+        // Miniatuur voor het homescherm: een klein schermbeeld van de preview als data-URL. Er wordt niets in het project geschreven.
+        const shot = await this.observer.screenshot({});
+        return { data_url: `data:image/jpeg;base64,${shot.data.toString("base64")}` };
+      }
       case "security.check":
         return securityCheck(this.projectDir);
       case "git.diff":

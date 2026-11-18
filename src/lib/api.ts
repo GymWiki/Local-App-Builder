@@ -10,6 +10,8 @@ export interface Project {
   template: string;
   created_at: string;
   default_account_id: number | null;
+  /** Laatst geopend of bewerkt (ISO 8601); null zolang het project nog nooit is geopend. */
+  last_used_at: string | null;
 }
 
 export interface Account {
@@ -78,6 +80,18 @@ export const listProjects = () => invoke<Project[]>("list_projects");
 export const createProject = (naam: string, bovenliggendPad: string, template?: string) =>
   invoke<Project>("create_project", { naam, bovenliggendPad, template });
 export const deleteProject = (id: number) => invoke<void>("delete_project", { id });
+export const renameProject = (id: number, naam: string) => invoke<Project>("rename_project", { id, naam });
+export const projectThumbnailGet = (id: number) => invoke<string | null>("project_thumbnail_get", { id });
+export const projectThumbnailSet = (id: number, dataUrl: string) => invoke<void>("project_thumbnail_set", { id, dataUrl });
+
+// indeling van de werkruimte per project
+export interface StoredLayout {
+  versie: number;
+  json: string;
+}
+export const layoutGet = (projectId: number) => invoke<StoredLayout | null>("layout_get", { projectId });
+export const layoutSet = (projectId: number, versie: number, json: string) => invoke<void>("layout_set", { projectId, versie, json });
+export const layoutReset = (projectId: number) => invoke<void>("layout_reset", { projectId });
 export const setDefaultAccount = (projectId: number, accountId: number | null) =>
   invoke<void>("set_default_account", { projectId, accountId });
 

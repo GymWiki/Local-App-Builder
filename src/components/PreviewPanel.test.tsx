@@ -8,7 +8,7 @@ import * as api from "../lib/api";
 vi.mock("../lib/api");
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }));
 
-const project: Project = { id: 1, naam: "P", pad: "/p", template: "leeg", created_at: "", default_account_id: null };
+const project: Project = { id: 1, naam: "P", pad: "/p", template: "leeg", created_at: "", default_account_id: null, last_used_at: null };
 const up: McpInfo = { state: "running", port: 1, error: null };
 const down: McpInfo = { state: "unavailable", port: null, error: "Node.js niet gevonden.", kind: "node_missing", log: [] };
 
