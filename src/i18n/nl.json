@@ -863,7 +863,8 @@
       "maximaliseer": "Voorbeeld groot maken",
       "herstelGrootte": "Voorbeeld weer normaal",
       "sluitProject": "Project sluiten",
-      "meer": "Meer"
+      "meer": "Meer",
+      "sneltoetsen": "Sneltoetsen"
     },
     "ui": {
       "flexlayout.ui.close.tab": "Sluiten",
@@ -913,6 +914,17 @@
       "standaard": "Standaardaccount",
       "sluit": "Project sluiten",
       "algemeen": "Voor alle projecten"
+    },
+    "verplaats": {
+      "knop": "Paneel ‘{{naam}}’ verplaatsen",
+      "titel": "‘{{naam}}’ verplaatsen naar…",
+      "links": "Links in de werkruimte",
+      "rechts": "Rechts in de werkruimte",
+      "boven": "Bovenaan",
+      "onder": "Onderaan",
+      "bijPreview": "Als tabblad bij het voorbeeld",
+      "bijChat": "Als tabblad bij het gesprek",
+      "zweven": "Los laten zweven"
     }
   },
   "eigenschappen": {

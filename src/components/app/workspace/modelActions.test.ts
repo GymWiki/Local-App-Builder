@@ -1,6 +1,8 @@
 import { Model } from "flexlayout-react";
 import { defaultLayout } from "@/lib/layout";
 import {
+  bestemmingenVoor,
+  verplaats,
   closePanel,
   isOpen,
   isPreviewMaximized,
@@ -110,5 +112,50 @@ describe("werkruimte: panelen openen en sluiten", () => {
   it("de vaste indelingen geven een bruikbaar model", () => {
     for (const p of ["standaard", "veelPreview", "veelChat"] as const)
       expect(isOpen(presetModel(p), "chat")).toBe(true);
+  });
+});
+
+describe("werkruimte: panelen verplaatsen met het menu", () => {
+  it("naar de rand van de werkruimte (links, rechts, boven, onder)", () => {
+    for (const naar of ["links", "rechts", "boven", "onder"] as const) {
+      const m = nieuw();
+      verplaats(m, "eigenschappen", naar);
+      expect(isOpen(m, "eigenschappen")).toBe(true);
+      expect(tabsetVan(m, "eigenschappen")).not.toBe(tabsetVan(m, "chat"));
+    }
+    const m = nieuw();
+    verplaats(m, "chat", "links");
+    const eerste = (m.toJson().layout.children![0] as { children: { component: string }[] }).children[0].component;
+    expect(eerste).toBe("chat");
+  });
+
+  it("als tabblad naast het voorbeeld of het gesprek", () => {
+    const m = nieuw();
+    verplaats(m, "eigenschappen", "bijPreview");
+    expect(tabsetVan(m, "eigenschappen")).toBe(tabsetVan(m, "preview"));
+    verplaats(m, "structuur", "bijChat");
+    expect(tabsetVan(m, "structuur")).toBe(tabsetVan(m, "chat"));
+  });
+
+  it("zwevend: het paneel blijft bestaan en staat in een los venster binnen de app", () => {
+    const m = nieuw();
+    verplaats(m, "eigenschappen", "zweven");
+    expect(isOpen(m, "eigenschappen")).toBe(true);
+    expect(Object.keys(m.toJson().subLayouts ?? {}).length).toBe(1);
+  });
+
+  it("de bestemmingen kloppen: een paneel kan niet naast zichzelf of zijn eigen groep", () => {
+    const m = nieuw();
+    expect(bestemmingenVoor(m, "preview")).not.toContain("bijPreview");
+    expect(bestemmingenVoor(m, "chat")).not.toContain("bijChat");
+    expect(bestemmingenVoor(m, "eigenschappen")).toContain("bijPreview");
+    expect(bestemmingenVoor(m, "eigenschappen")).toContain("zweven");
+  });
+
+  it("onbekend of gesloten paneel doet niets", () => {
+    const m = nieuw();
+    const voor = JSON.stringify(m.toJson());
+    verplaats(m, "database", "links");
+    expect(JSON.stringify(m.toJson())).toBe(voor);
   });
 });

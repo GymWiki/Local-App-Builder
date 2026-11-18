@@ -89,3 +89,31 @@ export const isPreviewMaximized = (model: Model): boolean =>
 
 export const presetModel = (preset: PresetId): Model =>
   Model.fromJson(defaultLayout(preset));
+
+export type Bestemming = "links" | "rechts" | "boven" | "onder" | "bijPreview" | "bijChat" | "zweven";
+export const BESTEMMINGEN: Bestemming[] = ["links", "rechts", "boven", "onder", "bijPreview", "bijChat", "zweven"];
+
+/** Welke bestemmingen kloppen voor dit paneel? (Een paneel kan niet naast zichzelf.) */
+export function bestemmingenVoor(model: Model, id: PanelId): Bestemming[] {
+  const eigen = parentTabset(model, id)?.getId();
+  return BESTEMMINGEN.filter((b) => {
+    if (b === "bijPreview") return id !== "preview" && parentTabset(model, "preview")?.getId() !== eigen;
+    if (b === "bijChat") return id !== "chat" && parentTabset(model, "chat")?.getId() !== eigen;
+    return true;
+  });
+}
+
+/** Verplaatst een paneel met een menu in plaats van slepen (voor wie niet kan slepen): naar een rand, als tabblad naast een ander paneel, of zwevend. */
+export function verplaats(model: Model, id: PanelId, naar: Bestemming): void {
+  if (!isOpen(model, id)) return;
+  const wortel = model.getRootRow()?.getId();
+  const randen = { links: DockLocation.LEFT, rechts: DockLocation.RIGHT, boven: DockLocation.TOP, onder: DockLocation.BOTTOM } as const;
+  if (naar in randen && wortel) {
+    model.doAction(Actions.moveNode(id, wortel, randen[naar as keyof typeof randen], -1));
+  } else if (naar === "bijPreview" || naar === "bijChat") {
+    const doel = parentTabset(model, naar === "bijPreview" ? "preview" : "chat");
+    if (doel) model.doAction(Actions.moveNode(id, doel.getId(), DockLocation.CENTER, -1));
+  } else if (naar === "zweven") {
+    model.doAction(Actions.popoutTab(id, "float"));
+  }
+}

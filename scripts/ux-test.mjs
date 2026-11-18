@@ -102,6 +102,31 @@ try {
     check(tag("scheidingsgreep reageert op pijltjestoets"), v0 !== v1, `${v0} → ${v1}`);
     check(tag("scheidingsgreep heeft een naam voor schermlezers"), !!(await greep.getAttribute("aria-label")));
 
+    // ---- Verplaatsen: slepen (docken als tabblad) en het menu; de preview laadt daarbij niet opnieuw
+    if (!compact) {
+      const tabsLijst = () => p.evaluate(() => [...document.querySelectorAll(".flexlayout__tabset")].map((ts) => [...ts.querySelectorAll(".flexlayout__tab_button")].map((b) => b.textContent.trim()).join("+")).join("|"));
+      const navs0 = navs;
+      const gesprek = await p.locator(".flexlayout__tab_button", { hasText: "Gesprek" }).first().boundingBox();
+      const voorbeeld = await p.locator(".flexlayout__tabset", { has: p.locator(".flexlayout__tab_button", { hasText: "Voorbeeld" }) }).first().boundingBox();
+      await p.mouse.move(gesprek.x + 10, gesprek.y + 10);
+      await p.mouse.down();
+      await p.mouse.move(gesprek.x - 30, gesprek.y - 30, { steps: 6 });
+      await p.mouse.move(voorbeeld.x + voorbeeld.width / 2, voorbeeld.y + voorbeeld.height / 2, { steps: 15 });
+      await p.mouse.up();
+      await p.waitForTimeout(500);
+      check(tag("slepen: gesprek wordt tabblad bij het voorbeeld"), (await tabsLijst()).includes("Voorbeeld+Gesprek"), await tabsLijst());
+      check(tag("slepen: preview laadt niet opnieuw"), navs === navs0, `${navs - navs0} navigaties`);
+      await p.getByTestId("verplaats-chat").click();
+      await p.getByRole("menuitem", { name: "Rechts in de werkruimte", exact: true }).click();
+      await p.waitForTimeout(500);
+      check(tag("menu: gesprek staat weer in een eigen groep"), !(await tabsLijst()).includes("Voorbeeld+Gesprek"), await tabsLijst());
+      await p.getByTestId("verplaats-eigenschappen").click();
+      await p.getByRole("menuitem", { name: "Los laten zweven", exact: true }).click();
+      await p.waitForTimeout(600);
+      check(tag("menu: zwevend paneel is zichtbaar"), await p.locator(".flexlayout__floating_window, .flexlayout__layout_float, [class*=float_window]").first().isVisible().catch(() => false));
+      check(tag("zweven: preview laadt niet opnieuw"), navs === navs0, `${navs - navs0} navigaties`);
+    }
+
     // ---- Vaste indelingen en herstel
     const menu = async (item) => {
       await p.getByRole("button", { name: "Indeling van de werkruimte" }).click();

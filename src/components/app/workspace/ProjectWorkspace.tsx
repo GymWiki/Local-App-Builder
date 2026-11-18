@@ -14,7 +14,10 @@ import {
   Layout,
   Model,
   type TabNode,
+  type TabSetNode,
+  type BorderNode,
   type ITabRenderValues,
+  type ITabSetRenderValues,
 } from "flexlayout-react";
 import "flexlayout-react/style/light.css";
 import {
@@ -49,6 +52,7 @@ import ProjectSettingsPanel, {
   type SettingsProps,
 } from "./panels/ProjectSettingsPanel";
 import StructuurPanel from "./panels/StructuurPanel";
+import MovePanelMenu from "./MovePanelMenu";
 import SectionRail from "./SectionRail";
 import WorkspaceBar from "./WorkspaceBar";
 import { ICONEN } from "./sections";
@@ -271,6 +275,13 @@ export default function ProjectWorkspace(props: Props) {
     if (Icon) rv.leading = <Icon aria-hidden="true" className="size-4" />;
   };
 
+  const onRenderTabSet = (node: TabSetNode | BorderNode, rv: ITabSetRenderValues) => {
+    if (node.getType() !== "tabset" || !model) return;
+    const sel = (node as TabSetNode).getSelectedNode();
+    const id = sel?.getComponent();
+    if (sel && isPanelId(id)) rv.buttons.unshift(<MovePanelMenu key="verplaats" model={model} id={id} />);
+  };
+
   // Grotere stappen met het toetsenbord: Shift + pijltoets op een scheidingsgreep is acht keer zo groot als een gewone pijltoets.
   const onGripKey = (e: KeyboardEvent<HTMLDivElement>) => {
     const el = e.target as HTMLElement;
@@ -317,6 +328,7 @@ export default function ProjectWorkspace(props: Props) {
               model={model}
               factory={factory}
               onRenderTab={onRenderTab}
+              onRenderTabSet={onRenderTabSet}
               onModelChange={onModelChange}
               i18nTranslator={i18nTranslator}
             />
