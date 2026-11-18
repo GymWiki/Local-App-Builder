@@ -74,7 +74,7 @@
     "binnenkort": "Komt in een latere fase.",
     "geenProject": "Heb je al een project? Kies het links in de lijst.",
     "terminal": "Terminal",
-    "preview": "Preview",
+    "preview": "Voorbeeld",
     "uiterlijk": "Uiterlijk"
   },
   "info": {
@@ -134,11 +134,11 @@
     "tabs": "Open terminals"
   },
   "mcp": {
-    "uit": "MCP: uit",
-    "starting": "MCP: starten…",
-    "running": "MCP: gereed, wacht op AI",
-    "connected": "MCP: verbonden",
-    "unavailable": "MCP: niet beschikbaar",
+    "uit": "AI-koppeling: uit",
+    "starting": "AI-koppeling: starten…",
+    "running": "AI-koppeling: gereed, wacht op AI",
+    "connected": "AI-koppeling: verbonden",
+    "unavailable": "AI-koppeling: niet beschikbaar",
     "nietGestart": "Het onderdeel dat met de AI samenwerkt is niet gestart. Klik op ‘Opnieuw proberen’.",
     "probleemTitel": "Studio kan de koppeling met de AI niet starten",
     "opnieuw": "Opnieuw proberen",
@@ -217,21 +217,21 @@
     "vertrouwUitleg": "Studio voert onderstaande commando's op jouw computer uit (ook wanneer de AI ze via run_checks aanroept). Controleer ze en keur ze alleen goed als je ze herkent. Wijzigt het bestand, dan vraagt Studio opnieuw om goedkeuring.",
     "vertrouwStart": "Vertrouwen en starten",
     "vertrouw": "Vertrouwen",
-    "wachten": "Wachten tot de preview bereikbaar is…",
+    "wachten": "Wachten tot het voorbeeld bereikbaar is…",
     "logs": "Logs van het dev-proces",
     "geenLogs": "Nog geen uitvoer.",
-    "geenRuntime": "Een onderdeel van Studio draait niet; daardoor werken de preview, de controles en de eerdere versies nu niet.",
+    "geenRuntime": "Een onderdeel van Studio draait niet; daardoor werken het voorbeeld, de controles en de eerdere versies nu niet.",
     "modus": {
-      "static": "Statische preview",
+      "static": "Statisch voorbeeld",
       "node": "Dev-server",
       "config": "studio.json",
       "empty": "",
       "flutter": "",
       "unsupported": ""
     },
-    "nietActief": "De preview draait niet.",
+    "nietActief": "Het voorbeeld draait niet.",
     "startKnop": "Start",
-    "autoWissel": "Automatisch naar de preview wisselen als die beschikbaar komt",
+    "autoWissel": "Automatisch naar het voorbeeld wisselen als dat beschikbaar komt",
     "probleem": {
       "empty": "Nog niets om te tonen",
       "flutter": "Flutter-project",
@@ -245,7 +245,7 @@
       "untrusted_scripts": "Scripts wijzigden: goedkeuring nodig",
       "untrusted_config": "studio.json goedkeuren",
       "dev_crashed": "De dev-server is gecrasht",
-      "static_failed": "De statische preview kon niet starten",
+      "static_failed": "Het statische voorbeeld kon niet starten",
       "watch_failed": "Bestandswijzigingen worden niet gevolgd",
       "runtime_starting": "Projectruntime wordt gestart…"
     },
@@ -317,8 +317,8 @@
     }
   },
   "notice": {
-    "beschikbaar": "Preview beschikbaar voor ‘{{naam}}’",
-    "bekijk": "Bekijk preview",
+    "beschikbaar": "Voorbeeld beschikbaar voor ‘{{naam}}’",
+    "bekijk": "Bekijk het voorbeeld",
     "sluit": "Sluiten"
   },
   "chat": {
@@ -641,7 +641,7 @@
     "wissel": {
       "voor": "Voor",
       "na": "Na",
-      "geenBeeld": "Geen beeld beschikbaar (de preview draait nu niet).",
+      "geenBeeld": "Geen beeld beschikbaar (het voorbeeld draait nu niet).",
       "migreer": "Laat de AI de onderdelen aanpassen",
       "migreerUitleg": "De AI zet bestaande schermen over naar het nieuwe uiterlijk.",
       "terug": "Terugdraaien naar het vorige uiterlijk",
@@ -1339,7 +1339,7 @@
       "toestemming": {
         "label": "Hoeveel mag de AI zelf doen?",
         "uitleg": "Bepaalt wanneer de AI eerst om toestemming vraagt.",
-        "uitlegCli": "Dit geldt voor het gesprek met Claude. In de terminal bepaalt het AI-programma zelf wat het vraagt.",
+        "uitlegCli": "Dit geldt voor het gesprek met Claude. In de technische weergave bepaalt het AI-programma zelf wat het vraagt.",
         "waarschuwing": "Let op: bij ‘Werk zelfstandig’ werkt de AI door zonder te vragen. Online zetten, verwijderen en schrijven buiten je project vragen altijd om toestemming."
       },
       "taal": {
@@ -1442,5 +1442,15 @@
         "binnenkort": "Komt binnenkort"
       }
     }
+  },
+  "woordenlijst": {
+    "uitleg": "Vaste woorden in Studio. Gebruik altijd deze woorden in de gewone weergave; vaktaal staat alleen onder ‘Voor gevorderden’ of in een uitklapbare uitleg.",
+    "voorbeeld": "Voorbeeld",
+    "onlineZetten": "Online zetten",
+    "watJeAppOnthoudt": "Wat je app onthoudt",
+    "opgeslagenVersie": "Opgeslagen versie",
+    "terugNaarEerdereVersie": "Terug naar een eerdere versie",
+    "inlogsleutel": "Inlogsleutel",
+    "technischeWeergave": "Technische weergave"
   }
 }

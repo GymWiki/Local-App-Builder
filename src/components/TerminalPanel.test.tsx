@@ -39,7 +39,7 @@ describe("TerminalPanel", () => {
 
   it("toont de MCP-status en dat er geen AI actief is", () => {
     setup({ state: "connected", port: 1, error: null });
-    expect(screen.getByTestId("mcp-badge")).toHaveTextContent("MCP: verbonden");
+    expect(screen.getByTestId("mcp-badge")).toHaveTextContent("AI-koppeling: verbonden");
     expect(screen.getByTestId("account-badge")).toHaveTextContent("Geen AI actief");
   });
 

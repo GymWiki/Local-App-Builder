@@ -46,9 +46,9 @@ describe("PreviewPanel (zero-config)", () => {
 
   it("statische preview draait zonder runtime: iframe met de URL, badge en geen Node-melding", () => {
     show(info(), null);
-    expect(screen.getByTitle("Preview")).toHaveAttribute("src", "http://127.0.0.1:4000/");
+    expect(screen.getByTitle("Voorbeeld")).toHaveAttribute("src", "http://127.0.0.1:4000/");
     expect(screen.getByTestId("dev-badge")).toHaveTextContent("Draait");
-    expect(screen.getByText("Statische preview")).toBeInTheDocument();
+    expect(screen.getByText("Statisch voorbeeld")).toBeInTheDocument();
     expect(screen.queryByTestId("preview-problem")).not.toBeInTheDocument();
     expect(screen.queryByText(/projectruntime/)).not.toBeInTheDocument();
   });
@@ -90,7 +90,7 @@ describe("PreviewPanel (zero-config)", () => {
     expect(screen.getByTestId("problem-log")).toHaveTextContent("Error: EADDRINUSE");
     fireEvent.click(screen.getByRole("button", { name: "Opnieuw starten" }));
     await waitFor(() => expect(api.previewRestart).toHaveBeenCalledWith(1));
-    expect(screen.queryByTitle("Preview")).not.toBeInTheDocument();
+    expect(screen.queryByTitle("Voorbeeld")).not.toBeInTheDocument();
   });
 
   it("Flutter, kapotte studio.json en niet-ondersteunde projecten tonen hun eigen uitleg", () => {
@@ -115,15 +115,15 @@ describe("PreviewPanel (zero-config)", () => {
 
   it("dev-server zonder eigen HMR herlaadt het iframe bij een reload-signaal; met HMR niet", () => {
     const { rerender } = show(info({ mode: "node", hmr: false }), up, { reloadNonce: 0 });
-    const first = screen.getByTitle("Preview");
+    const first = screen.getByTitle("Voorbeeld");
     rerender(<PreviewPanel project={project} mcp={up} preview={info({ mode: "node", hmr: false })} visible reloadNonce={1} onError={vi.fn()} />);
-    expect(screen.getByTitle("Preview")).not.toBe(first);
+    expect(screen.getByTitle("Voorbeeld")).not.toBe(first);
 
     const hmr = info({ mode: "node", hmr: true });
     rerender(<PreviewPanel project={project} mcp={up} preview={hmr} visible reloadNonce={1} onError={vi.fn()} />);
-    const before = screen.getByTitle("Preview");
+    const before = screen.getByTitle("Voorbeeld");
     rerender(<PreviewPanel project={project} mcp={up} preview={hmr} visible reloadNonce={2} onError={vi.fn()} />);
-    expect(screen.getByTitle("Preview")).toBe(before);
+    expect(screen.getByTitle("Voorbeeld")).toBe(before);
   });
 
   it("instelbaar automatisch wisselen", () => {
@@ -138,8 +138,8 @@ describe("PreviewNotice", () => {
   it("meldt dat de preview beschikbaar is en heeft een knop", () => {
     const view = vi.fn();
     render(<PreviewNotice projectName="Mijn site" onView={view} onClose={vi.fn()} />);
-    expect(screen.getByTestId("preview-notice")).toHaveTextContent("Preview beschikbaar voor ‘Mijn site’");
-    fireEvent.click(screen.getByRole("button", { name: "Bekijk preview" }));
+    expect(screen.getByTestId("preview-notice")).toHaveTextContent("Voorbeeld beschikbaar voor ‘Mijn site’");
+    fireEvent.click(screen.getByRole("button", { name: "Bekijk het voorbeeld" }));
     expect(view).toHaveBeenCalled();
   });
 });
@@ -147,7 +147,7 @@ describe("PreviewNotice", () => {
 describe("PreviewPanel: schermgrootte", () => {
   it("wisselt tussen telefoon, tablet en computer; alleen de breedte van het voorbeeld verandert", () => {
     show(info());
-    const frame = () => screen.getByTitle("Preview") as HTMLIFrameElement;
+    const frame = () => screen.getByTitle("Voorbeeld") as HTMLIFrameElement;
     expect(frame().dataset.viewport).toBe("computer");
     expect(frame().style.width).toBe("");
     expect(frame().getAttribute("src")).toBe("http://127.0.0.1:4000/");
@@ -170,7 +170,7 @@ describe("PreviewPanel: schermgrootte", () => {
 });
 
 describe("PreviewPanel: klik-en-beschrijf", () => {
-  const frame = () => screen.getByTitle("Preview") as HTMLIFrameElement;
+  const frame = () => screen.getByTitle("Voorbeeld") as HTMLIFrameElement;
   const melding = (data: unknown, source: Window | null = frame().contentWindow) => act(() => void window.dispatchEvent(new MessageEvent("message", { data, source })));
 
   beforeEach(() => {
