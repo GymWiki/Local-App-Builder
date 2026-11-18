@@ -55,9 +55,12 @@ import ProjectSettingsPanel, {
 import StructuurPanel from "./panels/StructuurPanel";
 import MovePanelMenu from "./MovePanelMenu";
 import SectionRail from "./SectionRail";
+import ShortcutsDialog from "./ShortcutsDialog";
 import WorkspaceBar from "./WorkspaceBar";
 import { ICONEN } from "./sections";
 import {
+  closePanel,
+  isOpen,
   isPreviewMaximized,
   openIds,
   openPanel,
@@ -108,6 +111,7 @@ export default function ProjectWorkspace(props: Props) {
   const [selection, setSelection] = useState<PickedElement | null>(null);
   const [page, setPage] = useState<PageInfo | null>(null);
   const control = useRef<PreviewControl | null>(null);
+  const [toonSneltoetsen, setToonSneltoetsen] = useState(false);
   const normalRef = useRef<Model | null>(null);
 
   // Indeling van dit project laden (valt altijd terug op de standaardindeling).
@@ -149,6 +153,33 @@ export default function ProjectWorkspace(props: Props) {
     },
     [project.id],
   );
+
+  // Sneltoetsen: Ctrl (of Cmd) + Shift + G/E/L/M. Geen Alt, want dat is op veel toetsenborden de AltGr-toets.
+  useEffect(() => {
+    if (!model) return;
+    const onKey = (e: globalThis.KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey) || !e.shiftKey || e.altKey) return;
+      const k = e.key.toLowerCase();
+      if (k === "g") {
+        e.preventDefault();
+        openPanel(model, "chat");
+        setTimeout(() => document.getElementById("chat-input")?.focus(), 60);
+      } else if (k === "e") {
+        e.preventDefault();
+        if (isOpen(model, "eigenschappen")) closePanel(model, "eigenschappen");
+        else openPanel(model, "eigenschappen");
+      } else if (k === "l") {
+        e.preventDefault();
+        if (isOpen(model, "structuur")) closePanel(model, "structuur");
+        else openPanel(model, "structuur");
+      } else if (k === "m") {
+        e.preventDefault();
+        toggleMaximizePreview(model);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [model]);
 
   // Een paneel vanzelf naar voren halen als de rest van de app daarom vraagt.
   const verwerkt = useRef(props.request?.nonce ?? 0);
@@ -332,6 +363,7 @@ export default function ProjectWorkspace(props: Props) {
         onReset={() => void applyPreset("standaard", true)}
         onToggleMaximize={() => model && toggleMaximizePreview(model)}
         onCloseProject={props.onCloseProject}
+        onShortcuts={() => setToonSneltoetsen(true)}
       />
       <div className="flex min-h-0 flex-1">
         <SectionRail
@@ -353,6 +385,7 @@ export default function ProjectWorkspace(props: Props) {
               onRenderTab={onRenderTab}
               onRenderTabSet={onRenderTabSet}
               onModelChange={onModelChange}
+              keyMap={{ focusTabToggle: "F6", focusNextTabset: "Ctrl+]", focusPreviousTabset: "Ctrl+[" }}
               i18nTranslator={i18nTranslator}
             />
           ) : (
@@ -367,6 +400,7 @@ export default function ProjectWorkspace(props: Props) {
           )}
         </div>
       </div>
+      {toonSneltoetsen && <ShortcutsDialog onClose={() => setToonSneltoetsen(false)} />}
     </div>
   );
 }

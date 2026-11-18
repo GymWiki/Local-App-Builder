@@ -138,4 +138,38 @@ describe("ProjectWorkspace", () => {
     setup();
     expect(await screen.findByTestId("chat")).toBeInTheDocument();
   });
+
+  it("sneltoetsen: Ctrl+Shift+E toont of verbergt Eigenschappen, Ctrl+Shift+L het linkerpaneel", async () => {
+    setup();
+    await screen.findByTestId("chat");
+    const uitleg = () => screen.queryByText(/Kies in het voorbeeld een onderdeel van je pagina/);
+    expect(await screen.findByText(/Kies in het voorbeeld een onderdeel van je pagina/)).toBeInTheDocument();
+    fireEvent.keyDown(window, { key: "E", ctrlKey: true, shiftKey: true });
+    await waitFor(() => expect(uitleg()).not.toBeInTheDocument());
+    fireEvent.keyDown(window, { key: "E", ctrlKey: true, shiftKey: true });
+    await waitFor(() => expect(uitleg()).toBeInTheDocument());
+    expect(screen.getByTestId("rail-structuur")).toHaveAttribute("aria-pressed", "true");
+    fireEvent.keyDown(window, { key: "L", ctrlKey: true, shiftKey: true });
+    await waitFor(() => expect(screen.getByTestId("rail-structuur")).toHaveAttribute("aria-pressed", "false"));
+  });
+
+  it("sneltoetsen zonder Shift of met Alt doen niets (Alt is AltGr op veel toetsenborden)", async () => {
+    setup();
+    await screen.findByTestId("chat");
+    fireEvent.keyDown(window, { key: "L", ctrlKey: true });
+    fireEvent.keyDown(window, { key: "L", ctrlKey: true, shiftKey: true, altKey: true });
+    expect(screen.getByTestId("rail-structuur")).toHaveAttribute("aria-pressed", "true");
+  });
+
+  it("het menu Meer heeft Sneltoetsen en Project sluiten", async () => {
+    const { onCloseProject } = setup();
+    await screen.findByTestId("chat");
+    fireEvent.pointerDown(screen.getByRole("button", { name: "Meer" }), { button: 0, ctrlKey: false });
+    fireEvent.click(await screen.findByRole("menuitem", { name: "Sneltoetsen" }));
+    expect(await screen.findByText("Naar het gesprek (typen)")).toBeInTheDocument();
+    fireEvent.click(screen.getAllByRole("button", { name: "Sluiten" })[0]);
+    fireEvent.pointerDown(screen.getByRole("button", { name: "Meer" }), { button: 0, ctrlKey: false });
+    fireEvent.click(await screen.findByRole("menuitem", { name: "Project sluiten" }));
+    expect(onCloseProject).toHaveBeenCalled();
+  });
 });

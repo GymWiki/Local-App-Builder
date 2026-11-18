@@ -925,6 +925,22 @@
       "bijPreview": "Als tabblad bij het voorbeeld",
       "bijChat": "Als tabblad bij het gesprek",
       "zweven": "Los laten zweven"
+    },
+    "sneltoetsen": {
+      "titel": "Sneltoetsen",
+      "uitleg": "Met deze toetsen werk je sneller, ook zonder muis.",
+      "chat": "Naar het gesprek (typen)",
+      "eigenschappen": "Eigenschappen tonen of verbergen",
+      "links": "Linkerpaneel tonen of verbergen",
+      "groot": "Voorbeeld groot maken of weer normaal",
+      "volgende": "Naar de volgende groep panelen",
+      "vorige": "Naar de vorige groep panelen",
+      "wissel": "Wisselen tussen tabblad en inhoud",
+      "grepen": "Een scheidingsgreep verschuiven: kies hem met Tab, gebruik de pijltjestoetsen (met Shift grotere stappen)",
+      "sluit": "Sluiten"
+    },
+    "gemeld": {
+      "chatGefocust": "Je kunt nu typen in het gesprek."
     }
   },
   "eigenschappen": {

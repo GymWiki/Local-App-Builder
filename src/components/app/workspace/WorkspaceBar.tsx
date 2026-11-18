@@ -28,6 +28,7 @@ interface Props {
   onReset: () => void;
   onToggleMaximize: () => void;
   onCloseProject: () => void;
+  onShortcuts: () => void;
 }
 
 const PREVIEW_TOON: Record<string, string> = {
@@ -56,6 +57,7 @@ export default function WorkspaceBar({
   onReset,
   onToggleMaximize,
   onCloseProject,
+  onShortcuts,
 }: Props) {
   const { t } = useTranslation();
   const pStatus = preview?.status ?? "idle";
@@ -136,6 +138,8 @@ export default function WorkspaceBar({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem onSelect={onShortcuts}>{t("werkruimte.balk.sneltoetsen")}</DropdownMenuItem>
+          <DropdownMenuSeparator />
           <DropdownMenuItem onSelect={onCloseProject}>
             {t("werkruimte.balk.sluitProject")}
           </DropdownMenuItem>
