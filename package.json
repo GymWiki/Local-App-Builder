@@ -21,6 +21,7 @@
     "ui:a11y": "node scripts/ui-a11y.mjs",
     "ux:test": "node scripts/ux-test.mjs",
     "ux:menu": "node scripts/ux-menu-test.mjs",
+    "ux:koppel": "node scripts/ux-koppel-test.mjs",
     "mcp:test": "npm --prefix mcp-server test",
     "check": "npm run lint && npm test && npm run build && cd src-tauri && cargo clippy --all-targets -- -D warnings && cargo test"
   },

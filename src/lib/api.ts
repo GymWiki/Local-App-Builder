@@ -240,7 +240,7 @@ export type ChatErrorCode =
 export interface ChatMessage {
   id: number;
   project_id: number;
-  kind: "user" | "assistant" | "action" | "permission" | "error" | "divider" | "notice" | "version" | "loop_alert";
+  kind: "user" | "assistant" | "action" | "permission" | "error" | "divider" | "notice" | "version" | "loop_alert" | "connect_offer";
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   payload: Record<string, any>;
   created_at: string;
@@ -444,3 +444,32 @@ export const projectDescriptionGet = (projectId: number) => invoke<string>("proj
 export const projectDescriptionSet = (projectId: number, text: string) => invoke<void>("project_description_set", { projectId, text });
 export const projectFlags = (projectId: number) => invoke<Record<string, string>>("project_flags", { projectId });
 export const projectFlagSet = (projectId: number, key: ProjectFlagKey, value: string | null) => invoke<void>("project_flag_set", { projectId, key, value });
+
+// ---------- koppelingen met diensten (GitHub, Vercel, Supabase) ----------
+// Er gaat nooit een token naar de frontend; alleen het plakken van het token door de gebruiker gaat naar Rust.
+export type DienstId = "github" | "vercel" | "supabase";
+export type KoppelStatus = "niet_gekoppeld" | "bezig" | "werkt" | "verlopen" | "fout";
+export type Strategie = "oauth_loopback_pkce" | "oauth_device" | "token_plakken";
+export type KoppelBezig = { soort: "apparaat"; user_code: string; verification_uri: string; expires_in: number } | { soort: "browser"; url: string };
+export interface KoppelInfo {
+  id: DienstId;
+  strategie: Strategie;
+  status: KoppelStatus;
+  account: string | null;
+  /** Foutcode (nl.json: koppelingen.fout.<code>). */
+  fout: string | null;
+  rechten: string[];
+  functies: string[];
+  links: { signup: string; token_page: string; manage: string };
+  bezig: KoppelBezig | null;
+  verloopt: number | null;
+}
+export type KoppelStart = { soort: "plakken" } | { soort: "apparaat"; user_code: string; verification_uri: string; expires_in: number } | { soort: "browser"; url: string };
+export const connectList = () => invoke<KoppelInfo[]>("connect_list");
+export const connectStart = (id: DienstId) => invoke<KoppelStart>("connect_start", { id });
+export const connectPaste = (id: DienstId, token: string) => invoke<KoppelInfo>("connect_paste", { id, token });
+export const connectCancel = (id: DienstId) => invoke<void>("connect_cancel", { id });
+export const connectTest = (id: DienstId) => invoke<KoppelInfo>("connect_test", { id });
+export const connectTestAll = () => invoke<KoppelInfo[]>("connect_test_all");
+export const connectDisconnect = (id: DienstId) => invoke<{ ingetrokken: boolean; beheer_url: string }>("connect_disconnect", { id });
+export const connectOpen = (url: string) => invoke<void>("connect_open", { url });

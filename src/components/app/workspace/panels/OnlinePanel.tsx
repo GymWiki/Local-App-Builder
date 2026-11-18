@@ -3,9 +3,9 @@ import { useTranslation } from "react-i18next";
 import { toast } from "sonner";
 import { CheckIcon, CircleIcon } from "lucide-react";
 import { stappen } from "@/lib/menu";
+import VerbindKnop from "@/components/app/connect/VerbindKnop";
 import PublishPanel from "@/components/app/PublishPanel";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -80,10 +80,8 @@ export default function OnlinePanel() {
             <CardDescription className="text-base">{t("online.sleutels.uitleg")}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            <p className="text-base">{t("online.sleutels.binnenkort")}</p>
-            <Button variant="outline" disabled>
-              {t("online.sleutels.test")}
-            </Button>
+            <p className="text-base">{t("koppelingen.plek.onlinezetten")}</p>
+            <VerbindKnop id="vercel" />
             <p className="text-sm text-muted-foreground">{t("online.sleutels.later")}</p>
           </CardContent>
         </Card>

@@ -16,6 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import KoppelingenOverzicht from "@/components/app/connect/KoppelingenOverzicht";
 import Keuze from "./Keuze";
 import Rij from "./Rij";
 
@@ -176,7 +177,7 @@ export default function SettingsView({ scope, project, accounts, mcp, groep, onG
             {null}
           </Rij>
           <Rij id="inst-sleutels" label={t("inst.programma.sleutels.label")} uitleg={t("inst.programma.sleutels.uitleg")} bereik="alle">
-            <p className="text-sm text-muted-foreground">{t("inst.programma.sleutels.binnenkort")}</p>
+            <KoppelingenOverzicht />
           </Rij>
         </TabsContent>
 

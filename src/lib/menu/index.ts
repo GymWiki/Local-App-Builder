@@ -18,6 +18,10 @@ export const OPTIONEEL: MenuId[] = ["gegevens"];
 /** Hulp staat als knop bovenaan het menu, zodat er in de standaardstand hoogstens acht onderdelen in de lijst staan. */
 export const MAX_ZICHTBAAR = 8;
 
+/** Status van een koppeling met een dienst (zie Rust: connect::store::Status). */
+export type KoppelStatus = "niet_gekoppeld" | "bezig" | "werkt" | "verlopen" | "fout";
+export type Koppelingen = Partial<Record<"github" | "vercel" | "supabase", KoppelStatus>>;
+
 export interface Signalen {
   /** De gebruiker heeft al een eerste opdracht gegeven. */
   eersteOpdracht: boolean;
@@ -31,6 +35,8 @@ export interface Signalen {
   needsData: boolean;
   aantalFotos: number;
   aantalSchermen: number;
+  /** Status van de gekoppelde diensten; ontbrekend = nog niet bekend of niet gekoppeld. */
+  koppelingen: Koppelingen;
 }
 
 export const geenSignalen = (): Signalen => ({
@@ -45,6 +51,7 @@ export const geenSignalen = (): Signalen => ({
   needsData: false,
   aantalFotos: 0,
   aantalSchermen: 0,
+  koppelingen: {},
 });
 
 export type StapId = "idee" | "voorbeeld" | "aanpassen" | "online";
@@ -76,6 +83,8 @@ export interface ItemStatus {
   telling?: number;
 }
 
+const kapot = (s: Signalen, dienst: keyof Koppelingen) => s.koppelingen[dienst] === "verlopen" || s.koppelingen[dienst] === "fout";
+
 /** Het statusbolletje en de telling per menu-onderdeel. Onderdelen zonder status ontbreken. */
 export function menuStatus(s: Signalen): Partial<Record<MenuId, ItemStatus>> {
   const alleStappen = stappen(s).every((x) => x.klaar);
@@ -84,9 +93,10 @@ export function menuStatus(s: Signalen): Partial<Record<MenuId, ItemStatus>> {
     schermen: { punt: s.aantalSchermen > 0 ? "klaar" : "leeg", telling: s.aantalSchermen },
     uiterlijk: { punt: s.kitGekozen ? "klaar" : "leeg" },
     bestanden: { punt: s.aantalFotos > 0 ? "klaar" : "leeg", telling: s.aantalFotos },
-    gegevens: { punt: s.needsData && !s.heeftDatabase ? "actie" : s.heeftDatabase ? "klaar" : "leeg" },
-    onlinezetten: { punt: s.checksFalen ? "actie" : s.online ? "klaar" : "leeg" },
-    versies: { punt: s.aantalVersies > 0 ? "klaar" : "leeg", telling: s.aantalVersies },
+    // Een koppeling die niet meer werkt vraagt actie ("!"); een werkende koppeling telt als gezond.
+    gegevens: { punt: kapot(s, "supabase") || (s.needsData && !s.heeftDatabase) ? "actie" : s.heeftDatabase || s.koppelingen.supabase === "werkt" ? "klaar" : "leeg" },
+    onlinezetten: { punt: s.checksFalen || kapot(s, "vercel") ? "actie" : s.online ? "klaar" : "leeg" },
+    versies: { punt: kapot(s, "github") ? "actie" : s.aantalVersies > 0 ? "klaar" : "leeg", telling: s.aantalVersies },
   };
 }
 

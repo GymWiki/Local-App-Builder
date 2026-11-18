@@ -19,7 +19,7 @@ impl Provider for GitHub {
         &["github.com", "api.github.com"]
     }
     fn links(&self) -> Links {
-        Links { signup: "https://github.com/signup", token_page: "https://github.com/settings/personal-access-tokens/new", manage: "https://github.com/settings/applications" }
+        Links { signup: "https://github.com/signup", token_page: "https://github.com/settings/tokens/new", manage: "https://github.com/settings/applications" }
     }
     fn oauth(&self) -> Option<OauthKind> {
         // Device flow: geen client-geheim nodig. "repo" is nodig voor een privé-kopie van het project.

@@ -56,7 +56,30 @@ function mock({ demoUrl, scenario, THUMB }) {
     mcpDown: !!scenario.mcpDown,
     speed: 1,
     sent: [],
+    opened: [],
+    conn: Object.fromEntries(
+      ["github", "vercel", "supabase"].map((id) => [
+        id,
+        { id, strategie: id === "github" ? "oauth_device" : "token_plakken", status: (scenario.connStatus || {})[id] || "niet_gekoppeld", account: (scenario.connStatus || {})[id] === "werkt" ? "pieter" : null, fout: null, bezig: null, verloopt: null },
+      ]),
+    ),
   });
+  S.connLijst = () =>
+    Object.values(S.conn).map((c) => ({
+      ...c,
+      rechten: [c.id === "github" ? "repo" : c.id === "vercel" ? "projecten" : "account"],
+      functies: [c.id === "github" ? "backup" : c.id === "vercel" ? "onlinezetten" : "gegevens"],
+      links: { signup: `https://${c.id}.com/signup`, token_page: `https://${c.id}.com/tokens`, manage: `https://${c.id}.com/apps` },
+    }));
+  // Test-hulp: de gebruiker heeft op de pagina van de dienst toestemming gegeven (apparaatcode).
+  window.__connectDone = (id) => {
+    Object.assign(S.conn[id], { status: "werkt", account: "pieter", bezig: null, fout: null });
+    emit("connect-changed", null);
+  };
+  window.__connectFail = (id, fout) => {
+    Object.assign(S.conn[id], { status: "niet_gekoppeld", bezig: null, fout });
+    emit("connect-changed", null);
+  };
   const callbacks = {};
   const listeners = {};
   let nextId = 1;
@@ -147,6 +170,40 @@ function mock({ demoUrl, scenario, THUMB }) {
     project_flags: (a) => Object.fromEntries(Object.entries(S.flags).filter(([k]) => k.startsWith(a.projectId + ":") && !k.endsWith(":needs")).map(([k, v]) => [k.split(":")[1], v])),
     project_flag_set: (a) => void (a.value == null ? delete S.flags[a.projectId + ":" + a.key] : (S.flags[a.projectId + ":" + a.key] = a.value)),
     reset_ui_setting: (a) => void delete S.settings[a.key],
+    // ---- koppelingen (GitHub: apparaatcode, Vercel en Supabase: sleutel plakken)
+    connect_list: () => S.connLijst(),
+    connect_start: (a) => {
+      const c = S.conn[a.id];
+      c.fout = null;
+      if (c.strategie === "oauth_device") {
+        c.status = "bezig";
+        c.bezig = { soort: "apparaat", user_code: "ABCD-1234", verification_uri: "https://github.com/login/device", expires_in: 900 };
+        emit("connect-changed", null);
+        return c.bezig;
+      }
+      return { soort: "plakken" };
+    },
+    connect_paste: (a) => {
+      const c = S.conn[a.id];
+      if (a.token === "goed-token") {
+        c.status = "werkt";
+        c.account = a.id === "github" ? "pieter" : a.id === "vercel" ? "joke" : "Mijn bedrijf";
+        c.fout = null;
+        c.bezig = null;
+        emit("connect-changed", null);
+        return S.connLijst().find((x) => x.id === a.id);
+      }
+      throw "ongeldig_token";
+    },
+    connect_cancel: (a) => void (S.conn[a.id].bezig = null, S.conn[a.id].status = S.conn[a.id].account ? "werkt" : "niet_gekoppeld", emit("connect-changed", null)),
+    connect_test: (a) => S.connLijst().find((x) => x.id === a.id),
+    connect_test_all: () => S.connLijst(),
+    connect_disconnect: (a) => {
+      Object.assign(S.conn[a.id], { status: "niet_gekoppeld", account: null, fout: null, bezig: null });
+      emit("connect-changed", null);
+      return { ingetrokken: false, beheer_url: "https://github.com/settings/applications" };
+    },
+    connect_open: (a) => void S.opened.push(a.url),
     layout_get: (a) => S.layouts[a.projectId] ?? null,
     layout_set: (a) => void (S.layouts[a.projectId] = { versie: a.versie, json: a.json }),
     layout_reset: (a) => void delete S.layouts[a.projectId],

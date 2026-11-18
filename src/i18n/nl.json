@@ -1412,8 +1412,8 @@
         "uitleg": "Studio verstuurt zelf niets over jou of je projecten. Alleen de AI waar je mee werkt krijgt wat je hem vraagt."
       },
       "sleutels": {
-        "label": "Inlogsleutels",
-        "uitleg": "Studio bewaart geen wachtwoorden of inlogsleutels in je projecten. Je login bij de AI staat in het AI-programma zelf. Sleutels voor hostingbedrijven of appwinkels komen binnenkort; ze worden dan veilig op je computer bewaard.",
+        "label": "Koppelingen",
+        "uitleg": "Verbind je eigen accounts, zoals GitHub, Vercel en Supabase. Studio bewaart je toegang alleen op deze computer, in de beveiligde kluis.",
         "binnenkort": "Komt binnenkort"
       }
     },
@@ -1458,5 +1458,137 @@
     "terugNaarEerdereVersie": "Terug naar een eerdere versie",
     "inlogsleutel": "Inlogsleutel",
     "technischeWeergave": "Technische weergave"
+  },
+  "koppelingen": {
+    "titel": "Koppelingen",
+    "uitleg": "Hier verbind je je eigen accounts, zoals GitHub, Vercel en Supabase. Alles is optioneel. Studio bewaart je toegang alleen op deze computer, in de beveiligde kluis van je computer.",
+    "privacy": "De toegang blijft op dit apparaat. Studio stuurt niets naar anderen en heeft geen eigen server.",
+    "status": {
+      "niet_gekoppeld": "Niet gekoppeld",
+      "bezig": "Bezig met verbinden",
+      "werkt": "Werkt",
+      "verlopen": "Verlopen",
+      "fout": "Er is iets mis"
+    },
+    "knop": {
+      "verbind": "Verbind met {{dienst}}",
+      "bezig": "Bezig…",
+      "opnieuw": "Opnieuw verbinden",
+      "ontkoppel": "Ontkoppelen",
+      "test": "Testen",
+      "menu": "Opties voor {{dienst}}",
+      "gekoppeldAls": "{{dienst}}: {{account}}",
+      "allesTesten": "Alles testen",
+      "allesVerbinden": "Alles verbinden",
+      "overslaan": "Overslaan",
+      "klaar": "Klaar",
+      "annuleer": "Annuleren",
+      "open": "Open de pagina",
+      "kopieerLink": "Kopieer de link",
+      "kopieerCode": "Kopieer de code",
+      "gekopieerd": "Gekopieerd",
+      "toon": "Toon",
+      "verberg": "Verberg",
+      "verbinden": "Verbinden",
+      "volgende": "Volgende",
+      "verder": "Ga verder"
+    },
+    "dialoog": {
+      "titel": "Verbind met {{dienst}}",
+      "intro": "Studio opent {{dienst}}. Daar kies je wat je toestaat. Je wachtwoord blijft bij {{dienst}}.",
+      "rechtenTitel": "Dit mag Studio straks doen (klik om te lezen)",
+      "functiesTitel": "Hiervoor heb je het nodig:",
+      "wachtOpBrowser": "Wacht even… Kies in {{dienst}} wat je toestaat. Daarna kom je vanzelf terug in Studio.",
+      "browserNiet": "Opent je browser niet? Kopieer dan de link en plak hem zelf in je browser.",
+      "codeTitel": "Typ deze code op de pagina van {{dienst}}:",
+      "codeUitleg": "Klik op ‘Open de pagina’, log in en typ de code. Studio merkt vanzelf dat het gelukt is.",
+      "codeGeldig": "De code werkt ongeveer {{minuten}} minuten.",
+      "gelukt": "Gelukt! Je bent verbonden met {{dienst}}",
+      "geluktAccount": "Ingelogd als {{account}}",
+      "plakIntro": "Je plakt hier een toegangssleutel van {{dienst}}. Studio bewaart die veilig op deze computer en laat hem nooit aan de AI zien.",
+      "stap1": "Heb je een account bij {{dienst}}?",
+      "stap1Knop": "Account maken (opent {{dienst}})",
+      "stap2": "Maak een toegangssleutel",
+      "stap3": "Plak je sleutel hier",
+      "veldLabel": "Toegangssleutel",
+      "veldPlaats": "Plak hier je sleutel",
+      "sleutelPaginaKnop": "Open de pagina voor sleutels"
+    },
+    "ontkoppel": {
+      "titel": "{{dienst}} ontkoppelen?",
+      "uitleg": "Studio verwijdert je sleutel van deze computer. Functies die {{dienst}} nodig hebben, werken dan niet meer tot je opnieuw verbindt.",
+      "zelfIntrekken": "Wil je de sleutel ook bij {{dienst}} zelf intrekken? Dat doe je op de pagina hieronder. Dat is slim als je niet zeker weet dat niemand anders erbij kan.",
+      "link": "Open de pagina van {{dienst}} om toegang in te trekken",
+      "klaar": "{{dienst}} is ontkoppeld."
+    },
+    "fout": {
+      "geannuleerd": "Je hebt het verbinden geannuleerd. Je kunt het opnieuw proberen.",
+      "geweigerd": "Je hebt geen toestemming gegeven. Klik op ‘Opnieuw verbinden’ en kies ‘toestaan’.",
+      "verlopen": "De toegang is verlopen. Klik op ‘Opnieuw verbinden’.",
+      "geen_internet": "Er is geen internetverbinding. Controleer je verbinding en probeer het opnieuw.",
+      "time_out": "Het duurde te lang. Probeer het zo nog eens.",
+      "poort_bezet": "Studio kon het terugkeeradres niet openen omdat een ander programma het gebruikt. Sluit andere programma’s en probeer het opnieuw.",
+      "te_weinig_rechten": "Je sleutel heeft te weinig rechten. Maak een nieuwe sleutel met meer rechten, of kies bij het verbinden alle gevraagde rechten.",
+      "ongeldig_token": "Deze sleutel werkt niet. Controleer of je hem helemaal hebt gekopieerd, of maak een nieuwe.",
+      "te_veel_verzoeken": "Er zijn te veel verzoeken gedaan. Wacht een minuutje en probeer het opnieuw.",
+      "geblokkeerd": "Studio mag deze pagina niet openen. Dat is een veiligheidsregel.",
+      "niet_gekoppeld": "Deze dienst is nog niet gekoppeld.",
+      "kluis": "De beveiligde kluis van je computer is niet beschikbaar. Zonder kluis bewaart Studio geen sleutels. Controleer of je computer een wachtwoordbeheer (sleutelhanger) heeft.",
+      "onbekende_dienst": "Deze dienst kent Studio niet.",
+      "onverwacht": "Er ging iets mis bij het verbinden. Probeer het opnieuw. Lukt het weer niet, kies dan de andere manier (sleutel plakken).",
+      "niet_gevonden": "De dienst gaf een antwoord dat Studio niet begrijpt."
+    },
+    "overzicht": {
+      "titel": "Mijn koppelingen",
+      "alleVerbonden": "Alles is verbonden.",
+      "laatsteTest": "Testresultaat",
+      "voortgang": "Dienst {{nu}} van {{totaal}}",
+      "leeg": "Geen koppelingen beschikbaar."
+    },
+    "plek": {
+      "gegevens": "Om je app gegevens online te laten bewaren heb je een Supabase-account nodig.",
+      "onlinezetten": "Om je app online te zetten heb je een Vercel-account nodig.",
+      "backup": "Om een kopie van je project in je eigen GitHub te bewaren heb je een GitHub-account nodig. Het maken van de kopie zelf komt binnenkort.",
+      "backupTitel": "Kopie in GitHub"
+    },
+    "kaart": {
+      "titel": "De AI vraagt om verbinding met {{dienst}}",
+      "verbonden": "Je bent verbonden met {{dienst}}. Je kunt de AI laten doorgaan.",
+      "doorgaan": "Ik heb {{dienst}} verbonden. Ga maar verder.",
+      "redenVoorloop": "Waarom:"
+    },
+    "github": {
+      "naam": "GitHub",
+      "uitleg": "Een plek om een kopie van je project veilig online te bewaren.",
+      "rechten": {
+        "repo": "Projecten van jou maken en bijwerken, ook privé-projecten. Dit is veel; Studio gebruikt het alleen voor je kopie."
+      },
+      "functies": {
+        "backup": "Een kopie van je project bewaren in je eigen GitHub"
+      },
+      "stap2": "Klik op ‘Generate new token’ en kies ‘Generate new token (classic)’. Geef hem de naam ‘Studio’, kies een geldigheid en zet een vinkje bij ‘repo’. Klik onderaan op ‘Generate token’ en kopieer de sleutel; je ziet hem maar één keer."
+    },
+    "vercel": {
+      "naam": "Vercel",
+      "uitleg": "Een plek om je website of app online te zetten.",
+      "rechten": {
+        "projecten": "Projecten maken en je app online zetten."
+      },
+      "functies": {
+        "onlinezetten": "Je app online zetten"
+      },
+      "stap2": "Klik op ‘Create Token’ en geef hem de naam ‘Studio’. Kies bij voorkeur een korte geldigheid. Kopieer daarna de sleutel; je ziet hem maar één keer."
+    },
+    "supabase": {
+      "naam": "Supabase",
+      "uitleg": "Een plek om de gegevens van je app online te bewaren, met inloggen en delen tussen apparaten.",
+      "rechten": {
+        "account": "Je Supabase-projecten bekijken en beheren. Een gewone sleutel geeft toegang tot je hele account; kies je een beperkte sleutel (als Supabase die aanbiedt), dan is dat veiliger."
+      },
+      "functies": {
+        "gegevens": "De gegevens van je app online bewaren en beheren"
+      },
+      "stap2": "Klik op ‘Generate new token’ en geef hem de naam ‘Studio’. Kopieer daarna de sleutel; je ziet hem maar één keer. Let op: een gewone sleutel geeft toegang tot je hele Supabase-account."
+    }
   }
 }
