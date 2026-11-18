@@ -41,7 +41,7 @@ export default function StartPanel() {
         </div>
       ) : (
         <div className="space-y-2">
-          <Button size="lg" className="w-full" data-testid="volgende-stap" onClick={() => ga(volgende)}>
+          <Button size="lg" className="h-auto min-h-14 w-full whitespace-normal py-3 text-center" data-testid="volgende-stap" onClick={() => ga(volgende)}>
             {t("start.volgende")}: {t(`start.knop.${volgende}`)}
           </Button>
           <p className="text-base text-muted-foreground">{t(`start.hint.${volgende}`)}</p>

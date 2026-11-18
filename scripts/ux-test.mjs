@@ -45,7 +45,8 @@ try {
     await p.waitForTimeout(500);
 
     // ---- Werkruimte: panelen, iconenbalk, status
-    check(tag("iconenbalk met 10 onderdelen"), (await p.locator("[data-testid=rail] button").count()) === 10);
+    const menuItems = await p.locator("[data-testid=menu] [data-testid^=menu-]").evaluateAll((els) => els.map((e) => e.getAttribute("data-testid").slice(5)).filter((id) => !["terug", "klap", "hulp", "meer", "gevorderd"].includes(id)));
+    check(tag("menu met 8 onderdelen"), menuItems.length === 8, menuItems.join(","));
     check(tag("status van voorbeeld en AI-koppeling zichtbaar"), (await p.getByTestId("status-preview").isVisible()) && (await p.getByTestId("status-mcp").isVisible()));
     check(tag("geen horizontale scroll (werkruimte)"), await geenHScroll(p));
     const breedtes = await p.evaluate(() => [...document.querySelectorAll(".flexlayout__tabset")].map((e) => Math.round(e.getBoundingClientRect().width)));
