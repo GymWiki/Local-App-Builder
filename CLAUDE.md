@@ -66,3 +66,9 @@ Lokale desktop-app (Tauri 2 + React/TypeScript/Vite + Tailwind, Rust-backend, SQ
 - Een commando in Rust mag de `Db`-vergrendeling nooit vasthouden terwijl er code wordt aangeroepen die zelf `db.conn()` neemt (ChatManager, AppStore): dat blokkeert het hele venster. Beperk de vergrendeling tot een blok.
 - Test wijzigingen aan de indeling met `npm run ux:test` én in de echte app (`npm run tauri dev`); de nagebootste Tauri-laag vangt zulke fouten niet.
 
+
+## Menu en instellingen (beginnersweergave)
+- Het linkermenu (`workspace/WorkspaceMenu.tsx`) heeft hoogstens acht zichtbare onderdelen; techniek staat onder "Voor gevorderden". Statusbolletjes, stappen op Start en de zichtbaarheid van Gegevens komen **alleen** uit de Status-service (`src/lib/menu`), niet uit losse componenten.
+- Nieuwe instelling: voeg hem toe aan het register in `src/lib/settings/index.ts` (standaardwaarde + controle), aan `UI_SETTINGS`/`valid_setting` in `commands.rs` en aan `SettingsView` met label, uitleg, bereik (alle projecten of dit project) en "Standaard herstellen". Verandert het formaat, verhoog dan `SETTINGS_VERSION` en voeg een migratie toe.
+- Gebruik de vaste woorden uit `woordenlijst` in `nl.json`; de test `woordenlijst.test.ts` bewaakt dat vaktaal niet in de gewone weergave komt.
+- Test menu en instellingen met `npm run ux:menu` én in de echte app.

@@ -54,11 +54,11 @@ export default function SettingsView({ scope, project, accounts, mcp, groep, onG
     <div className="max-w-3xl p-5" data-testid="instellingen">
       <p className="mb-4 text-base text-muted-foreground">{t("inst.uitleg")}</p>
       <Tabs value={actief} onValueChange={kies}>
-        <TabsList className="h-auto flex-wrap" aria-label={t("inst.titel")}>
-          {metProject && <TabsTrigger value="project">{t("inst.groep.project")}</TabsTrigger>}
-          <TabsTrigger value="ai">{t("inst.groep.ai")}</TabsTrigger>
-          <TabsTrigger value="programma">{t("inst.groep.programma")}</TabsTrigger>
-          <TabsTrigger value="gevorderd">{t("inst.groep.gevorderd")}</TabsTrigger>
+        <TabsList className="h-auto w-full flex-wrap justify-start group-data-horizontal/tabs:h-auto" aria-label={t("inst.titel")}>
+          {metProject && <TabsTrigger value="project" className="h-10">{t("inst.groep.project")}</TabsTrigger>}
+          <TabsTrigger value="ai" className="h-10">{t("inst.groep.ai")}</TabsTrigger>
+          <TabsTrigger value="programma" className="h-10">{t("inst.groep.programma")}</TabsTrigger>
+          <TabsTrigger value="gevorderd" className="h-10">{t("inst.groep.gevorderd")}</TabsTrigger>
         </TabsList>
 
         {metProject && project && (
