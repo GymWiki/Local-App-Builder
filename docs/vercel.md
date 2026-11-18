@@ -21,6 +21,8 @@ Onderzocht op 18 november 2026 via de documentatie-index van Vercel (de officië
 
 - **Voorwaarden van het gratis (Hobby-)plan** (zoals "alleen niet-commercieel gebruik", limieten voor deployments, bandbreedte en functies): de zoekopdracht gaf alleen het rollback-punt hierboven. Studio belooft daarom niets over limieten of commercieel gebruik. Het scherm zegt: "Het gratis plan van Vercel heeft eigen voorwaarden (onder andere over commercieel gebruik en limieten). Lees ze op vercel.com voordat je een bedrijfswebsite online zet", met een link naar `vercel.com/pricing`.
 - Het exacte aanmaken van een project (`POST /v11/projects`), de statusvelden (`readyState`), annuleren (`PATCH /v12/deployments/{id}/cancel`), de lijst met deployments (`GET /v6/deployments`) en domeinen: de eindpunten zijn bekend uit eerder gebruik maar niet in deze sessie met de bron vergeleken. De code leest daarom alleen velden die er hoogstens ontbreken (alles optioneel; een onverwacht antwoord wordt een nette fout), en elke aanname staat in `src-tauri/src/vercel/api.rs` met een test op een nagebootst antwoord. **Zet dit op de handmatige testlijst (§8).**
+- **Bestandsnaam bij het uploaden:** dat Vercel de bestanden onder hun **SHA-1** (hex) verwacht en de header `x-vercel-digest` voor `POST /v2/files` gebruikt, stond niet in de gelezen tekst (alleen "reference them by SHA"). De code volgt dit gangbare gebruik; controleer het bij de eerste echte test.
+- Dat een "gevoelig" (`sensitive`) variabele niet voor de omgeving `development` kan, is een aanname; Studio stuurt serversleutels daarom alleen naar `production` en `preview`.
 - Runtime-logboek van de live site (fouten die bezoekers veroorzaken): eindpunt en vorm niet te controleren. **Niet gebouwd**; wel het bouwlogboek.
 - Domeinen kopen: kost geld en de vorm van het antwoord is niet geverifieerd. **Niet gebouwd**; Studio legt uit hoe je een bestaand domein koppelt en toont wat Vercel zelf aangeeft.
 
@@ -43,7 +45,16 @@ Onderzocht op 18 november 2026 via de documentatie-index van Vercel (de officië
 
 ## 5. Wat er gebouwd is
 
-Zie `src-tauri/src/vercel/` (`api.rs`, `files.rs`, `engine.rs`, `env.rs`, `store.rs`, `app.rs`), migratie `0009_vercel.sql`, scherm onder Online zetten (`src/components/app/vercel/`), MCP-tools in `mcp-server/src/tools.ts`.
+Zie `src-tauri/src/vercel/` (`api.rs`, `files.rs`, `engine.rs`, `env.rs`, `store.rs`, `app.rs`), migratie `0009_vercel.sql`, scherm onder Online zetten (`src/components/app/vercel/`), de vijf stappen in `src/lib/online.ts`, MCP-tools in `mcp-server/src/tools.ts`.
+
+- **Stappen en één grote knop** (deel 7): controles groen → Vercel gekoppeld (Verbinden-knop op die plek) → variabelen compleet → voorbeeld → echt online. `onlineStappen`/`volgendeOnlineStap` bepalen alles; het scherm toont alleen het resultaat.
+- **Voorbeeld/echt:** voorbeeld zonder extra vraag; echt online vraagt altijd een bevestiging (gebruiker: dialoog in het scherm, backend weigert zonder `bevestigd`; AI: `confirm.rs`-dialoog, zwaar). Voor elke deployment een lokale versie en een regel in het logboek met het adres.
+- **Mislukte bouw:** bouwlogboek ophalen, soort fout in gewone taal, laatste regels (geheimen gemaskeerd), "Laat de AI dit herstellen". Dezelfde fout herhaaldelijk bij de AI: de AI wordt gestopt (zelfde drempel als bij Supabase).
+- **Annuleren en time-out:** "Stoppen" annuleert bij Vercel; na 15 minuten geeft Studio het op en annuleert.
+- **Variabelen** (deel 3): waarden alleen in de OS-kluis; Supabase-aanbod (alleen openbaar adres + publiceerbare sleutel); controle op ontbrekende variabelen vóór het online zetten (blokkeert echt, waarschuwt bij voorbeeld).
+- **Eerdere versies en terugzetten** (deel 4): lijst van Vercel + eigen logboek; "Terug naar deze versie" met bevestiging; op het gratis plan eerlijke melding.
+- **Domein** (deel 5): een bestaand domein koppelen en controleren; Studio toont wat Vercel vraagt. Kopen niet gebouwd.
+- **Netwerk** (deel 8): API-verzoeken alleen naar `api.vercel.com`; de browser mag `*.vercel.app` (je eigen sites) openen, er wordt daar niets opgehaald.
 
 ## 6. Bewust niet gebouwd
 

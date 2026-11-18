@@ -83,6 +83,13 @@ function mock({ demoUrl, scenario, THUMB }) {
   S.ghUitkomst = scenario.ghUitkomst ?? null; // een vaste uitkomst voor de volgende back-up (bijvoorbeeld geheimen)
   S.ghVrij = scenario.ghVrij ?? true;
   S.ghState = () => ({ werkt: S.conn.github.status === "werkt", account: S.conn.github.account, link: S.ghLink, versies: 3, nieuw: S.ghNieuw, bezig: false, nu: Math.floor(Date.now() / 1000) });
+  // ---- Vercel (nagebootst): online zetten, variabelen, eerdere versies
+  S.vercel = { werkt: false, account: null, project: null, flutter: false, server_deel: false, ontbrekend: [], voorbeeld: null, live: null, laatste: null, bezig: false, nu: Math.floor(Date.now() / 1000), ...(scenario.vercel || {}) };
+  S.vercelUitkomst = scenario.vercelUitkomst ?? null; // vaste uitkomst voor het volgende online zetten
+  S.vercelAanroepen = [];
+  S.vercelEnv = scenario.vercelEnv ?? [];
+  S.vercelVersies = scenario.vercelVersies ?? [];
+  S.vercelState = () => ({ ...S.vercel, werkt: S.conn.vercel.status === "werkt", account: S.conn.vercel.account, nu: Math.floor(Date.now() / 1000) });
   window.__stuurActie = (req) => emit("actie-confirm", req);
   window.__stuurBevestiging = (req) => emit("db-confirm", req);
   S.connLijst = () =>
@@ -241,6 +248,32 @@ function mock({ demoUrl, scenario, THUMB }) {
     supa_sql: () => ({ status: "uitgevoerd", tekst: "Resultaat.", data: [] }),
     project_storage_get: (a) => S.opslag[a.projectId] ?? null,
     project_storage_set: (a) => void (S.opslag[a.projectId] = a.keuze),
+    vercel_state: () => S.vercelState(),
+    vercel_deploy: (a) => {
+      S.vercelAanroepen.push([a.doelNaam, a.bevestigd]);
+      if (S.vercelUitkomst) return S.vercelUitkomst;
+      const live = a.doelNaam === "live";
+      const rij = { id: 1, at: Math.floor(Date.now() / 1000), target: live ? "production" : "preview", deployment_id: "dpl_1", url: live ? "https://hovenier-joke.vercel.app" : "https://hovenier-joke-abc.vercel.app", state: "READY", checkpoint: "abc1234", code: "x" };
+      S.vercel = { ...S.vercel, project: "hovenier-joke", [live ? "live" : "voorbeeld"]: rij, laatste: rij };
+      emit("vercel-voortgang", { project_id: 1, stap: "gewijzigd", klaar: 0, totaal: 0 });
+      return { status: "uitgevoerd", code: live ? "live_online" : "voorbeeld_online", params: { url: rij.url } };
+    },
+    vercel_cancel: () => undefined,
+    vercel_deployments: () => ({ lijst: S.vercelVersies }),
+    vercel_rollback: (a) => (S.vercelAanroepen.push(["terug", a.deploymentId, a.bevestigd]), { status: "uitgevoerd", code: "teruggezet", params: {} }),
+    vercel_build_summary: () => ({ soort: "onbekend", regels: [] }),
+    vercel_env_list: () => S.vercelEnv,
+    vercel_env_set: (a) => {
+      if (/SECRET|VITE_.*KEY.*GEHEIM/.test(a.waarde)) return { status: "geweigerd", code: "env_ongeldig", params: { reden: "geheim_als_openbaar" } };
+      S.vercelEnv = [...S.vercelEnv.filter((e) => e.naam !== a.naam), { naam: a.naam, soort: a.soort, bron: "handmatig", omgevingen: a.omgevingen, gezet: 1, doorgestuurd: null }];
+      S.vercel = { ...S.vercel, ontbrekend: S.vercel.ontbrekend.filter((n) => n !== a.naam) };
+      S.vercelAanroepen.push(["env", a.naam, a.bevestigd]);
+      return { status: "uitgevoerd", code: "env_bewaard", params: { doorgestuurd: false } };
+    },
+    vercel_env_remove: (a) => void (S.vercelEnv = S.vercelEnv.filter((e) => e.naam !== a.naam)),
+    vercel_env_supabase: () => ({ status: "uitgevoerd", code: "env_bewaard", params: {} }),
+    vercel_domain_add: () => ({ naam: "mijnwinkel.nl", geverifieerd: false, regels: [{ type: "TXT", naam: "_vercel.mijnwinkel.nl", waarde: "vc-domain-verify=abc" }] }),
+    vercel_domain_check: () => ({ naam: "mijnwinkel.nl", geverifieerd: true, regels: [] }),
     github_state: () => S.ghState(),
     github_suggest_name: (a) => ({ naam: a.naam ?? "hovenier-joke", geldig: /^[a-z0-9][a-z0-9_-]*$/.test(a.naam ?? "hovenier-joke"), vrij: S.ghVrij }),
     github_first_backup: (a) => {

@@ -2019,6 +2019,189 @@
     "github_backup": {
       "titel": "Mag de AI een back-up maken?",
       "uitleg": "De AI wil nieuwe versies van je project naar je GitHub-kopie {{repo}} sturen. Er wordt niets overschreven of verwijderd."
+    },
+    "vercel_live": {
+      "titel": "Mag de AI de echte site online zetten?",
+      "uitleg": "De AI wil ‘{{naam}}’ echt online zetten: iedereen op internet ziet dan de nieuwe versie. Dit vraagt Studio altijd, ook als de AI veel mag."
+    },
+    "vercel_terugzetten": {
+      "titel": "Mag de AI de echte site terugzetten?",
+      "uitleg": "De AI wil de echte site van ‘{{naam}}’ terugzetten naar een eerdere versie. Bezoekers zien dan die oudere versie."
+    },
+    "vercel_variabele": {
+      "titel": "Mag de AI een instelling voor de echte site doorsturen?",
+      "uitleg": "De AI wil de instelling {{naam}} doorsturen naar je echte site. De waarde blijft geheim; de AI ziet haar niet."
+    }
+  },
+  "vercel": {
+    "titel": "Online zetten met Vercel",
+    "uitleg": "Zet je website op internet met je eigen Vercel-account. Je kunt eerst een voorbeeld online zetten om te kijken. De echte site gaat pas online als jij dat bevestigt.",
+    "stap": {
+      "controles": "De controles zijn groen",
+      "gekoppeld": "Vercel is gekoppeld",
+      "variabelen": "De instellingen (variabelen) zijn compleet",
+      "voorbeeld": "Een voorbeeld staat online",
+      "live": "De echte site staat online"
+    },
+    "volgende": {
+      "controles": "Laat de AI de controles herstellen",
+      "variabelen": "Instellingen invullen",
+      "voorbeeld": "Voorbeeld online zetten",
+      "live": "Echt online zetten",
+      "klaar": "Alles is klaar: je site staat online."
+    },
+    "controlesPrompt": "Draai de controles van mijn project en herstel wat niet groen is, zodat ik de site online kan zetten. Leg in gewone woorden uit wat je doet.",
+    "voorbeeld": "Voorbeeld online zetten",
+    "live": "Echt online zetten",
+    "stop": "Stoppen",
+    "voortgang": "Voortgang van het online zetten",
+    "fase": {
+      "controleren": "Controles draaien…",
+      "uploaden": "Bestanden worden verstuurd…",
+      "bouwen": "Vercel bouwt je site…",
+      "bezig": "Bezig…"
+    },
+    "kopieer": "Kopieer adres",
+    "gekopieerd": "Het adres is gekopieerd.",
+    "openBrowser": "Open in de browser",
+    "liveAdres": "Je echte site staat op:",
+    "flutter": "Een Flutter-app kan hier nog niet online worden gezet. Vercel is voor websites en web-apps. Voor een app in de winkel komt later een eigen onderdeel.",
+    "herstel": "Laat de AI dit herstellen",
+    "voorwaarden": "Het gratis plan van Vercel heeft eigen voorwaarden, onder andere over commercieel gebruik en limieten. Lees ze op vercel.com voordat je een bedrijfswebsite online zet.",
+    "voorwaardenLink": "Bekijk de voorwaarden en prijzen",
+    "waarschuwingVariabelen": "Let op: de code gebruikt instellingen die nog niet zijn ingevuld: {{namen}}. Het voorbeeld werkt daardoor misschien niet helemaal.",
+    "liveVraag": {
+      "titel": "Echt online zetten?",
+      "uitleg": "Je zet ‘{{naam}}’ nu echt online: iedereen op internet kan de nieuwe versie zien.",
+      "adresBestaand": "De bezoekers van {{adres}} krijgen vanaf nu deze versie te zien.",
+      "adresNieuw": "Je krijgt een eigen internetadres van Vercel.",
+      "terug": "Je kunt later terug naar een eerdere versie. Studio bewaart eerst een lokale versie van je werk.",
+      "nee": "Niet doen",
+      "ja": "Ja, echt online zetten"
+    },
+    "terugVraag": {
+      "titel": "Terug naar deze versie?",
+      "uitleg": "De echte site laat vanaf nu weer deze eerdere versie zien. Er wordt niets verwijderd; je kunt daarna weer naar een nieuwere versie.",
+      "ja": "Ja, terug naar deze versie"
+    },
+    "eerder": {
+      "titel": "Eerder online gezet",
+      "echt": "Echte site",
+      "voorbeeld": "Voorbeeld",
+      "klaar": "gelukt",
+      "mislukt": "mislukt",
+      "terug": "Terug naar deze versie"
+    },
+    "uitkomst": {
+      "voorbeeld_online": "Het voorbeeld staat online. Dit is nog niet je echte site.",
+      "live_online": "Je site staat online.",
+      "niet_ingesteld": "Vercel is nog niet ingesteld voor dit project.",
+      "niet_bevestigd": "Je hebt het niet toegestaan. Er staat niets nieuws online.",
+      "bevestiging_nodig": "Bevestig eerst dat je dit echt wilt. Er is niets veranderd.",
+      "controles": "Er is niets online gezet, want de controles zijn niet groen:",
+      "bouw_mislukt": "Vercel kon je site niet bouwen. Er is niets online gezet.",
+      "geannuleerd": "Het online zetten is gestopt. Er staat niets nieuws online.",
+      "time_out": "Het duurde te lang. Het online zetten is gestopt; er staat niets nieuws online.",
+      "lus": "Dezelfde fout kwam steeds terug. De AI is gestopt. Bekijk de fout en kies zelf hoe je verder gaat.",
+      "bezig": "Er loopt al iets. Even geduld.",
+      "flutter": "Een Flutter-app kan hier niet online worden gezet.",
+      "niets_om_te_zetten": "Er is nog niets om online te zetten. Maak eerst een pagina.",
+      "teruggezet": "De echte site laat weer de gekozen versie zien.",
+      "rollback_pro": "Met het gratis plan van Vercel kun je alleen terug naar de vorige versie, niet verder.",
+      "niet_gevonden": "Deze versie is niet gevonden bij Vercel.",
+      "naam_bezet": "De naam van het project is al in gebruik bij Vercel.",
+      "ongeldig_token": "De koppeling met Vercel werkt niet meer. Verbind opnieuw.",
+      "geen_rechten": "Vercel geeft Studio hier geen toestemming voor. Maak de koppeling opnieuw.",
+      "geen_internet": "Geen verbinding met Vercel. Controleer je internet.",
+      "te_veel_verzoeken": "Vercel vraagt om even te wachten. Probeer het over een paar minuten opnieuw.",
+      "onverwacht": "Er ging iets mis. Er is niets online gezet.",
+      "onbekend": "Er ging iets mis. Er is niets online gezet."
+    },
+    "probleem": {
+      "controles_falen": "De controles (bouwen, testen) slagen niet.",
+      "controles_niet_gedraaid": "De controles konden niet draaien.",
+      "kit": "De uiterlijk-controle blokkeert het online zetten.",
+      "beveiliging": "De beveiligingscontrole vindt ernstige problemen.",
+      "geheimen": "Er staan geheimen (sleutels of wachtwoorden) in je bestanden:",
+      "te_groot": "Sommige bestanden zijn te groot:",
+      "variabelen_ontbreken": "Er ontbreken instellingen (variabelen):",
+      "prompt": "Ik wil mijn site online zetten, maar Studio houdt dat tegen: {{lijst}}. Herstel dit. Haal geheimen uit de bestanden en bewaar ze buiten het project. Leg in gewone woorden uit wat je doet."
+    },
+    "bouw": {
+      "module_ontbreekt": "Een onderdeel dat je code nodig heeft, ontbreekt.",
+      "typefout": "Er zit een fout in de code.",
+      "installatie": "Het installeren van de onderdelen is mislukt.",
+      "geheugen": "Het bouwen had te weinig geheugen.",
+      "geen_uitvoermap": "Na het bouwen vond Vercel geen map met de website.",
+      "bouw_script": "Het bouwcommando gaf een fout.",
+      "onbekend": "De bouw is mislukt.",
+      "details": "Laat de laatste regels zien",
+      "prompt": "Mijn site kon niet online worden gezet: {{soort}} De laatste regels van het logboek: {{regels}}. Zoek de oorzaak, herstel hem en controleer het daarna. Leg in gewone woorden uit wat je doet."
+    },
+    "env": {
+      "titel": "Instellingen voor online (variabelen)",
+      "uitleg": "Sommige sites hebben instellingen nodig, bijvoorbeeld een naam of een sleutel. Je vult ze hier in. De waarde gaat naar de beveiligde kluis van je computer en wordt nergens meer getoond, ook niet aan de AI.",
+      "ontbreekt": "Je code gebruikt deze instellingen, maar ze zijn nog niet ingevuld:",
+      "supabase": "Je hebt Supabase gekoppeld. Studio kan het adres en de publieke sleutel daarvan voor je invullen. Een geheime sleutel gaat nooit mee.",
+      "supabaseKnop": "Supabase-gegevens overnemen",
+      "naam": "Naam van de instelling",
+      "waarde": "Waarde",
+      "waardeHulp": "De waarde wordt niet getoond en niet bewaard in je project.",
+      "soort": "Wie mag de waarde zien?",
+      "openbaar": "Openbaar",
+      "openbaarUitleg": "de waarde is niet geheim (bijvoorbeeld een naam of een publiek adres).",
+      "server": "Geheim (server)",
+      "serverUitleg": "alleen voor het deel van je site dat op een server draait, bijvoorbeeld een betaalsleutel.",
+      "serverUit": "alleen mogelijk als je project een serverdeel heeft; dit project heeft dat niet.",
+      "serverWaarschuwing": "Een geheime sleutel mag nooit in de pagina zelf komen, want dan kan iedereen hem lezen. Gebruik hem alleen op de server en kies een naam zonder VITE_, NEXT_PUBLIC_ of PUBLIC_ aan het begin.",
+      "omgevingen": "Waar moet de instelling gelden?",
+      "omg": {
+        "production": "Echte site",
+        "preview": "Voorbeelden",
+        "development": "Ontwikkeling"
+      },
+      "opslaan": "Instelling opslaan",
+      "verwijder": "Verwijderen",
+      "bewaard": "Waarde bewaard in de kluis",
+      "doorgestuurd": "Doorgestuurd naar Vercel",
+      "nogNiet": "Nog niet doorgestuurd",
+      "vraagTitel": "Instelling voor de echte site wijzigen?",
+      "vraagUitleg": "Dit verandert de instellingen van je echte site. De wijziging werkt bij de volgende keer dat je de site online zet.",
+      "vraagJa": "Ja, opslaan",
+      "uitkomst": {
+        "env_gezet": "De instelling is opgeslagen en doorgestuurd naar Vercel. De waarde is nergens meer te lezen.",
+        "env_bewaard": "De instelling is veilig bewaard. Ze gaat mee zodra Vercel gekoppeld is."
+      },
+      "fout": {
+        "ongeldige_naam": "Gebruik alleen hoofdletters, cijfers en een liggend streepje (bijvoorbeeld SITE_NAAM).",
+        "lege_waarde": "Vul een waarde in.",
+        "te_lang": "De waarde is te lang.",
+        "ongeldige_omgeving": "Kies minstens één plek waar de instelling moet gelden.",
+        "ongeldige_soort": "Kies of de waarde openbaar of geheim is.",
+        "geheim_als_openbaar": "Dit lijkt een geheime sleutel. Die mag niet als ‘openbaar’ worden opgeslagen, want dan kan iedereen hem lezen. Kies ‘Geheim (server)’ of gebruik de publieke sleutel.",
+        "server_met_openbare_naam": "Een geheime sleutel mag geen naam hebben die met VITE_, NEXT_PUBLIC_ of PUBLIC_ begint; die komen in de pagina zelf terecht.",
+        "geen_servergedeelte": "Dit project heeft geen serverdeel, dus een geheime sleutel kan hier niet worden gebruikt.",
+        "onbekend": "Deze instelling kan niet worden opgeslagen."
+      }
+    },
+    "domein": {
+      "titel": "Eigen domeinnaam",
+      "uitleg": "Heb je al een domeinnaam, zoals mijnwinkel.nl? Dan kun je hem koppelen aan je site. Vercel zegt welke gegevens je bij je domeinhouder moet invullen.",
+      "kosten": "Een domeinnaam kopen kan hier niet; dat doe je bij een domeinhouder en kost geld.",
+      "naam": "Je domeinnaam",
+      "koppel": "Domein koppelen",
+      "controleer": "Controleer of het werkt",
+      "klaar": "Het domein is gekoppeld en gecontroleerd.",
+      "nogNiet": "Het domein is nog niet klaar. Voer bij je domeinhouder de volgende gegevens in:",
+      "wachten": "Het kan een tijd duren (soms uren) voordat een wijziging bij je domeinhouder werkt. Controleer later opnieuw."
+    },
+    "fout": {
+      "naam_bezet": "Dit domein is al gekoppeld.",
+      "niet_gevonden": "Dit domein is niet gevonden.",
+      "geen_rechten": "Vercel geeft hier geen toestemming voor.",
+      "ongeldig_token": "De koppeling met Vercel werkt niet meer.",
+      "niet_gekoppeld": "Vercel is nog niet gekoppeld.",
+      "onverwacht": "Dit domein kan niet worden gekoppeld. Controleer de naam."
     }
   }
 }

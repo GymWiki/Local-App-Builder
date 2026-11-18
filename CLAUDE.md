@@ -89,3 +89,10 @@ Lokale desktop-app (Tauri 2 + React/TypeScript/Vite + Tailwind, Rust-backend, SQ
 - Een back-up door de AI (`git_backup`) vraagt, als `ai_ask` aan staat, bevestiging via `confirm.rs` (`actie-confirm`; dialoog `ActieBevestig`). Dat is de algemene bevestiging voor acties buiten de computer; gebruik hem ook voor Vercel en de winkels. Plan-modus ("Eerst overleggen") weigert altijd.
 - Automatisch een back-up na een opgeslagen versie staat standaard uit (`auto_backup`); de hook zit in het `git`-runtime-event in `lib.rs` (`github::app::auto_backup`).
 - Test: `cargo test github`, `npm run ux:github`, en echt met een eigen account (zie docs/github.md §7).
+
+## Online zetten met Vercel (eigen account van de gebruiker)
+- Alles in `src-tauri/src/vercel/` (onderzoek, keuzes, testlijst: `docs/vercel.md`); REST vanuit Rust, geen CLI. Studio uploadt de bronbestanden (`files.rs`, geen geheimen, geen `node_modules`) en laat Vercel bouwen. Het token alleen binnen `Manager::authorized`; foutmeldingen van Vercel gaan nooit door: alleen vaste codes (`VError`, `Uitkomst`; tekst onder `vercel.*` in `nl.json`).
+- **Echt online zetten, terugzetten en een variabele voor de echte site wijzigen vragen ALTIJD een bevestiging in de Studio-UI**, op elk niveau: de backend weigert zonder `bevestigd` (gebruiker) of vraagt de dialoog van `confirm.rs` met `zwaar` (AI). Een voorbeeld vraagt niets extra's. Plan-modus ("Eerst overleggen") weigert alles wat schrijft.
+- Waarden van omgevingsvariabelen staan alleen in de OS-kluis (`vercel-env/<project>/<NAAM>`), nooit in SQLite, uitkomsten, status, logs of AI-context. De AI kan alleen een door de gebruiker ingevoerde variabele doorsturen (`vercel_set_env` heeft alleen een naam). Een geheime sleutel nooit als "openbaar" of onder een naam die de browser ziet (`env.rs`).
+- Voor het uploaden: controles (lint/bouw/tests, kit-check, beveiligingscheck) en dezelfde geheimenscan als bij GitHub (`github/scan.rs`). Bouwlogboeken die we tonen gaan door `scan::redact`.
+- Test: `cargo test vercel`, `npm run ux:vercel`, en echt met een eigen account (docs/vercel.md §8).

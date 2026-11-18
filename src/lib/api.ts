@@ -625,3 +625,63 @@ export interface GhHerkend {
   niet_herkend: string[];
 }
 export const githubImport = (eigenaar: string, repo: string, privaat: boolean, bovenliggendPad: string) => invoke<{ project?: Project; herkend?: GhHerkend; fout?: string }>("github_import", { eigenaar, repo, privaat, bovenliggendPad });
+
+// ---------- Online zetten met Vercel ----------
+// Tokens en waarden van omgevingsvariabelen blijven in Rust; de frontend krijgt alleen codes en gewone gegevens.
+export interface VercelLog {
+  id: number;
+  at: number;
+  target: "preview" | "production";
+  deployment_id: string | null;
+  url: string | null;
+  state: string;
+  checkpoint: string | null;
+  code: string;
+}
+export interface VercelState {
+  werkt: boolean;
+  account: string | null;
+  project: string | null;
+  flutter: boolean;
+  server_deel: boolean;
+  ontbrekend: string[];
+  voorbeeld: VercelLog | null;
+  live: VercelLog | null;
+  laatste: VercelLog | null;
+  bezig: boolean;
+  nu: number;
+}
+export interface VercelUitkomst {
+  status: "uitgevoerd" | "geweigerd" | "mislukt";
+  code: string;
+  params: Record<string, unknown>;
+}
+export interface VercelEnv {
+  naam: string;
+  soort: "openbaar" | "server";
+  bron: string;
+  omgevingen: string[];
+  gezet: number;
+  doorgestuurd: number | null;
+}
+export interface VercelVersie {
+  id: string;
+  adres: string;
+  doel: string;
+  status: string;
+  gemaakt: number;
+  versie: string | null;
+}
+export const vercelState = (projectId: number) => invoke<VercelState>("vercel_state", { projectId });
+export const vercelDeploy = (projectId: number, doelNaam: "preview" | "live", bevestigd: boolean) => invoke<VercelUitkomst>("vercel_deploy", { projectId, doelNaam, bevestigd });
+export const vercelCancel = (projectId: number) => invoke<void>("vercel_cancel", { projectId });
+export const vercelDeployments = (projectId: number) => invoke<{ lijst?: VercelVersie[]; fout?: string }>("vercel_deployments", { projectId });
+export const vercelRollback = (projectId: number, deploymentId: string, bevestigd: boolean) => invoke<VercelUitkomst>("vercel_rollback", { projectId, deploymentId, bevestigd });
+export const vercelBuildSummary = (projectId: number) => invoke<{ soort?: string; regels?: string[]; fout?: string }>("vercel_build_summary", { projectId });
+export const vercelEnvList = (projectId: number) => invoke<VercelEnv[]>("vercel_env_list", { projectId });
+export const vercelEnvSet = (projectId: number, naam: string, waarde: string, soort: "openbaar" | "server", omgevingen: string[], bevestigd: boolean) => invoke<VercelUitkomst>("vercel_env_set", { projectId, naam, waarde, soort, omgevingen, bevestigd });
+export const vercelEnvRemove = (projectId: number, naam: string) => invoke<void>("vercel_env_remove", { projectId, naam });
+export const vercelEnvSupabase = (projectId: number, bevestigd: boolean) => invoke<VercelUitkomst>("vercel_env_supabase", { projectId, bevestigd });
+export const vercelDomainAdd = (projectId: number, domein: string) => invoke<{ naam?: string; geverifieerd?: boolean; regels?: { type: string; naam: string; waarde: string }[]; fout?: string }>("vercel_domain_add", { projectId, domein });
+export const vercelDomainCheck = (projectId: number, domein: string) => invoke<{ naam?: string; geverifieerd?: boolean; regels?: { type: string; naam: string; waarde: string }[]; fout?: string }>("vercel_domain_check", { projectId, domein });
+export const vercelUnlink = (projectId: number) => invoke<void>("vercel_unlink", { projectId });

@@ -5,10 +5,12 @@ import { CheckIcon, CircleIcon } from "lucide-react";
 import { stappen } from "@/lib/menu";
 import Controle from "@/components/app/supabase/Controle";
 import { useSupa } from "@/components/app/supabase/use-supa";
-import VerbindKnop from "@/components/app/connect/VerbindKnop";
+import OnlineZetten from "@/components/app/vercel/OnlineZetten";
+import Variabelen from "@/components/app/vercel/Variabelen";
+import Domein from "@/components/app/vercel/Domein";
+import { chatSend } from "@/lib/api";
 import PublishPanel from "@/components/app/PublishPanel";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { useWorkspace } from "../workspace-context";
@@ -32,8 +34,6 @@ export default function OnlinePanel() {
   const voorbeeld = stappen(w.signalen)[1].klaar;
   const online = w.signalen.online;
   const { state: supa } = useSupa(w.project.id);
-  // Een plek kiezen kan pas nadat de rest klaar is; pas dan hebben we een inlogsleutel nodig.
-  const sleutelsNodig = voorbeeld && veilig && kopie;
 
   return (
     <Frame titel={t("online.titel")} uitleg={t("online.uitleg")}>
@@ -76,22 +76,16 @@ export default function OnlinePanel() {
         </CardContent>
       </Card>
 
-      {sleutelsNodig && (
-        <Card data-testid="online-sleutels">
-          <CardHeader>
-            <div className="flex flex-wrap items-center gap-3">
-              <CardTitle className="text-lg">{t("online.sleutels.titel")}</CardTitle>
-              <Badge variant="secondary">{t("appwinkel.badge")}</Badge>
-            </div>
-            <CardDescription className="text-base">{t("online.sleutels.uitleg")}</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <p className="text-base">{t("koppelingen.plek.onlinezetten")}</p>
-            <VerbindKnop id="vercel" />
-            <p className="text-sm text-muted-foreground">{t("online.sleutels.later")}</p>
-          </CardContent>
-        </Card>
-      )}
+      <OnlineZetten
+        projectId={w.project.id}
+        tick={w.tick}
+        controlesGroen={!w.signalen.checksFalen && w.signalen.aantalVersies >= 1}
+        onVraagAi={(p) => void chatSend(w.project.id, p).then(() => w.focusGesprek()).catch(() => undefined)}
+        onLive={() => void w.setVlag("online_gezet", "1")}
+        onNaarVariabelen={() => document.getElementById("vercel-var-titel")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+      />
+      <Variabelen projectId={w.project.id} tick={w.tick} />
+      <Domein projectId={w.project.id} />
 
       {supa.gekoppeld && <Controle projectId={w.project.id} tick={w.tick} actief />}
 

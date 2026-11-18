@@ -37,6 +37,8 @@ pub fn open_hosts() -> Vec<&'static str> {
             }
         }
     }
+    // Websites die Studio online heeft gezet (voorbeelden en de echte site) mogen in de browser worden geopend; er wordt niets opgehaald.
+    v.push(".vercel.app");
     v.sort();
     v.dedup();
     v
@@ -58,6 +60,8 @@ mod tests {
         assert!(is_allowed("https://github.com/login/device", &h));
         assert!(is_allowed("https://supabase.com/dashboard/account/tokens", &h));
         assert!(is_allowed("https://vercel.com/account/tokens", &h));
+        assert!(is_allowed("https://mijn-site-abc.vercel.app/", &h));
+        assert!(!is_allowed("https://vercel.app.evil.example/", &h));
         assert!(!is_allowed("https://evil.example/", &h));
         assert!(!is_allowed("http://github.com/", &h));
         assert!(!is_allowed("file:///etc/passwd", &h));
