@@ -20,6 +20,7 @@ mod projectinfo;
 mod projects;
 mod provider;
 mod templates;
+mod supa;
 mod terminal;
 mod winpath;
 
