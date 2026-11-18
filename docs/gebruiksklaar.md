@@ -121,3 +121,10 @@ Voortgang per deel staat hieronder bij elk deel; de definitieve gereedheidslijst
 Nog niet gedaan in dit deel: een tijdlijn met miniaturen per eerder moment (de lijst met versies bestaat al, zonder miniaturen) en een kostenzin voor elke actie.
 
 Tests: `src/lib/fouten.test.ts`, `src/components/app/fouten.test.tsx`, `cargo test herstel rapport export`.
+
+## DEEL 5 — Afwerking (eerste stap: toegankelijkheid)
+
+- Nieuwe controle `npm run ux:a11y`: axe-core (WCAG 2.1 AA) op homescherm, eerste start, werkruimte en alle menu-onderdelen, licht en donker, 1280×720 / 1366×768 / 1920×1080, plus horizontaal scrollen en klikdoelen van minimaal 24px. Uitkomst nu: geen schendingen.
+- Opgelost: scrollgebieden bereikbaar met het toetsenbord, schakelaars, keuzerondjes en vinkjes en de paneelknoppen groter (zie `docs/ui.md`). Het shadcn-kitpakket is opnieuw gegenereerd.
+- Al aanwezig: "Herstel standaardindeling" (werkbalk), focusringen, grote klikdoelen, thematokens, licht en donker.
+- Nog niet gedaan: een volledige jargonronde, lege schermen en laadmeldingen per scherm, en prestatiemeting van de start.

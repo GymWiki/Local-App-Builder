@@ -50,7 +50,7 @@ function mockScript({ theme, demoUrl, scene }) {
     { id: "warm", naam: "Warm en speels", beschrijving: "Zachte kleuren en ronde hoeken.", label: "Vrolijk", licentie: "MIT", stacks: ["react-vite"], compatible: true, attributieVerplicht: false, installatiescripts: false, pakketten: [], preview: null, kleuren: { primair: "#ea580c", achtergrond: "#fff7ed", tekst: "#1c1917" } },
     { id: "material", naam: "Material", beschrijving: "Het uiterlijk van Android-apps.", label: "Voor Flutter", licentie: "BSD-3-Clause", stacks: ["flutter"], compatible: false, attributieVerplicht: false, installatiescripts: false, pakketten: [], preview: null, kleuren: { primair: "#6750a4", achtergrond: "#fffbfe", tekst: "#1c1b1f" } },
   ];
-  const settings = { communication_mode: "simple", permission_mode: "important", loop_threshold: "3", preview_auto_switch: "0", theme };
+  const settings = { communication_mode: "simple", permission_mode: "important", loop_threshold: "3", preview_auto_switch: "0", theme, eerste_start_klaar: "1" };
   const handlers = {
     list_projects: () => projects,
     list_accounts: () => accounts,

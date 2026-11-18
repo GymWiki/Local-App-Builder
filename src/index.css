@@ -266,6 +266,15 @@
   --flexlayout-color-toolbar-button-hover: var(--accent);
   --flexlayout-color-float-window-header-background: var(--card);
 }
+.studio-layout .flexlayout__tab_toolbar_button,
+.studio-layout .flexlayout__tab_button_trailing {
+  /* Grotere klikdoelen voor "Groot maken" en sluiten (minimaal 32px). */
+  min-width: 2rem;
+  min-height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 .studio-layout .flexlayout__tab_button,
 .studio-layout .flexlayout__tab_button_content {
   font-size: 1rem;

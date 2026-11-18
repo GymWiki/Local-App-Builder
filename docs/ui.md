@@ -228,3 +228,10 @@ Gelezen: `SectionRail.tsx`, `sections.ts`, `ProjectWorkspace.tsx`, `modelActions
 ### Bewust niet gedaan
 - Geen sleutels of tokens opslaan; geen bestanden wissen; geen wijzigingen aan de gegevens van een app zonder de AI.
 - "Werk zelfstandig" geldt voor het gesprek met Claude. Voor Gemini en Codex bestaat geen chatadapter; daar bepaalt het AI-programma in de terminal zelf wat het vraagt (staat zo in de uitleg).
+
+### Aanpassingen aan gegenereerde code voor toegankelijkheid
+- `src/components/ui/scroll-area.tsx`: het scrollgebied krijgt `tabIndex={0}`, zodat je met het toetsenbord kunt scrollen (axe: `scrollable-region-focusable`).
+- `src/index.css` (`.studio-layout`): de knoppen "Groot maken" en sluiten in de paneelbalk zijn minimaal 2rem groot.
+- Controle: `npm run ux:a11y` (axe in licht en donker, drie schermformaten, klikdoelen, horizontaal scrollen).
+- `src/components/ui/checkbox.tsx`: het vakje is `size-6` (24px, WCAG 2.2 minimum klikdoel).
+- `src/components/ui/switch.tsx` (24px hoog) en `radio-group.tsx` (24px): minimale klikdoelen volgens WCAG 2.2.
