@@ -80,3 +80,16 @@ Voortgang per deel staat hieronder bij elk deel; de definitieve gereedheidslijst
 - **MCP/runtime blokkeert nooit:** bestond al (`begin_mcp`, foutkaart met "Opnieuw proberen"); onveranderd.
 - **Hulp-paneel:** had al uitleg, voorbeeldvragen en een vraagveld; nu ook de systeemcheck. "Meld een probleem" komt bij DEEL 4.
 - Tests: `cargo test systeemcheck`, `eerstestart.test.tsx`.
+
+## DEEL 2 · De route "van idee tot app" (gedaan, met beperkingen)
+
+- **Route-balk bovenin elk project** (`RouteBalk.tsx`): acht stappen (idee, plan, uiterlijk, bouwen, aanpassen, gegevens, testen, delen) met bolletjes, de huidige stap met uitleg en geschatte duur, één grote knop en "Overslaan". De route is een hulpmiddel: elke stap is aan te klikken en over te slaan; niets is verplicht.
+- **Eén bron van waarheid:** feiten komen uit Rust (`route_feiten`: gesprek, PROJECT.md, plan-vlag, uiterlijk, versies, controles, back-up/online/winkel), de stappen uit `src/lib/route.ts` (getest). Balk en homescherm zeggen daardoor altijd hetzelfde. De bestaande vier stappen onder **Start** blijven ongewijzigd.
+- **Homescherm:** elke projectkaart toont "Stap 3 van 8: Uiterlijk" en één knop "Verder gaan".
+- **Idee:** dialoog met voorbeelden (afsprakenapp, takenlijst, kleine webshop, portfolio, kassa-app); de AI krijgt de opdracht maximaal drie korte vragen te stellen, met keuzes, en daarna een plan in PROJECT.md te schrijven in mensentaal. **Beperking:** de keuzes verschijnen als tekst in het gesprek (de chat heeft nog geen aanklikbare antwoordknoppen); de gebruiker typt of plakt een keuze.
+- **Plan:** dialoog toont het plan uit PROJECT.md met "Klopt dit?" (goedkeuren, aanpassen of laten maken). Alleen de lege koppen telt als "geen plan".
+- **Uiterlijk:** opent de bestaande kitkiezer. **"Verras me" bestaat niet** (niet gebouwd).
+- **Bouwen/Testen:** een vaste opdracht aan de AI om per stap in gewone taal te vertellen wat hij doet, en om na afloop een groen/oranje/rood-rapport te geven. Het rapport is chat-tekst; er is geen apart testscherm.
+- **Gegevens:** alleen open als de app opslag nodig heeft; anders "niet nodig".
+- **Delen:** opent Online zetten (waar back-up, Vercel en winkel staan). Live zetten en insturen vragen daar altijd bevestiging.
+- Tests: `cargo test route`, `route.test.ts`, `route.test.tsx`; alle `ux:`-suites slagen met de balk erin.

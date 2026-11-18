@@ -32,6 +32,7 @@ import type { PageInfo, PickedElement, PreviewControl } from "./pick";
 import MovePanelMenu from "./MovePanelMenu";
 import ShortcutsDialog from "./ShortcutsDialog";
 import WorkspaceBar from "./WorkspaceBar";
+import RouteBalk from "@/components/app/route/RouteBalk";
 import WorkspaceMenu from "./WorkspaceMenu";
 import { ICONEN } from "./menuIcons";
 import { WorkspaceProvider, type WorkspaceCtx } from "./workspace-context";
@@ -359,6 +360,7 @@ export default function ProjectWorkspace(props: Props) {
           onCloseProject={props.onCloseProject}
           onShortcuts={() => setToonSneltoetsen(true)}
         />
+        <RouteBalk />
         <div className="flex min-h-0 flex-1">
           <WorkspaceMenu
             projectNaam={project.naam}

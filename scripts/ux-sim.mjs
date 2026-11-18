@@ -272,6 +272,11 @@ function mock({ demoUrl, scenario, THUMB }) {
     supa_sql: () => ({ status: "uitgevoerd", tekst: "Resultaat.", data: [] }),
     project_storage_get: (a) => S.opslag[a.projectId] ?? null,
     project_storage_set: (a) => void (S.opslag[a.projectId] = a.keuze),
+    route_feiten: (a) => {
+      const pid = a.projectId;
+      const f = (k) => S.flags[pid + ":" + k];
+      return { heeft_idee: (S.messages[pid] || []).some((m) => m.kind === "user"), plan_klaar: f("route_plan") === "1", kit_gekozen: !!scenario.kitGekozen, versies: (S.versions[pid] || []).length, gegevens_nodig: !!scenario.gegevensNodig, gegevens_klaar: false, tests_ok: scenario.testsOk ?? null, back_up: false, online: f("online_gezet") === "1", winkel: false, overgeslagen: ["idee", "plan", "uiterlijk", "bouwen", "aanpassen", "gegevens", "testen", "delen"].filter((x) => f("over_" + x) === "1") };
+    },
     system_check: () => scenario.systeem ?? { punten: [{ id: "node", status: "ok", detail: "v22.3.0" }, { id: "git", status: "ok", detail: "git version 2.45" }, { id: "ai", status: "ok", detail: "claude" }, { id: "internet", status: "ok", detail: null }, { id: "schijf", status: "ok", detail: "120" }, { id: "rechten", status: "ok", detail: null }], klaar: true },
     winkels_overzicht: () => S.wkOverzicht(),
     winkels_bewaar: (a) => {

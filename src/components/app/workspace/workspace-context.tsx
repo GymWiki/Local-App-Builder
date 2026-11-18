@@ -1,5 +1,5 @@
 import { createContext, useContext, type RefObject } from "react";
-import type { Account, McpInfo, PreviewInfo, Project, ProjectSignals } from "@/lib/api";
+import type { Account, McpInfo, PreviewInfo, Project, ProjectFlagKey, ProjectSignals } from "@/lib/api";
 import type { PanelId } from "@/lib/layout";
 import type { Signalen } from "@/lib/menu";
 import type { PreviewControl } from "./pick";
@@ -17,7 +17,7 @@ export interface WorkspaceCtx {
   vlaggen: Record<string, string>;
   /** Haalt de signalen opnieuw op (bijvoorbeeld na het toevoegen van een foto). */
   verversSignalen: () => void;
-  setVlag: (key: "online_gezet" | "gegevens_aan" | "meer_onderdelen" | "start_verborgen", value: string | null) => Promise<void>;
+  setVlag: (key: ProjectFlagKey, value: string | null) => Promise<void>;
   openPaneel: (id: PanelId) => void;
   /** Zet de cursor in het invoerveld van het gesprek (opent het gesprek als dat nodig is). */
   focusGesprek: () => void;

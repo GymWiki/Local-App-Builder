@@ -60,6 +60,11 @@
       "titel": "Project uit de lijst halen?",
       "uitleg": "“{{naam}}” verdwijnt uit deze lijst. De bestanden op je computer blijven staan.",
       "knop": "Uit de lijst halen"
+    },
+    "route": {
+      "stap": "Stap {{nummer}} van {{totaal}}: {{naam}}",
+      "klaar": "Je app staat klaar.",
+      "verder": "Verder gaan"
     }
   },
   "welkom": {
@@ -2791,5 +2796,113 @@
       }
     },
     "accountNaam": "Mijn account"
+  },
+  "route": {
+    "titel": "Van idee tot app",
+    "stappen": "De stappen",
+    "stapNummer": "Stap {{nummer}}",
+    "stapVan": "Stap {{nummer}} van {{totaal}}",
+    "nvt": "niet nodig voor jouw app",
+    "overslaan": "Overslaan",
+    "verstuurd": "Ik heb het naar de AI gestuurd. Kijk in het gesprek.",
+    "klaar": "Je app staat klaar. Je kunt altijd verder aanpassen of een nieuwe versie delen.",
+    "status": {
+      "klaar": "klaar",
+      "overgeslagen": "overgeslagen",
+      "huidig": "nu aan de beurt",
+      "open": "nog te doen"
+    },
+    "stap": {
+      "idee": {
+        "titel": "Je idee",
+        "uitleg": "Vertel in eigen woorden wat je wilt maken.",
+        "duur": "ongeveer 2 minuten",
+        "knop": "Beschrijf je idee"
+      },
+      "plan": {
+        "titel": "Het plan",
+        "uitleg": "Je ziet in gewone woorden wat er komt en wat er in de eerste versie nog niet in zit.",
+        "duur": "ongeveer 2 minuten",
+        "knop": "Bekijk het plan"
+      },
+      "uiterlijk": {
+        "titel": "Uiterlijk",
+        "uitleg": "Kies hoe je app eruitziet, met voorbeelden en kleuren.",
+        "duur": "ongeveer 1 minuut",
+        "knop": "Kies het uiterlijk"
+      },
+      "bouwen": {
+        "titel": "Bouwen",
+        "uitleg": "De AI bouwt je app. Je ziet het voorbeeld meteen verschijnen.",
+        "duur": "5 tot 15 minuten",
+        "knop": "Laat de AI bouwen"
+      },
+      "aanpassen": {
+        "titel": "Aanpassen",
+        "uitleg": "Wijs iets aan in het voorbeeld of typ wat anders moet. Elke wijziging is ongedaan te maken.",
+        "duur": "zo lang je wilt",
+        "knop": "Pas iets aan"
+      },
+      "gegevens": {
+        "titel": "Gegevens",
+        "uitleg": "Je app moet iets onthouden. Hier kies je waar dat veilig gebeurt.",
+        "duur": "ongeveer 3 minuten",
+        "knop": "Regel de gegevens"
+      },
+      "testen": {
+        "titel": "Testen",
+        "uitleg": "Studio laat de AI de belangrijkste handelingen proberen en toont een eenvoudig rapport.",
+        "duur": "ongeveer 3 minuten",
+        "knop": "Test mijn app"
+      },
+      "delen": {
+        "titel": "Opslaan en delen",
+        "uitleg": "Bewaar een kopie, zet je app online of maak hem klaar voor de winkel. Online zetten vraagt altijd eerst jouw ja.",
+        "duur": "ongeveer 5 minuten",
+        "knop": "Opslaan en delen"
+      }
+    },
+    "idee": {
+      "titel": "Wat wil je maken?",
+      "uitleg": "Schrijf in je eigen woorden wat je wilt. De AI stelt daarna maximaal drie korte vragen, zoals voor wie het is en wat het belangrijkste is.",
+      "plaats": "Bijvoorbeeld: een app waarmee mijn klanten een afspraak kunnen maken.",
+      "of": "Of kies een voorbeeld:",
+      "stuur": "Naar de AI sturen",
+      "voorbeeldNaam": {
+        "afspraken": "Afsprakenapp",
+        "taken": "Takenlijst",
+        "webshop": "Kleine webshop",
+        "portfolio": "Portfolio",
+        "kassa": "Kassa-app"
+      },
+      "voorbeeld": {
+        "afspraken": "Een afsprakenapp waarmee klanten een tijd kunnen kiezen en ik alle afspraken kan zien.",
+        "taken": "Een takenlijst waarin ik taken kan toevoegen, afvinken en weer verwijderen.",
+        "webshop": "Een kleine webshop met een paar producten, een winkelmandje en een bestelformulier.",
+        "portfolio": "Een website waarop ik mijn werk laat zien, met een over-mij-pagina en een contactformulier.",
+        "kassa": "Een eenvoudige kassa-app waarmee ik producten kan aanslaan en een bon kan maken."
+      }
+    },
+    "plan": {
+      "titel": "Klopt dit plan?",
+      "uitleg": "Dit is het plan voor de eerste versie, in gewone woorden. Controleer of het klopt met wat jij in gedachten hebt.",
+      "leeg": "Er is nog geen plan. De AI kan het voor je maken op basis van je idee.",
+      "laden": "Het plan wordt geladen…",
+      "klopt": "Ja, dit klopt",
+      "aanpassen": "Pas het plan aan",
+      "wens": "Wat moet anders?",
+      "wensPlaats": "Bijvoorbeeld: ik wil ook een pagina met mijn openingstijden.",
+      "stuur": "Naar de AI sturen",
+      "terug": "Terug",
+      "maak": "Laat de AI het plan maken",
+      "goedgekeurd": "Het plan is goedgekeurd."
+    },
+    "prompt": {
+      "idee": "Ik wil een app maken. Mijn idee: {{idee}}. Stel me maximaal drie korte vragen, één voor één, in gewone taal: voor wie is het, wat is de belangrijkste functie en wordt het een website of een mobiele app. Geef bij elke vraag twee tot vier korte antwoorden waaruit ik kan kiezen. Schrijf daarna een eenvoudig plan in PROJECT.md in mensentaal: de schermen, de functies en wat er in versie 1 nog niet in zit. Gebruik geen technische woorden en bouw nog niets.",
+      "maakPlan": "Schrijf op basis van ons gesprek een eenvoudig plan in PROJECT.md, in mensentaal: de schermen, de functies en wat er in versie 1 nog niet in zit. Geen technische woorden. Bouw nog niets.",
+      "planAanpassen": "Pas het plan in PROJECT.md aan: {{wens}}. Houd het eenvoudig, in mensentaal, en bouw nog niets.",
+      "bouwen": "Bouw versie 1 van mijn app volgens het plan in PROJECT.md. Vertel in het gesprek per stap in gewone taal wat je doet (bijvoorbeeld ‘Ik maak het inlogscherm’) en laat geen ruwe uitvoer zien. Controleer je werk met de controles en een schermafbeelding, en sla na elke stap een leesbaar moment op.",
+      "testen": "Test de belangrijkste handelingen van mijn app zelf, bijvoorbeeld: kan ik iets toevoegen, opslaan en terugvinden? Gebruik het voorbeeld en de controles. Geef daarna een eenvoudig rapport met per onderdeel groen (werkt), oranje (let op) of rood (werkt niet), in gewone taal. Herstel rode punten pas als ik daarom vraag."
+    }
   }
 }

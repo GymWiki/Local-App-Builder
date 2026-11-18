@@ -431,7 +431,7 @@ export interface TableRows {
   rijen: string[][];
   totaal: number;
 }
-export type ProjectFlagKey = "online_gezet" | "gegevens_aan" | "meer_onderdelen" | "start_verborgen";
+export type ProjectFlagKey = "online_gezet" | "gegevens_aan" | "meer_onderdelen" | "start_verborgen" | "route_plan" | "over_idee" | "over_plan" | "over_uiterlijk" | "over_bouwen" | "over_aanpassen" | "over_gegevens" | "over_testen" | "over_delen";
 export const projectPages = (projectId: number) => invoke<PageInfo[]>("project_pages", { projectId });
 export const projectFiles = (projectId: number) => invoke<FileEntry[]>("project_files", { projectId });
 export const projectFileRead = (projectId: number, path: string) => invoke<FileContent>("project_file_read", { projectId, path });
@@ -793,3 +793,6 @@ export interface SysteemRapport {
   klaar: boolean;
 }
 export const systemCheck = () => invoke<SysteemRapport>("system_check");
+
+// ---------- de route van idee tot app ----------
+export const routeFeiten = (projectId: number) => invoke<import("./route").RouteFeiten>("route_feiten", { projectId });

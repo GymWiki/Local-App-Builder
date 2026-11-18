@@ -8,7 +8,8 @@ import {
   XIcon,
   CloudDownloadIcon,
 } from "lucide-react";
-import { projectThumbnailGet, type PreviewInfo, type Project } from "@/lib/api";
+import { projectThumbnailGet, routeFeiten, type PreviewInfo, type Project } from "@/lib/api";
+import { bepaalRoute, type Route } from "@/lib/route";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -70,6 +71,7 @@ export default function HomeScreen({
   const [zoek, setZoek] = useState("");
   const [sort, setSort] = useState<Sort>("laatst");
   const [thumbs, setThumbs] = useState<Record<number, string | null>>({});
+  const [routes, setRoutes] = useState<Record<number, Route>>({});
   const [renaming, setRenaming] = useState<Project | null>(null);
   const [removing, setRemoving] = useState<Project | null>(null);
   const [ophalen, setOphalen] = useState(false);
@@ -84,6 +86,20 @@ export default function HomeScreen({
             setThumbs((m) => (m[p.id] === d ? m : { ...m, [p.id]: d })),
         )
         .catch(() => undefined);
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [projects, thumbnailNonce]);
+
+  // Waar elk project op de route van idee tot app staat (één lichte vraag per project).
+  useEffect(() => {
+    let cancelled = false;
+    for (const p of projects) {
+      void Promise.resolve(routeFeiten(p.id)).then(
+        (f) => !cancelled && f && typeof f === "object" && setRoutes((m) => ({ ...m, [p.id]: bepaalRoute(f) })),
+        () => undefined,
+      );
     }
     return () => {
       cancelled = true;
@@ -202,6 +218,7 @@ export default function HomeScreen({
                   project={p}
                   thumbnail={thumbs[p.id] ?? null}
                   status={projectStatus(p, previews[p.id])}
+                  route={routes[p.id] ?? null}
                   onOpen={() => onOpen(p.id)}
                   onRename={() => setRenaming(p)}
                   onRemove={() => setRemoving(p)}

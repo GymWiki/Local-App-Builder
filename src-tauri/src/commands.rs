@@ -1413,6 +1413,15 @@ const PROJECT_FLAGS: &[&str] = &[
     "gegevens_aan",
     "meer_onderdelen",
     "start_verborgen",
+    "route_plan",
+    "over_idee",
+    "over_plan",
+    "over_uiterlijk",
+    "over_bouwen",
+    "over_aanpassen",
+    "over_gegevens",
+    "over_testen",
+    "over_delen",
 ];
 
 fn flag_key(project_id: i64, key: &str) -> Result<String> {

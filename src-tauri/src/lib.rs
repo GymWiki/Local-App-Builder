@@ -21,6 +21,7 @@ mod preview;
 mod projectinfo;
 mod projects;
 mod provider;
+mod route;
 mod systeemcheck;
 mod templates;
 mod updates;
@@ -450,6 +451,7 @@ pub fn run() {
             winkels::app::winkels_tekst_ontgrendel,
             winkels::app::winkels_tekst_geschiedenis,
             systeemcheck::system_check,
+            route::route_feiten,
             updates::update_check,
             updates::update_install,
             confirm::actie_confirm_answer,

@@ -6,6 +6,7 @@ import {
   Trash2Icon,
 } from "lucide-react";
 import type { PreviewInfo, Project } from "@/lib/api";
+import type { Route } from "@/lib/route";
 import { timeAgo } from "@/lib/time";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -53,6 +54,8 @@ interface Props {
   onOpen: () => void;
   onRename: () => void;
   onRemove: () => void;
+  /** Waar het project staat op de route van idee tot app (als die bekend is). */
+  route?: Route | null;
 }
 
 /** Eén projectkaart op het homescherm: miniatuur, naam, laatst bewerkt, status en een menu. */
@@ -63,6 +66,7 @@ export default function ProjectCard({
   onOpen,
   onRename,
   onRemove,
+  route,
 }: Props) {
   const { t } = useTranslation();
   const wanneer = project.last_used_at
@@ -127,6 +131,16 @@ export default function ProjectCard({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
+        {route && (
+          <div className="space-y-2 rounded-lg bg-muted/50 p-2" data-testid="project-route" data-huidig={route.huidig}>
+            <p className="text-sm">
+              {route.huidig === "klaar" ? t("home.route.klaar") : t("home.route.stap", { nummer: route.nummer, totaal: route.totaal, naam: t(`route.stap.${route.huidig}.titel`) })}
+            </p>
+            <Button size="sm" className="relative z-10" data-testid="project-verder" onClick={onOpen}>
+              {t("home.route.verder")}
+            </Button>
+          </div>
+        )}
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-sm text-muted-foreground">{wanneer}</span>
           <Badge data-testid="project-status" className={BADGE[status]}>
