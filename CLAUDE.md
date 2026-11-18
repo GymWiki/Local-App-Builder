@@ -72,3 +72,11 @@ Lokale desktop-app (Tauri 2 + React/TypeScript/Vite + Tailwind, Rust-backend, SQ
 - Nieuwe instelling: voeg hem toe aan het register in `src/lib/settings/index.ts` (standaardwaarde + controle), aan `UI_SETTINGS`/`valid_setting` in `commands.rs` en aan `SettingsView` met label, uitleg, bereik (alle projecten of dit project) en "Standaard herstellen". Verandert het formaat, verhoog dan `SETTINGS_VERSION` en voeg een migratie toe.
 - Gebruik de vaste woorden uit `woordenlijst` in `nl.json`; de test `woordenlijst.test.ts` bewaakt dat vaktaal niet in de gewone weergave komt.
 - Test menu en instellingen met `npm run ux:menu` én in de echte app.
+
+## Koppelingen en Supabase (eigen account van de gebruiker)
+- Tokens, refresh-tokens, het databasewachtwoord en alle sleutels staan **uitsluitend** in de OS-keychain (`connect/vault.rs`, per dienst een eigen `ProviderVault`). Nooit in SQLite, projectbestanden, logs, de chat, tooluitvoer of AI-context. Fouten en logs gaan door `supa::api::scrub`. Een token gebruik je alleen binnen `Manager::authorized`.
+- Alle uitgaande verbindingen van koppelingen lopen via Rust met een vaste lijst hosts (`connect/http.rs`, `providers::allowed_hosts`); de frontend doet zelf geen netwerkverzoeken (test: `src/netwerk.test.ts`). Studio bouwt geen eigen server of proxy voor tokens en levert geen client-geheim mee. Client-ID's (publiek) staan in `config/koppelingen.json`.
+- Nieuwe dienst: provider in `connect/providers/`, strategie (`oauth_device`, `oauth_loopback_pkce` of `token_plakken`), teksten onder `koppelingen.<id>` in `nl.json`, en een `VerbindKnop` op de plek waar de koppeling nodig is.
+- Elke wijziging aan de database van de gebruiker gaat door **één** pijplijn (`supa/engine/write.rs`): indelen met de parser (`classify.rs`), besluit volgens het niveau (`policy.rs`), vangnet, log. Bij twijfel (onleesbaar, onbekend, meerdere instructies) telt de hoogste klasse. Kosten vragen altijd een bevestiging in de Studio-UI. De AI krijgt alleen `UITGEVOERD`, `GEWEIGERD` of `MISLUKT`; voeg nooit een tool toe die een sleutel teruggeeft of vraagt.
+- Nieuwe `db_*`-tool: in `mcp-server/src/tools.ts` (dunne laag), `supa/app.rs::host`, en een test in `supa/engine/tests.rs`. Hou `docs/supabase.md` (risicoklassen) bij.
+- Test: `npm run ux:koppel` en `npm run ux:supabase`, en echt in de app met een eigen testproject.

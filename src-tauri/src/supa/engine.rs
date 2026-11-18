@@ -193,7 +193,14 @@ impl Engine {
         self.link(project).ok_or_else(|| Reply::nee("Dit project is nog niet gekoppeld aan Supabase. Vraag de gebruiker in Studio bij ‘Wat je app onthoudt’ een project te kiezen."))
     }
 
+    /// Is het gekoppelde project gepauzeerd? Dat verklaart een onverwachte fout.
+    fn is_paused(&self, link: &Link) -> bool {
+        self.api(&[], |c| c.project(&link.reference)).is_ok_and(|p| matches!(p.status.as_str(), "INACTIVE" | "PAUSED" | "PAUSING"))
+    }
+
     fn err_reply(&self, link: &Link, e: &SupaError) -> Reply {
+        let paused = SupaError::Paused;
+        let e = if matches!(e, SupaError::Unexpected | SupaError::NotFound) && !link.reference.is_empty() && self.is_paused(link) { &paused } else { e };
         match e {
             SupaError::Paused => Reply::fout("Het Supabase-project is gepauzeerd. De gebruiker kan het in Studio weer wakker maken."),
             SupaError::Connect(ConnectError::Unauthorized | ConnectError::Expired) => Reply::fout("De Supabase-koppeling werkt niet meer (verlopen of ingetrokken). De gebruiker moet opnieuw verbinden in Studio."),

@@ -76,3 +76,36 @@ Alle verbindingen van deze functie lopen via Studio's Rust-kant met een vaste li
 
 ## Bewust nu niet
 - OAuth (zie hierboven), de officiële MCP-server, branching, het herstellen van back-ups via de API (beperkt), het lezen van edge-geheimen.
+
+---
+
+# Resultaat: wat er is gebouwd (2026-11-18)
+
+## Hoe het werkt
+- **Alles gaat via Studio (Rust).** De AI roept `db_*`-tools aan (MCP-server). De Node-server doet zelf niets met Supabase: hij stuurt de vraag naar de app (`host_request`) en krijgt een uitslag terug (`UITGEVOERD`, `GEWEIGERD` of `MISLUKT`). Het token uit de OS-kluis, het databasewachtwoord en alle sleutels blijven in Rust. Er is geen tool of veld waarmee de AI een sleutel kan opvragen of meegeven (een test bewaakt dat).
+- **Eén pijplijn voor elke schrijfactie** (`src-tauri/src/supa/engine/write.rs`): SQL lezen en indelen (parser, `classify.rs`) → rijen tellen → back-up → besluit (`policy.rs`: toestaan, bevestigen of weigeren) → vangnet (git-checkpoint, momentopname van het schema) → uitvoeren → log. Dezelfde pijplijn geldt voor de AI, voor de gebruiker (scherm Gegevens, SQL-venster) en voor "ongedaan maken".
+- **Bevestigingen** zijn een dialoog in de Studio-UI (nooit in het gesprek met de AI), met de verandering in gewone woorden, het aantal rijen, een waarschuwing bij verlies, de back-upstatus en kosten. "Niet toestaan" heeft de focus; Escape telt als nee; zonder antwoord binnen 10 minuten is het nee.
+
+## Acties per risicoklasse
+| Klasse | Voorbeelden | Voorzichtig | Zelfstandig | Volledige controle |
+|---|---|---|---|---|
+| 1 Lezen | `SELECT` met limiet, schema, beleid, logs, adviezen, typen, projectstatus, publieke configuratie | vrij | vrij | vrij |
+| 2 Veilig schrijven | tabel/kolom/index/beleid toevoegen, seed-gegevens (≤ 500 rijen), functie plaatsen, nieuw edge-geheim, privé-opslagmap, extensie uit de gratis lijst, project wakker maken | bevestigen | vrij | vrij |
+| 3 Gevaarlijk | `DELETE`, `UPDATE`, `DROP`, `TRUNCATE`, kolom verwijderen, `ALTER` (hernoemen, type), `GRANT`/`REVOKE`, schrijven in `auth`/`storage`, beleid verruimen, inlog-instellingen, geheim overschrijven, project pauzeren, migratie terugdraaien, onleesbare SQL, meerdere instructies met een gevaarlijk deel | bevestigen | bevestigen | vrij, **maar** bevestigen bij > 100 rijen of niet te tellen, zonder gelukte back-up, en bij onleesbare SQL |
+| 4 Kosten | project maken, rekenkracht, add-ons | altijd bevestigen | altijd bevestigen | altijd bevestigen |
+Veiligheidsregels (alleen in Volledige controle toegestaan, met een waarschuwing in het log): RLS uitzetten en een beleid dat iedereen laat schrijven. Nieuwe tabellen in het publieke schema krijgen automatisch RLS aan. "Volledige controle" vraagt een waarschuwing en het getypte woord *volledig*, heeft een einde (standaard 1 uur, 15 min tot 4 uur kiesbaar), geldt per project, toont een rode balk en valt daarna terug op Zelfstandig.
+
+## Vangnet
+Checkpoint (git), momentopname van het schema (in het log), lokale back-up (JSON, op deze computer, nooit in het project; ≤ 5000 rijen en 5 MB per tabel), actielog (SQLite `db_actions`) met "Maak ongedaan" voor: nieuwe tabel/kolom/index/beleid (omgekeerde SQL), verwijderde rijen (terugzetten uit de back-up) en inlog-instellingen. Schrijflimiet: 10 per minuut en 100 per sessie. Bij dezelfde fout (drempel uit Instellingen, standaard 3) stopt de bug-lus bewaker de AI. De noodknop breekt wachtende acties af, zet het niveau op Voorzichtig en stopt de AI.
+
+## Wat niet ongedaan kan
+- Een tabel of kolom die verdween (alleen de rijen staan in de back-up; de tabel zelf niet).
+- Gewijzigde rijen (`UPDATE`): de oude waarden staan in het log van de back-up, maar Studio zet ze niet automatisch terug.
+- Toegevoegde rijen, aangezette extensies, geplaatste functies en geheimen.
+- Een gepauzeerd project dat langer dan 90 dagen stilligt, en een verwijderd project (Studio verwijdert nooit een project).
+
+## Wat ik niet kon bevestigen (controleren met een echt account)
+Zie `docs/supabase.md` hierboven bij "niet bevestigd": `GET /v1/projects` (pad), de velden van `config/auth`, of `GET /secrets` waarden teruggeeft (Studio gooit ze weg), de velden van het antwoord bij `database/query`, het gedrag van `functions/deploy` (multipart), het aantal verzoeken per minuut en of een plan-veld in `/v1/organizations` staat (zo niet toont Studio beide kostenmogelijkheden).
+
+## Bewust niet gedaan
+OAuth voor Supabase (zie boven), de officiële MCP-server, branching, de Supabase CLI, het lezen van edge-geheimen, een eigen server voor tokens.

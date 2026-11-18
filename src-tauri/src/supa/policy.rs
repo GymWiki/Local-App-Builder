@@ -190,6 +190,7 @@ impl WriteLimiter {
         self.recent.push_back(now);
         self.total += 1;
     }
+    #[cfg(test)]
     pub fn reset_session(&mut self) {
         self.recent.clear();
         self.total = 0;

@@ -57,6 +57,18 @@ function mock({ demoUrl, scenario, THUMB }) {
     speed: 1,
     sent: [],
     opened: [],
+    antwoorden: [],
+    opslag: {},
+    noodknop: 0,
+    supaPauze: false,
+    supaCheck: scenario.supaCheck || [],
+    supaProjecten: [{ reference: "abcdefghij", name: "Winkel", region: "eu-west-1", status: "ACTIVE_HEALTHY" }],
+    supa: scenario.supaGekoppeld ? { gekoppeld: true, naam: "Winkel", referentie: "abcdefghij", regio: "eu-west-1", niveau: scenario.supaNiveau || "voorzichtig", volledig_resterend: scenario.supaNiveau === "volledig" ? 1800 : null, volledig_secs: 3600 } : { gekoppeld: false, naam: "", referentie: "", regio: "", niveau: "voorzichtig", volledig_resterend: null, volledig_secs: 3600 },
+    supaActies: [
+      { id: 3, at: 1763460000, tool: "db_run_sql", class: 3, level: "zelfstandig", status: "uitgevoerd", summary: [{ code: "rijen_verwijderen", params: { tabel: "klanten" } }], detail: { backup: "gemaakt" }, kan_ongedaan: true, undone: false },
+      { id: 2, at: 1763459000, tool: "db_run_sql", class: 3, level: "voorzichtig", status: "geweigerd", summary: [{ code: "tabel_verwijderen", params: { tabel: "oud" } }], detail: { code: "niet_toegestaan" }, kan_ongedaan: false, undone: false },
+      { id: 1, at: 1763458000, tool: "db_apply_migration", class: 2, level: "zelfstandig", status: "uitgevoerd", summary: [{ code: "tabel_toevoegen", params: { tabel: "bestellingen" } }, { code: "rls_aan_automatisch", params: {} }], detail: {}, kan_ongedaan: true, undone: false },
+    ],
     conn: Object.fromEntries(
       ["github", "vercel", "supabase"].map((id) => [
         id,
@@ -64,6 +76,8 @@ function mock({ demoUrl, scenario, THUMB }) {
       ]),
     ),
   });
+  S.supaState = () => ({ ...S.supa });
+  window.__stuurBevestiging = (req) => emit("db-confirm", req);
   S.connLijst = () =>
     Object.values(S.conn).map((c) => ({
       ...c,
@@ -170,6 +184,56 @@ function mock({ demoUrl, scenario, THUMB }) {
     project_flags: (a) => Object.fromEntries(Object.entries(S.flags).filter(([k]) => k.startsWith(a.projectId + ":") && !k.endsWith(":needs")).map(([k, v]) => [k.split(":")[1], v])),
     project_flag_set: (a) => void (a.value == null ? delete S.flags[a.projectId + ":" + a.key] : (S.flags[a.projectId + ":" + a.key] = a.value)),
     reset_ui_setting: (a) => void delete S.settings[a.key],
+    // ---- Supabase (nagebootst): koppeling, niveau, tabellen, log, bevestigingen
+    supa_state: () => S.supaState(),
+    supa_projects: () => ({ projecten: S.supaProjecten, organisaties: [{ slug: "mijn-bedrijf", name: "Mijn bedrijf", plan: "free" }] }),
+    supa_link: (a) => {
+      const p = S.supaProjecten.find((x) => x.reference === a.reference);
+      S.supa = { gekoppeld: true, naam: p.name, referentie: p.reference, regio: p.region, niveau: "voorzichtig", volledig_resterend: null, volledig_secs: 3600 };
+      emit("supa-changed", { project_id: a.projectId });
+      return { status: "uitgevoerd", tekst: "Gekoppeld.", data: { naam: p.name } };
+    },
+    supa_create: (a) => {
+      S.supa = { gekoppeld: true, naam: a.naam, referentie: "nieuwproj1", regio: "eu-central-1", niveau: "voorzichtig", volledig_resterend: null, volledig_secs: 3600 };
+      S.supaNieuw = a.naam;
+      emit("supa-changed", { project_id: a.projectId });
+      return { status: "uitgevoerd", tekst: "Het project wordt gemaakt.", data: { naam: a.naam, status: "COMING_UP" } };
+    },
+    supa_unlink: (a) => void ((S.supa = { ...S.supa, gekoppeld: false }), emit("supa-changed", { project_id: a.projectId })),
+    supa_wake: () => ({ status: "uitgevoerd", tekst: "Wakker." }),
+    supa_set_level: (a) => {
+      if (a.niveau === "volledig" && String(a.bevestiging || "").toLowerCase() !== "volledig") throw "bevestiging_ontbreekt";
+      S.supa = { ...S.supa, niveau: a.niveau, volledig_resterend: a.niveau === "volledig" ? S.supa.volledig_secs : null };
+      emit("supa-changed", { project_id: a.projectId });
+    },
+    supa_set_duration: (a) => void (S.supa = { ...S.supa, volledig_secs: a.seconden }),
+    supa_emergency: (a) => {
+      S.noodknop = (S.noodknop || 0) + 1;
+      S.supa = { ...S.supa, niveau: "voorzichtig", volledig_resterend: null };
+      emit("supa-changed", { project_id: a.projectId });
+    },
+    supa_actions: () => S.supaActies,
+    supa_undo: (a) => {
+      S.supaActies = S.supaActies.map((x) => (x.id === a.actie ? { ...x, undone: true } : x));
+      return { status: "uitgevoerd", tekst: "Ongedaan gemaakt." };
+    },
+    supa_confirm_answer: (a) => void (S.antwoorden.push([a.id, a.toestaan]), true),
+    supa_tables: () => ({
+      tabellen: [
+        { tabel: "klanten", rls: true, rijen: 3, kolommen: [{ kolom: "id", type: "integer", verplicht: true }, { kolom: "naam", type: "text", verplicht: false }], beleid: [{ naam: "eigen" }] },
+        { tabel: "bestellingen", rls: false, rijen: 12, kolommen: [{ kolom: "id", type: "integer", verplicht: true }], beleid: [] },
+      ],
+    }),
+    supa_rows: (a) => ({ kolommen: ["id", "naam"], rijen: a.pagina === 0 ? [["1", "Jan"], ["2", "Piet"], ["3", "Klaas"]] : [], meer: a.pagina === 0, pagina: a.pagina }),
+    supa_row_save: () => ({ status: "uitgevoerd", tekst: "Uitgevoerd." }),
+    supa_users: () => ({ gebruikers: [{ id: "u1", email: "jan@voorbeeld.nl", created_at: "2026-11-01T10:00:00Z", last_sign_in_at: null }] }),
+    supa_security_check: () => ({ bevindingen: S.supaCheck }),
+    supa_status: () => ({ status: "uitgevoerd", tekst: "Gekoppeld.", data: { gekoppeld: S.supa.gekoppeld, gepauzeerd: !!S.supaPauze, status: "ACTIVE_HEALTHY" } }),
+    supa_write_config: () => ({ status: "uitgevoerd", tekst: "" }),
+    supa_auth_skill: () => true,
+    supa_sql: () => ({ status: "uitgevoerd", tekst: "Resultaat.", data: [] }),
+    project_storage_get: (a) => S.opslag[a.projectId] ?? null,
+    project_storage_set: (a) => void (S.opslag[a.projectId] = a.keuze),
     // ---- koppelingen (GitHub: apparaatcode, Vercel en Supabase: sleutel plakken)
     connect_list: () => S.connLijst(),
     connect_start: (a) => {

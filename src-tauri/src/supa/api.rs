@@ -193,11 +193,6 @@ impl<'a> Client<'a> {
         self.call("POST", &format!("/v1/projects/{reference}/restore"), Body::None).map(|_| ())
     }
 
-    pub fn delete_project(&self, reference: &str) -> Result<(), SupaError> {
-        check_ref(reference)?;
-        self.call("DELETE", &format!("/v1/projects/{reference}"), Body::None).map(|_| ())
-    }
-
     /// Alleen de PUBLIEKE sleutel (publishable, of de verouderde `anon`). Een geheime sleutel wordt nooit gelezen of teruggegeven.
     pub fn public_key(&self, reference: &str) -> Result<PublicKeys, SupaError> {
         check_ref(reference)?;
@@ -250,11 +245,6 @@ impl<'a> Client<'a> {
     pub fn set_secret(&self, reference: &str, name: &str, value: &str) -> Result<(), SupaError> {
         check_ref(reference)?;
         self.call("POST", &format!("/v1/projects/{reference}/secrets"), Body::Json(json!([{ "name": name, "value": value }]).to_string())).map(|_| ())
-    }
-
-    pub fn delete_secret(&self, reference: &str, name: &str) -> Result<(), SupaError> {
-        check_ref(reference)?;
-        self.call("DELETE", &format!("/v1/projects/{reference}/secrets"), Body::Json(json!([name]).to_string())).map(|_| ())
     }
 
     pub fn auth_config(&self, reference: &str) -> Result<Value, SupaError> {

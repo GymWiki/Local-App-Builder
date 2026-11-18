@@ -91,10 +91,6 @@ pub fn action_add(conn: &Connection, a: &NewAction) -> rusqlite::Result<i64> {
     Ok(conn.last_insert_rowid())
 }
 
-pub fn action_status(conn: &Connection, id: i64, status: &str, detail: &serde_json::Value) {
-    let _ = conn.execute("UPDATE db_actions SET status = ?2, detail = ?3 WHERE id = ?1", params![id, status, detail.to_string()]);
-}
-
 pub fn actions(conn: &Connection, project_id: i64, limit: i64) -> Vec<Action> {
     let Ok(mut st) = conn.prepare("SELECT id, at, tool, class, level, status, summary, detail, undo_kind IS NOT NULL, undone FROM db_actions WHERE project_id = ?1 ORDER BY id DESC LIMIT ?2") else { return vec![] };
     st.query_map(params![project_id, limit], |r| {

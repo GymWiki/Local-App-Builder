@@ -629,6 +629,17 @@ fn project_kiezen_en_ontkoppelen_raakt_supabase_niet() {
 }
 
 #[test]
+fn een_onverwachte_fout_bij_een_gepauzeerd_project_wordt_als_gepauzeerd_uitgelegd() {
+    let r = rig();
+    r.niveau(Level::Zelfstandig);
+    *r.http.status.lock().unwrap() = "INACTIVE".into();
+    r.http.fail_write.lock().unwrap().push((500, "boem".into()));
+    let x = r.e.run_sql(1, "db_run_sql", "CREATE TABLE a (id int)", Actor::Ai);
+    assert_eq!(x.status, "mislukt");
+    assert!(x.tekst.contains("gepauzeerd"), "{}", x.tekst);
+}
+
+#[test]
 fn zonder_geldig_token_krijgt_de_ai_een_duidelijke_melding_en_wordt_de_koppeling_verlopen() {
     let r = rig();
     r.kluis.delete("connect/supabase/tokens").unwrap();
