@@ -1,0 +1,71 @@
+# Gebruiksklaar: stand van zaken
+
+Dit document is de integratie-inventaris voor de weg naar "een leek komt van idee tot gepubliceerde app, zonder terminal en zonder jargon". Het is geschreven door de code en de bestaande rapporten door te nemen, niet uit het hoofd. Het wordt aan het eind van dit traject afgemaakt met een gereedheidslijst (zie "Afronding" onderaan).
+
+Datum inventaris: 18 november 2026, versie 0.1.0 (commit-hash staat onderaan Instellingen).
+
+## DEEL 0 · Inventarisatie
+
+### Wat werkt end-to-end (in code, met tests; met nagebootste AI)
+
+| Onderdeel | Stand |
+|---|---|
+| Projecten (maken, hernoemen, uit lijst halen, miniatuur) | Werkt. Bestanden van gebruikers worden nooit gewist. |
+| Homescherm met projectkaarten en werkruimte met docking (flexlayout), standaardindeling herstellen | Werkt. |
+| Linkermenu met statusbolletjes en vier-stappenvoortgang (Start) | Werkt. |
+| Chat per AI-CLI (Claude, Gemini via adapter) met toestemmingsdialogen, plan-modus ("Eerst overleggen"), foutkaarten in gewone taal, bug-lus-bewaking | Werkt. Codex heeft geen adapter (valt terug op terminal). |
+| MCP-server + runtime (checks, dev-server, screenshots, checkpoints, console-fouten) | Werkt; een storing blokkeert de rest niet (`begin_mcp`), met een foutkaart. |
+| Preview (statisch, Node, studio.json, Flutter-uitleg), aanwijzen in de preview, checkpoints/versies met terugzetten | Werkt. |
+| Kits (shadcn-varianten, Fragments UI, Material voor Flutter) en kit-check | Werkt. |
+| Instellingen in vier groepen, bedieningsniveaus, standaard herstellen, versie- en buildindicator | Werkt. |
+| Koppelingen (Verbinden-knop) met GitHub, Vercel, Supabase; kluis (OS-keychain) | Werkt, getest met nagebootste diensten; echte accounts nog niet door mij getest. |
+| Supabase (tabellen, niveaus, vangnet, log, noodknop) | Werkt (nagebootst getest). |
+| GitHub-back-up (alleen vooruit, geheimenscan, ophalen van GitHub) | Werkt (lokale test-remote). |
+| Vercel online zetten (voorbeeld/echt met bevestiging, variabelen, terugzetten, domein) | Werkt (nagebootst getest). |
+| In de appwinkel: gegevens, klaar-check, formulierhulp, teksten | Eerste stap werkt; geen verbinding met Google of Apple. |
+| Downloaden/bijwerken (GitHub Actions, ondertekende updates) | Gebouwd; nog nooit een echte release gedraaid. |
+
+### Half af
+
+| Onderdeel | Wat ontbreekt |
+|---|---|
+| Eerste start | Bestond niet: geen welkomstscherm, geen keuze van AI en bedieningsniveau bij de eerste keer. (DEEL 1.) |
+| Systeemcheck | Alleen losse stukken: AI-programma's (`cli_status`) en Node (foutkaart bij MCP). Geen Git-, internet-, schijfruimte- of rechtencheck, geen samenvatting. (DEEL 1.) |
+| Route "van idee tot app" | Er zijn 4 stappen (idee, voorbeeld, aanpassen, online). De opdracht vraagt 8 (idee, plan, uiterlijk, bouwen, aanpassen, gegevens, testen, delen). Ontbrekend: plan goedkeuren, test-rapport, "delen" als gezamenlijke stap, route bovenin het project, stap op de projectkaart. (DEEL 2.) |
+| Startprojecten | Er is één template (`web-react-vite`). (DEEL 3.) |
+| Foutmeldingen | Chat-fouten zijn vertaald; algemene fouten ("Er ging iets mis: …") tonen nog de ruwe tekst. Geen "Toon details", geen probleemrapport. (DEEL 4.) |
+| Herstel na crash | Projecten staan altijd op schijf en de versies zijn er, maar er is geen "Je werk is bewaard, wil je verdergaan?" bij opstarten. (DEEL 4.) |
+| Privacy | De instelling zegt dat Studio niets verstuurt; er is geen aparte privacyverklaring. Er bestaat geen gebruiksstatistiek (dus ook geen keuze nodig). (DEEL 6.) |
+| Installer | Er is een installerbouw, maar **Node.js en Git moeten nog op de computer staan**; dat is niet meegeleverd. Voor een leek is dat een harde blokkade. (DEEL 6: gedocumenteerd, niet op te lossen zonder een grote bouwstap.) |
+| Licentie | Geen licentiehaak; Studio is overal gratis. (DEEL 6.) |
+
+### Ontbreekt, of kon niet (nog) niet
+
+- Alles uit de winkelopdracht na de eerste stap: bouwen en uploaden naar Google Play en App Store, schermafbeeldingen, pictogrammen, exporteren. (Google-bronnen waren niet bereikbaar.)
+- Een Flutter-template, een "publish-kit" en een privacyverklaring-generator bestaan niet (de eerdere opdrachten gingen ervan uit).
+- Een echte test met een beginner en met echte AI-accounts (kan hier niet).
+- Meegeleverde Node.js en Git; code-ondertekening van de installer (certificaat); macOS-notarisatie; echte release gedraaid.
+
+### Opdrachten uit het plan die kennelijk niet (volledig) zijn uitgevoerd
+
+1. Codex-chatadapter (bewust niet: eerst de uitvoer van de echte CLI als fixture).
+2. Winkelopdracht C deel 2 t/m 6 en D (zie boven).
+3. Echte (niet nagebootste) controle van Supabase, GitHub, Vercel met eigen accounts: staat op de handmatige testlijsten.
+4. De "echte-app-controle" (Playwright tegen de Tauri-app) kon hier niet; alleen nagebootst.
+
+### Top 10: waar een leek vermoedelijk vastloopt
+
+| # | Plek | Waarom | Oplossing in dit traject |
+|---|---|---|---|
+| 1 | **Installeren** | Node.js en Git ontbreken, de leek weet niet wat dat is | Systeemcheck met uitleg + downloadknop (DEEL 1); meeleveren is een apart traject (docs/uitrollen.md) |
+| 2 | **Eerste start** | Geen uitleg wat Studio doet of wat eerst moet | Eerste-startscherm in drie stappen (DEEL 1) |
+| 3 | **AI koppelen** | Weet niet welke AI, of dat een eigen account nodig is | Stap 2 van de eerste start, met uitleg per AI |
+| 4 | **Bedieningsniveau** | Termen als "toestemming" begrijpt niemand | Drie keuzes in gewone taal (DEEL 1) |
+| 5 | **Wat nu?** | Na het maken van een project is niet duidelijk wat de volgende stap is | Route-balk bovenin het project met één grote knop (DEEL 2) |
+| 6 | **Idee beschrijven** | Leeg invoerveld; geen idee wat te typen | Voorbeelden, maximaal drie vragen, plan in mensentaal (DEEL 2/3) |
+| 7 | **Preview/fouten** | Ruwe foutteksten, of de AI loopt vast | Vertaalde fouten + "Toon details" + probleemrapport (DEEL 4); lus-bewaking bestaat al |
+| 8 | **Terugkeer na sluiten of crash** | Weet niet of er iets verloren is | "Je werk is bewaard" bij opstarten (DEEL 4) |
+| 9 | **Online zetten** | Accounts, tokens, kosten, de bevestiging | Stappen met Verbinden-knop bestaan; kosten- en uitlegzinnen worden aangescherpt (DEEL 4) |
+| 10 | **Voor de winkel klaarmaken** | Veel formulieren, wachttijden, kosten | Klaar-check en formulierhulp bestaan; bouwen/uploaden niet |
+
+Voortgang per deel staat hieronder bij elk deel; de definitieve gereedheidslijst volgt bij "Afronding".
