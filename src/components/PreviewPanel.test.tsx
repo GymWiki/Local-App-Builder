@@ -36,10 +36,10 @@ beforeEach(() => {
 
 describe("PreviewPanel (zero-config)", () => {
   it("leeg project: meldt dat er niets previewbaars is, zonder iets over Node.js te zeggen", () => {
-    show(withProblem("empty", "Er zijn nog geen previewbare bestanden.", { mode: "empty" }));
+    show(withProblem("empty", "Er is nog niets om te tonen.", { mode: "empty" }));
     const p = screen.getByTestId("preview-problem");
     expect(p).toHaveTextContent("Nog niets om te tonen");
-    expect(p).toHaveTextContent("geen previewbare bestanden");
+    expect(p).toHaveTextContent("nog niets om te tonen");
     expect(p).not.toHaveTextContent("Node.js");
     expect(screen.queryByRole("button", { name: "Start" })).not.toBeInTheDocument();
   });

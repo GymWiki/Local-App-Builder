@@ -28,7 +28,7 @@ describe("ActivityPanel", () => {
     expect(tl).toHaveTextContent("Eerste versie");
     const checks = await screen.findByTestId("last-checks");
     expect(checks).toHaveTextContent("Mislukt");
-    expect(checks).toHaveTextContent("build");
+    expect(checks).toHaveTextContent("Alles klaargezet");
   });
 
   it("vraagt bevestiging en zet pas daarna terug naar de vorige versie", async () => {
