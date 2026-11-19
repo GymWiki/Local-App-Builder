@@ -35,8 +35,15 @@ Het script zet het versienummer in `package.json`, `tauri.conf.json` en `Cargo.t
 
 Handmatig starten kan ook: GitHub → Actions → Release → Run workflow (gebruikt het versienummer uit `tauri.conf.json`).
 
+## Release: eerst concept, pas daarna publiceren
+De workflow maakt de release eerst als **concept** (draft) en laadt daar de installers van alle vier de doelen (Windows, macOS Apple Silicon, macOS Intel, Linux) in. Een mislukt doel blokkeert de andere bouwen niet (`fail-fast: false`), maar de laatste taak ("Release publiceren") draait **alleen als alle vier gelukt zijn** en zet het concept dan live. Mislukt er één, dan blijft de release een concept (onzichtbaar voor gebruikers en voor de update-controle). Herstart in GitHub → Actions de mislukte taak ("Re-run failed jobs"); als het dan lukt, wordt de release alsnog gepubliceerd. Een achtergebleven concept kun je onder Releases verwijderen.
+
+## OpenSSL op macOS
+Alleen de crate `git2` (voor de GitHub-back-up) haalt OpenSSL binnen. libgit2 gebruikt zelf WinHTTP (Windows), SecureTransport (macOS) of OpenSSL (Linux), maar de Rust-kant (`openssl-sys`) werd ook op macOS gecompileerd en faalde bij de Intel-bouw op een Apple Silicon-runner ("pkg-config has not been configured to support cross-compilation"). Er is geen rustls-variant van libgit2, dus OpenSSL helemaal weghalen kan niet zonder de back-up te verliezen. Daarom wordt op macOS (alleen daar, `[target.'cfg(target_os = "macos")']` in `Cargo.toml`) OpenSSL uit de bron meegebouwd (`vendored`; dat kost enkele minuten extra en vraagt `perl` en `make`, die op de GitHub-macOS-runners staan). De update-controle en de koppelingen (`ureq`) gebruiken geen OpenSSL.
+
 ## Wat je moet weten
 - **De repository moet openbaar blijven** (dat is hij nu): de app leest `latest.json` zonder inloggegevens. Bij een privé-repository werkt het controleren niet.
+- **App-identifier:** `nl.studio.desktop` (eerder `nl.studio.app`; die eindigde op `.app`, wat op macOS verwarring geeft). Een installatie van vóór de wijziging is voor het systeem een andere app: ze gebruikt een andere map voor haar gegevens en krijgt geen update naar de nieuwe. Verwijder zo'n testinstallatie en installeer opnieuw.
 - **Windows** toont bij een niet-ondertekende installer een SmartScreen-waarschuwing ("onbekende uitgever"): kies "Meer informatie → Toch uitvoeren". Dat is een code-ondertekeningscertificaat (kost geld) en staat los van het ondertekenen van updates.
 - **macOS** blokkeert niet-genotariseerde apps ("kan niet worden geopend"): rechtsklik → Open. Notariseren vraagt een Apple-ontwikkelaarsaccount.
 - Studio heeft **Node.js 20+** en **Git** op de computer nodig tijdens het gebruik (MCP-server en versies); dat zit niet in de installer.

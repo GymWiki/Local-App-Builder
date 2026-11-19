@@ -15,7 +15,7 @@
 2. `npm run tauri dev` stopt nu met een duidelijke fout als poort 1420 al bezet is (`scripts/dev-check.mjs`). Sluit dan het oude venster of proces. Zonder deze controle kon Studio stilletjes een oude Vite-server van een eerdere sessie tonen.
 3. Kijk onderaan **Instellingen** bij "Welke versie draait er?": versie, commit en bouwtijd. Klopt de commit niet met `git rev-parse --short HEAD`, dan draait er een andere versie.
 4. Wis caches: `rm -rf node_modules/.vite dist` (Windows: `rmdir /s /q node_modules\.vite dist`) en start opnieuw.
-5. Schone start: sluit Studio en hernoem de map `nl.studio.app` in je app-datamap (Windows: `%APPDATA%`, macOS: `~/Library/Application Support`, Linux: `~/.local/share`). Je projecten op schijf blijven staan; alleen de lijst en instellingen beginnen opnieuw.
+5. Schone start: sluit Studio en hernoem de map `nl.studio.desktop` in je app-datamap (Windows: `%APPDATA%`, macOS: `~/Library/Application Support`, Linux: `~/.local/share`). Je projecten op schijf blijven staan; alleen de lijst en instellingen beginnen opnieuw.
 6. Controleer zonder de echte app: `npm run ux:start` maakt screenshots in `docs/ui/start-*.png`.
 
 ## 2. Zonder accounts (alles lokaal)

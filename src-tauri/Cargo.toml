@@ -38,5 +38,12 @@ tauri-plugin-updater = "2"
 unicode-segmentation = "1"
 fs4 = "0.13"
 
+# OpenSSL wordt alleen door git2 binnengehaald (de `https`-feature). libgit2 heeft geen rustls-variant: Windows gebruikt WinHTTP,
+# macOS gebruikt SecureTransport en alleen Linux gebruikt echt OpenSSL. Maar de Rust-crate `openssl-sys` wordt voor alle unix-doelen
+# (dus ook macOS) gecompileerd, en dat faalt bij cross-compileren (Intel-bouw op een Apple Silicon-runner: geen pkg-config naar een
+# x86_64-OpenSSL). Daarom op macOS (alleen daar) OpenSSL uit de bron meebouwen; Linux gebruikt de systeem-OpenSSL, Windows heeft geen OpenSSL.
+[target.'cfg(target_os = "macos")'.dependencies]
+openssl-sys = { version = "0.9", features = ["vendored"] }
+
 [dev-dependencies]
 tempfile = "3"
