@@ -331,12 +331,12 @@
     "teruggezetMetBackup": "Teruggezet. Je laatste wijzigingen staan veilig in een back-upversie.",
     "alGelijk": "Het project staat al in die versie.",
     "staplabel": {
-      "lint": "lint",
-      "build": "build",
-      "test": "test",
-      "html": "HTML aanwezig",
-      "links": "links",
-      "console": "console",
+      "lint": "Code nagekeken",
+      "build": "Alles klaargezet",
+      "test": "Automatische proef",
+      "html": "Pagina aanwezig",
+      "links": "Verwijzingen",
+      "console": "Fouten op de pagina",
       "kit": "Uiterlijk"
     },
     "leeg": {

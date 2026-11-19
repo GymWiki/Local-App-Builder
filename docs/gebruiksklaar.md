@@ -155,3 +155,8 @@ Gedaan: toegankelijkheid (axe, klikdoelen, toetsenbord), vaktaalronde op de plek
 **Alleen te testen met jouw accounts:** Claude- en Gemini-login en de echte kosten/limieten; GitHub-back-up; Vercel (echt online zetten); Supabase; de winkels; het eerste echte release- en updatetraject (0.1.1 → 0.1.2); Windows PowerShell `npm run setup:updates`; de taakmeting van het AI-gebruik (`docs/tokens.md` §2c).
 
 **Wat jij nog moet regelen voor een openbare release:** zie `docs/uitrollen.md` (Windows-certificaat, Apple-account en notarisering, updatesleutel en -hosting, Node.js meeleveren, licentie en betalingen, privacyverklaring en gebruiksvoorwaarden, voorwaarden van de AI-aanbieders voor het gebruik van hun CLI's).
+
+## Vervolg op DEEL 5 (19 november)
+- **Vaktaalronde:** alle gebruikersteksten buiten "Voor gevorderden" gescand op een bredere woordenlijst (repository, build, console, SQL, JSON, terminal, …). Aangepast: de stappen in de activiteitenlijst ("lint/build/console" → "Code nagekeken / Alles klaargezet / Fouten op de pagina") en de melding bij een leeg voorbeeld ("previewbare bestanden"). Wat bleef staan is bewust: de woorden "Terminal" (menu voor gevorderden), letterlijke GitHub-knopteksten in de uitleg bij een token, en de SQL-opdrachten voor wie SQL kent.
+- **Lege schermen:** elk menu-onderdeel in een nieuw project doorlopen; elk scherm heeft een uitleg bij leegte (geen enkel blanco scherm).
+- **Nog niet gedaan:** een laad- en succesmeldingenronde per scherm, en een prestatiemeting van de opstart (kan alleen in de echte app).

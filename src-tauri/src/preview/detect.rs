@@ -288,7 +288,7 @@ pub fn detect(dir: &Path) -> Plan {
 
     // 6. Leeg
     let mut p = Plan::new(Kind::Empty);
-    p.reason = Some("Er zijn nog geen previewbare bestanden. Zodra de AI een index.html of een project met een dev-script maakt, verschijnt de preview vanzelf.".into());
+    p.reason = Some("Er is nog niets om te tonen. Zodra de AI een pagina (index.html) of een project met een startscript maakt, verschijnt het voorbeeld vanzelf.".into());
     p
 }
 
