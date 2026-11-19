@@ -8,6 +8,13 @@ const MIGRATIONS: &[&str] = &[
     include_str!("../migrations/0001_init.sql"),
     include_str!("../migrations/0002_fase2.sql"),
     include_str!("../migrations/0003_fase3.sql"),
+    include_str!("../migrations/0004_chat.sql"),
+    include_str!("../migrations/0005_indeling.sql"),
+    include_str!("../migrations/0006_koppelingen.sql"),
+    include_str!("../migrations/0007_supabase.sql"),
+    include_str!("../migrations/0008_github.sql"),
+    include_str!("../migrations/0009_vercel.sql"),
+    include_str!("../migrations/0010_winkels.sql"),
 ];
 
 pub fn open(path: &Path) -> Result<Connection> {
@@ -55,6 +62,15 @@ pub fn set_setting(conn: &Connection, key: &str, value: &str) -> Result<()> {
     Ok(())
 }
 
+/// Staat "Eenvoudige taal" aan (standaard)? Alleen de waarde "technical" zet het uit.
+pub fn communication_simple(conn: &Connection) -> bool {
+    get_setting(conn, "ui:communication_mode")
+        .ok()
+        .flatten()
+        .as_deref()
+        != Some("technical")
+}
+
 #[cfg(test)]
 pub fn schema_version(conn: &Connection) -> Result<usize> {
     Ok(conn.query_row("PRAGMA user_version", [], |r| r.get(0))?)
@@ -81,10 +97,22 @@ mod tests {
             tables(&conn),
             vec![
                 "ai_accounts",
+                "chat_messages",
+                "chat_sessions",
                 "check_runs",
+                "connections",
+                "db_actions",
+                "github_links",
                 "mcp_calls",
+                "project_layouts",
                 "projects",
-                "settings"
+                "settings",
+                "store_apps",
+                "store_tekst_versies",
+                "supabase_links",
+                "vercel_deployments",
+                "vercel_env",
+                "vercel_links"
             ]
         );
         assert_eq!(schema_version(&conn).unwrap(), MIGRATIONS.len());

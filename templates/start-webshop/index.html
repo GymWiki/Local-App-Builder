@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mijn webshop</title>
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="stijl.css" />
+  <style>
+    .producten { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); margin: 1rem 0; }
+    .prijs { font-weight: 700; color: var(--tekst); }
+    .totaal { display: flex; justify-content: space-between; font-weight: 700; padding: 0.5rem 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Mijn webshop</h1>
+    <p>Kies je producten, vul je gegevens in en bestel. Dit is een voorbeeld: er wordt nog niet echt betaald.</p>
+    <section aria-labelledby="p-titel">
+      <h2 id="p-titel">Producten</h2>
+      <div class="producten" id="producten"></div>
+    </section>
+    <section aria-labelledby="m-titel">
+      <h2 id="m-titel">Winkelmandje</h2>
+      <ul id="mandje" class="lijst"></ul>
+      <p id="mandje-leeg" class="leeg">Je mandje is nog leeg.</p>
+      <div class="totaal"><span>Totaal</span><span id="totaal">€ 0,00</span></div>
+    </section>
+    <section aria-labelledby="b-titel">
+      <h2 id="b-titel">Bestellen</h2>
+      <form id="bestel" class="kaart">
+        <label for="naam">Je naam</label>
+        <input id="naam" required autocomplete="name" />
+        <label for="email">Je e-mailadres</label>
+        <input id="email" type="email" required autocomplete="email" />
+        <p id="melding" aria-live="polite"></p>
+        <button class="hoofd" type="submit">Bestelling plaatsen</button>
+      </form>
+    </section>
+    <section aria-labelledby="o-titel">
+      <h2 id="o-titel">Geplaatste bestellingen (voorbeeld)</h2>
+      <ul id="bestellingen" class="lijst"></ul>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

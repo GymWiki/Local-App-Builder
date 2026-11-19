@@ -1,0 +1,6 @@
+{"type":"system","subtype":"init","session_id":"sess-retry-1"}
+{"type":"system","subtype":"api_retry","attempt":1,"max_retries":5,"retry_delay_ms":2000,"error_status":529,"error":"overloaded"}
+{"type":"stream_event","event":{"type":"content_block_delta","delta":{"type":"text_delta","text":"x"}}}
+{"type":"iets_nieuws_van_een_latere_versie","payload":1}
+{"type":"assistant","message":{"id":"m1","content":[{"type":"text","text":"Sorry voor het wachten."}]}}
+{"type":"result","subtype":"success","is_error":false,"session_id":"sess-retry-1","result":"ok"}

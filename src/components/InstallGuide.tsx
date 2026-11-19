@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { cliStatus, type CliStatus } from "../lib/api";
+import { cliStatus, type CliStatus } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface Props {
   status: CliStatus;
@@ -27,31 +29,37 @@ export default function InstallGuide({ status, onInstalled }: Props) {
   }
 
   return (
-    <div className="mx-auto max-w-xl space-y-4 p-8 text-sm" data-testid="install-guide">
-      <h2 className="text-lg font-semibold">{t("cli.nietGevonden", { naam: t(`provider.${current.provider}`) })}</h2>
-      <p className="text-zinc-400">{t("cli.uitleg")}</p>
-      <ul className="space-y-2">
-        {current.install_steps.map((s) => (
-          <li key={s.label}>
-            <div className="text-zinc-500">{s.label}</div>
-            <code className="block select-all rounded bg-zinc-900 px-3 py-2 font-mono">{s.command}</code>
-          </li>
-        ))}
-      </ul>
-      <p className="text-zinc-500">{t("cli.herstart")}</p>
-      <div className="flex items-center gap-3">
-        <button
-          onClick={() => void recheck()}
-          disabled={busy}
-          className="rounded bg-indigo-600 px-3 py-2 font-medium hover:bg-indigo-500 disabled:opacity-50"
-        >
-          {t("cli.opnieuw")}
-        </button>
-        <a href={current.docs_url} target="_blank" rel="noreferrer" className="text-indigo-400 hover:underline">
-          {t("cli.docs")}
-        </a>
-        {stillMissing && <span role="status" className="text-amber-400">{t("cli.nogSteedsNiet")}</span>}
-      </div>
-    </div>
+    <Card data-testid="install-guide" className="mx-auto my-6 max-w-xl">
+      <CardHeader>
+        <CardTitle className="text-lg">{t("cli.nietGevonden", { naam: t(`provider.${current.provider}`) })}</CardTitle>
+        <CardDescription className="text-base">{t("cli.uitleg", { naam: t(`provider.${current.provider}`) })}</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4 text-base">
+        <ul className="space-y-2">
+          {current.install_steps.map((s) => (
+            <li key={s.label}>
+              <div className="text-muted-foreground">{s.label}</div>
+              <code className="block rounded-lg bg-muted px-3 py-2 font-mono select-all">{s.command}</code>
+            </li>
+          ))}
+        </ul>
+        <p className="text-muted-foreground">{t("cli.herstart")}</p>
+        <div className="flex flex-wrap items-center gap-3">
+          <Button onClick={() => void recheck()} disabled={busy}>
+            {t("cli.opnieuw")}
+          </Button>
+          <Button variant="link" asChild>
+            <a href={current.docs_url} target="_blank" rel="noreferrer">
+              {t("cli.docs")}
+            </a>
+          </Button>
+          {stillMissing && (
+            <span role="status" className="text-warning">
+              {t("cli.nogSteedsNiet")}
+            </span>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }

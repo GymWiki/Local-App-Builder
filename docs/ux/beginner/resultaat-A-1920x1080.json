@@ -1,0 +1,104 @@
+[
+ {
+  "scenario": "A 1920x1080 licht",
+  "klikken": 19,
+  "seconden": 40.8,
+  "stappen": [
+   {
+    "naam": "eerste start: welkom",
+    "ok": true,
+    "ms": 110
+   },
+   {
+    "naam": "eerste start: AI kiezen en inloggen",
+    "ok": true,
+    "ms": 832
+   },
+   {
+    "naam": "eerste start: bedieningsniveau en afronden",
+    "ok": true,
+    "ms": 122
+   },
+   {
+    "naam": "nieuw project (start-takenlijst)",
+    "ok": true,
+    "ms": 1041
+   },
+   {
+    "naam": "route-balk en chat zichtbaar",
+    "ok": true,
+    "ms": 12
+   },
+   {
+    "naam": "chat 1: Maak de kop groter",
+    "ok": true,
+    "ms": 3839
+   },
+   {
+    "naam": "chat 2: Voeg een tweede pagina toe",
+    "ok": true,
+    "ms": 3848
+   },
+   {
+    "naam": "chat 3: Maak de knop blauw",
+    "ok": true,
+    "ms": 3877
+   },
+   {
+    "naam": "chat 4: Zet de tekst in het midden",
+    "ok": true,
+    "ms": 3895
+   },
+   {
+    "naam": "chat 5: Voeg een contactknop toe",
+    "ok": true,
+    "ms": 3857
+   },
+   {
+    "naam": "chat 6: Maak de achtergrond lichter",
+    "ok": true,
+    "ms": 3855
+   },
+   {
+    "naam": "chat 7: Verander de titel",
+    "ok": true,
+    "ms": 3861
+   },
+   {
+    "naam": "chat 8: Voeg een voettekst toe",
+    "ok": true,
+    "ms": 3897
+   },
+   {
+    "naam": "chat 9: Maak de knoppen groter",
+    "ok": true,
+    "ms": 3906
+   },
+   {
+    "naam": "chat 10: Voeg een logo toe",
+    "ok": true,
+    "ms": 3871
+   },
+   {
+    "naam": "na tien wijzigingen: versies bewaard en voorbeeld zichtbaar",
+    "ok": true,
+    "ms": 20
+   }
+  ],
+  "blokkades": [],
+  "twijfel": [
+   "welkom: afgekapt: Sluiten",
+   "AI kiezen: afgekapt: Sluiten",
+   "AI kiezen: dubbeleScroll: div[dialog-content] 408x994",
+   "niveau: afgekapt: Sluiten",
+   "werkruimte: afgekapt: Mijn takenlijst | nog te doen | Gesprek met de AI",
+   "werkruimte: dubbeleScroll: div[scroll-area-viewport] 624x154 | div[scroll-area-viewport] 624x292",
+   "na tien wijzigingen: afgekapt: Mijn takenlijst | klaar | nog te doen",
+   "na tien wijzigingen: buitenBeeld: Wat is er veranderd?",
+   "na tien wijzigingen: dubbeleScroll: div[scroll-area-viewport] 624x154 | div[scroll-area-viewport] 624x237"
+  ],
+  "scriptfouten": [],
+  "gelukteWijzigingen": 10,
+  "wachtMsInChat": 38029
+ }
+]

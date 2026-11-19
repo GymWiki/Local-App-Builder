@@ -6,7 +6,7 @@ import * as api from "../lib/api";
 
 vi.mock("../lib/api");
 
-const project: Project = { id: 1, naam: "P", pad: "/p", template: "leeg", created_at: "", default_account_id: null };
+const project: Project = { id: 1, naam: "P", pad: "/p", template: "leeg", created_at: "", default_account_id: null, last_used_at: null };
 const up = { state: "connected" as const, port: 1, error: null };
 const points = [
   { hash: "b".repeat(40), short: "bbbbbbb", date: "2026-11-16T10:00:00+01:00", message: "Inlog toegevoegd" },
@@ -36,14 +36,14 @@ describe("ActivityPanel", () => {
     await screen.findByTestId("timeline");
     fireEvent.click(screen.getByRole("button", { name: "Terug naar vorige versie" }));
 
-    const dialog = await screen.findByRole("dialog");
+    const dialog = await screen.findByRole("alertdialog");
     expect(dialog).toHaveTextContent("Eerste versie");
     expect(dialog).toHaveTextContent("automatisch bewaard");
     expect(api.runtime).not.toHaveBeenCalledWith(1, "git.restore", expect.anything());
 
     fireEvent.click(screen.getByRole("button", { name: "Ja, terugzetten" }));
     await waitFor(() => expect(api.runtime).toHaveBeenCalledWith(1, "git.restore", { hash: "a".repeat(40) }));
-    expect(await screen.findByRole("status")).toHaveTextContent("back-upcheckpoint");
+    expect(await screen.findByRole("status")).toHaveTextContent("back-upversie");
   });
 
   it("annuleren zet niets terug", async () => {

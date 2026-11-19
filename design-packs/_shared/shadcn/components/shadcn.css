@@ -1,0 +1,60 @@
+/*
+ * Thema van de kit "shadcn". De basiskleuren (--background, --foreground, --primary, --border, --destructive, --radius)
+ * komen uit design/tokens.json via src/kit/tokens.css; de rest wordt hieruit afgeleid, zodat licht en donker meewisselen.
+ * Donkere modus: <html data-theme="dark">.
+ */
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is([data-theme="dark"] *));
+
+@theme inline {
+  --font-sans: var(--kit-font);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) * 0.5);
+  --radius-md: calc(var(--radius) * 0.75);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+}
+
+:root {
+  --card: var(--background);
+  --card-foreground: var(--foreground);
+  --popover: var(--background);
+  --popover-foreground: var(--foreground);
+  --secondary: color-mix(in oklab, var(--foreground) 7%, var(--background));
+  --secondary-foreground: var(--foreground);
+  --muted: color-mix(in oklab, var(--foreground) 6%, var(--background));
+  --muted-foreground: color-mix(in oklab, var(--foreground) 68%, var(--background));
+  --accent: color-mix(in oklab, var(--primary) 12%, var(--background));
+  --accent-foreground: var(--foreground);
+  --input: color-mix(in oklab, var(--foreground) 45%, var(--background));
+  --ring: var(--primary);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background font-sans text-foreground antialiased;
+  }
+}

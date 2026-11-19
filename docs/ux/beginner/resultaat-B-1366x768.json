@@ -1,0 +1,134 @@
+[
+ {
+  "scenario": "B 1366x768 licht",
+  "klikken": 10,
+  "seconden": 10.2,
+  "stappen": [
+   {
+    "naam": "nieuw project (leeg)",
+    "ok": true,
+    "ms": 1044
+   },
+   {
+    "naam": "idee: route-balk toont de eerste stap",
+    "ok": true,
+    "ms": 31
+   },
+   {
+    "naam": "idee beschrijven",
+    "ok": true,
+    "ms": 4170
+   },
+   {
+    "naam": "route gaat verder na het idee",
+    "ok": true,
+    "ms": 13
+   },
+   {
+    "naam": "uiterlijk kiezen",
+    "ok": true,
+    "ms": 654
+   },
+   {
+    "naam": "bouwen en aanpassen in de chat",
+    "ok": true,
+    "ms": 4053
+   },
+   {
+    "naam": "online zetten: voorbeeld en echt met bevestiging",
+    "ok": true,
+    "ms": 199
+   }
+  ],
+  "blokkades": [],
+  "twijfel": [
+   "route idee: afgekapt: Hovenier Joke | nog te doen | Gesprek met de AI",
+   "route idee: buitenBeeld: Technische weergave",
+   "route idee: dubbeleScroll: div[scroll-area-viewport] 256x438 | div 260x574 | div[scroll-area-viewport] 260x574",
+   "idee-dialoog: afgekapt: Hovenier Joke | nog te doen | Gesprek met de AI",
+   "idee-dialoog: buitenBeeld: Technische weergave",
+   "idee-dialoog: dubbeleScroll: div[scroll-area-viewport] 256x438 | div 260x574 | div[scroll-area-viewport] 260x574",
+   "route na idee: afgekapt: Hovenier Joke | klaar | nog te doen",
+   "route na idee: buitenBeeld: Technische weergave",
+   "route na idee: dubbeleScroll: div[scroll-area-viewport] 256x438 | div 260x574 | div[scroll-area-viewport] 260x574",
+   "uiterlijk: vaktaal zichtbaar: tokens",
+   "uiterlijk: afgekapt: Hovenier Joke | klaar | nog te doen",
+   "uiterlijk: buitenBeeld: Technische weergave",
+   "uiterlijk: dubbeleScroll: div[scroll-area-viewport] 256x438 | div 260x574 | div[scroll-area-viewport] 260x574",
+   "na bouwen: afgekapt: Hovenier Joke | klaar | nog te doen",
+   "na bouwen: buitenBeeld: Technische weergave",
+   "na bouwen: dubbeleScroll: div[scroll-area-viewport] 256x438 | div 260x574 | div[scroll-area-viewport] 260x574",
+   "online zetten: vaktaal zichtbaar: database",
+   "online zetten: afgekapt: Hovenier Joke | klaar | nog te doen",
+   "online zetten: buitenBeeld: Technische weergave",
+   "online zetten: dubbeleScroll: div[scroll-area-viewport] 256x438 | div 260x574 | div[scroll-area-viewport] 260x574"
+  ],
+  "scriptfouten": []
+ },
+ {
+  "scenario": "B 1366x768 donker",
+  "klikken": 10,
+  "seconden": 10.2,
+  "stappen": [
+   {
+    "naam": "nieuw project (leeg)",
+    "ok": true,
+    "ms": 846
+   },
+   {
+    "naam": "idee: route-balk toont de eerste stap",
+    "ok": true,
+    "ms": 18
+   },
+   {
+    "naam": "idee beschrijven",
+    "ok": true,
+    "ms": 4457
+   },
+   {
+    "naam": "route gaat verder na het idee",
+    "ok": true,
+    "ms": 13
+   },
+   {
+    "naam": "uiterlijk kiezen",
+    "ok": true,
+    "ms": 655
+   },
+   {
+    "naam": "bouwen en aanpassen in de chat",
+    "ok": true,
+    "ms": 4016
+   },
+   {
+    "naam": "online zetten: voorbeeld en echt met bevestiging",
+    "ok": true,
+    "ms": 194
+   }
+  ],
+  "blokkades": [],
+  "twijfel": [
+   "route idee: afgekapt: Hovenier Joke | nog te doen | Gesprek met de AI",
+   "route idee: buitenBeeld: Technische weergave",
+   "route idee: dubbeleScroll: div[scroll-area-viewport] 256x438 | div 260x574 | div[scroll-area-viewport] 260x574",
+   "idee-dialoog: afgekapt: Hovenier Joke | nog te doen | Gesprek met de AI",
+   "idee-dialoog: buitenBeeld: Technische weergave",
+   "idee-dialoog: dubbeleScroll: div[scroll-area-viewport] 256x438 | div 260x574 | div[scroll-area-viewport] 260x574",
+   "route na idee: afgekapt: Hovenier Joke | klaar | nog te doen",
+   "route na idee: buitenBeeld: Technische weergave",
+   "route na idee: dubbeleScroll: div[scroll-area-viewport] 256x438 | div 260x574 | div[scroll-area-viewport] 260x574",
+   "uiterlijk: vaktaal zichtbaar: tokens",
+   "uiterlijk: afgekapt: Hovenier Joke | klaar | nog te doen",
+   "uiterlijk: buitenBeeld: Technische weergave",
+   "uiterlijk: dubbeleScroll: div[scroll-area-viewport] 256x438 | div 260x574 | div[scroll-area-viewport] 260x574",
+   "na bouwen: afgekapt: Hovenier Joke | klaar | nog te doen",
+   "na bouwen: buitenBeeld: Technische weergave",
+   "na bouwen: dubbeleScroll: div[scroll-area-viewport] 256x438 | div 260x574 | div[scroll-area-viewport] 260x574",
+   "online zetten: vaktaal zichtbaar: database",
+   "online zetten: afgekapt: Hovenier Joke | klaar | nog te doen",
+   "online zetten: buitenBeeld: Technische weergave",
+   "online zetten: dubbeleScroll: div[scroll-area-viewport] 256x438 | div 260x574 | div[scroll-area-viewport] 260x574"
+  ],
+  "scriptfouten": []
+ }
+]

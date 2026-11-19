@@ -1,0 +1,551 @@
+[
+ {
+  "stap": "1-start-eerste-scherm",
+  "file": "01-1-start-eerste-scherm-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [],
+  "klein": [],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "1b-instellingen-nieuwsgierig",
+  "file": "02-1b-instellingen-nieuwsgierig-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Sluiten"
+  ],
+  "klein": [
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 407x769"
+  ]
+ },
+ {
+  "stap": "1-start-eerste-scherm",
+  "file": "03-1-start-eerste-scherm-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [],
+  "klein": [],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "2-nieuw-project-dialoog",
+  "file": "04-2-nieuw-project-dialoog-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Nieuw project",
+   "Sluiten"
+  ],
+  "klein": [
+   "BUTTON (23x23)",
+   "INPUT (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "2b-leeg-versturen",
+  "file": "05-2b-leeg-versturen-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Nieuw project",
+   "Sluiten"
+  ],
+  "klein": [
+   "BUTTON (23x23)",
+   "INPUT (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "2c-enter-zonder-map",
+  "file": "06-2c-enter-zonder-map-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Nieuw project",
+   "Sluiten"
+  ],
+  "klein": [
+   "BUTTON (23x23)",
+   "INPUT (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "2d-naam-en-map-ingevuld",
+  "file": "07-2d-naam-en-map-ingevuld-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Nieuw project",
+   "Sluiten"
+  ],
+  "klein": [
+   "BUTTON (23x23)",
+   "INPUT (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "2e-project-aangemaakt",
+  "file": "08-2e-project-aangemaakt-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 501x297"
+  ]
+ },
+ {
+  "stap": "3-opdracht-getypt",
+  "file": "09-3-opdracht-getypt-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 501x297"
+  ]
+ },
+ {
+  "stap": "3b-ai-denkt",
+  "file": "10-3b-ai-denkt-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 501x226"
+  ]
+ },
+ {
+  "stap": "3c-ai-bezig",
+  "file": "11-3c-ai-bezig-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "— Klaar",
+   "— Bezig…",
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 501x184"
+  ]
+ },
+ {
+  "stap": "3d-ai-klaar",
+  "file": "12-3d-ai-klaar-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "— Klaar",
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 501x184",
+   "div 501x46"
+  ]
+ },
+ {
+  "stap": "3-opdracht-getypt",
+  "file": "13-3-opdracht-getypt-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "— Klaar",
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 501x184",
+   "div 501x46"
+  ]
+ },
+ {
+  "stap": "3b-ai-denkt",
+  "file": "14-3b-ai-denkt-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "— Klaar",
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 501x184"
+  ]
+ },
+ {
+  "stap": "3c-ai-bezig",
+  "file": "15-3c-ai-bezig-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "— Klaar",
+   "— Bezig…",
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "section 501x722",
+   "div[scroll-area-viewport] 501x184"
+  ]
+ },
+ {
+  "stap": "3d-ai-klaar",
+  "file": "16-3d-ai-klaar-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "— Klaar",
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "section 501x722",
+   "div[scroll-area-viewport] 501x184",
+   "div 501x46"
+  ]
+ },
+ {
+  "stap": "6-versies-dialoog",
+  "file": "17-6-versies-dialoog-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "— Klaar",
+   "Wat wil je maken of veranderen?",
+   "Sluiten"
+  ],
+  "klein": [
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "section 501x722",
+   "div[scroll-area-viewport] 501x184",
+   "div 501x46"
+  ]
+ },
+ {
+  "stap": "6b-terugzetten-bevestiging",
+  "file": "18-6b-terugzetten-bevestiging-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "— Klaar",
+   "Wat wil je maken of veranderen?",
+   "Sluiten"
+  ],
+  "klein": [
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "section 501x722",
+   "div[scroll-area-viewport] 501x184",
+   "div 501x46"
+  ]
+ },
+ {
+  "stap": "6c-na-escape",
+  "file": "19-6c-na-escape-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "— Klaar",
+   "Wat wil je maken of veranderen?",
+   "Sluiten"
+  ],
+  "klein": [
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "section 501x722",
+   "div[scroll-area-viewport] 501x184",
+   "div 501x46"
+  ]
+ },
+ {
+  "stap": "7-wissel-van-ai",
+  "file": "20-7-wissel-van-ai-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "— Klaar",
+   "Wat wil je maken of veranderen?",
+   "Sluiten"
+  ],
+  "klein": [
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "section 501x722",
+   "div[scroll-area-viewport] 501x184",
+   "div 501x46"
+  ]
+ },
+ {
+  "stap": "7b-accounts",
+  "file": "21-7b-accounts-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [],
+  "klein": [
+   "Claude Gemini Codex (nog niet beschikbaa (1x1)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "7c-account-toegevoegd",
+  "file": "22-7c-account-toegevoegd-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [],
+  "klein": [
+   "Claude Gemini Codex (nog niet beschikbaa (1x1)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "8-publiceren",
+  "file": "23-8-publiceren-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [],
+  "klein": [],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 912x722"
+  ]
+ },
+ {
+  "stap": "8b-veiligheid",
+  "file": "24-8b-veiligheid-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [],
+  "klein": [],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 912x722"
+  ]
+ },
+ {
+  "stap": "8c-download",
+  "file": "25-8c-download-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [],
+  "klein": [],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 912x722"
+  ]
+ },
+ {
+  "stap": "9a-geavanceerd",
+  "file": "26-9a-geavanceerd-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [],
+  "klein": [],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "9b-sluiten",
+  "file": "27-9b-sluiten-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [],
+  "klein": [],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "9c-weer-open",
+  "file": "28-9c-weer-open-donker.png",
+  "notitie": "",
+  "vw": 1536,
+  "vh": 864,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "— Klaar",
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "section 501x722",
+   "div[scroll-area-viewport] 501x184",
+   "div 501x46",
+   "div[scroll-area-viewport] 329x864"
+  ]
+ }
+]

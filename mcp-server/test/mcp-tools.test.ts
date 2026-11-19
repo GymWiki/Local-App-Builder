@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { startServer, type Running } from "../src/server.js";
 import { makeExample, waitFor, type Example } from "./helpers.js";
@@ -31,20 +31,88 @@ afterEach(async () => {
   await srv.close();
 });
 
+const BUDGET_TEKENS = 60_000;
+
 describe("MCP-tools (fase 3)", () => {
-  it("toont negen tools", async () => {
+  it("toont alle tools", async () => {
     const names = (await client.listTools()).tools.map((t) => t.name).sort();
     expect(names).toEqual([
+      "afhankelijkheden",
+      "bestanden_voor_taak",
+      "db_apply_migration",
+      "db_configure_auth",
+      "db_create_project",
+      "db_deploy_edge_function",
+      "db_generate_types",
+      "db_get_advisors",
+      "db_get_logs",
+      "db_get_public_config",
+      "db_list_tables",
+      "db_manage_storage",
+      "db_pause_project",
+      "db_propose_migration",
+      "db_restore_project",
+      "db_rollback_migration",
+      "db_run_readonly_query",
+      "db_run_sql",
+      "db_set_edge_secret",
+      "db_status",
       "get_console_errors",
       "get_dev_logs",
+      "get_last_change",
       "get_preview_screenshot",
+      "git_backup",
       "git_checkpoint",
       "git_list_checkpoints",
+      "github_list_repos",
+      "github_status",
+      "kit_componenten",
+      "koppeling_voorstellen",
+      "koppelingen_status",
+      "needs_data",
+      "permission_prompt",
+      "project_kaart",
       "project_status",
       "read_project_notes",
       "run_checks",
+      "schema_database",
+      "security_check",
       "update_project_notes",
+      "vercel_deploy_live",
+      "vercel_deploy_preview",
+      "vercel_get_build_logs",
+      "vercel_list_deployments",
+      "vercel_rollback",
+      "vercel_set_env",
+      "vercel_status",
+      "winkel_klaarcheck",
+      "winkel_schrijf_teksten",
+      "winkel_status",
+      "zoek_symbool",
     ]);
+  });
+
+  it("de toollijst is stabiel (cache) en de beschrijvingen blijven binnen het budget", async () => {
+    const a = (await client.listTools()).tools;
+    const b = (await client.listTools()).tools;
+    expect(JSON.stringify(a)).toBe(JSON.stringify(b));
+    const totaal = a.reduce((n, t) => n + (t.description?.length ?? 0) + JSON.stringify(t.inputSchema).length, 0);
+    console.log(`tools: ${a.length}, beschrijvingen+schema's: ${totaal} tekens ≈ ${Math.round(totaal / 4)} tokens (schatting)`);
+    // Budget: groei bewust, niet per ongeluk. Pas dit getal alleen aan met een reden (docs/tokens.md).
+    expect(totaal).toBeLessThan(BUDGET_TEKENS);
+    for (const t of a) expect((t.description ?? "").length, t.name).toBeLessThan(1800);
+    // Geen wisselende gegevens in de beschrijvingen (tijd, willekeurige id's).
+    expect(JSON.stringify(a)).not.toMatch(/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/);
+  });
+
+  it("needs_data schrijft alleen .studio/needs-data.json in het project en weigert een lege reden", async () => {
+    const r = await call("needs_data", { reden: "Bestellingen moeten bewaard blijven." });
+    expect(r.isError).not.toBe(true);
+    const file = JSON.parse(await readFile(path.join(ex.dir, ".studio", "needs-data.json"), "utf8"));
+    expect(file.reden).toBe("Bestellingen moeten bewaard blijven.");
+    expect(typeof file.op).toBe("string");
+    const leeg = await call("needs_data", { reden: "" });
+    expect(leeg.isError).toBe(true);
   });
 
   it("run_checks weigert niet-goedgekeurde studio.json met een duidelijke melding", async () => {
@@ -72,6 +140,42 @@ describe("MCP-tools (fase 3)", () => {
     expect(r.isError).toBeFalsy();
     expect(textOf(await call("git_list_checkpoints"))).toContain("start");
     expect(execFileSync("git", ["log", "--format=%s"], { cwd: ex.dir, encoding: "utf8" }).trim()).toBe("start");
+  });
+
+  it("get_last_change toont niet-opgeslagen werk en daarna de laatste versie, zonder geheimen en ingekort", async () => {
+    await writeFile(path.join(ex.dir, "a.txt"), "eerste\n");
+    expect((await call("git_checkpoint", { bericht: "eerste versie" })).isError).toBeFalsy();
+    await writeFile(path.join(ex.dir, "a.txt"), "eerste\ntweede regel\n");
+    await writeFile(path.join(ex.dir, ".env"), "GEHEIM=hunter2\n");
+    await writeFile(path.join(ex.dir, "sleutel.pem"), "PRIVATE KEY\n");
+    let t = textOf(await call("get_last_change"));
+    expect(t).toContain("nog niet opgeslagen werk");
+    expect(t).toContain("+tweede regel");
+    expect(t).not.toMatch(/hunter2|PRIVATE KEY|\.env|sleutel\.pem/);
+    expect((await call("git_checkpoint", { bericht: "tweede versie" })).isError).toBeFalsy();
+    t = textOf(await call("get_last_change"));
+    expect(t).toContain("laatste versie — tweede versie");
+    expect(t).toContain("+tweede regel");
+    expect(t).not.toContain("hunter2");
+    const c = await srv.runtime.git.lastChange(10);
+    expect(c.truncated).toBe(true);
+    expect(c.diff.length).toBe(10);
+  });
+
+  it("get_last_change zegt het netjes als er nog niets is om te vergelijken", async () => {
+    const r = await call("get_last_change");
+    expect(r.isError).toBe(true);
+    expect(textOf(r)).toMatch(/Er zijn nog geen versies/);
+  });
+
+  it("git_checkpoint eist een korte titel in gewone taal (max 8 woorden)", async () => {
+    await writeFile(path.join(ex.dir, "a.txt"), "x");
+    const lang = await call("git_checkpoint", { bericht: "een twee drie vier vijf zes zeven acht negen" });
+    expect(lang.isError).toBe(true);
+    expect(textOf(lang)).toMatch(/maximaal 8 woorden/);
+    const goed = await call("git_checkpoint", { bericht: "een twee drie vier vijf zes zeven acht" });
+    expect(goed.isError).toBeFalsy();
+    expect(textOf(await call("git_list_checkpoints"))).toContain("een twee drie vier vijf zes zeven acht");
   });
 
   it("screenshot en console-errors uit de preview (slaat over zonder browser)", async (ctx) => {

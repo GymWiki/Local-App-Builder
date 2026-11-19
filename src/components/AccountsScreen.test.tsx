@@ -11,7 +11,7 @@ describe("AccountsScreen", () => {
     const changed = vi.fn();
     render(<AccountsScreen accounts={[]} onChanged={changed} onError={vi.fn()} />);
 
-    fireEvent.change(screen.getByLabelText("Label"), { target: { value: "Werk" } });
+    fireEvent.change(screen.getByLabelText("Naam van dit account"), { target: { value: "Werk" } });
     fireEvent.click(screen.getByRole("button", { name: "Account toevoegen" }));
     await waitFor(() => expect(api.createAccount).toHaveBeenCalledWith("claude", "Werk"));
     expect(changed).toHaveBeenCalled();

@@ -1,12 +1,20 @@
 use crate::accounts::{self, Account};
+use crate::assets;
+use crate::chat::events::ErrorCode;
+use crate::chat::store::StoredMessage;
+use crate::chat::{self, ChatLaunch, ChatManager};
 use crate::claude_approval;
 use crate::cli::{self, CliStatus};
 use crate::error::{AppError, Result};
 use crate::instructions;
+use crate::layouts;
 use crate::mcp::{self, McpInfo, McpManager};
 use crate::mcp_config;
+use crate::preview::{PreviewInfo, PreviewManager};
+use crate::projectinfo;
 use crate::projects::{self, Project};
 use crate::provider::Provider;
+use crate::templates;
 use crate::terminal::{Snapshot, SpawnSpec, TerminalManager};
 use rusqlite::Connection;
 use serde::Serialize;
@@ -14,7 +22,7 @@ use serde_json::{json, Value};
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, MutexGuard};
 use std::time::Duration;
-use tauri::State;
+use tauri::{Emitter, Manager, State};
 
 pub struct Db(pub Mutex<Connection>);
 pub struct Profiles(pub PathBuf);
@@ -36,30 +44,104 @@ pub fn list_projects(db: State<Db>) -> Result<Vec<Project>> {
 
 #[tauri::command]
 pub fn create_project(
+    app: tauri::AppHandle,
     db: State<Db>,
     naam: String,
     bovenliggend_pad: String,
     template: Option<String>,
 ) -> Result<Project> {
-    projects::create(
+    let template = template.unwrap_or_else(|| "leeg".into());
+    let project = projects::create(
         &*db.conn()?,
         &naam,
         &PathBuf::from(bovenliggend_pad),
-        template.as_deref().unwrap_or("leeg"),
-    )
+        &template,
+    )?;
+    if template != "leeg" {
+        // Heeft het voorbeeld een eigen, ingevulde PROJECT.md, dan vervangt die de lege die zojuist is gemaakt (het project is nog nieuw).
+        if let Ok(t) = templates::bundled(&app, "templates") {
+            if t.join(&template).join("PROJECT.md").is_file() {
+                let _ = std::fs::remove_file(Path::new(&project.pad).join("PROJECT.md"));
+            }
+        }
+        // Een echt template: bestanden erin zetten. Lukt dat niet, dan verdwijnt het project weer uit de lijst (de map blijft staan).
+        let copied = templates::bundled(&app, "templates")
+            .and_then(|t| templates::copy_template(&t, &template, Path::new(&project.pad)));
+        if let Err(e) = copied {
+            let _ = projects::delete(&*db.conn()?, project.id);
+            return Err(e);
+        }
+    }
+    Ok(project)
 }
 
 /// Verwijdert alleen uit de lijst; bestanden op schijf blijven staan.
 #[tauri::command(async)]
 pub fn delete_project(
     db: State<Db>,
+    profiles: State<Profiles>,
     mcp: State<McpManager>,
-    term: State<TerminalManager>,
+    previews: State<PreviewManager>,
+    chat: State<ChatManager>,
     id: i64,
 ) -> Result<()> {
+    // Terminals sluit de frontend per tab; hier de chat, preview (watcher, statische server) en de MCP-runtime.
+    chat.stop(id);
+    previews.close(id);
     mcp.stop(id);
-    let _ = term; // sessies sluit de frontend per tab; de MCP-server stopt hier
-    projects::delete(&*db.conn()?, id)
+    projects::delete(&*db.conn()?, id)?;
+    layouts::thumbnail_delete(&thumbnails_dir(&profiles), id);
+    Ok(())
+}
+
+/// Wijzigt alleen de naam in Studio; de map op schijf blijft zoals ze is.
+#[tauri::command]
+pub fn rename_project(db: State<Db>, id: i64, naam: String) -> Result<Project> {
+    projects::rename(&*db.conn()?, id, &naam)
+}
+
+fn thumbnails_dir(profiles: &Profiles) -> PathBuf {
+    profiles
+        .0
+        .parent()
+        .unwrap_or(&profiles.0)
+        .join("thumbnails")
+}
+
+// ---------- indeling en miniaturen ----------
+
+#[derive(serde::Serialize)]
+pub struct LayoutInfo {
+    pub versie: i64,
+    pub json: String,
+}
+
+#[tauri::command]
+pub fn layout_get(db: State<Db>, project_id: i64) -> Result<Option<LayoutInfo>> {
+    Ok(layouts::get(&*db.conn()?, project_id)?.map(|l| LayoutInfo {
+        versie: l.versie,
+        json: l.json,
+    }))
+}
+
+#[tauri::command]
+pub fn layout_set(db: State<Db>, project_id: i64, versie: i64, json: String) -> Result<()> {
+    layouts::set(&*db.conn()?, project_id, versie, &json)
+}
+
+#[tauri::command]
+pub fn layout_reset(db: State<Db>, project_id: i64) -> Result<()> {
+    layouts::reset(&*db.conn()?, project_id)
+}
+
+#[tauri::command]
+pub fn project_thumbnail_get(profiles: State<Profiles>, id: i64) -> Option<String> {
+    layouts::thumbnail_get(&thumbnails_dir(&profiles), id)
+}
+
+#[tauri::command]
+pub fn project_thumbnail_set(profiles: State<Profiles>, id: i64, data_url: String) -> Result<()> {
+    layouts::thumbnail_set(&thumbnails_dir(&profiles), id, &data_url)
 }
 
 #[tauri::command]
@@ -102,31 +184,182 @@ fn trust_key(project_id: i64) -> String {
     format!("studio_trust:{project_id}")
 }
 
-#[tauri::command(async)]
-pub fn open_project(db: State<Db>, mcp: State<McpManager>, id: i64) -> Result<McpInfo> {
-    let (p, trusted) = {
-        let c = db.conn()?;
-        (
-            projects::get(&c, id)?,
-            crate::db::get_setting(&c, &trust_key(id))?,
-        )
-    };
-    // Vaste werkwijze (CLAUDE.md / GEMINI.md / AGENTS.md) bijwerken; mislukken mag het openen niet blokkeren.
-    let _ = instructions::ensure(Path::new(&p.pad));
-    let info = mcp.start(p.id, &p.naam, Path::new(&p.pad));
-    if info.is_up() {
-        let _ = mcp.call(
-            p.id,
-            "trust.set",
-            json!({ "hash": trusted }),
-            Duration::from_secs(5),
-        );
+/// Start de MCP-server van een project op een achtergrondthread. Blokkeert niets: terminal, preview en git werken
+/// gewoon door, ook als de server faalt. De uitkomst (draait of de echte foutreden) komt als `mcp-status`-gebeurtenis.
+fn begin_mcp(app: &tauri::AppHandle, p: &Project) -> McpInfo {
+    let mcp = app.state::<McpManager>();
+    if mcp.mark_starting(p.id) {
+        let (app, id, name, pad) = (app.clone(), p.id, p.naam.clone(), p.pad.clone());
+        std::thread::spawn(move || {
+            let mcp = app.state::<McpManager>();
+            let info = mcp.start(id, &name, Path::new(&pad));
+            if !mcp.finish_starting(id) {
+                mcp.stop(id); // project werd ondertussen gesloten
+                return;
+            }
+            if info.is_up() {
+                let trusted = app
+                    .state::<Db>()
+                    .conn()
+                    .ok()
+                    .and_then(|c| crate::db::get_setting(&c, &trust_key(id)).ok().flatten());
+                let _ = mcp.call(
+                    id,
+                    "trust.set",
+                    json!({ "hash": trusted }),
+                    Duration::from_secs(5),
+                );
+                crate::host::push_toolgroepen(&app, id);
+            }
+            let _ = app.emit("mcp-status", json!({ "project_id": id, "info": info }));
+            // De runtime is er (of juist niet): preview opnieuw beoordelen (plan doorgeven, dev-server starten, melding tonen).
+            app.state::<PreviewManager>().open(id, PathBuf::from(&pad));
+        });
     }
-    Ok(info)
+    mcp.info(p.id).unwrap_or_else(|| McpInfo {
+        state: "starting".into(),
+        port: None,
+        error: None,
+        kind: None,
+        log: vec![],
+    })
 }
 
 #[tauri::command(async)]
-pub fn close_project(mcp: State<McpManager>, id: i64) {
+pub fn open_project(
+    app: tauri::AppHandle,
+    db: State<Db>,
+    previews: State<PreviewManager>,
+    id: i64,
+) -> Result<McpInfo> {
+    let p = projects::get(&*db.conn()?, id)?;
+    let _ = projects::touch(&*db.conn()?, id);
+    // Vaste werkwijze (CLAUDE.md / GEMINI.md / AGENTS.md) bijwerken; mislukken mag het openen niet blokkeren.
+    let simple = crate::db::communication_simple(&*db.conn()?);
+    let _ = instructions::ensure(Path::new(&p.pad), simple);
+    // Zero-config preview werkt direct (statisch zonder Node); de runtime volgt op de achtergrond.
+    previews.open(p.id, PathBuf::from(&p.pad));
+    Ok(begin_mcp(&app, &p))
+}
+
+// ---------- preview ----------
+
+#[tauri::command]
+pub fn preview_info(previews: State<PreviewManager>, id: i64) -> Option<PreviewInfo> {
+    previews.info(id)
+}
+
+#[tauri::command(async)]
+pub fn preview_start(previews: State<PreviewManager>, id: i64) -> Result<PreviewInfo> {
+    previews.start(id)
+}
+
+#[tauri::command(async)]
+pub fn preview_stop(previews: State<PreviewManager>, id: i64) -> Result<PreviewInfo> {
+    previews.stop(id)
+}
+
+#[tauri::command(async)]
+pub fn preview_restart(previews: State<PreviewManager>, id: i64) -> Result<PreviewInfo> {
+    previews.restart(id)
+}
+
+#[tauri::command(async)]
+pub fn preview_trust_scripts(previews: State<PreviewManager>, id: i64) -> Result<PreviewInfo> {
+    previews.trust_scripts(id)
+}
+
+#[tauri::command(async)]
+pub fn preview_install(previews: State<PreviewManager>, id: i64) -> Result<PreviewInfo> {
+    previews.install(id)
+}
+
+const UI_SETTINGS: &[&str] = &[
+    "preview_auto_switch",
+    "communication_mode",
+    "permission_mode",
+    "loop_threshold",
+    "theme",
+    "plan_default",
+    "settings_version",
+    "text_scale",
+    "default_project_dir",
+    "menu_collapsed",
+    "update_check",
+    "eerste_start_klaar",
+    "model_beleid",
+    "model_eigen",
+    "kaart_aan",
+];
+
+fn valid_setting(key: &str, value: &str) -> bool {
+    match key {
+        "communication_mode" => matches!(value, "simple" | "technical"),
+        "permission_mode" => matches!(value, "always" | "important" | "autonomous"),
+        "plan_default" => matches!(value, "0" | "1"),
+        "settings_version" => value.parse::<u32>().is_ok_and(|n| n <= 1000),
+        "text_scale" => matches!(value, "90" | "100" | "115" | "130"),
+        "menu_collapsed" | "update_check" | "eerste_start_klaar" | "kaart_aan" => matches!(value, "0" | "1"),
+        "model_beleid" => matches!(value, "auto" | "zuinig" | "gebalanceerd" | "best"),
+        "model_eigen" => value.len() <= 60 && value.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '.' | '-' | '_' | '[' | ']' | ':')),
+        "default_project_dir" => value.len() <= 1000 && !value.contains('\0'),
+        "theme" => matches!(value, "system" | "light" | "dark"),
+        "loop_threshold" => value
+            .parse::<usize>()
+            .is_ok_and(|n| (chat::guard::MIN_THRESHOLD..=chat::guard::MAX_THRESHOLD).contains(&n)),
+        _ => value.len() <= 20,
+    }
+}
+
+#[tauri::command]
+pub fn get_ui_setting(db: State<Db>, key: String) -> Result<Option<String>> {
+    if !UI_SETTINGS.contains(&key.as_str()) {
+        return Err(AppError::Invalid("Onbekende instelling.".into()));
+    }
+    crate::db::get_setting(&*db.conn()?, &format!("ui:{key}"))
+}
+
+/// "Standaard herstellen": wist de keuze, zodat de standaardwaarde weer geldt.
+#[tauri::command(async)]
+pub fn reset_ui_setting(db: State<Db>, key: String) -> Result<()> {
+    if !UI_SETTINGS.contains(&key.as_str()) {
+        return Err(AppError::Invalid("Onbekende instelling.".into()));
+    }
+    db.conn()?
+        .execute("DELETE FROM settings WHERE key = ?1", [format!("ui:{key}")])?;
+    Ok(())
+}
+
+#[tauri::command(async)]
+pub fn set_ui_setting(db: State<Db>, key: String, value: String) -> Result<()> {
+    if !UI_SETTINGS.contains(&key.as_str()) || !valid_setting(&key, &value) {
+        return Err(AppError::Invalid("Onbekende instelling.".into()));
+    }
+    let all = {
+        let c = db.conn()?;
+        crate::db::set_setting(&c, &format!("ui:{key}"), &value)?;
+        projects::list(&c)?
+    };
+    // "Eenvoudige taal" aan/uit: instructiebestanden van alle projecten meteen bijwerken (alleen onze blokken).
+    if key == "communication_mode" {
+        for p in all {
+            if Path::new(&p.pad).is_dir() {
+                let _ = instructions::ensure(Path::new(&p.pad), value == "simple");
+            }
+        }
+    }
+    Ok(())
+}
+
+#[tauri::command(async)]
+pub fn close_project(
+    mcp: State<McpManager>,
+    previews: State<PreviewManager>,
+    chat: State<ChatManager>,
+    id: i64,
+) {
+    chat.stop(id);
+    previews.close(id);
     mcp.stop(id);
 }
 
@@ -139,6 +372,7 @@ fn timeout_for(cmd: &str) -> Duration {
     match cmd {
         "checks.run" => Duration::from_secs(60 * 60),
         "dev.start" | "dev.restart" | "dev.stop" => Duration::from_secs(30),
+        "kit.apply" | "kit.scripts" => Duration::from_secs(20 * 60),
         _ => Duration::from_secs(60),
     }
 }
@@ -151,9 +385,10 @@ pub fn runtime_call(
     cmd: String,
     args: Option<Value>,
 ) -> Result<Value> {
-    if cmd == "trust.set" {
+    if cmd == "trust.set" || cmd.starts_with("kit.") {
         return Err(AppError::Invalid(
-            "Gebruik trust_studio_config om te vertrouwen.".into(),
+            "Dit commando heeft een eigen route (trust_studio_config of de kit_*-commando's)."
+                .into(),
         ));
     }
     mcp.call(
@@ -313,6 +548,301 @@ mod tests {
     }
 }
 
+// ---------- chat ----------
+
+#[derive(Debug, Serialize)]
+pub struct ChatTarget {
+    pub provider: String,
+    pub account_id: Option<i64>,
+    pub account_label: Option<String>,
+    /// Heeft deze AI een chatweergave? Zo niet: terugval op de terminal.
+    pub structured: bool,
+    /// "plan" (eerst overleggen) of "build" (bouwen).
+    pub mode: String,
+}
+
+/// Welke AI praat in de chat? Eerst de keuze in de chat zelf (sessie), dan het standaardaccount, anders Claude.
+fn resolve_target(
+    conn: &Connection,
+    project: &Project,
+) -> Result<(Provider, Option<accounts::Account>)> {
+    if let Some(s) = chat::store::session(conn, project.id)? {
+        let acc = s.account_id.and_then(|id| accounts::get(conn, id).ok());
+        return Ok((Provider::parse(&s.provider)?, acc));
+    }
+    if let Some(id) = project.default_account_id {
+        if let Ok(a) = accounts::get(conn, id) {
+            return Ok((Provider::parse(&a.provider)?, Some(a)));
+        }
+    }
+    Ok((Provider::Claude, None))
+}
+
+fn target_of(provider: Provider, acc: &Option<accounts::Account>, mode: String) -> ChatTarget {
+    ChatTarget {
+        provider: provider.as_str().into(),
+        account_id: acc.as_ref().map(|a| a.id),
+        account_label: acc.as_ref().map(|a| a.label.clone()),
+        structured: chat::supports_structured(provider),
+        mode,
+    }
+}
+
+/// Welke AI en welk account bij dit project horen. De database-vergrendeling is weer vrij zodra de functie klaar is.
+fn target_gegevens(db: &Db, project_id: i64) -> Result<(Provider, Option<accounts::Account>)> {
+    let c = db.conn()?;
+    let p = projects::get(&c, project_id)?;
+    resolve_target(&c, &p)
+}
+
+#[tauri::command]
+pub fn chat_target(db: State<Db>, chat: State<ChatManager>, project_id: i64) -> Result<ChatTarget> {
+    // Eerst de vergrendeling vrijgeven en dan pas `chat.mode`: die leest zelf uit de database. Houd je hem vast, dan blokkeert
+    // het commando zichzelf (en omdat dit een gewoon commando is, het hele venster).
+    let (provider, acc) = target_gegevens(&db, project_id)?;
+    Ok(target_of(provider, &acc, chat.mode(project_id)))
+}
+
+#[tauri::command]
+pub fn chat_history(
+    db: State<Db>,
+    project_id: i64,
+    limit: Option<i64>,
+) -> Result<Vec<StoredMessage>> {
+    chat::store::history(
+        &*db.conn()?,
+        project_id,
+        limit.unwrap_or(200).clamp(1, 1000),
+    )
+}
+
+/// Bouwt alles wat nodig is om de chat-CLI te starten (binary, omgeving, MCP-config). Wacht hooguit kort op de MCP-server.
+fn prepare_chat(
+    app: &tauri::AppHandle,
+    db: &Db,
+    mcp: &McpManager,
+    chat: &ChatManager,
+    profiles: &Profiles,
+    project_id: i64,
+) -> Result<ChatLaunch> {
+    let (project, provider, account) = {
+        let c = db.conn()?;
+        let p = projects::get(&c, project_id)?;
+        let (prov, acc) = resolve_target(&c, &p)?;
+        (p, prov, acc)
+    };
+    if !chat::supports_structured(provider) {
+        return Err(AppError::Invalid(
+            "Deze AI heeft nog geen chatweergave; gebruik de technische weergave.".into(),
+        ));
+    }
+    let binary = cli::resolve(provider.binary()).ok_or_else(|| {
+        AppError::Invalid(format!("{} is niet geïnstalleerd.", provider.binary()))
+    })?;
+    let dir = project_dir(&project)?;
+
+    begin_mcp(app, &project);
+    let info = mcp.wait_ready(project.id, Duration::from_secs(4));
+    let Some((true, Some(port))) = info.as_ref().map(|i| (i.is_up(), i.port)) else {
+        let why = info
+            .and_then(|i| i.error)
+            .unwrap_or_else(|| "De MCP-server is nog niet klaar.".into());
+        chat.report_error(project_id, ErrorCode::McpUnavailable, &why);
+        return Err(AppError::Invalid(format!(
+            "De koppeling met Studio is er nog niet: {why}"
+        )));
+    };
+
+    // `--mcp-config`-bestand met alleen verwijzingen (${STUDIO_MCP_URL}); het token gaat via de omgeving.
+    let app_data = profiles
+        .0
+        .parent()
+        .map(Path::to_path_buf)
+        .unwrap_or_else(|| profiles.0.clone());
+    let cfg_dir = app_data.join("chat").join(project_id.to_string());
+    std::fs::create_dir_all(&cfg_dir)?;
+    let cfg = cfg_dir.join("mcp.json");
+    let body =
+        json!({ "mcpServers": { mcp_config::SERVER_NAME: mcp_config::entry(Provider::Claude) } });
+    std::fs::write(
+        &cfg,
+        serde_json::to_string_pretty(&body).unwrap_or_default(),
+    )?;
+
+    let mut env = base_env();
+    env.extend(cli::mcp_env(&mcp::url_for(port), mcp.token()));
+    let profile = account.as_ref().map(|a| PathBuf::from(&a.profile_dir));
+    if let Some(p) = &profile {
+        std::fs::create_dir_all(p)?;
+    }
+    env.extend(cli::profile_env(provider, profile.as_deref()));
+    Ok(ChatLaunch {
+        provider,
+        account_id: account.map(|a| a.id),
+        binary,
+        cwd: dir,
+        env,
+        mcp_config: Some(cfg),
+        permission_tool: Some("mcp__studio__permission_prompt".into()),
+    })
+}
+
+#[tauri::command(async)]
+#[allow(clippy::too_many_arguments)]
+pub fn chat_send(
+    app: tauri::AppHandle,
+    db: State<Db>,
+    mcp: State<McpManager>,
+    chat: State<ChatManager>,
+    profiles: State<Profiles>,
+    project_id: i64,
+    text: String,
+    visible: Option<bool>,
+    attachments: Option<Vec<String>>,
+) -> Result<()> {
+    let dir = project_dir(&projects::get(&*db.conn()?, project_id)?)?;
+    let _ = projects::touch(&*db.conn()?, project_id);
+    let attachments = attachments_from_paths(&dir, attachments.unwrap_or_default())?;
+    let launch = prepare_chat(&app, &db, &mcp, &chat, &profiles, project_id)?;
+    chat.send_with(
+        project_id,
+        &text,
+        visible.unwrap_or(true),
+        &launch,
+        &attachments,
+    )
+}
+
+/// Maximaal aantal bijlagen per bericht.
+const MAX_ATTACHMENTS: usize = 6;
+
+/// Controleert elk pad (alleen `assets/`, gewoon bestand) en maakt er bijlagen van.
+fn attachments_from_paths(dir: &Path, paths: Vec<String>) -> Result<Vec<chat::Attachment>> {
+    if paths.len() > MAX_ATTACHMENTS {
+        return Err(AppError::Invalid(format!(
+            "Je kunt maximaal {MAX_ATTACHMENTS} bestanden tegelijk meesturen."
+        )));
+    }
+    paths
+        .into_iter()
+        .map(|p| {
+            let full = assets::resolve_asset(dir, &p)?;
+            let name = full
+                .file_name()
+                .map(|n| n.to_string_lossy().to_string())
+                .unwrap_or_default();
+            let ext = full
+                .extension()
+                .and_then(|e| e.to_str())
+                .unwrap_or("")
+                .to_lowercase();
+            Ok(chat::Attachment {
+                path: p.replace('\\', "/"),
+                name,
+                kind: assets::kind_of(&ext).into(),
+            })
+        })
+        .collect()
+}
+
+/// Slaat een gesleept of geplakt bestand op in `assets/` van het project.
+#[tauri::command(async)]
+pub fn chat_attach(
+    db: State<Db>,
+    project_id: i64,
+    name: String,
+    data: String,
+) -> Result<assets::Saved> {
+    let dir = project_dir(&projects::get(&*db.conn()?, project_id)?)?;
+    assets::save_base64(&dir, &name, &data)
+}
+
+/// Miniatuur (data-URL) van een bijlage, of `None` als het geen kleine afbeelding is.
+#[tauri::command(async)]
+pub fn chat_asset_data(db: State<Db>, project_id: i64, path: String) -> Result<Option<String>> {
+    let dir = project_dir(&projects::get(&*db.conn()?, project_id)?)?;
+    assets::thumbnail(&dir, &path)
+}
+
+/// "Probeer opnieuw": stuurt het laatste bericht van de gebruiker nog eens (zonder een nieuwe ballon).
+#[tauri::command(async)]
+pub fn chat_retry(
+    app: tauri::AppHandle,
+    db: State<Db>,
+    mcp: State<McpManager>,
+    chat: State<ChatManager>,
+    profiles: State<Profiles>,
+    project_id: i64,
+) -> Result<()> {
+    let text = chat::store::last_user_text(&*db.conn()?, project_id)?
+        .ok_or_else(|| AppError::Invalid("Er is nog niets om opnieuw te proberen.".into()))?;
+    let atts = chat::store::last_user_attachments(&*db.conn()?, project_id)?;
+    let launch = prepare_chat(&app, &db, &mcp, &chat, &profiles, project_id)?;
+    chat.send_with(project_id, &text, false, &launch, &atts)
+}
+
+#[tauri::command]
+pub fn chat_mode_set(chat: State<ChatManager>, project_id: i64, mode: String) -> Result<()> {
+    chat.set_mode(project_id, &mode)
+}
+
+#[tauri::command]
+pub fn chat_busy(chat: State<ChatManager>, project_id: i64) -> bool {
+    chat.busy(project_id)
+}
+
+#[tauri::command]
+pub fn chat_stop(chat: State<ChatManager>, project_id: i64) {
+    chat.stop(project_id);
+}
+
+/// "Wissel van AI": nieuwe sessie met een scheiding in de chat. Heeft de nieuwe AI een chatweergave, dan krijgt hij PROJECT.md als overdracht.
+#[tauri::command(async)]
+#[allow(clippy::too_many_arguments)]
+pub fn chat_switch(
+    app: tauri::AppHandle,
+    db: State<Db>,
+    mcp: State<McpManager>,
+    chat: State<ChatManager>,
+    profiles: State<Profiles>,
+    project_id: i64,
+    provider: String,
+    account_id: Option<i64>,
+) -> Result<ChatTarget> {
+    let provider = Provider::parse(&provider)?;
+    let account = {
+        let c = db.conn()?;
+        let acc = account_id.map(|id| accounts::get(&c, id)).transpose()?;
+        if let Some(a) = &acc {
+            if a.provider != provider.as_str() {
+                return Err(AppError::Invalid(
+                    "Dit account hoort bij een andere AI.".into(),
+                ));
+            }
+        }
+        projects::set_default_account(&c, project_id, account_id)?;
+        acc
+    };
+    let divider = json!({ "kind": "switched", "provider": provider.as_str(), "label": account.as_ref().map(|a| a.label.clone()) });
+    chat.new_session(project_id, provider, account_id, divider);
+    let target = target_of(provider, &account, chat.mode(project_id));
+    if target.structured {
+        let launch = prepare_chat(&app, &db, &mcp, &chat, &profiles, project_id)?;
+        chat.send(project_id, cli::HANDOVER_PROMPT, false, &launch)?;
+    }
+    Ok(target)
+}
+
+#[tauri::command(async)]
+pub fn permission_answer(
+    chat: State<ChatManager>,
+    project_id: i64,
+    req_id: String,
+    allow: bool,
+) -> Result<()> {
+    chat.answer_permission(project_id, &req_id, allow)
+}
+
 // ---------- terminal ----------
 
 #[derive(Debug, Serialize)]
@@ -392,6 +922,7 @@ pub fn start_shell(
 #[tauri::command(async)]
 #[allow(clippy::too_many_arguments)]
 pub fn start_ai(
+    app: tauri::AppHandle,
     db: State<Db>,
     term: State<TerminalManager>,
     mcp: State<McpManager>,
@@ -423,7 +954,17 @@ pub fn start_ai(
 
     let mut warnings = Vec::new();
     let mut env = base_env();
-    let info = mcp.start(project.id, &project.naam, &dir);
+    // De CLI mag nooit op de MCP-server blokkeren: hooguit 4 s wachten, daarna starten we zonder MCP (met uitleg).
+    begin_mcp(&app, &project);
+    let info = mcp
+        .wait_ready(project.id, Duration::from_secs(4))
+        .unwrap_or_else(|| McpInfo {
+            state: "starting".into(),
+            port: None,
+            error: None,
+            kind: None,
+            log: vec![],
+        });
     if let (true, Some(port)) = (info.is_up(), info.port) {
         match mcp_config::ensure(provider, &dir) {
             Ok(_) => {
@@ -436,6 +977,8 @@ pub fn start_ai(
         }
     } else if let Some(e) = info.error {
         warnings.push(format!("MCP niet beschikbaar: {e}"));
+    } else if info.state == "starting" {
+        warnings.push("De MCP-server is nog niet klaar; de AI start zonder Studio-tools. Start de AI opnieuw zodra ‘MCP: gereed’ in de balk staat.".into());
     }
 
     let profile = account.as_ref().map(|a| PathBuf::from(&a.profile_dir));
@@ -522,4 +1065,414 @@ pub fn pty_snapshot(term: State<TerminalManager>, id: String) -> Result<Snapshot
 #[tauri::command]
 pub fn pty_close(term: State<TerminalManager>, id: String) -> Result<()> {
     term.close(&id)
+}
+
+#[cfg(test)]
+mod attachment_tests {
+    use super::*;
+
+    #[test]
+    fn bijlagepaden_worden_gecontroleerd_en_beperkt() {
+        let d = tempfile::tempdir().unwrap();
+        let png = [0x89u8, b'P', b'N', b'G', 0, 0, 0, 0];
+        let s = assets::save(d.path(), "foto.png", &png).unwrap();
+        let ok = attachments_from_paths(d.path(), vec![s.path.clone()]).unwrap();
+        assert_eq!(
+            (ok[0].path.as_str(), ok[0].kind.as_str()),
+            ("assets/foto.png", "image")
+        );
+        assert!(attachments_from_paths(d.path(), vec!["../buiten.png".into()]).is_err());
+        assert!(attachments_from_paths(d.path(), vec!["index.html".into()]).is_err());
+        assert!(
+            attachments_from_paths(d.path(), vec![s.path.clone(); MAX_ATTACHMENTS + 1])
+                .unwrap_err()
+                .to_string()
+                .contains("maximaal")
+        );
+    }
+}
+
+/// Roept een kit-commando van de runtime aan. De map met kits komt van Studio zelf (nooit van de UI).
+fn kit_call(
+    app: &tauri::AppHandle,
+    db: &Db,
+    mcp: &McpManager,
+    project_id: i64,
+    cmd: &str,
+    mut args: Value,
+) -> Result<Value> {
+    let project = projects::get(&*db.conn()?, project_id)?;
+    project_dir(&project)?;
+    begin_mcp(app, &project);
+    let ready = mcp.wait_ready(project_id, Duration::from_secs(15));
+    if !ready.map(|i| i.is_up()).unwrap_or(false) {
+        return Err(AppError::Invalid(
+            "De koppeling met Studio is er nog niet. Probeer het over een paar seconden opnieuw."
+                .into(),
+        ));
+    }
+    let packs = templates::bundled(app, "design-packs")?;
+    args["packs"] = json!(packs.to_string_lossy());
+    let timeout = timeout_for(cmd);
+    mcp.call(project_id, cmd, args, timeout)
+}
+
+#[tauri::command(async)]
+pub fn kit_list(
+    app: tauri::AppHandle,
+    db: State<Db>,
+    mcp: State<McpManager>,
+    project_id: i64,
+) -> Result<Value> {
+    kit_call(&app, &db, &mcp, project_id, "kit.list", json!({}))
+}
+
+#[tauri::command(async)]
+pub fn kit_current(
+    app: tauri::AppHandle,
+    db: State<Db>,
+    mcp: State<McpManager>,
+    project_id: i64,
+) -> Result<Value> {
+    kit_call(&app, &db, &mcp, project_id, "kit.current", json!({}))
+}
+
+/// Past een kit toe (met checkpoint vooraf en automatisch terugdraaien bij een fout). Ververst daarna de preview.
+#[tauri::command(async)]
+pub fn kit_apply(
+    app: tauri::AppHandle,
+    db: State<Db>,
+    mcp: State<McpManager>,
+    previews: State<PreviewManager>,
+    project_id: i64,
+    kit: String,
+    tailor: Option<Value>,
+) -> Result<Value> {
+    let dir = project_dir(&projects::get(&*db.conn()?, project_id)?)?;
+    previews.open(project_id, dir.clone()); // plan opnieuw bepalen (bijv. net een template erin gezet)
+    let out = kit_call(
+        &app,
+        &db,
+        &mcp,
+        project_id,
+        "kit.apply",
+        json!({ "kit": kit, "tailor": tailor }),
+    );
+    previews.open(project_id, dir);
+    out
+}
+
+#[tauri::command(async)]
+pub fn kit_scripts(
+    app: tauri::AppHandle,
+    db: State<Db>,
+    mcp: State<McpManager>,
+    project_id: i64,
+    packages: Vec<String>,
+) -> Result<Value> {
+    kit_call(
+        &app,
+        &db,
+        &mcp,
+        project_id,
+        "kit.scripts",
+        json!({ "packages": packages }),
+    )
+}
+
+/// Past hoofdkleur, afronding, ruimte of lettertype aan (meteen zichtbaar in de preview).
+#[tauri::command(async)]
+pub fn kit_tailor(
+    app: tauri::AppHandle,
+    db: State<Db>,
+    mcp: State<McpManager>,
+    project_id: i64,
+    tailor: Value,
+) -> Result<Value> {
+    kit_call(
+        &app,
+        &db,
+        &mcp,
+        project_id,
+        "kit.tailor",
+        json!({ "tailor": tailor }),
+    )
+}
+
+/// Scant de broncode op afwijkingen van het gekozen uiterlijk (losse kleuren, gewone knoppen, andere bibliotheken, …).
+#[tauri::command(async)]
+pub fn kit_check(
+    app: tauri::AppHandle,
+    db: State<Db>,
+    mcp: State<McpManager>,
+    project_id: i64,
+) -> Result<Value> {
+    kit_call(&app, &db, &mcp, project_id, "kit.check", json!({}))
+}
+
+/// Stelt in of de kit-check alleen waarschuwt of ook blokkeert ("waarschuwen" of "blokkeren").
+#[tauri::command(async)]
+pub fn kit_strictness(
+    app: tauri::AppHandle,
+    db: State<Db>,
+    mcp: State<McpManager>,
+    project_id: i64,
+    level: String,
+) -> Result<Value> {
+    kit_call(
+        &app,
+        &db,
+        &mcp,
+        project_id,
+        "kit.strictness",
+        json!({ "level": level }),
+    )
+}
+
+#[cfg(test)]
+mod setting_tests {
+    use super::*;
+
+    #[test]
+    fn alle_instellingen_van_de_ui_zijn_toegestaan_en_waarden_worden_gecontroleerd() {
+        for key in [
+            "preview_auto_switch",
+            "communication_mode",
+            "permission_mode",
+            "loop_threshold",
+            "theme",
+            "plan_default",
+            "settings_version",
+            "text_scale",
+            "default_project_dir",
+        ] {
+            assert!(UI_SETTINGS.contains(&key), "{key} ontbreekt in UI_SETTINGS");
+        }
+        assert!(
+            valid_setting("theme", "system")
+                && valid_setting("theme", "light")
+                && valid_setting("theme", "dark")
+        );
+        assert!(!valid_setting("theme", "paars"));
+        assert!(
+            valid_setting("permission_mode", "autonomous")
+                && !valid_setting("permission_mode", "alles")
+        );
+        assert!(valid_setting("plan_default", "1") && !valid_setting("plan_default", "ja"));
+        assert!(valid_setting("text_scale", "115") && !valid_setting("text_scale", "500"));
+        assert!(valid_setting("settings_version", "1") && !valid_setting("settings_version", "x"));
+        assert!(!valid_setting("default_project_dir", "a\0b"));
+        assert!(
+            valid_setting("loop_threshold", "3")
+                && !valid_setting("loop_threshold", "1")
+                && !valid_setting("loop_threshold", "abc")
+        );
+    }
+}
+
+/// "Download je project": maakt een zip (zonder node_modules, bouwuitvoer en geheimen) op de gekozen plek.
+#[tauri::command(async)]
+pub fn export_project(
+    db: State<Db>,
+    project_id: i64,
+    dest: String,
+) -> Result<crate::export::ExportResult> {
+    let dir = project_dir(&projects::get(&*db.conn()?, project_id)?)?;
+    crate::export::export_zip(&dir, Path::new(&dest))
+}
+
+/// Opdracht-verbeteraar: de AI schrijft een duidelijker voorstel. Er wordt niets verstuurd of opgeslagen.
+#[tauri::command(async)]
+pub fn improve_prompt(db: State<Db>, project_id: i64, text: String) -> Result<String> {
+    let (_project, provider, account) = {
+        let c = db.conn()?;
+        let p = projects::get(&c, project_id)?;
+        let (prov, acc) = resolve_target(&c, &p)?;
+        (p, prov, acc)
+    };
+    if provider != Provider::Claude {
+        return Err(AppError::Invalid(
+            "De opdracht-verbeteraar werkt nu alleen met Claude. Kies Claude voor dit project."
+                .into(),
+        ));
+    }
+    let binary = cli::resolve(provider.binary()).ok_or_else(|| {
+        AppError::Invalid(format!("{} is niet geïnstalleerd.", provider.binary()))
+    })?;
+    let mut env = base_env();
+    let profile = account.as_ref().map(|a| PathBuf::from(&a.profile_dir));
+    if let Some(p) = &profile {
+        std::fs::create_dir_all(p)?;
+    }
+    env.extend(cli::profile_env(provider, profile.as_deref()));
+    crate::improve::run(
+        &binary,
+        &env,
+        &std::env::temp_dir(),
+        &text,
+        Duration::from_secs(120),
+    )
+}
+#[cfg(test)]
+mod target_tests {
+    use super::*;
+    use std::sync::Mutex;
+
+    /// Regressie: `chat_target` hield de database-vergrendeling vast terwijl `chat.mode` hem opnieuw nam. Dat blokkeerde het
+    /// hele venster zodra je een project opende. De vergrendeling moet vrij zijn zodra de gegevens zijn opgehaald.
+    #[test]
+    fn target_gegevens_geeft_de_database_weer_vrij() {
+        let db = Db(Mutex::new(crate::db::open_in_memory().unwrap()));
+        let tmp = tempfile::tempdir().unwrap();
+        let p = projects::create(&db.conn().unwrap(), "App", tmp.path(), "leeg").unwrap();
+        let (provider, account) = target_gegevens(&db, p.id).unwrap();
+        assert_eq!(provider, Provider::Claude);
+        assert!(account.is_none());
+        assert!(db.0.try_lock().is_ok(), "de database is nog vergrendeld");
+        assert!(target_gegevens(&db, 9999).is_err());
+        assert!(
+            db.0.try_lock().is_ok(),
+            "de database is na een fout nog vergrendeld"
+        );
+    }
+}
+
+// ---------- werkruimte: pagina's, bestanden, foto's, signalen en gegevens ----------
+
+fn dir_of(db: &Db, project_id: i64) -> Result<PathBuf> {
+    project_dir(&projects::get(&*db.conn()?, project_id)?)
+}
+
+#[tauri::command(async)]
+pub fn project_pages(db: State<Db>, project_id: i64) -> Result<Vec<projectinfo::PageInfo>> {
+    projectinfo::pages(&dir_of(&db, project_id)?)
+}
+
+#[tauri::command(async)]
+pub fn project_files(db: State<Db>, project_id: i64) -> Result<Vec<projectinfo::FileEntry>> {
+    projectinfo::files(&dir_of(&db, project_id)?)
+}
+
+#[tauri::command(async)]
+pub fn project_file_read(
+    db: State<Db>,
+    project_id: i64,
+    path: String,
+) -> Result<projectinfo::FileContent> {
+    projectinfo::read_file(&dir_of(&db, project_id)?, &path)
+}
+
+#[tauri::command(async)]
+pub fn project_signals(db: State<Db>, project_id: i64) -> Result<projectinfo::Signals> {
+    Ok(projectinfo::signals(&dir_of(&db, project_id)?))
+}
+
+#[tauri::command(async)]
+pub fn assets_list(db: State<Db>, project_id: i64) -> Result<Vec<projectinfo::AssetInfo>> {
+    projectinfo::assets_list(&dir_of(&db, project_id)?)
+}
+
+#[tauri::command(async)]
+pub fn assets_delete(db: State<Db>, project_id: i64, path: String) -> Result<()> {
+    projectinfo::assets_delete(&dir_of(&db, project_id)?, &path)
+}
+
+#[tauri::command(async)]
+pub fn data_overview(db: State<Db>, project_id: i64) -> Result<Vec<projectinfo::DataFile>> {
+    projectinfo::data_overview(&dir_of(&db, project_id)?)
+}
+
+#[tauri::command(async)]
+pub fn data_rows(
+    db: State<Db>,
+    project_id: i64,
+    file: String,
+    table: String,
+    limit: Option<usize>,
+) -> Result<projectinfo::TableRows> {
+    projectinfo::table_rows(
+        &dir_of(&db, project_id)?,
+        &file,
+        &table,
+        limit.unwrap_or(50),
+    )
+}
+
+#[tauri::command(async)]
+pub fn project_description_get(db: State<Db>, project_id: i64) -> Result<String> {
+    Ok(projectinfo::description_get(&dir_of(&db, project_id)?))
+}
+
+#[tauri::command(async)]
+pub fn project_description_set(db: State<Db>, project_id: i64, text: String) -> Result<()> {
+    projectinfo::description_set(&dir_of(&db, project_id)?, &text)
+}
+
+/// Waar de app zijn gegevens bewaart (`lokaal` of `online`), uit PROJECT.md.
+#[tauri::command]
+pub fn project_storage_get(db: State<Db>, project_id: i64) -> Result<Option<String>> {
+    Ok(projectinfo::storage_get(&dir_of(&db, project_id)?).map(String::from))
+}
+
+#[tauri::command]
+pub fn project_storage_set(db: State<Db>, project_id: i64, keuze: String) -> Result<()> {
+    projectinfo::storage_set(&dir_of(&db, project_id)?, &keuze)
+}
+
+// Kleine vlaggen per project (bijvoorbeeld "online gezet", "Gegevens tonen"): alleen bekende sleutels en korte waarden.
+const PROJECT_FLAGS: &[&str] = &[
+    "online_gezet",
+    "gegevens_aan",
+    "meer_onderdelen",
+    "start_verborgen",
+    "route_plan",
+    "over_idee",
+    "over_plan",
+    "over_uiterlijk",
+    "over_bouwen",
+    "over_aanpassen",
+    "over_gegevens",
+    "over_testen",
+    "over_delen",
+];
+
+fn flag_key(project_id: i64, key: &str) -> Result<String> {
+    if !PROJECT_FLAGS.contains(&key) {
+        return Err(AppError::Invalid("Onbekende projectinstelling.".into()));
+    }
+    Ok(format!("project:{project_id}:{key}"))
+}
+
+#[tauri::command]
+pub fn project_flags(
+    db: State<Db>,
+    project_id: i64,
+) -> Result<std::collections::HashMap<String, String>> {
+    let c = db.conn()?;
+    let mut out = std::collections::HashMap::new();
+    for k in PROJECT_FLAGS {
+        if let Some(v) = crate::db::get_setting(&c, &flag_key(project_id, k)?)? {
+            out.insert((*k).to_string(), v);
+        }
+    }
+    Ok(out)
+}
+
+#[tauri::command]
+pub fn project_flag_set(
+    db: State<Db>,
+    project_id: i64,
+    key: String,
+    value: Option<String>,
+) -> Result<()> {
+    let k = flag_key(project_id, &key)?;
+    let c = db.conn()?;
+    match value {
+        Some(v) if v.len() <= 20 => crate::db::set_setting(&c, &k, &v),
+        Some(_) => Err(AppError::Invalid("Die waarde is te lang.".into())),
+        None => {
+            c.execute("DELETE FROM settings WHERE key = ?1", [&k])?;
+            Ok(())
+        }
+    }
 }

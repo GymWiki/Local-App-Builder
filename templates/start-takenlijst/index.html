@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mijn takenlijst</title>
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="stijl.css" />
+</head>
+<body>
+  <main>
+    <h1>Mijn takenlijst</h1>
+    <p id="telling" aria-live="polite"></p>
+    <form id="nieuw" class="rij">
+      <label for="tekst" class="sr" style="position:absolute;left:-9999px">Nieuwe taak</label>
+      <input id="tekst" placeholder="Wat moet er gebeuren?" autocomplete="off" required />
+      <button class="hoofd" type="submit">Toevoegen</button>
+    </form>
+    <ul id="lijst" class="lijst"></ul>
+    <p id="leeg" class="leeg" hidden>Je hebt nog geen taken. Voeg je eerste taak toe.</p>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>

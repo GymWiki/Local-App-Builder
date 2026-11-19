@@ -3,7 +3,7 @@
 Lokale desktop-app om apps te maken met je eigen AI-CLI's. Fase 1: projecten en SQLite. Fase 2: terminal, lokale MCP-server, AI-accounts. Fase 3: de feedbackloop (preview, checks, screenshots, checkpoints).
 
 ## Vereisten
-- Node.js 20+ (ook nodig tijdens gebruik: de MCP-server draait op Node; staat het op een ongebruikelijke plek, zet dan `STUDIO_NODE_PATH` naar `node.exe`), Rust (stable), `git` in je PATH
+- Node.js 22.22+ of 24.15+ om te ontwikkelen (`npm install` weigert oudere versies; de test-onderdelen vragen dat). Tijdens gebruik van Studio zelf is Node.js 20+ genoeg: de MCP-server draait op Node; staat het op een ongebruikelijke plek, zet dan `STUDIO_NODE_PATH` naar `node.exe`), Rust (stable), `git` in je PATH
 - Minstens één AI-CLI: Claude Code of Gemini CLI (Studio toont installatie-uitleg als hij ontbreekt)
 - Tauri-systeemvereisten: https://v2.tauri.app/start/prerequisites/
   - Linux: `libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libssl-dev`
@@ -32,8 +32,28 @@ De database (`studio.db`) staat in de app-datamap van het besturingssysteem (`nl
 - Bronnen en verificatie: `docs/cli-notes.md`.
 - Claude vraagt bij de eerste start om goedkeuring van de projectserver uit `.mcp.json`; dat is bedoeld gedrag.
 
+## Chat-weergave (fase 5)
+Studio is gemaakt voor mensen die schrikken van een terminal. Het scherm heeft de tabs **Maken**, **Publiceren** en **Geavanceerd**:
+- **Maken**: links het gesprek met de AI, rechts de preview (zie hieronder). Grote invoer ("Beschrijf wat je wilt maken..."), tekstballonnen, een statusregel ("Bezig met nadenken", "Bestanden aanpassen", "Controleert of alles werkt", "Klaar") en snelle acties ("Maak het mooier", "Maak het mobielvriendelijk", "Er klopt iets niet", "Wat is er veranderd?").
+- **Actiekaartjes** vertalen wat de AI doet naar mensentaal ("Pagina gemaakt: index.html", "Foutje gevonden en hersteld"); commando's en paden zitten achter *Details*.
+- **Toestemmingen** lopen via een MCP-tool (`permission_prompt`, `--permission-prompt-tool`) en verschijnen als dialoog met **Ja**/**Nee**. Kies bij *Instellingen* tussen **Vraag altijd** en **Vraag alleen bij belangrijke dingen**; gevaarlijke acties (verwijderen, publiceren, buiten het project schrijven) vragen altijd.
+- **Fouten** in mensentaal met **Probeer opnieuw** en uitklapbare technische details.
+- **Geschiedenis en sessie** staan per project in SQLite; bij heropenen hervat Studio de sessie (`--resume`). **Wissel van AI** start een nieuwe sessie met PROJECT.md als overdracht.
+- **Geavanceerd** (en de knop *Technische weergave* in de chat) bevat de ruwe terminal. CLI's zonder gebouwde/geverifieerde gestructureerde uitvoer (nu: Gemini en Codex) vallen terug op de terminal.
+- **Instellingen → Eenvoudige taal / Technisch**: in de eenvoudige stand schrijft Studio een afgebakend blok *Zo praat je met de gebruiker* in `CLAUDE.md`, `GEMINI.md` en `AGENTS.md` én een skill `.claude/skills/eenvoudig-communiceren/SKILL.md`. In de technische stand verdwijnt dat blok weer. Eigen tekst in die bestanden blijft altijd staan; een eigen skill met dezelfde naam wordt nooit overschreven.
+
+## Zero-config preview (fase 4)
+Studio detecteert bij het openen van een project én bij elke bestandswijziging (file watcher) wat het is:
+- **Alleen `index.html`** (root of `public/`): ingebouwde statische server in Rust, alleen `127.0.0.1` op een willekeurige poort, zonder Node.js. Wijzigingen verversen de pagina automatisch (Server-Sent Events + een klein script dat in de HTML wordt geplakt). Dotfiles (`.env`, `.git`), `..` en symlinks naar buiten de map worden niet geserveerd.
+- **`package.json` met `dev`- of `start`-script**: Studio draait het script (via de Node-runtime), leest de poort uit de uitvoer (Vite, Next, Astro, CRA, …) en toont die URL. Ontbreken de dependencies, dan meldt Studio dat (met knop **npm install uitvoeren**) en start de preview zodra ze er zijn. Frameworks zonder eigen hot reload worden bij een wijziging herladen.
+- **Flutter / overig**: een duidelijke melding met wat er nodig is.
+- **`studio.json` met `dev`** blijft leidend.
+- **Vertrouwen**: de eerste keer dat Studio scripts uit `package.json` ziet, worden die vertrouwd (het is jouw project); wijzigen ze daarna, dan vraagt Studio eerst opnieuw om goedkeuring. Dit voorkomt dat een AI-wijziging in package.json ongezien commando's laat draaien.
+- **Preview beschikbaar**: zodra er voor het eerst iets draait, toont Studio een melding met knop, of wisselt automatisch naar de preview-tab (instelbaar onderaan de Preview-tab).
+- **MCP**: `get_preview_screenshot`, `get_console_errors` en `run_checks` werken ook voor de statische modus (checks: html aanwezig, geen kapotte lokale links, geen console-fouten).
+
 ## Fase 3: de feedbackloop
-Zet in de projectmap een `studio.json` (de Preview-tab maakt een voorbeeld aan):
+Alleen voor afwijkende situaties: zet in de projectmap een `studio.json` (leidend boven de detectie):
 ```json
 { "dev": "npm run dev", "build": "npm run build", "lint": "npm run lint", "test": "npm test",
   "previewUrl": "http://localhost:5173", "timeoutSec": 300 }
@@ -47,6 +67,9 @@ Zet in de projectmap een `studio.json` (de Preview-tab maakt een voorbeeld aan):
 - De zijbalk toont de laatste check-resultaten en de tijdlijn.
 
 ## Problemen met de MCP-server
+- De MCP-server start op een **achtergrondthread**: terminal, preview en git werken meteen, ook als de server faalt. De terminalbalk toont ‘MCP: starten…’ en daarna ‘gereed’ of de echte foutreden met **Opnieuw proberen**.
+- In een dev-build (`tauri dev`) staat het exacte startcommando in de console van `tauri dev` (`[studio] start: …`; het token wordt nooit getoond) en als eerste regel in de logregels van de foutmelding.
+- Paden naar Node worden schoongemaakt (geen `\\?\C:\…`, geen `..`, geen gemengde scheidingstekens; werkt met spaties). Een `\\?\`-pad laat Node op Windows crashen met `EISDIR … lstat 'C:'`.
 - `npm run tauri dev` en de release-build draaien eerst `scripts/mcp-prepare.mjs`: installeert zo nodig de dependencies van `mcp-server/` en bouwt `dist/index.mjs`.
 - Studio zoekt Node in PATH en op bekende plekken (Program Files, nvm, fnm, Volta, scoop, Homebrew), start `node --version` en eist versie 20+.
 - Mislukt het starten, dan toont de terminalbalk en de Preview-tab de echte reden (Node ontbreekt/te oud, serverbestand ontbreekt, crash met laatste logregels, time-out) en een knop **Opnieuw proberen**.

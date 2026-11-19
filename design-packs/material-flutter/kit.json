@@ -1,0 +1,52 @@
+{
+  "id": "material-flutter",
+  "naam": "Material (Flutter)",
+  "beschrijving": "Het vertrouwde Material 3-uiterlijk van Android-apps, ingebouwd in Flutter. Jij kiest kleuren en afronding; de AI gebruikt de standaard Material-onderdelen.",
+  "label": "Voor Flutter-apps",
+  "type": "bestanden",
+  "extraPakketten": [],
+  "bron": "https://github.com/flutter/flutter",
+  "licentie": "BSD-3-Clause",
+  "attributie": {
+    "verplicht": false,
+    "tekst": ""
+  },
+  "stacks": [
+    "flutter"
+  ],
+  "installatiestappen": [
+    "Er wordt geen pakket geïnstalleerd: Material zit al in Flutter.",
+    "Studio maakt lib/theme/app_theme.dart uit je kleuren, afronding en lettertype (design/tokens.json).",
+    "De AI zet in MaterialApp: theme: AppTheme.licht() en darkTheme: AppTheme.donker()."
+  ],
+  "installatiescripts": false,
+  "setup": {
+    "uitvoer": "dart",
+    "stijlImports": [],
+    "provider": null,
+    "tokenMap": {},
+    "tokenMapDonker": {},
+    "rootAttributen": {},
+    "vitePlugins": [],
+    "alias": {}
+  },
+  "tokens": "tokens.json",
+  "kitcontext": {
+    "catalogus": "handmatig",
+    "maxTokens": 6000,
+    "importPad": "package:flutter/material.dart",
+    "kern": []
+  },
+  "componenten": "_shared/material/components",
+  "regels": "rules.md",
+  "preview": "preview.png",
+  "voorbeeld": "voorbeeld.dart",
+  "kitCheck": {
+    "vervangNative": {},
+    "verbodenImports": [
+      "package:cupertino_icons/",
+      "package:get/",
+      "package:flutter_bootstrap"
+    ]
+  }
+}

@@ -7,6 +7,9 @@ export interface ConsoleEntry {
   at: string;
 }
 
+/** Hoger dan dit knippen we een schermafbeelding van de hele pagina af (pixels). */
+export const MAX_FULLPAGE_HOOGTE = 2400;
+
 export type Viewport = "desktop" | "mobile";
 const VIEWPORTS = {
   desktop: { viewport: { width: 1280, height: 800 } },
@@ -19,9 +22,11 @@ type Page = any;
 type Browser = any;
 
 const MAX_ENTRIES = 200;
+/** Browsers vragen zelf om /favicon.ico; een ontbrekend icoon is geen fout van het project. */
+const isFavicon = (url?: string) => !!url && /\/favicon\.ico(?:[?#].*)?$/i.test(url);
 const NAV_TIMEOUT = 15_000;
 
-async function launchBrowser(): Promise<Browser> {
+export async function launchBrowser(): Promise<Browser> {
   let pw: any;
   try {
     pw = await import("playwright-core");
@@ -76,16 +81,17 @@ export class PreviewObserver {
 
   private attach(page: Page, origin: string): void {
     page.on("console", (m: any) => {
-      if (m.type() === "error") this.add({ kind: "console", text: m.text().slice(0, 1000), url: m.location()?.url });
+      const loc = m.location()?.url;
+      if (m.type() === "error" && !isFavicon(loc)) this.add({ kind: "console", text: m.text().slice(0, 1000), url: loc });
     });
     page.on("pageerror", (e: Error) => this.add({ kind: "pageerror", text: String(e.stack ?? e.message).slice(0, 1500) }));
     page.on("requestfailed", (r: any) => {
       const failure = r.failure()?.errorText ?? "mislukt";
-      if (failure.includes("ERR_ABORTED")) return; // genegeerde navigatie/annulering
+      if (failure.includes("ERR_ABORTED") || isFavicon(r.url())) return; // genegeerde navigatie/annulering
       this.add({ kind: "network", text: `${r.method()} ${r.url()} → ${failure}`, url: r.url() });
     });
     page.on("response", (r: any) => {
-      if (r.status() >= 400 && r.url().startsWith(origin)) {
+      if (r.status() >= 400 && r.url().startsWith(origin) && !isFavicon(r.url())) {
         this.add({ kind: "network", text: `${r.request().method()} ${r.url()} → HTTP ${r.status()}`, url: r.url() });
       }
     });
@@ -98,6 +104,33 @@ export class PreviewObserver {
       throw new Error(`Preview niet bereikbaar op ${url}. Draait de dev-server? Start hem in de Preview-tab. (${String((e as Error).message).split("\n")[0]})`);
     }
     await page.waitForTimeout(500); // late fouten na de load
+  }
+
+  /** Screenshot van één onderdeel (CSS-selector) op een pagina van de preview. Valt terug op het zichtbare scherm als het onderdeel er niet (meer) is. */
+  async elementShot(selector: string, pagePath = "/"): Promise<{ data: Buffer; found: boolean }> {
+    const base = await this.getUrl();
+    const target = new URL(pagePath, base);
+    if (target.origin !== new URL(base).origin) throw new Error("Pad valt buiten de preview-URL.");
+    const browser = await this.ensureBrowser();
+    const ctx = await browser.newContext(VIEWPORTS.desktop);
+    try {
+      const page = await ctx.newPage();
+      page.setDefaultTimeout(NAV_TIMEOUT);
+      await this.goto(page, target.toString());
+      let loc;
+      try {
+        loc = page.locator(selector).first();
+        if ((await loc.count()) === 0) throw new Error("niet gevonden");
+      } catch {
+        const data: Buffer = await page.screenshot({ type: "jpeg", quality: 70, timeout: NAV_TIMEOUT });
+        return { data, found: false };
+      }
+      await loc.scrollIntoViewIfNeeded({ timeout: 3000 }).catch(() => undefined);
+      const data: Buffer = await loc.screenshot({ type: "jpeg", quality: 70, timeout: NAV_TIMEOUT });
+      return { data, found: true };
+    } finally {
+      await ctx.close().catch(() => undefined);
+    }
   }
 
   async screenshot(opts: { viewport?: Viewport; path?: string; fullPage?: boolean }): Promise<{ data: Buffer; width: number; height: number; url: string }> {
@@ -113,8 +146,16 @@ export class PreviewObserver {
       this.attach(page, new URL(base).origin);
       await this.goto(page, target.toString());
       // JPEG houdt het resultaat klein genoeg voor de uitvoerlimiet van de AI-CLI.
-      const data: Buffer = await page.screenshot({ type: "jpeg", quality: 70, fullPage: opts.fullPage ?? false, timeout: NAV_TIMEOUT });
-      return { data, width: vp.viewport.width, height: vp.viewport.height, url: target.toString() };
+      // Een volledige pagina kan enorm lang zijn; dat kost veel AI-gebruik zonder dat het meer helpt. We kappen af op MAX_FULLPAGE_HOOGTE.
+      let hoogte: number = vp.viewport.height;
+      let clip: { x: number; y: number; width: number; height: number } | undefined;
+      if (opts.fullPage) {
+        const volledig = await page.evaluate(() => document.documentElement.scrollHeight).catch(() => vp.viewport.height);
+        hoogte = Math.max(vp.viewport.height, Math.min(volledig, MAX_FULLPAGE_HOOGTE));
+        if (volledig > MAX_FULLPAGE_HOOGTE) clip = { x: 0, y: 0, width: vp.viewport.width, height: MAX_FULLPAGE_HOOGTE };
+      }
+      const data: Buffer = await page.screenshot({ type: "jpeg", quality: 70, fullPage: opts.fullPage ?? false, ...(clip ? { clip } : {}), timeout: NAV_TIMEOUT });
+      return { data, width: vp.viewport.width, height: hoogte, url: target.toString() };
     } finally {
       await ctx.close().catch(() => undefined);
     }

@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "identifier": "nl.studio.app",
   "build": {
-    "beforeDevCommand": "npm run mcp:build && npm run dev",
+    "beforeDevCommand": "node scripts/dev-check.mjs && npm run mcp:build && npm run dev",
     "devUrl": "http://localhost:1420",
     "beforeBuildCommand": "npm run build",
     "frontendDist": "../dist"
@@ -16,7 +16,8 @@
         "width": 1280,
         "height": 800,
         "minWidth": 900,
-        "minHeight": 600
+        "minHeight": 600,
+        "dragDropEnabled": false
       }
     ],
     "security": {
@@ -35,7 +36,20 @@
     ],
     "resources": {
       "../mcp-server/dist/index.mjs": "mcp-server/index.mjs",
+      "../design-packs": "design-packs",
+      "../templates": "templates",
       "../mcp-server/node_modules/playwright-core": "mcp-server/node_modules/playwright-core"
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDhGQkRCN0U1REQ3MjJFQzAKUldUQUxuTGQ1YmU5anlhUkpFeTlOdmx2cEptYWF5WmNrZ1J5VGcxOGlQempnKzd1OTdEaUpyZmoK",
+      "endpoints": [
+        "https://github.com/GymWiki/Local-App-Builder/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
+      }
     }
   }
 }

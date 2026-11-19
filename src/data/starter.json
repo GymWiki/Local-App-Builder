@@ -1,0 +1,15 @@
+{
+  "voorbeelden": [
+    { "id": "kapper", "titel": "Website voor een kapper", "uitleg": "Met openingstijden, prijzen en een knop om een afspraak te maken.", "prompt": "Maak een website voor een kapsalon. Zet er een mooie kop met de naam bovenaan, de openingstijden, een prijslijst, een paar foto-plekken en een duidelijke knop ‘Afspraak maken’. Gebruik rustige, vriendelijke kleuren." },
+    { "id": "afspraak", "titel": "Afspraakformulier", "uitleg": "Een formulier waarmee bezoekers een datum en tijd kiezen.", "prompt": "Maak een afspraakformulier met naam, e-mailadres, telefoonnummer, een datum, een tijd en een opmerking. Laat vriendelijke foutmeldingen zien als iets ontbreekt en een bedankt-melding na het versturen." },
+    { "id": "todo", "titel": "Takenlijst-app", "uitleg": "Taken toevoegen, afvinken en weghalen. Blijft bewaard.", "prompt": "Maak een takenlijst-app. Je kunt taken toevoegen, afvinken en weghalen. De taken blijven bewaard als je de pagina sluit. Houd het ontwerp simpel en groot genoeg om makkelijk te bedienen." },
+    { "id": "portfolio", "titel": "Portfolio-pagina", "uitleg": "Laat je werk zien met foto's en een korte uitleg over jou.", "prompt": "Maak een persoonlijke portfolio-pagina met een korte introductie over mij, een rooster met werkvoorbeelden (met plek voor een foto en een titel) en onderaan contactgegevens." },
+    { "id": "menu", "titel": "Menukaart voor een restaurant", "uitleg": "Gerechten in groepen, met prijzen en een telefoonnummer.", "prompt": "Maak een menukaart voor een restaurant met groepen als voorgerechten, hoofdgerechten en desserten. Zet bij elk gerecht een korte omschrijving en de prijs. Maak het goed leesbaar op een telefoon." },
+    { "id": "winkel", "titel": "Kleine webwinkel", "uitleg": "Producten in een rooster, met een winkelmandje.", "prompt": "Maak een eenvoudige webwinkel met een rooster van producten (foto-plek, naam, prijs), een knop ‘In mandje’ en een mandje dat laat zien wat je gekozen hebt en het totaalbedrag. Er hoeft nog niet betaald te kunnen worden." }
+  ],
+  "snelleActies": [
+    { "id": "mooier", "label": "Maak het mooier", "prompt": "Maak het ontwerp mooier en rustiger: let op kleuren, ruimte tussen onderdelen en een prettig lettertype. Verander niets aan de inhoud." },
+    { "id": "mobiel", "label": "Maak het mobielvriendelijk", "prompt": "Zorg dat alles er ook op een telefoon goed uitziet en makkelijk te bedienen is. Controleer het daarna met een schermafbeelding op telefoonformaat." },
+    { "id": "klopt", "label": "Er klopt iets niet", "prompt": "Er klopt iets niet. Kijk eerst zelf in de preview en naar eventuele foutmeldingen, zoek wat er mis is en los het op. Leg daarna in gewone woorden uit wat er aan de hand was." }
+  ]
+}

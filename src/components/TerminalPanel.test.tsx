@@ -7,7 +7,7 @@ import * as api from "../lib/api";
 vi.mock("../lib/api");
 vi.mock("./TerminalView", () => ({ default: ({ sessionId }: { sessionId: string }) => <div data-testid={`term-${sessionId}`} /> }));
 
-const project: Project = { id: 1, naam: "P", pad: "/p", template: "leeg", created_at: "", default_account_id: null };
+const project: Project = { id: 1, naam: "P", pad: "/p", template: "leeg", created_at: "", default_account_id: null, last_used_at: null };
 const status = (installed: boolean): CliStatus => ({
   provider: "claude",
   installed,
@@ -39,7 +39,7 @@ describe("TerminalPanel", () => {
 
   it("toont de MCP-status en dat er geen AI actief is", () => {
     setup({ state: "connected", port: 1, error: null });
-    expect(screen.getByTestId("mcp-badge")).toHaveTextContent("MCP: verbonden");
+    expect(screen.getByTestId("mcp-badge")).toHaveTextContent("AI-koppeling: verbonden");
     expect(screen.getByTestId("account-badge")).toHaveTextContent("Geen AI actief");
   });
 

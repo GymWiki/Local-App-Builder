@@ -1,3 +1,7 @@
+import { samenvattingChecks, ontdubbel, logsKort } from "./uitvoer.js";
+import { ALLE_GROEPEN, type Groepen } from "./groepen.js";
+export { ALLE_GROEPEN, type Groepen } from "./groepen.js";
+import { securityCheck } from "./security.js";
 import { execFile } from "node:child_process";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -9,6 +13,7 @@ import type { Runtime } from "./runtime.js";
 
 const exec = promisify(execFile);
 export const NOTES_FILE = "PROJECT.md";
+export const MAX_TITLE_WORDS = 8;
 const MAX_NOTES_BYTES = 1_000_000;
 
 export interface ProjectCtx {
@@ -64,7 +69,7 @@ export async function gitStatus(ctx: ProjectCtx): Promise<string> {
   }
 }
 
-export function registerTools(server: McpServer, ctx: ProjectCtx, record: (r: CallRecord) => void): void {
+export function registerTools(server: McpServer, ctx: ProjectCtx, record: (r: CallRecord) => void, groepen: Groepen = ALLE_GROEPEN): void {
   async function run(tool: string, summary: string, fn: () => Promise<string | Content[]>): Promise<Result> {
     const start = Date.now();
     try {
@@ -107,29 +112,201 @@ export function registerTools(server: McpServer, ctx: ProjectCtx, record: (r: Ca
       }),
   );
 
+  // De AI meldt dat de app opslag nodig heeft (bijvoorbeeld bestellingen). Studio toont dan het onderdeel "Gegevens" in het menu.
+  // Alleen een klein bestand in .studio/ binnen het project; er wordt niets geïnstalleerd of uitgevoerd.
+  server.registerTool(
+    "needs_data",
+    {
+      description:
+        "Meld aan Studio dat deze app gegevens moet onthouden (zoals bestellingen, inschrijvingen of gebruikers) en dus opslag nodig heeft. Studio laat de gebruiker dan het onderdeel ‘Gegevens’ zien. Geef in `reden` één korte zin in gewone taal. Er wordt niets aangemaakt of geïnstalleerd; kies zelf eerst met de gebruiker hoe de opslag moet komen.",
+      inputSchema: { reden: z.string().min(1).max(300) },
+    },
+    ({ reden }) =>
+      run("needs_data", `len=${reden.length}`, async () => {
+        const dir = await resolveInside(ctx.projectDir, ".studio");
+        await mkdir(dir, { recursive: true });
+        const file = await resolveInside(ctx.projectDir, ".studio/needs-data.json");
+        await writeFile(file, JSON.stringify({ reden: reden.slice(0, 300), op: new Date().toISOString() }) + "\n");
+        return "Genoteerd: Studio laat de gebruiker nu het onderdeel ‘Gegevens’ zien.";
+      }),
+  );
+
   const rt = ctx.runtime;
   if (!rt) return;
+
+  // Koppelingen met diensten van de gebruiker (GitHub, Vercel, Supabase). De AI ziet alleen óf iets gekoppeld is, nooit sleutels.
+  server.registerTool(
+    "koppelingen_status",
+    {
+      description:
+        "Toont welke diensten de gebruiker aan Studio heeft gekoppeld (github, vercel, supabase) en of die werken. Geeft nooit sleutels of accountgegevens. Is een dienst niet gekoppeld, zeg dat dan in gewone woorden en gebruik `koppeling_voorstellen`; probeer nooit zelf een sleutel te vragen of te gebruiken.",
+      inputSchema: {},
+    },
+    () =>
+      run("koppelingen_status", "", async () => {
+        const r = (await rt.hostCall("connect.status", {}, 15_000)) as { id: string; gekoppeld: boolean; werkt: boolean }[];
+        return JSON.stringify({ koppelingen: r });
+      }),
+  );
+
+  server.registerTool(
+    "koppeling_voorstellen",
+    {
+      description:
+        "Laat de gebruiker in het gesprek een knop ‘Verbinden’ zien voor een dienst die nodig is (github, vercel of supabase). De gebruiker verbindt altijd zelf; er gebeurt niets zonder zijn klik. Geef in `reden` één korte zin in gewone taal waarom dit nodig is.",
+      inputSchema: { dienst: z.enum(["github", "vercel", "supabase"]), reden: z.string().min(1).max(200) },
+    },
+    ({ dienst, reden }) =>
+      run("koppeling_voorstellen", `dienst=${dienst}`, async () => {
+        await rt.hostCall("connect.propose", { dienst, reden: reden.slice(0, 200) }, 15_000);
+        return "De knop staat in het gesprek. Wacht tot de gebruiker heeft verbonden; vraag nooit zelf om een sleutel.";
+      }),
+  );
+
+  // ---- Supabase (de gebruiker koppelt zijn eigen account). Studio voert alles zelf uit en bewaart alle sleutels; de AI krijgt alleen een uitslag.
+  type HostReply = { status: "uitgevoerd" | "geweigerd" | "mislukt"; tekst: string; data?: unknown };
+  const groepVan = (naam: string): keyof Groepen | null => (naam.startsWith("db_") ? "db" : naam.startsWith("github_") || naam === "git_backup" ? "github" : naam.startsWith("vercel_") ? "vercel" : null);
+  const dbTool = (naam: string, cmd: string, beschrijving: string, inputSchema: z.ZodRawShape, schrijft: boolean) => {
+    const groep = groepVan(naam);
+    if (groep && !groepen[groep]) return;
+    server.registerTool(naam, { description: beschrijving, inputSchema }, (args: Record<string, unknown>) =>
+      run(naam, schrijft ? "schrijfactie" : "lezen", async () => {
+        const r = (await rt.hostCall(cmd, args, schrijft ? 12 * 60 * 1000 : 60_000)) as HostReply;
+        const kop = r.status === "uitgevoerd" ? "UITGEVOERD" : r.status === "geweigerd" ? "GEWEIGERD" : "MISLUKT";
+        const tekst = `${kop}: ${r.tekst}${r.data === undefined || r.data === null ? "" : `\n${JSON.stringify(r.data)}`}`;
+        // Een geweigerde of mislukte actie is voor de AI een fout, zodat hij niet doet alsof het gelukt is.
+        if (r.status !== "uitgevoerd") throw new Error(tekst);
+        return tekst;
+      }),
+    );
+  };
+  const SQL = z.string().min(1).max(100_000);
+  const UITLEG = z.string().max(500).optional();
+  const NAAM = z.string().min(1).max(80);
+  const LEES = "Alleen lezen en altijd toegestaan. ";
+  const SCHRIJF = "Studio voert dit zelf uit met de gekoppelde Supabase-account van de gebruiker; je krijgt nooit sleutels te zien. Afhankelijk van het bedieningsniveau en de risicoklasse vraagt Studio de gebruiker om bevestiging in de app (dat kan even duren) of weigert het. De uitslag begint met UITGEVOERD, GEWEIGERD of MISLUKT: doe nooit alsof een geweigerde actie is gelukt. ";
+  // ---- Projectkaart: gericht opvragen in plaats van bestanden lezen. Antwoorden zijn kort en begrensd; de kaart kan achterlopen, dus lees bij twijfel het echte bestand.
+  const kaartTool = (naam: string, cmd: string, beschrijving: string, inputSchema: z.ZodRawShape) =>
+    server.registerTool(naam, { description: beschrijving, inputSchema }, (args: Record<string, unknown>) =>
+      run(naam, "lezen", async () => {
+        const r = (await rt.hostCall(cmd, args, 60_000)) as { tekst?: string };
+        const t = String(r?.tekst ?? "");
+        return t.length > 12_000 ? `${t.slice(0, 12_000)}\n… ingekort; vraag gerichter of blader met vanaf/pagina.` : t;
+      }),
+    );
+  kaartTool("project_kaart", "kaart.kaart", "Compact overzicht van het project: schermen, routes, bestanden met hun doel en de database. Begin hiermee in plaats van mappen door te lezen. Met uitgebreid=true krijg je meer detail per pagina.", {
+    uitgebreid: z.boolean().optional(),
+    pagina: z.number().int().min(1).max(500).optional(),
+  });
+  kaartTool("zoek_symbool", "kaart.zoek_symbool", "Waar staat een functie, component of type en welke bestanden gebruiken het? Geeft bestand en regelnummer. Lees daarna alleen dat stuk van het bestand.", {
+    naam: z.string().min(1).max(80),
+    vanaf: z.number().int().min(0).max(10_000).optional(),
+    limiet: z.number().int().min(1).max(40).optional(),
+  });
+  kaartTool("bestanden_voor_taak", "kaart.bestanden_voor_taak", "Geeft op basis van een korte omschrijving van de taak de 3 tot 8 meest waarschijnlijke bestanden, met reden. Gebruik dit vóór je zelf gaat zoeken.", {
+    omschrijving: z.string().min(2).max(300),
+    limiet: z.number().int().min(1).max(8).optional(),
+  });
+  kaartTool("afhankelijkheden", "kaart.afhankelijkheden", "Wat gebruikt dit bestand en welke bestanden raakt een wijziging erin? Handig om te zien wat je kunt breken.", {
+    pad: z.string().min(1).max(300),
+    vanaf: z.number().int().min(0).max(10_000).optional(),
+    limiet: z.number().int().min(1).max(40).optional(),
+  });
+  kaartTool("schema_database", "kaart.schema", "De databasetabellen en kolommen zoals die uit de migraties van het project volgen. Geen gegevens, alleen de opbouw.", {});
+  kaartTool("kit_componenten", "kaart.kit", "Welke kit-componenten (components/ui) heeft dit project en wat leveren ze? Geef namen mee voor alleen die onderdelen.", {
+    namen: z.array(z.string().min(1).max(60)).max(20).optional(),
+  });
+  // ---- GitHub-back-up. Alleen vooruit sturen; geen tool voor force-push, verwijderen of instellingen. Het token blijft in Studio.
+  const GITHUB = "Studio voert dit zelf uit met het GitHub-account van de gebruiker; je krijgt nooit een token te zien. ";
+  dbTool("github_status", "github.status", LEES + "Is GitHub gekoppeld, onder welke accountnaam, bij welke repository hoort dit project, wanneer was de laatste back-up, hoeveel nieuwe versies zijn er sinds die back-up en zijn de versies uiteengelopen (ja/nee)?", {}, false);
+  dbTool("github_list_repos", "github.list_repos", LEES + "De namen en zichtbaarheid (privé of openbaar) van de repositories van de gebruiker. Geen inhoud, geen tokens.", {}, false);
+  dbTool(
+    "git_backup",
+    "github.backup",
+    GITHUB +
+      "Stuurt nieuwe opgeslagen versies naar de GitHub-back-up van dit project (alleen vooruit; er wordt nooit iets overschreven of verwijderd). Werkt alleen als de gebruiker de back-up al heeft ingesteld. Studio controleert eerst op geheimen en te grote bestanden en blokkeert als die er zijn. Afhankelijk van de instelling vraagt Studio de gebruiker om bevestiging in de app. De uitslag begint met UITGEVOERD, GEWEIGERD of MISLUKT: doe nooit alsof een geweigerde back-up is gelukt, en probeer nooit te forceren als de versies zijn uiteengelopen.",
+    {},
+    true,
+  );
+  // ---- Online zetten met Vercel. Studio voert alles zelf uit met het account van de gebruiker; je krijgt nooit een token of een waarde te zien.
+  const VERCEL = "Studio voert dit zelf uit met het Vercel-account van de gebruiker; je krijgt nooit een token of de waarde van een variabele te zien. Studio controleert eerst of alles groen is. De uitslag begint met UITGEVOERD, GEWEIGERD of MISLUKT: doe nooit alsof een geweigerde of mislukte actie is gelukt. ";
+  dbTool("vercel_status", "vercel.status", LEES + "Is Vercel gekoppeld, hoe heet het project, wat is het adres van het voorbeeld en van de echte site, wat was de laatste uitkomst en welke omgevingsvariabelen ontbreken (alleen namen)?", {}, false);
+  dbTool("vercel_list_deployments", "vercel.list", LEES + "De eerdere versies die online zijn gezet: tijd, voorbeeld of echt, status en adres.", {}, false);
+  dbTool("vercel_get_build_logs", "vercel.build_logs", LEES + "Een samenvatting van het bouwlogboek van de laatste mislukte bouw: soort fout en de laatste regels (geheimen zijn gemaskeerd). Gebruik dit om de fout te herstellen.", {}, false);
+  dbTool("vercel_deploy_preview", "vercel.preview", VERCEL + "Zet een VOORBEELD online (niet de echte site) met een eigen adres. Werkt alleen als de gebruiker Vercel voor dit project al eenmaal heeft ingesteld. Kan een paar minuten duren.", {}, true);
+  dbTool("vercel_deploy_live", "vercel.live", VERCEL + "Zet de ECHTE site online. De gebruiker moet dit ALTIJD zelf bevestigen in een dialoog in Studio, ook als je veel mag; zonder zijn ja gebeurt er niets. Vraag er dus niet op een andere manier om en doe niets om dit te omzeilen.", {}, true);
+  dbTool("vercel_rollback", "vercel.rollback", VERCEL + "Zet de echte site terug naar een eerdere versie (uit `vercel_list_deployments`). De gebruiker moet dit altijd bevestigen. Op het gratis plan kan alleen naar de vorige versie.", { deployment: z.string().min(1).max(80) }, true);
+  dbTool("vercel_set_env", "vercel.set_env", VERCEL + "Stuurt een omgevingsvariabele die de GEBRUIKER zelf in Studio heeft ingevoerd door naar Vercel. Je geeft alleen de naam; je kunt en mag nooit een waarde meegeven of lezen. Bestaat de variabele niet in Studio, vraag de gebruiker dan om haar bij ‘Online zetten’ in te voeren. Voor de echte site vraagt Studio altijd bevestiging.", { naam: z.string().regex(/^[A-Z][A-Z0-9_]{0,63}$/) }, true);
+  // ---- In de appwinkel (Google Play en App Store). Studio bewaart alle gegevens; je krijgt nooit een sleutel, wachtwoord of demo-account te zien.
+  const WINKEL = "Studio voert dit zelf uit; je krijgt nooit sleutels, wachtwoorden of inloggegevens te zien. De uitslag begint met UITGEVOERD, GEWEIGERD of MISLUKT: doe nooit alsof een geweigerde actie is gelukt. ";
+  dbTool("winkel_status", "winkel.status", LEES + "De stand van de voorbereiding voor Google Play en de App Store: app-naam, unieke app-namen, versienummer en per winkel hoeveel onderdelen klaar zijn. Punten met status ‘handmatig’ moet de gebruiker zelf bij de winkel doen.", {}, false);
+  dbTool("winkel_klaarcheck", "winkel.klaarcheck", LEES + "De volledige klaar-check per winkel (ontbreekt, let_op, klaar, handmatig) en de bevindingen over de inhoud (ontbrekende privacyverklaring, testtekst, gevoelige rechten). Gebruik dit om te zien wat je nog kunt herstellen in het project.", {}, false);
+  dbTool(
+    "winkel_schrijf_teksten",
+    "winkel.schrijf_teksten",
+    WINKEL +
+      "Stelt teksten voor de winkelpagina voor en slaat ze op als CONCEPT, pas nadat de gebruiker dat in Studio heeft toegestaan. Een door de gebruiker goedgekeurde tekst wordt nooit gewijzigd; de gebruiker keurt zelf goed. Velden voor ‘appstore’: app_naam, subtitel, trefwoorden, beschrijving, promotietekst, wat_is_nieuw. Voor ‘play’: app_naam, korte_beschrijving, volledige_beschrijving, wat_is_nieuw. De uitslag toont per veld het aantal tekens en of het binnen de limiet is: schrijf korter als het ‘te_lang’ is. Verzin geen functies die de app niet heeft.",
+    { winkel: z.enum(["play", "appstore"]), taal: z.enum(["nl", "en"]), teksten: z.record(z.string().min(1).max(40), z.string().max(20_000)) },
+    true,
+  );
+  dbTool("db_status", "db.status", LEES + "Is het project gekoppeld aan Supabase, hoe heet het, in welke regio, is het gepauzeerd en welk bedieningsniveau geldt?", {}, false);
+  dbTool("db_get_public_config", "db.public_config", LEES + "De project-URL en de publiceerbare sleutel (veilig voor in de app). Nooit de geheime sleutel of het wachtwoord.", {}, false);
+  dbTool("db_list_tables", "db.list_tables", LEES + "Tabellen in het publieke schema met kolommen, of RLS aan staat en welk beleid er is.", {}, false);
+  dbTool("db_run_readonly_query", "db.readonly", LEES + "Voert één SELECT uit (anders weigert Studio). Het resultaat is begrensd op maximaal 200 rijen.", { sql: SQL, limiet: z.number().int().min(1).max(200).optional() }, false);
+  dbTool("db_get_logs", "db.logs", LEES + "De laatste logregels van een onderdeel.", { bron: z.enum(["api", "database", "auth", "functies", "opslag"]), minuten: z.number().int().min(1).max(1440).optional() }, false);
+  dbTool("db_get_advisors", "db.advisors", LEES + "Adviezen van Supabase over veiligheid en snelheid.", {}, false);
+  dbTool("db_generate_types", "db.types", LEES + "TypeScript-typen van het publieke schema.", {}, false);
+  dbTool("db_propose_migration", "db.propose", "Schrijft een voorstel voor een migratie als bestand in supabase/migrations/ (met tijdstempel). Voert NIETS uit; de gebruiker kan het eerst bekijken. Nieuwe tabellen in het publieke schema krijgen automatisch RLS aan; schrijf er beleid per rol bij. Gebruik `db_apply_migration` om het toe te passen.", { naam: NAAM, sql: SQL, uitleg: UITLEG }, true);
+  dbTool("db_apply_migration", "db.apply", SCHRIJF + "Past een migratie toe (schrijft ook het bestand in supabase/migrations/). Geef in `uitleg` één korte zin in gewone taal waarom.", { naam: NAAM, sql: SQL, uitleg: UITLEG }, true);
+  dbTool("db_rollback_migration", "db.rollback", SCHRIJF + "Draait de laatste toegepaste migratie terug, alleen als Studio weet hoe (bijvoorbeeld een nieuwe tabel weer weghalen). Anders: schrijf een nieuwe migratie.", { naam: NAAM }, true);
+  dbTool("db_run_sql", "db.run_sql", SCHRIJF + "Voert SQL uit (één of meer instructies). Studio deelt elke instructie in: lezen, veilig schrijven, gevaarlijk (verwijderen, wijzigen, RLS uit, rechten) of onleesbaar (telt als gevaarlijk). Maakt vooraf een checkpoint, een momentopname van het schema en bij gevaarlijke acties een back-up. Geef in `uitleg` één korte zin in gewone taal waarom.", { sql: SQL, uitleg: UITLEG }, true);
+  dbTool("db_deploy_edge_function", "db.deploy", SCHRIJF + "Plaatst een edge function (één bestand, Deno/TypeScript).", { naam: NAAM, code: z.string().min(1).max(200_000) }, true);
+  dbTool("db_set_edge_secret", "db.secret", SCHRIJF + "Zet een geheim voor edge functions (alleen schrijven; niemand kan de waarde daarna nog lezen, ook jij niet). Overschrijven van een bestaand geheim is gevaarlijk.", { naam: NAAM, waarde: z.string().min(1).max(48 * 1024) }, true);
+  dbTool("db_manage_storage", "db.storage", SCHRIJF + "Opslagmappen: `lijst` of `maken` (altijd privé). Beleid voor bestanden zet je met db_run_sql op storage.objects (dat is altijd gevaarlijk).", { actie: z.enum(["lijst", "maken"]), naam: z.string().max(63).optional(), publiek: z.boolean().optional() }, true);
+  dbTool("db_configure_auth", "db.auth", SCHRIJF + "Wijzigt inlog-instellingen (alleen site_url, uri_allow_list, mailer_autoconfirm, disable_signup en external_email_enabled). Altijd gevaarlijk.", { instellingen: z.record(z.string(), z.unknown()) }, true);
+  dbTool("db_pause_project", "db.pause", SCHRIJF + "Pauzeert het Supabase-project (gevaarlijk: de app is dan offline).", {}, true);
+  dbTool("db_restore_project", "db.restore", SCHRIJF + "Maakt een gepauzeerd project weer wakker.", {}, true);
+  dbTool("db_create_project", "db.create", SCHRIJF + "Maakt een nieuw Supabase-project (regio Europa) en koppelt het. Dit kan geld kosten en vraagt daarom ALTIJD een kostenbevestiging van de gebruiker, in elk niveau.", { naam: NAAM, organisatie: z.string().max(80).optional() }, true);
+
+  // Toestemmingen voor de chat-weergave: `claude --permission-prompt-tool mcp__studio__permission_prompt`.
+  // Moet één tekstblok met JSON teruggeven en geen structuredContent (dus geen outputSchema), zie docs/cli-notes.md.
+  server.registerTool(
+    "permission_prompt",
+    {
+      description: "Interne tool van Studio: vraagt de gebruiker om toestemming voor een actie van de AI. Niet zelf aanroepen.",
+      inputSchema: {
+        tool_name: z.string().optional(),
+        input: z.record(z.string(), z.unknown()).optional(),
+        tool_use_id: z.string().optional(),
+      },
+    },
+    ({ tool_name, input, tool_use_id }) =>
+      run("permission_prompt", "", async () => {
+        if (!tool_name) return JSON.stringify({ behavior: "deny", message: "Onleesbare toestemmingsvraag; de actie is niet uitgevoerd." });
+        const r = await rt.requestPermission(tool_name, input ?? {}, tool_use_id);
+        return JSON.stringify(r.allow ? { behavior: "allow", updatedInput: input ?? {} } : { behavior: "deny", message: r.message ?? "De gebruiker heeft dit niet toegestaan." });
+      }),
+  );
 
   server.registerTool(
     "run_checks",
     {
       description:
-        "Draait lint, build en tests uit studio.json (in die volgorde) en geeft per stap geslaagd/mislukt met de relevante foutregels (max 200). Roep dit aan na elke wijziging.",
-      inputSchema: { steps: z.array(z.enum(["lint", "build", "test"])).optional() },
+        "Draait de checks van het project en geeft per stap geslaagd/mislukt, bij een fout de eerste echte fout met bestand en regel en hooguit 12 relevante regels. Vraag uitgebreid=true alleen als je de hele log nodig hebt. Heeft het project een gekozen UI-kit, dan draait ook de stap ‘kit’: die meldt losse kleuren, losse pixelwaarden, gewone HTML-onderdelen waar de kit een component voor heeft en imports uit andere UI-bibliotheken (status ‘warned’ = waarschuwing, ‘failed’ = geblokkeerd; herstel ze). Bij een project met lint-/build-/test-scripts (package.json of studio.json) draaien die; bij een statisch project (index.html) controleert het: html (aanwezig), links (geen kapotte lokale verwijzingen) en console (geen console- of netwerkfouten in de preview). Roep dit aan na elke wijziging.",
+      inputSchema: {
+        steps: z.array(z.enum(["lint", "build", "test", "kit", "html", "links", "console"])).optional(),
+        uitgebreid: z.boolean().optional(),
+      },
     },
-    ({ steps }) =>
-      run("run_checks", `steps=${(steps ?? ["lint", "build", "test"]).join(",")}`, async () => {
-        const r = await rt.runChecks(steps);
-        const head = r.ok ? "ALLE CHECKS GESLAAGD" : "CHECKS MISLUKT";
-        return `${head}\n` + JSON.stringify(r, null, 2);
-      }),
+    ({ steps, uitgebreid }) =>
+      run("run_checks", `steps=${(steps ?? ["lint", "build", "test"]).join(",")}`, async () => samenvattingChecks(await rt.runChecks(steps), uitgebreid === true)),
   );
 
   server.registerTool(
     "get_preview_screenshot",
     {
       description:
-        "Screenshot (JPEG) van de preview, genomen met een onzichtbare browser. De dev-server moet draaien. Optioneel viewport (desktop 1280x800 of mobile 390x844), een pad binnen de preview (bijv. /over) en fullPage.",
+        "Screenshot (JPEG) van de preview, genomen met een onzichtbare browser. Werkt voor statische projecten (index.html) en dev-servers; de preview moet draaien (Studio start hem vanzelf). Een screenshot kost aanzienlijk meer dan tekst: neem er een na een zichtbare wijziging of als je het resultaat echt moet zien, niet na elke kleine stap. Optioneel viewport (desktop 1280x800 of mobile 390x844), een pad binnen de preview (bijv. /over) en fullPage (hoger dan 2400 px wordt afgekapt).",
       inputSchema: {
         viewport: z.enum(["desktop", "mobile"]).default("desktop"),
         path: z.string().max(500).optional(),
@@ -150,26 +327,30 @@ export function registerTools(server: McpServer, ctx: ProjectCtx, record: (r: Ca
     "get_console_errors",
     {
       description:
-        "Console-errors, uncaught exceptions en mislukte netwerkverzoeken van de preview sinds de vorige aanroep. Laadt de pagina standaard opnieuw. Let op: dit is een onzichtbare browser; handelingen die de gebruiker zelf in de preview doet zie je hier niet.",
+        "Console-errors, uncaught exceptions en mislukte netwerkverzoeken van de preview sinds de vorige aanroep, ontdubbeld met een telling. Laadt de pagina standaard opnieuw. Let op: dit is een onzichtbare browser; handelingen die de gebruiker zelf in de preview doet zie je hier niet.",
       inputSchema: { reload: z.boolean().default(true) },
     },
     ({ reload }) =>
       run("get_console_errors", `reload=${reload}`, async () => {
         const e = await rt.observer.consoleErrors(reload);
-        return e.length ? JSON.stringify(e, null, 2) : "Geen console- of netwerkfouten sinds de vorige aanroep.";
+        return ontdubbel(e);
       }),
   );
 
   server.registerTool(
     "get_dev_logs",
     {
-      description: "De laatste regels uitvoer van het dev-proces (standaard 100, max 500).",
-      inputSchema: { lines: z.number().int().min(1).max(500).default(100) },
+      description: "De laatste regels uitvoer van het dev-proces (standaard 60, max 500). Bij veel uitvoer eerst de foutregels.",
+      inputSchema: { lines: z.number().int().min(1).max(500).default(60) },
     },
     ({ lines }) =>
       run("get_dev_logs", `lines=${lines}`, async () => {
         const st = rt.dev.status();
-        const logs = rt.dev.logs.last(lines);
+        const logs = lines <= 20 ? rt.dev.logs.last(lines) : logsKort(rt.dev.logs.last(500), lines);
+        const plan = rt.getPlan();
+        if (!logs.length && plan?.kind === "static") {
+          return `Statische preview${plan.staticUrl ? ` op ${plan.staticUrl}` : ""}: er is geen dev-proces en dus geen dev-logs. Gebruik get_console_errors voor fouten in de browser.`;
+        }
         const head = `dev-server: ${st.state}${st.error ? ` (${st.error})` : ""}`;
         if (!logs.length) return `${head}\n(nog geen uitvoer; start de dev-server via de Preview-tab)`;
         return `${head}\n${logs.join("\n")}`;
@@ -180,13 +361,45 @@ export function registerTools(server: McpServer, ctx: ProjectCtx, record: (r: Ca
     "git_checkpoint",
     {
       description:
-        "Maakt een checkpoint: git add -A + commit met het bericht. Gevoelige bestanden (.env, sleutels) worden nooit meegenomen. Doe dit pas als run_checks slaagt.",
+        "Slaat een versie op (git add -A + commit). Het bericht is een titel van maximaal 8 woorden in gewone taal, zonder jargon; de gebruiker ziet die in zijn tijdlijn. Gevoelige bestanden (.env, sleutels) worden nooit meegenomen. Doe dit pas als run_checks slaagt.",
       inputSchema: { bericht: z.string().min(1).max(200) },
     },
     ({ bericht }) =>
       run("git_checkpoint", `len=${bericht.length}`, async () => {
+        // De titel is bedoeld voor mensen (tijdlijn in Studio): kort en in gewone taal.
+        const words = bericht.trim().split(/\s+/).length;
+        if (words > MAX_TITLE_WORDS) throw new Error(`Gebruik een titel van maximaal ${MAX_TITLE_WORDS} woorden in gewone taal (nu ${words}).`);
         const r = await rt.control("git.checkpoint", { message: bericht });
         return JSON.stringify(r, null, 2);
+      }),
+  );
+
+  server.registerTool(
+    "security_check",
+    {
+      description:
+        "Controleert het project op veiligheid vóór publiceren: API-sleutels of tokens in de code, .env- of geheime bestanden in git of in de uitvoermap (dist/build/public), vaste wachtwoorden en ontbrekende toegangsregels voor de database (Supabase row level security, Firebase-regels). Geeft per bevinding een veilige omschrijving (geheimen staan nooit volledig in de uitvoer). Verhelp bevindingen door geheimen naar een .env-bestand te verplaatsen dat niet in git staat; zeg de gebruiker dat een sleutel die in de code stond ook vernieuwd moet worden.",
+      inputSchema: {},
+    },
+    () =>
+      run("security_check", "", async () => {
+        const r = await securityCheck(rt.projectDir);
+        if (r.findings.length === 0) return `GEEN PROBLEMEN GEVONDEN (${r.scanned} bestanden gecontroleerd).`;
+        return [`${r.findings.length} BEVINDING(EN) in ${r.scanned} bestanden:`, ...r.findings.map((f) => `- [${f.severity}] ${f.code} — ${f.file}${f.line ? `:${f.line}` : ""} — ${f.detail}`)].join("\n");
+      }),
+  );
+
+  server.registerTool(
+    "get_last_change",
+    {
+      description:
+        "Geeft de laatste wijziging in het project: niet-opgeslagen werk, of anders de laatste versie ten opzichte van de vorige (bestandslijst + wijzigingen, ingekort, zonder geheimen). Gebruik dit om de gebruiker in gewone woorden uit te leggen wat er veranderd is.",
+      inputSchema: {},
+    },
+    () =>
+      run("get_last_change", "", async () => {
+        const c = await rt.git.lastChange();
+        return [`Bron: ${c.source === "werk" ? "nog niet opgeslagen werk" : "laatste versie"} — ${c.title}`, `Bestanden (${c.files.length}): ${c.files.slice(0, 40).join(", ")}`, c.truncated ? "(de wijzigingen hieronder zijn ingekort)" : "", "", c.diff].join("\n");
       }),
   );
 

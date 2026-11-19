@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { cliStatus, ptyClose, startLogin, type Account, type CliStatus } from "../lib/api";
 import TerminalView from "./TerminalView";
 import InstallGuide from "./InstallGuide";
@@ -36,25 +38,23 @@ export default function LoginModal({ account, onClose }: { account: Account; onC
   }, [account.id, account.provider, attempt]);
 
   return (
-    <div className="fixed inset-0 z-10 flex items-center justify-center bg-black/70">
-      <div role="dialog" aria-label={t("accounts.inloggen")} className="flex h-[32rem] w-[48rem] flex-col rounded-lg bg-zinc-900 shadow-xl">
-        <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="flex h-[34rem] max-w-3xl flex-col gap-0 p-0 sm:max-w-3xl" showCloseButton={false}>
+        <DialogHeader className="flex-row items-center justify-between gap-4 border-b border-border p-4">
           <div>
-            <div className="font-semibold">
-              {t("accounts.inloggenBij", { provider: t(`provider.${account.provider}`), label: account.label })}
-            </div>
-            <div className="text-xs text-zinc-500">{t("accounts.inlogUitleg")}</div>
+            <DialogTitle>{t("accounts.inloggenBij", { provider: t(`provider.${account.provider}`), label: account.label })}</DialogTitle>
+            <DialogDescription>{t("accounts.inlogUitleg")}</DialogDescription>
           </div>
-          <button onClick={onClose} className="rounded border border-zinc-700 px-3 py-1 text-sm hover:bg-zinc-800">
+          <Button variant="outline" onClick={onClose}>
             {t("accounts.klaar")}
-          </button>
-        </div>
+          </Button>
+        </DialogHeader>
         <div className="min-h-0 flex-1">
-          {error && <p className="p-4 text-red-400">{error}</p>}
+          {error && <p className="p-4 text-destructive">{error}</p>}
           {missing && <InstallGuide status={missing} onInstalled={() => setAttempt((n) => n + 1)} />}
           {sessionId && !missing && <TerminalView sessionId={sessionId} active exitText={(c) => t("terminal.beeindigd", { code: c ?? "?" })} />}
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

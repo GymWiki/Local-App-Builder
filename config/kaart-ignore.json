@@ -1,0 +1,6 @@
+{
+  "_uitleg": "Eén lijst voor de projectindex, de MCP-tools en de instructies: deze mappen en bestanden worden nooit doorzocht, geïndexeerd of aan de AI getoond.",
+  "mappen": ["node_modules", ".git", "dist", "build", "out", "target", "coverage", ".next", ".nuxt", ".svelte-kit", ".turbo", ".cache", ".dart_tool", "__pycache__", ".venv", "venv", ".idea", ".vscode", ".gradle", "Pods", ".studio", ".claude", ".gemini", "vendor"],
+  "bestanden": [".env", "package-lock.json", "yarn.lock", "pnpm-lock.yaml", "pubspec.lock", "Cargo.lock", ".DS_Store"],
+  "patronen_einde": [".min.js", ".min.css", ".map", ".lock", ".pem", ".key", ".p12", ".pfx", ".jks", ".keystore"]
+}

@@ -1,5 +1,6 @@
 use crate::error::{AppError, Result};
 use crate::node;
+use crate::winpath;
 use rusqlite::{params, Connection};
 use serde::Serialize;
 use serde_json::Value;
@@ -113,6 +114,8 @@ pub struct McpManager {
     servers: Mutex<HashMap<i64, Server>>,
     /// Laatste mislukte start per project, zodat de UI de reden kan blijven tonen.
     failures: Mutex<HashMap<i64, McpInfo>>,
+    /// Projecten waarvan de server op dit moment op een achtergrondthread wordt gestart.
+    starting: Mutex<std::collections::HashSet<i64>>,
     start_timeout: Duration,
     sink: McpSink,
 }
@@ -135,6 +138,7 @@ impl McpManager {
             scripts,
             servers: Mutex::new(HashMap::new()),
             failures: Mutex::new(HashMap::new()),
+            starting: Mutex::new(Default::default()),
             start_timeout: START_TIMEOUT,
             sink,
         }
@@ -150,24 +154,66 @@ impl McpManager {
         &self.token
     }
 
-    pub fn info(&self, project_id: i64) -> Option<McpInfo> {
-        let running = self
-            .servers
+    /// Alleen een echt draaiende (of net gecrashte) server, zonder de "bezig met starten"- en foutlaag.
+    fn running_info(&self, project_id: i64) -> Option<McpInfo> {
+        self.servers
             .lock()
             .unwrap()
             .get(&project_id)
-            .map(|s| s.info.lock().unwrap().clone());
-        running.or_else(|| self.failures.lock().unwrap().get(&project_id).cloned())
+            .map(|s| s.info.lock().unwrap().clone())
     }
 
-    /// Start de server voor een project (idempotent). Faalt nooit hard: bij een probleem krijg je
-    /// `unavailable` met de echte reden (`kind`, `error`, `log`) en onthoudt de manager die.
+    /// De projecten waarvan de runtime nu draait.
+    pub fn running_ids(&self) -> Vec<i64> {
+        self.servers.lock().unwrap().keys().copied().collect()
+    }
+
+    pub fn info(&self, project_id: i64) -> Option<McpInfo> {
+        self.running_info(project_id)
+            .or_else(|| {
+                self.starting
+                    .lock()
+                    .unwrap()
+                    .contains(&project_id)
+                    .then(|| McpInfo::plain("starting", None))
+            })
+            .or_else(|| self.failures.lock().unwrap().get(&project_id).cloned())
+    }
+
+    /// Markeert dat er voor dit project een achtergrondstart begint. `false` = draait al of er loopt er al één.
+    pub fn mark_starting(&self, project_id: i64) -> bool {
+        if self.running_info(project_id).is_some_and(|i| i.is_up()) {
+            return false;
+        }
+        self.starting.lock().unwrap().insert(project_id)
+    }
+
+    /// Klaar met starten. `false` = het project is ondertussen gesloten: de aanroeper moet de server dan stoppen.
+    pub fn finish_starting(&self, project_id: i64) -> bool {
+        self.starting.lock().unwrap().remove(&project_id)
+    }
+
+    /// Wacht (maximaal `timeout`) tot een lopende achtergrondstart klaar is en geeft de dan geldende status terug.
+    pub fn wait_ready(&self, project_id: i64, timeout: Duration) -> Option<McpInfo> {
+        let deadline = std::time::Instant::now() + timeout;
+        loop {
+            let info = self.info(project_id);
+            let busy = info.as_ref().is_some_and(|i| i.state == "starting");
+            if !busy || std::time::Instant::now() >= deadline {
+                return info;
+            }
+            std::thread::sleep(Duration::from_millis(25));
+        }
+    }
+
+    /// Start de server voor een project (idempotent, blokkerend: draai dit op een achtergrondthread).
+    /// Faalt nooit hard: bij een probleem krijg je `unavailable` met de echte reden (`kind`, `error`, `log`).
     pub fn start(&self, project_id: i64, name: &str, dir: &Path) -> McpInfo {
-        if let Some(i) = self.info(project_id) {
+        if let Some(i) = self.running_info(project_id) {
             if i.is_up() {
                 return i;
             }
-            self.stop(project_id);
+            self.stop_server(project_id);
         }
         self.failures.lock().unwrap().remove(&project_id);
         match self.try_start(project_id, name, dir) {
@@ -200,10 +246,24 @@ impl McpManager {
             )
         })?;
         let node = node::find().map_err(|p| McpInfo::fail(p.kind(), p.message(), vec![]))?;
+        // Naar Node gaat altijd een gewoon pad: nooit `\\?\C:\…` (Windows) en nooit met `..`/gemengde scheidingstekens.
+        let script = winpath::for_node(&script);
+        let dir = winpath::clean_path(dir);
+        let launch = format!(
+            "[studio] start: {:?} {:?} (cwd: {:?}; omgeving: STUDIO_PROJECT_DIR={:?} STUDIO_PROJECT_NAME={:?} STUDIO_MCP_TOKEN=<verborgen>)",
+            node.path,
+            script,
+            dir,
+            dir,
+            name
+        );
+        #[cfg(debug_assertions)]
+        eprintln!("{launch}");
 
         let mut cmd = Command::new(&node.path);
         cmd.arg(&script)
-            .env("STUDIO_PROJECT_DIR", dir)
+            .current_dir(&dir)
+            .env("STUDIO_PROJECT_DIR", &dir)
             .env("STUDIO_PROJECT_NAME", name)
             .env("STUDIO_MCP_TOKEN", &self.token)
             .stdin(Stdio::piped())
@@ -218,7 +278,7 @@ impl McpManager {
             McpInfo::fail(
                 "spawn_failed",
                 format!("Kon {} niet starten: {e}", node.path.display()),
-                vec![],
+                vec![launch.clone()],
             )
         })?;
         let stdin = child.stdin.take().unwrap();
@@ -226,6 +286,7 @@ impl McpManager {
         let stderr = child.stderr.take().unwrap();
         let info = Arc::new(Mutex::new(McpInfo::plain("starting", None)));
         let log: LogTail = Arc::default();
+        push_log(&log, launch);
         let (ready_tx, ready_rx) = mpsc::channel::<Ready>();
         let pending: Pending = Arc::default();
 
@@ -308,7 +369,12 @@ impl McpManager {
                                 });
                             }
                         }
-                        Some("dev") | Some("checks") | Some("git") => sink(McpEvent::Runtime {
+                        Some("dev")
+                        | Some("checks")
+                        | Some("git")
+                        | Some("permission_request")
+                        | Some("host_request")
+                        | Some("permission_expired") => sink(McpEvent::Runtime {
                             project_id,
                             payload: v.clone(),
                         }),
@@ -456,11 +522,18 @@ impl McpManager {
         }
     }
 
-    pub fn stop(&self, project_id: i64) {
+    fn stop_server(&self, project_id: i64) {
         let removed = self.servers.lock().unwrap().remove(&project_id);
         if let Some(s) = removed {
             Self::shutdown(vec![s], Duration::from_secs(8));
         }
+    }
+
+    /// Stopt de server en annuleert een eventuele achtergrondstart voor dit project.
+    pub fn stop(&self, project_id: i64) {
+        self.starting.lock().unwrap().remove(&project_id);
+        self.failures.lock().unwrap().remove(&project_id);
+        self.stop_server(project_id);
     }
 
     pub fn stop_all(&self) {
@@ -909,5 +982,170 @@ mod tests {
             );
         }
         m.stop(5);
+    }
+
+    // ---------- paden met spaties / gebouwde indeling / niet-blokkerend ----------
+
+    fn real_script() -> Option<PathBuf> {
+        let script = Path::new(env!("CARGO_MANIFEST_DIR")).join("../mcp-server/dist/index.mjs");
+        (script.is_file() && node::find().is_ok()).then_some(script)
+    }
+
+    #[test]
+    fn server_in_een_map_met_spaties_start_zoals_in_de_gebouwde_app() {
+        let Some(real) = real_script() else {
+            return eprintln!("overgeslagen: node of mcp-server/dist ontbreekt");
+        };
+        let root = tempfile::tempdir().unwrap();
+        // Indeling van een installatie: <app-map met spaties>/mcp-server/index.mjs (Tauri-resource)
+        let app_dir = root.path().join("Studio App (v1.0)");
+        let bundled = app_dir.join("mcp-server").join("index.mjs");
+        std::fs::create_dir_all(bundled.parent().unwrap()).unwrap();
+        std::fs::copy(&real, &bundled).unwrap();
+        let project = root.path().join("Mijn Project met spaties");
+        std::fs::create_dir_all(&project).unwrap();
+        std::fs::write(project.join("studio.json"), r#"{"lint":"echo hoi"}"#).unwrap();
+
+        // Het pad met `..` en een niet-bestaande eerste kandidaat (zoals een dev-pad dat er niet is) moet gewoon werken.
+        std::fs::create_dir_all(app_dir.join("x")).unwrap();
+        let messy = app_dir
+            .join("x")
+            .join("..")
+            .join("mcp-server")
+            .join("index.mjs");
+        let m = manager_with(vec![root.path().join("bestaat niet.mjs"), messy], 20_000);
+        let info = m.start(1, "Mijn Project", &project);
+        assert_eq!(info.state, "running", "{info:?}");
+        // De server draait echt in de projectmap met spaties:
+        let cfg = m
+            .call(
+                1,
+                "config.get",
+                serde_json::json!({}),
+                Duration::from_secs(10),
+            )
+            .unwrap();
+        assert_eq!(cfg["exists"], true, "{cfg}");
+        assert_eq!(cfg["config"]["lint"], "echo hoi");
+        m.stop(1);
+    }
+
+    #[test]
+    fn het_exacte_startcommando_staat_in_de_log_zonder_token() {
+        if node::find().is_err() {
+            return eprintln!("overgeslagen: geen Node.js");
+        }
+        let root = tempfile::tempdir().unwrap();
+        let dir = root.path().join("Map met spaties");
+        std::fs::create_dir_all(&dir).unwrap();
+        let script = dir.join("kapot server.mjs");
+        std::fs::write(&script, "console.error('boem'); process.exit(1);").unwrap();
+        let i = manager_with(vec![script.clone()], 10_000).start(1, "P", &dir);
+        assert_eq!(i.kind.as_deref(), Some("crashed"), "{i:?}");
+        let first = i.log.first().expect("startregel ontbreekt");
+        assert!(first.starts_with("[studio] start:"), "{first}");
+        assert!(
+            first.contains("kapot server.mjs") && first.contains("Map met spaties"),
+            "{first}"
+        );
+        assert!(first.contains("STUDIO_MCP_TOKEN=<verborgen>"));
+        assert!(i.log.iter().any(|l| l.contains("boem")));
+    }
+
+    #[test]
+    fn achtergrondstart_blokkeert_niet_en_een_gesloten_project_wordt_niet_alsnog_gestart() {
+        let m = manager_with(vec![], 1000);
+        assert!(m.mark_starting(1));
+        assert!(
+            !m.mark_starting(1),
+            "tweede start voor hetzelfde project negeren"
+        );
+        assert_eq!(m.info(1).unwrap().state, "starting");
+        // project sluiten tijdens het starten
+        m.stop(1);
+        assert!(
+            !m.finish_starting(1),
+            "de start is geannuleerd: niet meer gewenst"
+        );
+        assert!(m.info(1).is_none());
+
+        // wait_ready geeft op tijd op
+        assert!(m.mark_starting(2));
+        let t = std::time::Instant::now();
+        let info = m.wait_ready(2, Duration::from_millis(150)).unwrap();
+        assert_eq!(info.state, "starting");
+        assert!(t.elapsed() < Duration::from_secs(2));
+        assert!(m.finish_starting(2));
+    }
+
+    #[test]
+    fn een_mislukte_start_laat_een_nieuwe_poging_toe_zonder_de_rest_te_hinderen() {
+        let m = manager_with(vec![], 1000);
+        let a = m.start(1, "x", Path::new("."));
+        assert_eq!(a.kind.as_deref(), Some("script_missing"));
+        assert!(
+            m.mark_starting(1),
+            "na een mislukking mag opnieuw gestart worden"
+        );
+        assert!(m.finish_starting(1));
+    }
+
+    /// Handmatige controle met een echte Claude-CLI (zie README): ziet `claude mcp list` onze server?
+    /// `STUDIO_CLAUDE_BIN=/pad/naar/claude cargo test claude_mcp_list -- --ignored --nocapture`
+    #[test]
+    #[ignore = "vereist een echte Claude-CLI via STUDIO_CLAUDE_BIN"]
+    fn claude_mcp_list_ziet_de_studio_server_in_een_map_met_spaties() {
+        use crate::{claude_approval, cli, mcp_config, provider::Provider};
+        let Ok(bin) = std::env::var("STUDIO_CLAUDE_BIN") else {
+            return eprintln!("STUDIO_CLAUDE_BIN niet gezet");
+        };
+        let real = real_script().expect("mcp-server/dist en Node.js zijn nodig");
+        let root = tempfile::tempdir().unwrap();
+        let bundled = root
+            .path()
+            .join("Studio App (v1)")
+            .join("mcp-server")
+            .join("index.mjs");
+        std::fs::create_dir_all(bundled.parent().unwrap()).unwrap();
+        std::fs::copy(&real, &bundled).unwrap();
+        let project = root.path().join("Mijn Project");
+        std::fs::create_dir_all(&project).unwrap();
+
+        let m = manager_with(vec![bundled], 20_000);
+        let info = m.start(1, "Mijn Project", &project);
+        assert_eq!(info.state, "running", "{info:?}");
+        mcp_config::ensure(Provider::Claude, &project).unwrap();
+        claude_approval::ensure(&project).unwrap();
+
+        // Lege Claude-configmap waarin de map als vertrouwd staat (wat de trust-dialoog zou opslaan).
+        let cfg = root.path().join("claude config");
+        std::fs::create_dir_all(&cfg).unwrap();
+        let key = project
+            .canonicalize()
+            .unwrap()
+            .to_string_lossy()
+            .to_string();
+        std::fs::write(
+            cfg.join(".claude.json"),
+            serde_json::json!({ "projects": { key: { "hasTrustDialogAccepted": true } } })
+                .to_string(),
+        )
+        .unwrap();
+
+        let mut cmd = std::process::Command::new(bin);
+        cmd.args(["mcp", "list"])
+            .current_dir(&project)
+            .env("CLAUDE_CONFIG_DIR", &cfg);
+        for (k, v) in cli::mcp_env(&url_for(info.port.unwrap()), m.token()) {
+            cmd.env(k, v);
+        }
+        let out = cli::output_with_timeout(cmd, Duration::from_secs(90)).unwrap();
+        eprintln!("--- claude mcp list ---\n{}", out.text);
+        assert!(
+            out.text.contains("studio") && out.text.contains("Connected"),
+            "{}",
+            out.text
+        );
+        m.stop(1);
     }
 }

@@ -13,9 +13,11 @@ pub struct Project {
     pub template: String,
     pub created_at: String,
     pub default_account_id: Option<i64>,
+    /// Laatst geopend of bewerkt (ISO 8601, UTC); `None` zolang het project nog nooit is geopend.
+    pub last_used_at: Option<String>,
 }
 
-const COLS: &str = "id, naam, pad, template, created_at, default_account_id";
+const COLS: &str = "id, naam, pad, template, created_at, default_account_id, last_used_at";
 
 fn row_to_project(r: &rusqlite::Row) -> rusqlite::Result<Project> {
     Ok(Project {
@@ -25,6 +27,7 @@ fn row_to_project(r: &rusqlite::Row) -> rusqlite::Result<Project> {
         template: r.get(3)?,
         created_at: r.get(4)?,
         default_account_id: r.get(5)?,
+        last_used_at: r.get(6)?,
     })
 }
 
@@ -61,6 +64,41 @@ pub fn set_default_account(
         return Err(AppError::NotFound);
     }
     Ok(())
+}
+
+/// Zet "laatst gebruikt" op nu. Een project dat niet (meer) bestaat is geen fout: het is alleen een tijdstempel.
+pub fn touch(conn: &Connection, id: i64) -> Result<()> {
+    conn.execute(
+        "UPDATE projects SET last_used_at = strftime('%Y-%m-%dT%H:%M:%SZ', 'now') WHERE id = ?1",
+        params![id],
+    )?;
+    Ok(())
+}
+
+/// Verandert alleen de weergavenaam in Studio; de map op schijf houdt haar naam.
+pub fn rename(conn: &Connection, id: i64, naam: &str) -> Result<Project> {
+    let naam = naam.trim();
+    if naam.is_empty() {
+        return Err(AppError::Invalid("Geef het project een naam.".into()));
+    }
+    if naam.chars().count() > 60 {
+        return Err(AppError::Invalid(
+            "Kies een kortere naam (maximaal 60 tekens).".into(),
+        ));
+    }
+    if naam.chars().any(|c| c.is_control()) {
+        return Err(AppError::Invalid(
+            "Gebruik alleen gewone tekens in de naam.".into(),
+        ));
+    }
+    if conn.execute(
+        "UPDATE projects SET naam = ?1 WHERE id = ?2",
+        params![naam, id],
+    )? == 0
+    {
+        return Err(AppError::NotFound);
+    }
+    get(conn, id)
 }
 
 /// Verwijdert ALLEEN de regel uit de database. Bestanden op schijf blijven altijd staan.
@@ -169,7 +207,7 @@ pub fn create(
     let result = (|| {
         git_init(&dir)?;
         fs::write(dir.join("PROJECT.md"), project_md(naam))?;
-        crate::instructions::ensure(&dir)?;
+        crate::instructions::ensure(&dir, crate::db::communication_simple(conn))?;
         let pad = dir.to_string_lossy().to_string();
         conn.execute(
             "INSERT INTO projects (naam, pad, template) VALUES (?1, ?2, ?3)",
@@ -183,6 +221,22 @@ pub fn create(
         let _ = fs::remove_dir_all(&dir); // alleen de map die we net zelf maakten
     }
     result
+}
+
+/// Neemt een map die er al is (bijvoorbeeld een van GitHub opgehaalde) op in de lijst. Er wordt niets overschreven: PROJECT.md en
+/// de instructies voor de AI worden alleen aangevuld als ze ontbreken.
+pub fn register_existing(conn: &Connection, naam: &str, dir: &Path, template: &str) -> Result<Project> {
+    let naam = naam.trim();
+    if naam.is_empty() || !dir.is_dir() {
+        return Err(AppError::Invalid("Deze map bestaat niet.".into()));
+    }
+    if !dir.join("PROJECT.md").exists() {
+        fs::write(dir.join("PROJECT.md"), project_md(naam))?;
+    }
+    crate::instructions::ensure(dir, crate::db::communication_simple(conn))?;
+    let pad = dir.to_string_lossy().to_string();
+    conn.execute("INSERT INTO projects (naam, pad, template) VALUES (?1, ?2, ?3)", params![naam, pad, template])?;
+    get(conn, conn.last_insert_rowid())
 }
 
 #[cfg(test)]
@@ -269,5 +323,31 @@ mod tests {
         conn.execute("DROP TABLE projects", []).unwrap();
         assert!(create(&conn, "Kapot", tmp.path(), "leeg").is_err());
         assert!(!tmp.path().join("Kapot").exists());
+    }
+
+    #[test]
+    fn hernoemen_verandert_alleen_de_naam_in_de_lijst() {
+        let conn = db::open_in_memory().unwrap();
+        let tmp = tempfile::tempdir().unwrap();
+        let p = create(&conn, "Oud", tmp.path(), "leeg").unwrap();
+        let n = rename(&conn, p.id, "  Nieuw  ").unwrap();
+        assert_eq!(n.naam, "Nieuw");
+        assert_eq!(n.pad, p.pad);
+        assert!(tmp.path().join("Oud").is_dir());
+        assert!(rename(&conn, p.id, "   ").is_err());
+        assert!(rename(&conn, p.id, &"x".repeat(61)).is_err());
+        assert!(rename(&conn, p.id, "a\nb").is_err());
+        assert!(matches!(rename(&conn, 999, "x"), Err(AppError::NotFound)));
+    }
+
+    #[test]
+    fn laatst_gebruikt_begint_leeg_en_wordt_gezet() {
+        let conn = db::open_in_memory().unwrap();
+        let tmp = tempfile::tempdir().unwrap();
+        let p = create(&conn, "App", tmp.path(), "leeg").unwrap();
+        assert_eq!(p.last_used_at, None);
+        touch(&conn, p.id).unwrap();
+        assert!(get(&conn, p.id).unwrap().last_used_at.is_some());
+        touch(&conn, 999).unwrap(); // geen fout
     }
 }

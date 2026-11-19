@@ -7,24 +7,92 @@
     "nieuwProject": "Nieuw project",
     "leeg": "Nog geen projecten. Maak je eerste project aan.",
     "verwijder": "Verwijderen uit lijst",
-    "bevestigVerwijder": "“{{naam}}” uit de lijst verwijderen? De bestanden op je computer blijven staan."
+    "bevestigVerwijder": "“{{naam}}” uit de lijst verwijderen? De bestanden op je computer blijven staan.",
+    "instellingen": "Instellingen",
+    "verwijderTitel": "Project uit de lijst halen?",
+    "annuleer": "Annuleren",
+    "verwijderKnop": "Uit de lijst halen"
+  },
+  "home": {
+    "titel": "Je projecten",
+    "uitleg": "Kies een project om verder te werken, of begin met een nieuw project.",
+    "zoek": "Zoek in je projecten",
+    "zoekPlaceholder": "Zoek op naam…",
+    "sorteer": "Sorteren",
+    "sorteerLaatst": "Laatst gebruikt",
+    "sorteerNaam": "Naam (A-Z)",
+    "nieuw": "Nieuw project",
+    "nieuwUitleg": "Begin met een leeg project of een startklare website.",
+    "laatst": "Laatst bewerkt: {{wanneer}}",
+    "nooit": "Nog niet geopend",
+    "openen": "Openen",
+    "hernoemen": "Naam wijzigen",
+    "uitLijst": "Uit lijst verwijderen",
+    "menu": "Meer acties voor {{naam}}",
+    "geenResultaat": "Geen projecten gevonden voor ‘{{zoek}}’.",
+    "wisZoek": "Zoekopdracht wissen",
+    "plaatshouder": "Nog geen voorbeeld",
+    "miniatuur": "Voorbeeld van {{naam}}",
+    "kaart": "Open {{naam}}",
+    "alleProjecten": "Alle projecten",
+    "status": {
+      "running": "Draait",
+      "starting": "Start op",
+      "error": "Fout",
+      "stopped": "Gestopt",
+      "idle": "Niet actief",
+      "nieuw": "Nieuw",
+      "stopping": "Stopt"
+    },
+    "leeg": {
+      "titel": "Welkom bij Studio",
+      "uitleg": "Hier maak je een website of app samen met een AI. Je vertelt in gewone woorden wat je wilt. Techniek hoef je niet te snappen.",
+      "knop": "Maak je eerste project"
+    },
+    "hernoem": {
+      "titel": "Naam wijzigen",
+      "label": "Nieuwe naam",
+      "uitleg": "Alleen de naam in Studio verandert. De map op je computer houdt haar naam.",
+      "knop": "Opslaan",
+      "klaar": "De naam is gewijzigd."
+    },
+    "verwijder": {
+      "titel": "Project uit de lijst halen?",
+      "uitleg": "“{{naam}}” verdwijnt uit deze lijst. De bestanden op je computer blijven staan.",
+      "knop": "Uit de lijst halen"
+    },
+    "route": {
+      "stap": "Stap {{nummer}} van {{totaal}}: {{naam}}",
+      "klaar": "Je app staat klaar.",
+      "verder": "Verder gaan"
+    }
+  },
+  "welkom": {
+    "titel": "Welkom bij Studio",
+    "uitleg": "Hier maak je een website of app samen met een AI. Je vertelt in gewone woorden wat je wilt. Techniek hoef je niet te snappen.",
+    "knop": "Maak je eerste project"
   },
   "tabs": {
-    "terminal": "Terminal",
-    "preview": "Preview",
+    "maken": "Maken",
     "publiceren": "Publiceren",
+    "geavanceerd": "Geavanceerd",
     "binnenkort": "Komt in een latere fase.",
-    "geenProject": "Kies of maak een project om te beginnen."
+    "geenProject": "Heb je al een project? Kies het links in de lijst.",
+    "terminal": "Terminal",
+    "preview": "Voorbeeld",
+    "uiterlijk": "Uiterlijk"
   },
   "info": {
     "titel": "Projectinfo",
     "naam": "Naam",
     "pad": "Map",
-    "template": "Template",
+    "template": "Soort project",
     "aangemaakt": "Aangemaakt",
     "geenSelectie": "Geen project geselecteerd.",
     "standaardAccount": "Standaardaccount",
-    "sluit": "Project sluiten (stopt terminals en MCP)"
+    "sluit": "Project sluiten",
+    "gesloten": "Project gesloten. Je werk is bewaard; je vindt het terug in de lijst links.",
+    "technischWeergave": "Technische weergave"
   },
   "nieuw": {
     "titel": "Nieuw project",
@@ -35,10 +103,41 @@
     "resultaat": "Er wordt een map “{{naam}}” aangemaakt in de gekozen locatie.",
     "annuleer": "Annuleren",
     "maak": "Project aanmaken",
-    "bezig": "Bezig…"
+    "bezig": "Bezig…",
+    "soort": "Hoe wil je beginnen?",
+    "soortLeeg": "Beschrijf je idee",
+    "soortLeegUitleg": "Je begint met een leeg project en vertelt de AI in je eigen woorden wat je wilt.",
+    "soortWeb": "Startklare website (met kleuren en uiterlijk kiezen)",
+    "soortWebUitleg": "Je krijgt meteen een werkende website om op voort te bouwen. Straks kies je hoe hij eruitziet.",
+    "fout": {
+      "naamLeeg": "Geef je project een naam.",
+      "naamLang": "Kies een kortere naam (maximaal 60 tekens).",
+      "naamTekens": "Gebruik geen tekens als / \\ : * ? \" < > | in de naam.",
+      "mapLeeg": "Kies eerst een map waarin het project komt."
+    },
+    "voorbeeldKop": "Of begin met een voorbeeld dat meteen werkt",
+    "voorbeeld": {
+      "start-takenlijst": {
+        "titel": "Takenlijst",
+        "uitleg": "Taken toevoegen, afvinken en verwijderen. Geen account nodig."
+      },
+      "start-portfolio": {
+        "titel": "Portfolio",
+        "uitleg": "Een persoonlijke website met je werk en een contactformulier."
+      },
+      "start-webshop": {
+        "titel": "Kleine webshop (met voorstel voor een database)",
+        "uitleg": "Producten, winkelmandje en bestellen. Bestellingen bewaren in een database kan later."
+      },
+      "start-kassa": {
+        "titel": "Kassa voor op je telefoon",
+        "uitleg": "Producten aanslaan, totaal zien en afrekenen, gemaakt voor een klein scherm."
+      }
+    }
   },
   "fout": {
-    "algemeen": "Er ging iets mis: {{bericht}}"
+    "algemeen": "Er ging iets mis: {{bericht}}",
+    "sluit": "Sluiten"
   },
   "provider": {
     "claude": "Claude",
@@ -55,28 +154,29 @@
     "actiefAccount": "Account: {{naam}}",
     "leeg": "Start een AI of open een terminal om te beginnen.",
     "beeindigd": "[proces beëindigd, code {{code}}]",
-    "codexUitgeschakeld": "Codex is nog niet beschikbaar: de documentatie kon niet worden geverifieerd (zie docs/cli-notes.md)."
+    "codexUitgeschakeld": "Codex is nog niet beschikbaar: de documentatie kon niet worden geverifieerd (zie docs/cli-notes.md).",
+    "tabs": "Open terminals"
   },
   "mcp": {
-    "uit": "MCP: uit",
-    "starting": "MCP: starten…",
-    "running": "MCP: gereed, wacht op AI",
-    "connected": "MCP: verbonden",
-    "unavailable": "MCP: niet beschikbaar",
-    "nietGestart": "De projectruntime is niet gestart.",
-    "probleemTitel": "MCP-server niet beschikbaar",
+    "uit": "AI-koppeling: uit",
+    "starting": "AI-koppeling: starten…",
+    "running": "AI-koppeling: gereed, wacht op AI",
+    "connected": "AI-koppeling: verbonden",
+    "unavailable": "AI-koppeling: niet beschikbaar",
+    "nietGestart": "Het onderdeel dat met de AI samenwerkt is niet gestart. Klik op ‘Opnieuw proberen’.",
+    "probleemTitel": "Studio kan de koppeling met de AI niet starten",
     "opnieuw": "Opnieuw proberen",
     "bezig": "Bezig…",
-    "logs": "Laatste logregels van de server",
+    "logs": "Technische details",
     "hint": {
-      "node_missing": "Installeer Node.js 20 of nieuwer van https://nodejs.org en start Studio opnieuw. Staat Node op een ongebruikelijke plek, zet dan de omgevingsvariabele STUDIO_NODE_PATH naar node.exe.",
-      "node_old": "Werk Node.js bij naar versie 20 of nieuwer en start Studio opnieuw.",
-      "node_broken": "Het gevonden node-bestand werkt niet. Herinstalleer Node.js of zet STUDIO_NODE_PATH naar een werkende node.exe.",
-      "script_missing": "Draai `npm run mcp:build` in de map van Studio (of start Studio via `npm run tauri dev`, dat bouwt het automatisch) en klik op Opnieuw proberen.",
-      "spawn_failed": "Het besturingssysteem liet Node niet starten (antivirus of rechten?). Kijk of node.exe handmatig start.",
-      "timeout": "De server werd niet op tijd klaar. Antivirus kan het eerste keer vertragen: probeer opnieuw.",
-      "crashed": "De server stopte meteen. Zie de logregels hieronder.",
-      "error": "De server meldde een fout. Zie de melding hierboven."
+      "node_missing": "Studio heeft het gratis programma Node.js nodig. Download het op https://nodejs.org (kies de ‘LTS’-versie), installeer het en open Studio daarna opnieuw.",
+      "node_old": "Het programma Node.js op deze computer is te oud. Installeer de nieuwste versie van https://nodejs.org en open Studio daarna opnieuw.",
+      "node_broken": "Node.js is gevonden, maar werkt niet. Installeer het opnieuw via https://nodejs.org en open Studio daarna opnieuw.",
+      "script_missing": "Een onderdeel van Studio is niet klaar. Als je Studio zelf bouwt: draai `npm run mcp:build` en klik daarna op ‘Opnieuw proberen’.",
+      "spawn_failed": "Je computer liet het onderdeel niet starten. Misschien blokkeert een virusscanner het. Probeer het opnieuw.",
+      "timeout": "Het duurde te lang voor het klaar was. De eerste keer kan een virusscanner dit vertragen. Probeer het opnieuw.",
+      "crashed": "Het onderdeel stopte meteen. Klik op ‘Technische details’ als je hulp zoekt.",
+      "error": "Er ging iets mis. Probeer het opnieuw of klik op ‘Technische details’ als je hulp zoekt."
     },
     "controleer": "Controleer in Claude",
     "controleBezig": "Controleren…",
@@ -91,11 +191,11 @@
     "goedkeuring": "Studio heeft de ‘studio’-server voor Claude goedgekeurd. Vraagt Claude bij de eerste start of hij deze map mag vertrouwen, kies dan Ja; daarna verschijnt hier ‘verbonden’."
   },
   "cli": {
-    "nietGevonden": "{{naam}} is niet geïnstalleerd",
-    "uitleg": "Installeer de CLI met een van onderstaande commando's in een gewone terminal.",
-    "herstart": "Is hij net geïnstalleerd? Klik dan op ‘Opnieuw controleren’. Lukt het niet, start Studio dan opnieuw.",
+    "nietGevonden": "{{naam}} is nog niet geïnstalleerd",
+    "uitleg": "Om met {{naam}} te werken moet het eerst één keer op deze computer worden gezet. Kopieer hieronder een regel, plak die in de Terminal (op Windows: PowerShell) en druk op Enter.",
+    "herstart": "Klaar met installeren? Klik dan op ‘Opnieuw controleren’. Lukt het niet, sluit Studio dan af en open het opnieuw.",
     "opnieuw": "Opnieuw controleren",
-    "docs": "Officiële installatiedocs",
+    "docs": "Hulp bij installeren",
     "nogSteedsNiet": "Nog steeds niet gevonden."
   },
   "wissel": {
@@ -105,66 +205,2865 @@
   },
   "accounts": {
     "titel": "AI-accounts",
-    "privacy": "Studio bewaart nooit wachtwoorden of tokens. Je logt zelf in via de CLI; die bewaart de login in de profielmap van dit account.",
-    "provider": "Provider",
-    "label": "Label",
+    "privacy": "Studio bewaart nooit je wachtwoord. Je logt in bij de AI zelf; die onthoudt dat voor dit account.",
+    "provider": "Welke AI?",
+    "label": "Naam van dit account",
     "labelVoorbeeld": "bijv. Werk of Privé",
     "toevoegen": "Account toevoegen",
     "nogNiet": "nog niet beschikbaar",
-    "leeg": "Nog geen accounts. Zonder account gebruikt Studio de standaardlogin van de CLI.",
+    "leeg": "Je hebt nog geen extra accounts. Dat is prima: Studio gebruikt dan het account waarmee je al bent ingelogd.",
     "inloggen": "Inloggen",
     "inloggenBij": "Inloggen bij {{provider}} · {{label}}",
-    "inlogUitleg": "Log in via de terminal hieronder. Sluit dit venster als je klaar bent.",
+    "inlogUitleg": "Log hieronder in bij de AI. Sluit dit venster als je klaar bent.",
     "klaar": "Klaar",
-    "bevestigVerwijder": "Account “{{label}}” uit de lijst verwijderen? De profielmap met de login blijft staan op:\\n{{pad}}"
+    "bevestigVerwijder": "Account “{{label}}” uit de lijst verwijderen? Je login bij de AI blijft bewaard op je computer, in:\n{{pad}}",
+    "fout": {
+      "labelLeeg": "Geef het account een naam, bijvoorbeeld ‘Werk’.",
+      "labelLang": "Kies een kortere naam (maximaal 60 tekens)."
+    },
+    "verwijderTitel": "Account verwijderen?",
+    "annuleer": "Annuleren"
   },
   "preview": {
-    "geenRuntime": "De projectruntime draait niet. Open het project (en installeer Node.js) om de preview, checks en tijdlijn te gebruiken.",
     "status": {
       "running": "Draait",
       "starting": "Starten…",
       "stopping": "Stoppen…",
       "error": "Fout",
-      "stopped": "Gestopt"
+      "stopped": "Gestopt",
+      "idle": "Niet actief"
     },
     "start": "Start",
     "stop": "Stop",
-    "herstart": "Herstart",
+    "herstart": "Opnieuw starten",
     "ververs": "Vernieuwen",
-    "geenConfig": "Dit project heeft nog geen studio.json. Daarin staan de commando's voor preview, lint, build en test, bijvoorbeeld:",
-    "maakConfig": "Voorbeeld-studio.json aanmaken",
-    "configFout": "studio.json is ongeldig: {{fout}}",
     "vertrouwTitel": "studio.json goedkeuren",
     "vertrouwUitleg": "Studio voert onderstaande commando's op jouw computer uit (ook wanneer de AI ze via run_checks aanroept). Controleer ze en keur ze alleen goed als je ze herkent. Wijzigt het bestand, dan vraagt Studio opnieuw om goedkeuring.",
     "vertrouwStart": "Vertrouwen en starten",
     "vertrouw": "Vertrouwen",
-    "wachten": "Wachten tot de preview bereikbaar is…",
-    "nietActief": "De preview draait niet. Klik op Start.",
+    "wachten": "Wachten tot het voorbeeld bereikbaar is…",
     "logs": "Logs van het dev-proces",
-    "geenLogs": "Nog geen uitvoer."
+    "geenLogs": "Nog geen uitvoer.",
+    "geenRuntime": "Een onderdeel van Studio draait niet; daardoor werken het voorbeeld, de controles en de eerdere versies nu niet.",
+    "modus": {
+      "static": "Statisch voorbeeld",
+      "node": "Dev-server",
+      "config": "studio.json",
+      "empty": "",
+      "flutter": "",
+      "unsupported": ""
+    },
+    "nietActief": "Het voorbeeld draait niet.",
+    "startKnop": "Start",
+    "autoWissel": "Automatisch naar het voorbeeld wisselen als dat beschikbaar komt",
+    "probleem": {
+      "empty": "Nog niets om te tonen",
+      "flutter": "Flutter-project",
+      "unsupported": "Niet automatisch te tonen",
+      "config_invalid": "studio.json is ongeldig",
+      "node_missing": "Node.js ontbreekt",
+      "node_old": "Node.js is te oud",
+      "node_broken": "Node.js werkt niet",
+      "runtime_unavailable": "Projectruntime niet beschikbaar",
+      "deps_missing": "Afhankelijkheden nog niet geïnstalleerd",
+      "untrusted_scripts": "Scripts wijzigden: goedkeuring nodig",
+      "untrusted_config": "studio.json goedkeuren",
+      "dev_crashed": "De dev-server is gecrasht",
+      "static_failed": "Het statische voorbeeld kon niet starten",
+      "watch_failed": "Bestandswijzigingen worden niet gevolgd",
+      "runtime_starting": "Projectruntime wordt gestart…"
+    },
+    "uitleg": {
+      "node_missing": "Dit project heeft Node.js nodig. Installeer Node.js 20 of nieuwer (https://nodejs.org) en klik op Opnieuw proberen.",
+      "deps_missing": "Draai npm install (of laat de AI dat doen). Zodra de installatie klaar is, start de preview vanzelf.",
+      "untrusted_scripts": "Studio voert alleen scripts uit die jij hebt goedgekeurd. Controleer ze en klik op Vertrouwen.",
+      "dev_crashed": "Zie de laatste logregels hieronder. Los het op en klik op Herstart."
+    },
+    "installeer": "npm install uitvoeren",
+    "installeren": "Installeren…",
+    "vertrouwScripts": "Vertrouwen en starten",
+    "opnieuwProberen": "Opnieuw proberen",
+    "laatsteRegels": "Laatste logregels",
+    "weergave": {
+      "titel": "Schermgrootte van het voorbeeld",
+      "telefoon": "Telefoon",
+      "tablet": "Tablet",
+      "computer": "Computer",
+      "uitleg": "Dit verandert alleen de breedte van het voorbeeld, niet je project."
+    },
+    "kies": {
+      "knop": "Kies een onderdeel",
+      "uitleg": "Klik op iets in het voorbeeld, bijvoorbeeld een kop of een knop. Daarna typ je wat er anders moet en gaat die wens naar de AI.",
+      "bezig": "Wijs een onderdeel aan in het voorbeeld… (Esc om te stoppen)",
+      "titel": "Wat moet hier anders?",
+      "gekozen": "Gekozen onderdeel: {{tag}}{{tekst}}",
+      "label": "Beschrijf je wens",
+      "plek": "Bijvoorbeeld: maak deze knop groter en groen",
+      "versturen": "Naar de AI sturen",
+      "annuleer": "Annuleren",
+      "verstuurd": "Ik heb je wens naar de AI gestuurd. Kijk in het tabblad Maken.",
+      "prompt": "Pas dit onderdeel in de preview aan. Onderdeel: {{tag}} met de kiesregel ‘{{selector}}’ op pagina {{pad}}{{tekst}}. Wat ik wil: {{wens}}. {{beeld}}Verander alleen dit onderdeel, behalve als iets anders er echt voor aangepast moet worden. Controleer het daarna met een schermafbeelding.",
+      "beeld": "Bij dit bericht zit een schermafbeelding van het onderdeel. "
+    }
   },
   "activiteit": {
-    "checks": "Laatste checks",
+    "checks": "Laatste controle",
     "geslaagd": "Alles geslaagd",
     "mislukt": "Mislukt",
-    "nogGeenChecks": "Nog geen checks gedraaid. De AI doet dat via run_checks.",
+    "nogGeenChecks": "Nog niets gecontroleerd. De AI doet dat zelf als hij klaar is met een wijziging.",
     "stap": {
       "passed": "geslaagd",
       "failed": "mislukt",
       "timeout": "time-out",
-      "skipped": "overgeslagen"
+      "skipped": "overgeslagen",
+      "warned": "waarschuwing"
     },
-    "tijdlijn": "Tijdlijn",
-    "nogGeenCheckpoints": "Nog geen checkpoints.",
+    "tijdlijn": "Eerdere versies",
+    "nogGeenCheckpoints": "Zodra de AI iets heeft aangepast, bewaart Studio hier vanzelf een opgeslagen versie. Dan kun je altijd terug naar een eerdere versie.",
     "terug": "Terug naar vorige versie",
     "zetTerug": "Terugzetten",
     "bevestig": "Terugzetten naar “{{bericht}}” ({{datum}})?",
-    "uitleg1": "Niet-opgeslagen wijzigingen worden eerst automatisch bewaard als checkpoint.",
-    "uitleg2": "Het terugzetten wordt zelf een nieuw checkpoint; je geschiedenis blijft intact.",
-    "uitleg3": "Je kunt altijd terug naar de huidige versie via de tijdlijn.",
+    "uitleg1": "Niet-opgeslagen wijzigingen worden eerst automatisch bewaard als een versie.",
+    "uitleg2": "Het terugzetten wordt zelf ook een nieuwe versie; je eerdere versies blijven bewaard.",
+    "uitleg3": "Je kunt altijd terug naar de huidige versie via de lijst met eerdere versies.",
     "bevestigKnop": "Ja, terugzetten",
     "teruggezet": "Teruggezet.",
-    "teruggezetMetBackup": "Teruggezet. Je laatste wijzigingen staan veilig in een back-upcheckpoint.",
-    "alGelijk": "Het project staat al in die versie."
+    "teruggezetMetBackup": "Teruggezet. Je laatste wijzigingen staan veilig in een back-upversie.",
+    "alGelijk": "Het project staat al in die versie.",
+    "staplabel": {
+      "lint": "lint",
+      "build": "build",
+      "test": "test",
+      "html": "HTML aanwezig",
+      "links": "links",
+      "console": "console",
+      "kit": "Uiterlijk"
+    },
+    "leeg": {
+      "titel": "Nog geen eerdere versies",
+      "knop": "Naar het gesprek"
+    }
+  },
+  "notice": {
+    "beschikbaar": "Voorbeeld beschikbaar voor ‘{{naam}}’",
+    "bekijk": "Bekijk het voorbeeld",
+    "sluit": "Sluiten"
+  },
+  "chat": {
+    "titel": "Gesprek met de AI",
+    "invoerLabel": "Wat wil je maken of veranderen?",
+    "placeholder": "Beschrijf wat je wilt maken...",
+    "verstuur": "Versturen",
+    "hint": "Enter verstuurt je bericht. Shift + Enter begint een nieuwe regel.",
+    "stop": "Stoppen",
+    "geschiedenis": "Gesprek",
+    "leeg": "Hier komt je gesprek. Vertel in gewone woorden wat je wilt maken, bijvoorbeeld: ‘een website voor mijn bakkerij’.",
+    "technisch": "Technische weergave",
+    "wissel": "Wissel van AI",
+    "nieuwGesprek": "Nieuw gesprek",
+    "status": {
+      "thinking": "Bezig met nadenken",
+      "editing": "Bestanden aanpassen",
+      "working": "Bezig met werken",
+      "checking": "Controleert of alles werkt",
+      "done": "Klaar",
+      "idle": "Klaar om te helpen"
+    },
+    "snel": {
+      "titel": "Snelle acties",
+      "veranderd": "Wat is er veranderd?"
+    },
+    "snelPrompt": {
+      "veranderd": "Wat is er veranderd? Gebruik de tool get_last_change om de laatste wijziging te bekijken en vat die samen in ten hoogste vijf korte zinnen, in gewone woorden en zonder vakjargon of bestandsnamen."
+    },
+    "details": "Details",
+    "verberg": "Verberg details",
+    "toonDetails": "Toon details",
+    "actie": {
+      "file_created": "Bestand gemaakt: {{file}}",
+      "file_created_page": "Pagina gemaakt: {{file}}",
+      "file_edited": "Bestand aangepast: {{file}}",
+      "file_edited_page": "Pagina aangepast: {{file}}",
+      "file_read": "Bekijkt een bestand",
+      "search": "Zoekt in je project",
+      "run_checks": "Controleert of alles werkt",
+      "run_checks_fixed": "Foutje gevonden en hersteld",
+      "run_checks_error": "Controle: er klopt nog iets niet",
+      "install_packages": "Installeert onderdelen",
+      "start_server": "Start de voorbeeldweergave",
+      "run_command": "Voert een opdracht uit",
+      "delete_files": "Verwijdert bestanden",
+      "publish": "Publiceert je werk",
+      "save_version": "Slaat een versie op: {{message}}",
+      "save_version_leeg": "Slaat een versie op",
+      "list_versions": "Bekijkt eerdere versies",
+      "view_preview": "Bekijkt de voorbeeldweergave",
+      "find_page_errors": "Zoekt naar fouten op de pagina",
+      "read_logs": "Leest de meldingen van de voorbeeldweergave",
+      "read_notes": "Leest de projectnotities",
+      "update_notes": "Werkt de projectnotities bij",
+      "plan": "Maakt een plan",
+      "web_lookup": "Zoekt op het internet",
+      "helper": "Vraagt een hulpje om mee te denken",
+      "other": "Doet iets extra's"
+    },
+    "actieMislukt": "Dit lukte niet. De AI probeert het opnieuw.",
+    "actieBezig": "Bezig…",
+    "actieKlaar": "Klaar",
+    "toestemming": {
+      "titel": "De AI vraagt toestemming",
+      "ja": "Ja",
+      "nee": "Nee",
+      "details": "Wat doet dit precies?",
+      "gevaar": "Let op: dit kan niet gemakkelijk worden teruggedraaid.",
+      "buitenProject": "Dit gaat buiten je project.",
+      "toegestaan": "Toestemming gegeven",
+      "geweigerd": "Toestemming geweigerd",
+      "verlopen": "Geen antwoord gegeven",
+      "vraag": {
+        "file_created": "Mag de AI dit bestand maken?",
+        "file_edited": "Mag de AI dit bestand aanpassen?",
+        "delete_files": "Mag de AI iets verwijderen?",
+        "publish": "Mag de AI je werk publiceren of versturen?",
+        "run_command": "Mag de AI een opdracht op je computer uitvoeren?",
+        "install_packages": "Mag de AI onderdelen installeren?",
+        "web_lookup": "Mag de AI iets op het internet opzoeken?",
+        "start_server": "Mag de AI de voorbeeldweergave starten?",
+        "save_version": "Mag de AI een versie opslaan?",
+        "generic": "Mag de AI dit doen?",
+        "buiten": "Mag de AI een bestand buiten je project aanpassen?"
+      },
+      "uitleg": {
+        "file_created": "De AI maakt of overschrijft een bestand in je project: {{file}}.",
+        "file_edited": "De AI past een bestand in je project aan: {{file}}.",
+        "delete_files": "Bestanden of mappen worden verwijderd. Dat kan niet altijd worden teruggedraaid.",
+        "publish": "Je werk wordt buiten deze computer gedeeld of verstuurd.",
+        "run_command": "De AI wil een programma op je computer starten. Bij ‘details’ zie je welk programma.",
+        "install_packages": "Hulponderdelen worden van internet gehaald en geïnstalleerd.",
+        "web_lookup": "De AI zoekt informatie op het internet.",
+        "start_server": "De AI start een voorbeeld van je werk.",
+        "save_version": "De AI bewaart de huidige stand als een terugzetbare versie.",
+        "generic": "De AI wil een actie uitvoeren."
+      },
+      "planTitel": "Wil je dat de AI dit plan gaat bouwen?",
+      "planUitleg": "Dit is het plan van de AI. Als je ‘Ja, bouw dit’ kiest, gaat hij aan de slag.",
+      "planJa": "Ja, bouw dit",
+      "planNee": "Nee, nog even overleggen"
+    },
+    "fout": {
+      "not_logged_in": {
+        "titel": "Je bent nog niet ingelogd",
+        "uitleg": "Log eerst in bij je AI-account. Dat doe je bij ‘AI-accounts’.",
+        "knop": "Naar AI-accounts"
+      },
+      "rate_limit": {
+        "titel": "De AI heeft even rust nodig",
+        "uitleg": "Je hebt tijdelijk het maximum bereikt. Probeer het over een paar minuten opnieuw."
+      },
+      "overloaded": {
+        "titel": "De AI is even druk bezig",
+        "uitleg": "Probeer het over een momentje opnieuw."
+      },
+      "billing": {
+        "titel": "Er is iets mis met je abonnement",
+        "uitleg": "Controleer je account bij de aanbieder van de AI."
+      },
+      "network": {
+        "titel": "Geen verbinding met internet",
+        "uitleg": "Controleer je internetverbinding en probeer het opnieuw."
+      },
+      "model_not_found": {
+        "titel": "Dit AI-model is niet beschikbaar",
+        "uitleg": "Kies een ander account of probeer het later opnieuw."
+      },
+      "cli_crashed": {
+        "titel": "De AI is onverwacht gestopt",
+        "uitleg": "Dat gebeurt soms. Probeer het opnieuw."
+      },
+      "cli_missing": {
+        "titel": "De AI is niet geïnstalleerd",
+        "uitleg": "Installeer eerst de AI. In de technische weergave staat hoe."
+      },
+      "mcp_unavailable": {
+        "titel": "De koppeling met Studio ontbreekt",
+        "uitleg": "Studio kon de koppeling met de AI niet starten. Probeer het opnieuw."
+      },
+      "unknown": {
+        "titel": "Er ging iets mis",
+        "uitleg": "Probeer het opnieuw. Lukt het niet, open dan de technische details."
+      },
+      "opnieuw": "Probeer opnieuw",
+      "technisch": "Technische details"
+    },
+    "terugval": {
+      "titel": "Deze AI werkt nog niet in de chat",
+      "uitleg": "{{ai}} kan nog niet met de chatweergave worden gebruikt. Open de technische weergave om er toch mee te werken.",
+      "uitlegFout": "De chatweergave werkt niet met deze versie van de AI. Open de technische weergave om er toch mee te werken."
+    },
+    "scheiding": {
+      "gewisseld": "Gewisseld naar {{ai}}",
+      "nieuw": "Nieuw gesprek"
+    },
+    "wisselDialoog": {
+      "titel": "Wissel van AI",
+      "uitleg": "Het gesprek wordt voortgezet met een andere AI. Die leest eerst de projectnotities (PROJECT.md) om te weten waar het project staat.",
+      "tip": "Tip: vraag de huidige AI eerst de projectnotities bij te werken."
+    },
+    "geenAccount": "standaard",
+    "versieOpgeslagen": "Versie opgeslagen: {{titel}}",
+    "modus": {
+      "label": "Wat moet de AI nu doen?",
+      "kop": "De AI mag:",
+      "plan": "Eerst overleggen",
+      "build": "Bouwen",
+      "planUitleg": "De AI denkt mee en stelt een plan voor, maar past niets aan.",
+      "buildUitleg": "De AI gaat meteen aan de slag en bouwt.",
+      "banner": "Overleg-modus: de AI bespreekt een plan en past niets aan. Kies ‘Bouwen’ als je wilt dat hij begint.",
+      "placeholderPlan": "Vertel wat je wilt; we bespreken eerst een plan..."
+    },
+    "lus": {
+      "titel": "Even pauzeren: dit lukt zo nog niet",
+      "uitleg": {
+        "same_error": "De AI loopt steeds tegen dezelfde fout aan, {{aantal}} keer na elkaar. Verder proberen helpt waarschijnlijk niet.",
+        "same_step": "Dezelfde controle mislukt steeds, {{aantal}} keer na elkaar, ook al probeert de AI iets anders.",
+        "worse": "Het wordt niet beter maar slechter: er gaan nu méér dingen mis dan eerst.",
+        "rewrites": "De AI schrijft steeds hetzelfde bestand opnieuw, terwijl de controle nog steeds mislukt. Zo komt hij waarschijnlijk niet verder."
+      },
+      "vraag": "Wat wil je doen?",
+      "terug": "Terug naar laatste werkende versie",
+      "terugGeen": "Er is nog geen werkende versie om naar terug te gaan.",
+      "overleg": "Eerst alleen onderzoeken",
+      "andere": "Andere AI proberen",
+      "terugBevestig": "Terug naar ‘{{titel}}’?",
+      "terugUitleg": "Je huidige werk wordt eerst bewaard als een versie, dus er gaat niets verloren.",
+      "terugJa": "Ja, ga terug",
+      "terugKlaar": "Klaar: je project staat weer bij ‘{{titel}}’.",
+      "overlegPrompt": "Stop even met bouwen. Onderzoek alleen: leg in gewone woorden uit wat er misgaat en waarom, en stel een ander plan voor. Pas nog niets aan.",
+      "anderePrompt": "Je eerdere aanpak werkt niet. Probeer het op een wezenlijk andere manier: lees eerst alleen wat nodig is, zoek de echte oorzaak en leg in één zin uit wat je nu anders doet. Herschrijf niet opnieuw wat je al probeerde.",
+      "andereAanpak": "Probeer een andere aanpak"
+    },
+    "bijlage": {
+      "knop": "Bestand",
+      "kies": "Kies een afbeelding of document",
+      "sleep": "Laat het bestand hier los om het mee te sturen",
+      "verwijder": "Verwijder {{naam}}",
+      "lijst": "Bijlagen bij je bericht",
+      "bezig": "Bestand wordt opgeslagen…",
+      "teGroot": "{{naam}} is te groot (maximaal {{max}} MB).",
+      "typeNiet": "{{naam}}: dit bestandstype kan ik niet gebruiken. Kies een afbeelding (png, jpg, gif, webp) of een document (pdf, txt, md, csv, json).",
+      "teVeel": "Je kunt maximaal {{max}} bestanden tegelijk meesturen.",
+      "mislukt": "{{naam}} kon niet worden toegevoegd: {{reden}}",
+      "alt": "Bijgevoegde afbeelding: {{naam}}",
+      "document": "Document: {{naam}}"
+    },
+    "start": {
+      "titel": "Begin met een voorbeeld",
+      "uitleg": "Kies een voorbeeld, of typ hieronder in je eigen woorden wat je wilt maken.",
+      "knop": "Gebruik dit voorbeeld"
+    },
+    "verbeter": {
+      "knop": "Verbeter tekst",
+      "knopUitleg": "De AI schrijft je zin om tot een duidelijke opdracht. Je ziet eerst een voorstel.",
+      "titel": "Voorstel voor je opdracht",
+      "uitleg": "Dit is een voorstel. Pas het gerust aan. Er wordt pas iets verstuurd als jij op ‘Versturen’ drukt.",
+      "bezig": "De AI schrijft een voorstel…",
+      "label": "Verbeterde opdracht",
+      "versturen": "Versturen",
+      "gebruik": "Zet in mijn tekstvak",
+      "annuleer": "Annuleren",
+      "opnieuw": "Probeer opnieuw"
+    },
+    "lang": {
+      "titel": "Dit gesprek is al lang",
+      "uitleg": "Een lang gesprek kost de AI steeds meer gebruik, en hij kan details vergeten. Met een frisse start begint hij opnieuw met je projectnotities en de laatste versies. Je werk en je eerdere gesprek blijven bewaard.",
+      "fris": "Ga verder met een frisse start",
+      "blijf": "Blijf in dit gesprek"
+    },
+    "gebruik": {
+      "regel": "AI-gebruik van deze klus: ± {{totaal}} woorddelen ({{nieuw}} nieuw, {{hergebruikt}} hergebruikt).",
+      "uitleg": "Wat betekent dit?",
+      "tekst": "Studio gebruikt je eigen AI-account. Heb je een abonnement, dan telt dit mee voor je limiet en kost het geen extra geld. Betaal je per gebruik, dan kan dit geld kosten. De cijfers komen van de AI zelf; Studio rekent geen bedragen uit. ‘Hergebruikt’ is wat de AI al in zijn geheugen had en kost veel minder.",
+      "groot": "Dit was een grote klus ({{beurten}} stappen). Een volgende keer gaat het zuiniger en betrouwbaarder in kleine stappen.",
+      "splits": "Splits dit in stappen",
+      "splitsPrompt": "Maak een kort plan in kleine stappen voor wat er nog moet gebeuren. Voer alleen stap 1 uit, controleer het resultaat en wacht dan op mijn akkoord voor de volgende stap."
+    }
+  },
+  "instellingen": {
+    "titel": "Instellingen",
+    "taal": {
+      "titel": "Hoe de AI tegen je praat",
+      "eenvoudig": "Eenvoudige taal",
+      "eenvoudigUitleg": "De AI praat in gewone woorden, zonder vakjargon. Aanbevolen.",
+      "technisch": "Technisch",
+      "technischUitleg": "De AI mag vaktaal gebruiken en je ziet ruwe details. Voor ervaren gebruikers.",
+      "toelichting": "Studio zet deze keuze als instructie in CLAUDE.md, GEMINI.md en AGENTS.md van je projecten. Eigen tekst in die bestanden blijft ongemoeid."
+    },
+    "toestemming": {
+      "titel": "Hoeveel mag de AI zelf doen?",
+      "altijd": "Vraag altijd",
+      "altijdUitleg": "Studio vraagt toestemming voor alles wat iets verandert of uitvoert. Alleen kijken mag zonder vraag.",
+      "belangrijk": "Vraag bij belangrijke dingen",
+      "belangrijkUitleg": "Gewoon bouwwerk (bestanden maken, controleren) gaat zonder vraag. Onbekende opdrachten vragen toestemming.",
+      "toelichting": "Gevaarlijke acties, zoals verwijderen en publiceren, vragen altijd bevestiging, welke keuze je ook maakt.",
+      "zelfstandig": "Werk zelfstandig",
+      "zelfstandigUitleg": "De AI werkt door zonder steeds te vragen, ook met opdrachten die hij zelf bedenkt. Let op: het is dan vaker iets wat je niet gezien hebt. Online zetten, verwijderen en schrijven buiten je project vragen altijd om je toestemming."
+    },
+    "opgeslagen": "Opgeslagen",
+    "lus": {
+      "titel": "Hulp als de AI vastloopt",
+      "label": "Waarschuw na zoveel keer dezelfde mislukte controle",
+      "uitleg": "Studio onderbreekt de AI als dezelfde fout of dezelfde stap zoveel keer na elkaar mislukt, of als het slechter wordt. Je krijgt dan keuzes. Standaard: 3.",
+      "fout": "Kies een heel getal van 2 tot 10."
+    },
+    "thema": {
+      "titel": "Weergave",
+      "system": "Volgens mijn computer",
+      "systemUitleg": "Studio is licht of donker, zoals je computer is ingesteld.",
+      "light": "Licht",
+      "lightUitleg": "Een lichte achtergrond met donkere tekst.",
+      "dark": "Donker",
+      "darkUitleg": "Een donkere achtergrond met lichte tekst. Rustiger voor de ogen in een donkere ruimte."
+    },
+    "sluit": "Sluiten",
+    "beschrijving": "Pas aan hoe Studio eruitziet en hoe de AI met je werkt."
+  },
+  "versies": {
+    "titel": "Versies van je project",
+    "knop": "Versies",
+    "sluit": "Sluiten",
+    "uitleg": "Na elke keer dat de AI klaar is, bewaart Studio automatisch een versie. Je kunt altijd terug naar een eerdere versie.",
+    "laden": "Bezig met laden…",
+    "leeg": "Er zijn nog geen versies. Na het eerste antwoord van de AI verschijnt hier de eerste.",
+    "huidig": "huidige versie",
+    "terug": "Terug naar deze versie",
+    "bevestigTitel": "Terug naar ‘{{titel}}’?",
+    "bevestigUitleg": "Je huidige werk wordt eerst bewaard als een versie. Er gaat dus niets verloren, en je kunt later weer terug naar nu.",
+    "ja": "Ja, ga terug",
+    "teruggezet": "Klaar: je project staat weer zoals bij ‘{{titel}}’. Je vorige werk staat veilig in de lijst.",
+    "alGelijk": "Het project staat al in deze versie."
+  },
+  "uiterlijk": {
+    "titel": "Uiterlijk van je app",
+    "intro": "Kies hoe je app eruitziet. De AI gebruikt dat uiterlijk bij alles wat hij bouwt, zodat alles bij elkaar past.",
+    "welkom": "Kies eerst hoe je app eruit moet zien",
+    "kiesKit": "Kies een uiterlijk",
+    "kiezer": "Beschikbare uiterlijken",
+    "livevoorbeeld": "Voorbeeld van {{naam}}",
+    "geenPreview": "Geen voorbeeld beschikbaar",
+    "licentie": "Licentie: {{licentie}}",
+    "geschiktVoor": "Geschikt voor: {{stacks}}",
+    "stack": {
+      "react-vite": "React-websites",
+      "flutter": "Flutter-apps"
+    },
+    "past": "Past niet bij dit project",
+    "kies": "Kies dit uiterlijk",
+    "pakketten": "Dit wordt aan je project toegevoegd:",
+    "scriptsWaarschuwing": "Dit pakket heeft installatiescripts. Die voer ik niet uit zonder jouw goedkeuring.",
+    "veiligheid": "Studio maakt eerst een versie van je project. Gaat er iets mis, dan zet ik alles terug zoals het was.",
+    "attributieNodig": "Voor dit uiterlijk is een vermelding verplicht. Studio zet die automatisch in NOTICE.md. Haal je die weg, dan waarschuw ik je.",
+    "toepassen": "Toepassen",
+    "annuleer": "Annuleren",
+    "bezig": "Bezig met het toepassen van het uiterlijk… Dit kan een minuut duren.",
+    "klaar": "Klaar! Je app heeft nu het uiterlijk ‘{{naam}}’.",
+    "controleOvergeslagen": "De controle van je project kon nu niet draaien. Draai hem zelf in het tabblad Maken. ({{reden}})",
+    "details": "Details",
+    "fout": {
+      "install_failed": "Het installeren lukte niet. Je project is teruggezet zoals het was.",
+      "checks_failed": "Je project werkte niet meer met dit uiterlijk. Ik heb alles teruggezet zoals het was.",
+      "refused": "Dit uiterlijk kan ik hier niet gebruiken.",
+      "no_repo": "Ik kan nog geen versie van je project maken, dus ik begin hier niet aan.",
+      "terugzettenMislukt": "Terugzetten lukte niet automatisch. Gebruik ‘Versies’ in het gesprek om terug te gaan."
+    },
+    "scripts": {
+      "titel": "Installatiescripts goedkeuren?",
+      "uitleg": "Deze pakketten willen bij het installeren eigen programma's draaien: {{pakketten}}. Doe dit alleen als je het uiterlijk vertrouwt.",
+      "ja": "Ja, uitvoeren",
+      "nee": "Nee, overslaan",
+      "klaar": "De scripts zijn uitgevoerd.",
+      "mislukt": "De scripts gaven een fout: {{detail}}"
+    },
+    "wissel": {
+      "voor": "Voor",
+      "na": "Na",
+      "geenBeeld": "Geen beeld beschikbaar (het voorbeeld draait nu niet).",
+      "migreer": "Laat de AI de onderdelen aanpassen",
+      "migreerUitleg": "De AI zet bestaande schermen over naar het nieuwe uiterlijk.",
+      "terug": "Terugdraaien naar het vorige uiterlijk",
+      "teruggezet": "Teruggezet naar het vorige uiterlijk.",
+      "migreerPrompt": "Ik heb het uiterlijk van deze app gewisseld naar ‘{{naam}}’. Zet alle bestaande schermen en onderdelen over naar de onderdelen van dit nieuwe uiterlijk. Lees eerst docs/ui-kit.md. Gebruik de regels van dit uiterlijk en pas bestaande onderdelen in src/components/app/ aan. Draai daarna run_checks."
+    },
+    "eigen": {
+      "titel": "Eigen stijl",
+      "uitleg": "De AI bedenkt alles zelf. Dat kost meer tijd en meer AI-gebruik dan een kant-en-klaar uiterlijk, en het wordt minder consequent.",
+      "kies": "Eigen stijl kiezen",
+      "prompt": "Ik wil een eigen stijl voor deze app, zonder kant-en-klare kit. Stel eerst een klein ontwerp voor (kleuren, lettertype, ronding en ruimte) en zet dat in design/tokens.json en in CSS-variabelen. Gebruik daarna alleen die waarden.",
+      "kitTitel": "Eigen stijl op basis van een kit",
+      "kitUitleg": "Je kiest een kit als basis. De AI past daarna alleen de kleuren, rondingen en een paar onderdelen aan.",
+      "kitKies": "Kit als basis kiezen",
+      "kitPrompt": "Ik heb ‘{{naam}}’ gekozen als basis. Maak er een eigen stijl van: pas alleen de tokens in design/tokens.json aan en maximaal een paar onderdelen, door ze in src/components/app/ te verpakken. Pas kitcomponenten nooit zelf aan.",
+      "verstuurd": "Ik heb de AI gevraagd om de eigen stijl te maken. Kijk in het tabblad Maken."
+    },
+    "huidig": {
+      "titel": "Gekozen uiterlijk",
+      "versie": "Versie {{versie}}",
+      "andere": "Ander uiterlijk kiezen",
+      "geen": "Je app heeft nog geen uiterlijk."
+    },
+    "attributie": {
+      "mist": "De vermelding in NOTICE.md ontbreekt. Voor dit uiterlijk is die verplicht. Zet de tekst terug, of kies een ander uiterlijk."
+    },
+    "aanpassen": {
+      "titel": "Zelf aanpassen",
+      "uitleg": "Wat je hier verandert, zie je meteen in het voorbeeld. Er is geen AI voor nodig.",
+      "kleur": "Hoofdkleur",
+      "afronding": "Afronding",
+      "afrondingen": {
+        "scherp": "Scherp",
+        "gemiddeld": "Gemiddeld",
+        "rond": "Rond"
+      },
+      "ruimte": "Ruimte",
+      "ruimtes": {
+        "compact": "Compact",
+        "normaal": "Normaal",
+        "ruim": "Ruim"
+      },
+      "lettertype": "Lettertype",
+      "lettertypes": {
+        "systeem": "Standaard van het apparaat",
+        "serif": "Met sierlijntjes (Georgia)",
+        "verdana": "Breed en rustig (Verdana)",
+        "trebuchet": "Vriendelijk (Trebuchet)",
+        "mono": "Schrijfmachine (Courier)"
+      },
+      "bewaar": "Bewaar als versie",
+      "bewaard": "Bewaard als versie.",
+      "standaard": "Terug naar de standaard van de kit",
+      "mislukt": "Aanpassen lukte niet: {{reden}}"
+    },
+    "laden": "Even laden…",
+    "controle": {
+      "titel": "Klopt je app met het uiterlijk?",
+      "uitleg": "Ik zoek naar plekken waar iets niet bij het gekozen uiterlijk past. Dat zie je ook als de AI zijn werk controleert.",
+      "knop": "Controleer nu",
+      "bezig": "Bezig met controleren…",
+      "alles": "Alles klopt: er zijn geen afwijkingen gevonden in {{aantal}} bestanden.",
+      "gevonden": "{{aantal}} afwijkingen gevonden in {{bestanden}} bestanden.",
+      "regel": "regel {{regel}}",
+      "herstel": "Laat de AI dit herstellen",
+      "herstelAlles": "Laat de AI alles in dit rijtje herstellen",
+      "prompt": "De kit-check meldt een afwijking van het gekozen uiterlijk in {{bestand}}, regel {{regel}}: {{melding}} {{tip}} Herstel dit volgens docs/ui-kit.md en draai daarna run_checks.",
+      "promptAlles": "De kit-check meldt afwijkingen van het gekozen uiterlijk ({{titel}}). Herstel ze volgens docs/ui-kit.md en draai daarna run_checks. Plekken:\\n{{plekken}}",
+      "verstuurd": "Ik heb de AI gevraagd dit te herstellen. Kijk in het tabblad Maken.",
+      "regels": {
+        "kleur": {
+          "titel": "Losse kleuren",
+          "uitleg": "Kleuren moeten uit de kit komen, zodat alles bij elkaar past en je het uiterlijk later kunt wisselen."
+        },
+        "pixels": {
+          "titel": "Losse maten",
+          "uitleg": "Ruimte en afmetingen horen uit de kit te komen, zodat alles even ruim en gelijk is."
+        },
+        "lettertype": {
+          "titel": "Los lettertype",
+          "uitleg": "Het lettertype hoort uit de kit te komen."
+        },
+        "native": {
+          "titel": "Gewone knoppen en velden",
+          "uitleg": "Waar de kit een eigen onderdeel heeft, moet dat gebruikt worden. Dan werken hover, focus en uitgeschakeld overal hetzelfde."
+        },
+        "bibliotheek": {
+          "titel": "Andere uiterlijk-bibliotheken",
+          "uitleg": "Een tweede bibliotheek maakt je app rommelig en zwaarder. Gebruik alleen de gekozen kit."
+        }
+      },
+      "strengheid": {
+        "titel": "Hoe streng moet de controle zijn?",
+        "waarschuwen": "Waarschuwen",
+        "blokkeren": "Blokkeren",
+        "waarschuwenUitleg": "Afwijkingen worden gemeld, maar de controle slaagt nog.",
+        "blokkerenUitleg": "Afwijkingen laten de controle mislukken. De AI moet ze eerst herstellen."
+      }
+    }
+  },
+  "publiceren": {
+    "titel": "Delen en online zetten",
+    "online": {
+      "titel": "Wil je dat anderen je website zien?",
+      "uitleg": "Dan moet je project op internet staan. Daarvoor heb je meestal drie dingen nodig:",
+      "stap1": "Een gedownload project. Dat maak je hierboven met ‘Download je project’.",
+      "stap2": "Een plek op internet waar je website mag staan (een ‘hostingbedrijf’). Veel bedrijven laten je gratis beginnen.",
+      "stap3": "Een eigen adres, zoals jouwbedrijf.nl. Dat kost meestal een klein bedrag per jaar.",
+      "knop": "Vraag de AI om hulp hierbij",
+      "prompt": "Ik wil mijn website online zetten, maar ik ben geen techneut. Leg in eenvoudige stappen uit wat ik nodig heb en welke keuzes ik moet maken. Doe niets zonder dat ik het goedvind.",
+      "verstuurd": "De vraag is naar de AI gestuurd. Kijk bij het tabblad ‘Maken’ voor het antwoord."
+    },
+    "export": {
+      "titel": "Download je project",
+      "uitleg": "Je krijgt een zip met alle bestanden van je project.",
+      "van_jou": "De code is van jou. Hij zit niet vast aan Studio: je kunt hem openen, aanpassen en publiceren waar je maar wilt.",
+      "niet_mee": "Niet in de zip: de map node_modules, bouwuitvoer die je opnieuw kunt maken, en geheimen zoals .env-bestanden en sleutels.",
+      "knop": "Download je project",
+      "bezig": "Bezig met inpakken…",
+      "klaar": "Klaar: {{aantal}} bestanden opgeslagen in {{pad}}.",
+      "geheimen": "Deze geheime bestanden zijn bewust niet meegenomen: {{lijst}}.",
+      "groot": "Deze bestanden waren te groot en zijn overgeslagen: {{lijst}}."
+    },
+    "veilig": {
+      "titel": "Controleer veiligheid",
+      "uitleg": "Ik zoek naar dingen die niet openbaar mogen worden: geheime sleutels, wachtwoorden en gegevens die voor iedereen openstaan.",
+      "knop": "Controleer veiligheid",
+      "bezig": "Bezig met controleren…",
+      "schoon": "Alles ziet er goed uit: er zijn geen problemen gevonden in {{aantal}} bestanden.",
+      "gevonden": "{{aantal}} punt(en) gevonden. Je kunt nog steeds publiceren, maar los deze eerst op als je kunt.",
+      "waarschuwing": "Let op: dit zijn waarschuwingen. Studio houdt je niet tegen als je toch publiceert.",
+      "hoog": "Belangrijk",
+      "midden": "Goed om te weten",
+      "regel": "regel {{regel}}",
+      "oplossen": "Los dit op",
+      "verstuurd": "Ik heb de AI gevraagd dit op te lossen. Kijk in het tabblad Maken.",
+      "codes": {
+        "api_key": {
+          "titel": "Een geheime sleutel staat in je code",
+          "uitleg": "Iedereen die je code of website ziet, kan deze sleutel gebruiken."
+        },
+        "private_key": {
+          "titel": "Een privésleutel staat in je project",
+          "uitleg": "Een privésleutel hoort nooit in je code of op internet."
+        },
+        "env_in_git": {
+          "titel": "Een .env-bestand zit in je versiegeschiedenis",
+          "uitleg": "Daarin staan je geheimen. Ook als je het bestand later weghaalt, blijft het in oude versies staan."
+        },
+        "secret_file_in_git": {
+          "titel": "Een geheim bestand zit in je versiegeschiedenis",
+          "uitleg": "Sleutelbestanden horen niet in je versies."
+        },
+        "secret_in_export": {
+          "titel": "Een geheim staat in de map die online komt",
+          "uitleg": "Alles in die map kan door iedereen worden gelezen."
+        },
+        "password": {
+          "titel": "Een vast wachtwoord staat in je code",
+          "uitleg": "Zet wachtwoorden in een apart, geheim bestand."
+        },
+        "db_rules_missing": {
+          "titel": "Je database heeft geen toegangsregels",
+          "uitleg": "Zonder regels kan iedereen met je websiteadres de gegevens lezen of veranderen."
+        },
+        "db_rules_open": {
+          "titel": "Je database staat voor iedereen open",
+          "uitleg": "De regels laten iedereen lezen of schrijven."
+        }
+      },
+      "prompt": {
+        "geheim": "De veiligheidscheck vond een geheim in {{bestand}}{{regel}}: {{detail}}. Haal het uit de code, zet het in een .env-bestand dat niet in git staat (voeg .env toe aan .gitignore) en lees het via een omgevingsvariabele. Maak ook een .env.example zonder echte waarden. Zeg me daarna in gewone woorden dat ik deze sleutel moet vernieuwen of intrekken bij de aanbieder, omdat hij al in de code stond. Toon de sleutel zelf nergens. Draai daarna run_checks.",
+        "gitbestand": "De veiligheidscheck vond een geheim bestand in de versiegeschiedenis: {{bestand}}. Zet het in .gitignore en haal het uit het volgende versiepunt zonder bestanden van mij te wissen. Leg me uit dat de oude versies het bestand nog bevatten en dat ik de geheimen daarin moet vernieuwen. Draai daarna run_checks.",
+        "uitvoer": "De veiligheidscheck vond een geheim in een map die online komt: {{bestand}}. Zorg dat geheimen nooit in die map belanden, bijvoorbeeld door ze alleen op een server te gebruiken, en laat me weten welke sleutels ik moet vernieuwen. Draai daarna run_checks.",
+        "wachtwoord": "De veiligheidscheck vond een vast wachtwoord in {{bestand}}{{regel}}. Verplaats het naar een omgevingsvariabele in een .env-bestand dat niet in git staat. Draai daarna run_checks.",
+        "regels": "De veiligheidscheck meldt een probleem met de toegangsregels van de database in {{bestand}}: {{detail}} Maak veilige regels, zodat gebruikers alleen hun eigen gegevens kunnen lezen en veranderen (voor Supabase: row level security met policies). Leg in gewone woorden uit wat je veranderd hebt."
+      }
+    }
+  },
+  "werkruimte": {
+    "label": "Werkruimte",
+    "laden": "De werkruimte wordt geladen…",
+    "paneel": {
+      "start": "Start",
+      "schermen": "Schermen",
+      "uiterlijk": "Uiterlijk",
+      "bestanden": "Foto’s en bestanden",
+      "gegevens": "Wat je app onthoudt",
+      "onlinezetten": "Online zetten",
+      "appwinkel": "In de appwinkel",
+      "versies": "Eerdere versies",
+      "instellingen": "Instellingen",
+      "hulp": "Hulp",
+      "terminal": "Terminal",
+      "logs": "Logs",
+      "technischestatus": "Technische status",
+      "code": "Code en bestanden",
+      "preview": "Voorbeeld",
+      "eigenschappen": "Eigenschappen",
+      "chat": "Gesprek"
+    },
+    "rail": {
+      "label": "Onderdelen van je project",
+      "open": "{{naam}} openen",
+      "sluit": "{{naam}} sluiten",
+      "geavanceerd": "Geavanceerd"
+    },
+    "balk": {
+      "status": "Status",
+      "preview": "Voorbeeld: {{status}}",
+      "mcp": "AI-koppeling: {{status}}",
+      "mcpGereed": "gereed",
+      "mcpVerbonden": "verbonden",
+      "mcpStart": "start op",
+      "mcpUit": "uit",
+      "mcpProbleem": "werkt niet",
+      "indeling": "Indeling",
+      "indelingMenu": "Indeling van de werkruimte",
+      "standaard": "Standaard",
+      "veelPreview": "Veel voorbeeld",
+      "veelChat": "Veel gesprek",
+      "herstel": "Herstel standaardindeling",
+      "herstelKlaar": "De standaardindeling is hersteld.",
+      "panelen": "Panelen tonen",
+      "maximaliseer": "Voorbeeld groot maken",
+      "herstelGrootte": "Voorbeeld weer normaal",
+      "sluitProject": "Project sluiten",
+      "meer": "Meer",
+      "sneltoetsen": "Sneltoetsen"
+    },
+    "ui": {
+      "flexlayout.ui.close.tab": "Sluiten",
+      "flexlayout.ui.close.tabset": "Groep sluiten",
+      "flexlayout.ui.maximize.tabset": "Groot maken",
+      "flexlayout.ui.restore.tabset": "Weer normaal",
+      "flexlayout.ui.overflow.menu.tooltip": "Meer tabbladen",
+      "flexlayout.ui.splitter": "Grootte aanpassen met de pijltjestoetsen",
+      "flexlayout.ui.move.tabset": "Groep verplaatsen",
+      "flexlayout.ui.popout.tab": "In nieuw venster",
+      "flexlayout.ui.menu.maximize": "Groot maken",
+      "flexlayout.ui.menu.restore": "Weer normaal",
+      "flexlayout.ui.menu.float": "Los laten zweven",
+      "flexlayout.ui.menu.close.all": "Alles sluiten",
+      "flexlayout.ui.menu.close.others": "Anderen sluiten",
+      "flexlayout.ui.menu.close.right": "Rechts sluiten",
+      "flexlayout.ui.dock.float.to.layout": "Terug in de indeling",
+      "flexlayout.ui.error.rendering.component": "Dit paneel kan niet worden getoond",
+      "flexlayout.ui.error.rendering.component.retry": "Opnieuw proberen",
+      "flexlayout.ui.active.tabset": "Actieve groep",
+      "flexlayout.ui.rename.tab": "Naam wijzigen",
+      "flexlayout.ui.menu.rename": "Naam wijzigen"
+    },
+    "plaatshouder": {
+      "binnenkort": "Komt later",
+      "componenten": "Hier zie je straks de onderdelen waaruit je pagina is gebouwd, zoals knoppen en formulieren, en kun je ze hergebruiken.",
+      "database": "Hier kun je straks gegevens bijhouden voor je app, zoals bestellingen of afspraken.",
+      "koppelingen": "Hier kun je straks diensten koppelen (bijvoorbeeld betalen of e-mail) en wachtwoorden veilig bewaren. Studio bewaart nooit zelf wachtwoorden in je project.",
+      "vraagAi": "Vraag de AI om hulp hierbij",
+      "promptComponenten": "Ik wil begrijpen uit welke onderdelen mijn pagina is gebouwd. Maak een eenvoudig overzicht in gewone woorden, zonder iets te veranderen.",
+      "promptDatabase": "Ik wil gegevens kunnen bijhouden in mijn app. Leg in eenvoudige woorden uit welke mogelijkheden er zijn en wat je aanraadt. Verander nog niets zonder dat ik het goedvind.",
+      "promptKoppelingen": "Ik wil mijn app koppelen aan een dienst, bijvoorbeeld voor betalen of e-mail. Leg in eenvoudige woorden uit wat ik nodig heb en hoe geheime sleutels veilig blijven. Verander nog niets zonder dat ik het goedvind.",
+      "verstuurd": "De vraag is naar de AI gestuurd."
+    },
+    "structuur": {
+      "titel": "Pagina’s en structuur",
+      "pagina": "Pagina",
+      "geenSelectie": "Kies in het voorbeeld een onderdeel om te zien waar het in de pagina zit.",
+      "plek": "Plek in de pagina"
+    },
+    "project": {
+      "titel": "Dit project",
+      "naam": "Naam",
+      "map": "Map op je computer",
+      "soort": "Soort project",
+      "aangemaakt": "Aangemaakt",
+      "standaard": "Standaardaccount",
+      "sluit": "Project sluiten",
+      "algemeen": "Voor alle projecten"
+    },
+    "verplaats": {
+      "knop": "Paneel ‘{{naam}}’ verplaatsen",
+      "titel": "‘{{naam}}’ verplaatsen naar…",
+      "links": "Links in de werkruimte",
+      "rechts": "Rechts in de werkruimte",
+      "boven": "Bovenaan",
+      "onder": "Onderaan",
+      "bijPreview": "Als tabblad bij het voorbeeld",
+      "bijChat": "Als tabblad bij het gesprek",
+      "zweven": "Los laten zweven"
+    },
+    "sneltoetsen": {
+      "titel": "Sneltoetsen",
+      "uitleg": "Met deze toetsen werk je sneller, ook zonder muis.",
+      "start": "Naar Start (wat is de volgende stap?)",
+      "voorbeeld": "Naar het voorbeeld",
+      "chat": "Naar het gesprek (typen)",
+      "eigenschappen": "Eigenschappen tonen of verbergen",
+      "links": "Menu klein of groot maken",
+      "groot": "Voorbeeld groot maken of weer normaal",
+      "volgende": "Naar de volgende groep panelen",
+      "vorige": "Naar de vorige groep panelen",
+      "wissel": "Wisselen tussen tabblad en inhoud",
+      "grepen": "Een scheidingsgreep verschuiven: kies hem met Tab, gebruik de pijltjestoetsen (met Shift grotere stappen)",
+      "sluit": "Sluiten"
+    },
+    "gemeld": {
+      "chatGefocust": "Je kunt nu typen in het gesprek."
+    }
+  },
+  "eigenschappen": {
+    "titel": "Eigenschappen",
+    "uitleg": "Kies in het voorbeeld een onderdeel van je pagina. Dan zie je hier wat het is en hoe het eruitziet.",
+    "kies": "Kies een onderdeel",
+    "kiesBezig": "Klik nu op iets in het voorbeeld…",
+    "geenPreview": "Het voorbeeld draait niet. Start het eerst, dan kun je hier een onderdeel kiezen.",
+    "pagina": {
+      "titel": "Deze pagina",
+      "naam": "Titel",
+      "pad": "Adres",
+      "taal": "Taal",
+      "venster": "Grootte van het voorbeeld",
+      "achtergrond": "Achtergrond",
+      "tekst": "Tekstkleur",
+      "lettertype": "Lettertype",
+      "leeg": "(geen titel)",
+      "nogNiet": "Zodra je een onderdeel kiest, zie je hier ook gegevens van de pagina."
+    },
+    "sectie": {
+      "soort": "Wat is dit?",
+      "tekst": "Tekst",
+      "afmeting": "Afmetingen",
+      "uiterlijk": "Uiterlijk",
+      "kit": "Onderdeel uit het uiterlijk",
+      "plek": "Plek in de pagina",
+      "wens": "Wat moet hier anders?"
+    },
+    "afmeting": "{{breed}} × {{hoog}} pixels",
+    "verborgen": "Dit onderdeel is nu niet zichtbaar.",
+    "kitJa": "Ja, dit is het onderdeel ‘{{naam}}’ uit het uiterlijk.",
+    "kitBinnen": "Het zit in het onderdeel ‘{{naam}}’ uit het uiterlijk.",
+    "kitNee": "Nee, dit is een eigen onderdeel.",
+    "token": "Thematoken",
+    "geenTokens": "Geen thematoken gevonden. De waarden hieronder zijn los ingesteld.",
+    "losseWaarde": "los ingesteld",
+    "ouder": "Kies het onderdeel erboven",
+    "kind": "Kies een onderdeel eronder",
+    "geenOuder": "Dit is het bovenste onderdeel.",
+    "geenKind": "Er zit niets onder.",
+    "wensLabel": "Beschrijf wat je anders wilt",
+    "wensPlaats": "Bijvoorbeeld: maak deze knop groter en groen",
+    "verstuur": "Naar de AI sturen",
+    "verstuurd": "Je wens is naar de AI gestuurd, met een schermafbeelding van dit onderdeel.",
+    "wis": "Keuze wissen",
+    "eigenschap": {
+      "background-color": "Achtergrondkleur",
+      "color": "Tekstkleur",
+      "border-radius": "Afronding van de hoeken",
+      "padding": "Ruimte binnenin",
+      "margin": "Ruimte eromheen",
+      "gap": "Ruimte ertussen",
+      "font-size": "Tekstgrootte",
+      "font-family": "Lettertype",
+      "font-weight": "Dikte van de tekst",
+      "display": "Indeling",
+      "opacity": "Doorzichtigheid",
+      "style": "Direct in het element ingesteld",
+      "background": "Achtergrond"
+    },
+    "type": {
+      "h1": "Kop (groot)",
+      "h2": "Kop",
+      "h3": "Kop (klein)",
+      "h4": "Kop (klein)",
+      "h5": "Kop (klein)",
+      "h6": "Kop (klein)",
+      "p": "Tekstblok",
+      "span": "Stukje tekst",
+      "a": "Link",
+      "button": "Knop",
+      "img": "Afbeelding",
+      "input": "Invoerveld",
+      "textarea": "Invoerveld voor lange tekst",
+      "select": "Keuzelijst",
+      "label": "Label bij een veld",
+      "form": "Formulier",
+      "ul": "Lijst",
+      "ol": "Genummerde lijst",
+      "li": "Onderdeel van een lijst",
+      "nav": "Menu",
+      "header": "Bovenkant van de pagina",
+      "footer": "Onderkant van de pagina",
+      "main": "Hoofdinhoud",
+      "section": "Deel van de pagina",
+      "article": "Artikel",
+      "aside": "Zijkant",
+      "div": "Vak",
+      "table": "Tabel",
+      "body": "Hele pagina",
+      "svg": "Tekening",
+      "video": "Video",
+      "onbekend": "Onderdeel ({{tag}})"
+    }
+  },
+  "menu": {
+    "label": "Menu van je project",
+    "terug": "Alle projecten",
+    "hulp": "Hulp",
+    "klap": "Menu inklappen",
+    "klapOpen": "Menu uitklappen",
+    "groep": {
+      "maken": "Maken",
+      "delen": "Delen",
+      "beheer": "Beheer"
+    },
+    "open": "{{naam}} openen",
+    "sneltoets": "Sneltoets: {{toets}}",
+    "status": {
+      "klaar": "klaar",
+      "actie": "actie nodig",
+      "leeg": "nog niet gestart"
+    },
+    "telling": "{{aantal}} stuks",
+    "meer": {
+      "knop": "Meer onderdelen",
+      "titel": "Onderdelen toevoegen",
+      "leeg": "Je hebt alle onderdelen al in het menu.",
+      "gegevens": "Wat je app onthoudt"
+    },
+    "gevorderd": {
+      "titel": "Voor gevorderden",
+      "uitleg": "Beginners hebben dit niet nodig. Hier staan technische onderdelen voor wie meer wil zien.",
+      "open": "Voor gevorderden tonen",
+      "dicht": "Voor gevorderden verbergen"
+    }
+  },
+  "start": {
+    "titel": "Start",
+    "uitleg": "Zo kom je stap voor stap van idee naar een website of app die online staat.",
+    "volgende": "Volgende stap",
+    "klaarTitel": "Alles gedaan!",
+    "klaarUitleg": "Je project is online. Je kunt het altijd verder aanpassen via het gesprek.",
+    "stapKlaar": "klaar",
+    "stapOpen": "nog te doen",
+    "stap": {
+      "idee": {
+        "titel": "1. Beschrijf je idee",
+        "uitleg": "Vertel in gewone woorden wat je wilt maken."
+      },
+      "voorbeeld": {
+        "titel": "2. Bekijk het voorbeeld",
+        "uitleg": "Kijk hoe het er nu uitziet."
+      },
+      "aanpassen": {
+        "titel": "3. Pas het aan",
+        "uitleg": "Vraag de AI om iets te veranderen tot je tevreden bent."
+      },
+      "online": {
+        "titel": "4. Zet het online",
+        "uitleg": "Zorg dat anderen je website kunnen bekijken."
+      }
+    },
+    "knop": {
+      "idee": "Beschrijf je idee",
+      "voorbeeld": "Bekijk het voorbeeld",
+      "aanpassen": "Pas het aan",
+      "online": "Zet het online"
+    },
+    "hint": {
+      "idee": "Typ je idee in het gesprek. Bijvoorbeeld: ‘Maak een website voor mijn tuinbedrijf’.",
+      "voorbeeld": "Het voorbeeld staat in het midden.",
+      "aanpassen": "Typ in het gesprek wat anders moet. Bijvoorbeeld: ‘Maak de kop groter’.",
+      "online": "Je gaat naar de checklist voor online zetten."
+    }
+  },
+  "schermen": {
+    "titel": "Schermen",
+    "uitleg": "Dit zijn de pagina’s van je app. Klik op een pagina om hem in het voorbeeld te zien.",
+    "open": "{{naam}} tonen in het voorbeeld",
+    "pad": "Adres: {{pad}}",
+    "leeg": {
+      "titel": "Nog geen pagina’s",
+      "uitleg": "Zodra de AI je eerste pagina heeft gemaakt, staat die hier.",
+      "knop": "Naar het gesprek"
+    }
+  },
+  "bestanden": {
+    "titel": "Foto’s en bestanden",
+    "uitleg": "Hier staan de foto’s en bestanden die je app kan gebruiken. Sleep ze hierheen of kies ze.",
+    "toevoegen": "Foto of bestand toevoegen",
+    "sleep": "Laat los om toe te voegen",
+    "zoneTip": "Sleep foto’s of bestanden hierheen",
+    "toegevoegd": "{{naam}} is toegevoegd.",
+    "mislukt": "{{naam}} kon niet worden toegevoegd: {{reden}}",
+    "verwijder": "{{naam}} verwijderen",
+    "bevestig": {
+      "titel": "Dit bestand verwijderen?",
+      "uitleg": "‘{{naam}}’ wordt uit de map ‘assets’ van je project gehaald. Dit kun je niet terugdraaien. Gebruikt je app dit bestand, dan ontbreekt het daarna.",
+      "knop": "Verwijderen",
+      "annuleer": "Annuleren"
+    },
+    "verwijderd": "{{naam}} is verwijderd.",
+    "leeg": {
+      "titel": "Nog geen foto’s of bestanden",
+      "uitleg": "Voeg een foto toe, bijvoorbeeld je logo of een afbeelding van je werk. De AI kan ze daarna in je app gebruiken.",
+      "knop": "Foto of bestand toevoegen"
+    },
+    "grootte": "{{kb}} kB"
+  },
+  "hulp": {
+    "titel": "Hulp",
+    "uitleg": "Studio helpt je met een website of app te maken, zonder dat je iets van techniek hoeft te weten.",
+    "zo": {
+      "titel": "Zo werkt het",
+      "een": "Je vertelt in het gesprek wat je wilt. De AI maakt het.",
+      "twee": "Je ziet het resultaat direct in het voorbeeld.",
+      "drie": "Wil je iets anders? Vertel het in het gesprek, of klik een onderdeel in het voorbeeld aan.",
+      "vier": "Elke keer dat de AI klaar is, bewaart Studio een versie. Je kunt altijd terug naar een eerdere versie."
+    },
+    "voorbeelden": {
+      "titel": "Voorbeelden van vragen",
+      "a": "Wat kan ik hier allemaal mee?",
+      "b": "Hoe zet ik mijn website online?",
+      "c": "Waarom ziet mijn pagina er op een telefoon anders uit?",
+      "d": "Kun je uitleggen wat je net gedaan hebt?"
+    },
+    "vraag": {
+      "titel": "Stel een vraag",
+      "label": "Wat wil je weten?",
+      "plaats": "Typ hier je vraag in gewone woorden…",
+      "knop": "Vraag het aan de AI",
+      "verstuurd": "Je vraag is naar de AI gestuurd. Het antwoord staat in het gesprek.",
+      "prompt": "Beantwoord de volgende vraag in gewone, eenvoudige woorden, zonder jargon. Verander niets aan het project. Vraag: {{vraag}}"
+    }
+  },
+  "appwinkel": {
+    "titel": "In de appwinkel",
+    "badge": "Eerste stap",
+    "uitleg": "Hier bereid je je app voor op Google Play (Android) en de App Store (iPhone), met je eigen ontwikkelaarsaccounts. Studio zegt eerlijk wat het voor je doet en wat je zelf bij de winkel moet doen.",
+    "nodig": {
+      "titel": "Dit heb je straks nodig",
+      "een": "Schermafbeeldingen van je app",
+      "twee": "Een korte en een lange beschrijving",
+      "drie": "Een privacyverklaring",
+      "vier": "Een account bij Google Play en/of Apple"
+    },
+    "nu": {
+      "titel": "Wat kun je nu al doen?",
+      "uitleg": "Vraag de AI om je alvast te vertellen wat er voor jouw app nodig is.",
+      "knop": "Vraag de AI wat ik nodig heb",
+      "prompt": "Ik wil mijn app later in de appwinkel zetten (Android en iPhone). Leg in eenvoudige woorden uit wat ik daarvoor nodig heb en wat de volgende stappen zijn. Verander nog niets aan het project.",
+      "verstuurd": "De vraag is naar de AI gestuurd."
+    }
+  },
+  "gegevens": {
+    "titel": "Wat je app onthoudt",
+    "uitleg": "Hier zie je wat je app onthoudt, zoals bestellingen of inschrijvingen.",
+    "nodig": "De AI zegt dat je app iets moet onthouden: {{reden}}",
+    "tabellen": {
+      "titel": "Je tabellen",
+      "aantal": "{{aantal}} rij(en)",
+      "rlsAan": "Beveiligd",
+      "rlsUit": "Niet beveiligd",
+      "kolommen": "Kolommen",
+      "toegangsregels": "Toegangsregels: {{aantal}}",
+      "geen": "Je app onthoudt nog niets.",
+      "terug": "Terug naar de tabellen",
+      "vorige": "Vorige",
+      "volgende": "Volgende",
+      "pagina": "Pagina {{nu}}",
+      "rijToevoegen": "Rij toevoegen",
+      "wijzig": "Wijzigen",
+      "bewaar": "Bewaren",
+      "annuleer": "Annuleren",
+      "opslaanUitleg": "Studio vraagt eerst om je bevestiging.",
+      "leeg": "Deze tabel is leeg.",
+      "geenSleutel": "Deze rij kan hier niet veilig worden aangepast, omdat de tabel geen hoofdsleutel heeft. Laat de AI dit aanpassen."
+    },
+    "rijen": "{{aantal}} rijen",
+    "bekijk": "{{naam}} bekijken",
+    "alleenLezen": "Je kunt de gegevens hier bekijken. Wijzigen doe je voorlopig via de AI, zodat er niets per ongeluk verdwijnt.",
+    "eerste": "De eerste {{aantal}} van {{totaal}} rijen",
+    "terug": "Terug naar de lijst",
+    "leeg": {
+      "titel": "Je app onthoudt nog niets",
+      "uitleg": "Heeft je app opslag nodig, bijvoorbeeld voor bestellingen? Vraag de AI om het samen met jou te regelen.",
+      "knop": "Vraag de AI om opslag"
+    },
+    "geenBestand": "Er staat nog geen bestand met gegevens in je project. Heb je een database bij een andere dienst, dan zie je die hier nog niet.",
+    "prompt": "Mijn app moet gegevens kunnen onthouden. Leg in eenvoudige woorden uit welke mogelijkheden er zijn en wat je aanraadt. Verander nog niets zonder dat ik het goedvind.",
+    "verstuurd": "De vraag is naar de AI gestuurd.",
+    "wijziging": {
+      "tabel_toevoegen": "Er komt een tabel ‘{{tabel}}’ bij",
+      "kolom_toevoegen": "Tabel ‘{{tabel}}’ krijgt een kolom ‘{{kolom}}’ erbij",
+      "regel_toevoegen": "Tabel ‘{{tabel}}’ krijgt een extra regel",
+      "rls_aan": "De beveiliging per rij gaat aan voor ‘{{tabel}}’",
+      "rls_uit": "De beveiliging per rij gaat UIT voor ‘{{tabel}}’: iedereen kan er dan bij",
+      "rls_aan_automatisch": "Studio zet de beveiliging per rij voor de nieuwe tabel ook aan",
+      "kolom_regel": "Kolom ‘{{kolom}}’ van ‘{{tabel}}’ krijgt een regel",
+      "index_toevoegen": "Tabel ‘{{tabel}}’ wordt sneller doorzocht (index)",
+      "beleid_toevoegen": "Er komt een toegangsregel ‘{{naam}}’ bij voor ‘{{tabel}}’",
+      "extensie_aan": "De extra functie ‘{{naam}}’ wordt aangezet",
+      "schema_toevoegen": "Er komt een nieuwe afdeling ‘{{naam}}’ bij",
+      "object_toevoegen": "Er komt een nieuw onderdeel bij",
+      "weergave_toevoegen": "Er komt een weergave ‘{{naam}}’ bij",
+      "functie_toevoegen": "Er komt een functie ‘{{naam}}’ bij",
+      "trigger_toevoegen": "Er komt een automatische actie bij",
+      "opmerking": "Er komt een opmerking bij",
+      "rijen_toevoegen": "Er komen rijen bij in ‘{{tabel}}’ ({{aantal}})",
+      "rijen_wijzigen": "Rijen in ‘{{tabel}}’ worden aangepast",
+      "rijen_verwijderen": "Rijen uit ‘{{tabel}}’ verdwijnen",
+      "tabel_leegmaken": "Alle rijen uit ‘{{tabel}}’ verdwijnen",
+      "tabel_verwijderen": "De tabel ‘{{tabel}}’ verdwijnt",
+      "kolom_verwijderen": "Een kolom van ‘{{tabel}}’ verdwijnt",
+      "object_verwijderen": "‘{{naam}}’ verdwijnt",
+      "tabel_aanpassen": "Tabel ‘{{tabel}}’ wordt aangepast",
+      "rechten_wijzigen": "De rechten van gebruikers worden aangepast",
+      "onbekend": "Een opdracht die Studio niet goed kan lezen",
+      "functie_plaatsen": "Er wordt een functie ‘{{naam}}’ geplaatst",
+      "geheim_toevoegen": "Er komt een geheim ‘{{naam}}’ bij voor je functies",
+      "geheim_overschrijven": "Het geheim ‘{{naam}}’ wordt overschreven",
+      "map_toevoegen": "Er komt een privé-opslagmap ‘{{naam}}’ bij",
+      "inlog_instelling": "De inlog-instelling ‘{{naam}}’ verandert",
+      "project_pauzeren": "Het project ‘{{naam}}’ wordt gepauzeerd: je app is dan offline",
+      "project_wakker": "Het project ‘{{naam}}’ wordt wakker gemaakt",
+      "project_maken": "Er komt een nieuw project ‘{{naam}}’ (regio {{regio}})"
+    },
+    "vraag": {
+      "titelAi": "De AI wil iets veranderen",
+      "titelGebruiker": "Weet je het zeker?",
+      "titelKosten": "Dit kan geld kosten",
+      "uitleg": "Je gaf de AI toegang tot je Supabase-account. Studio voert dit pas uit als jij het goed vindt.",
+      "wijzigingen": "Dit gaat er gebeuren:",
+      "uitlegAi": "De AI zegt:",
+      "verlies": "Let op: hiermee verdwijnen gegevens van je app.",
+      "rijen": "Het gaat om {{aantal}} rij(en).",
+      "backupGemaakt": "Studio heeft eerst een back-up op deze computer gemaakt. Daarna kun je het ongedaan maken.",
+      "backupMislukt": "Er is GEEN back-up. Gegevens die verdwijnen komen niet terug.",
+      "redenenTitel": "Waarom vraagt Studio dit?",
+      "reden": {
+        "niveau": "Op het niveau ‘Voorzichtig’ vraagt Studio altijd eerst.",
+        "gevaarlijk": "Dit kan gegevens veranderen of weghalen.",
+        "kosten": "Dit kan geld kosten.",
+        "onleesbaar": "Studio kan deze opdracht niet goed lezen, daarom vraagt hij het voor de zekerheid.",
+        "veel_rijen": "Het gaat om veel rijen.",
+        "geen_backup": "Er kon geen back-up worden gemaakt.",
+        "gebruiker": "Je past dit zelf aan in het scherm."
+      },
+      "kosten": {
+        "gratis_plan": "Op het gratis plan kost dit niets. Je mag er twee gratis projecten hebben.",
+        "betaald_plan": "Op een betaald plan kost een nieuw project ongeveer {{bedrag}} dollar per maand.",
+        "onbekend_plan": "Heb je het gratis plan? Dan kost dit niets (je mag twee gratis projecten hebben). Heb je een betaald plan? Dan kost een nieuw project ongeveer {{bedrag}} dollar per maand."
+      },
+      "waarschuwingen": {
+        "rls_automatisch_aan": "Studio zet de beveiliging per rij vanzelf aan voor nieuwe tabellen.",
+        "beleid_alles_leesbaar": "Iedereen kan de rijen van ‘{{tabel}}’ lezen.",
+        "beleid_alles_schrijfbaar": "Iedereen kan rijen van ‘{{tabel}}’ toevoegen of aanpassen.",
+        "rls_uit": "De beveiliging per rij gaat uit voor ‘{{tabel}}’."
+      },
+      "sql": "Bekijk de technische opdracht",
+      "toestaan": "Toestaan",
+      "nietToestaan": "Niet toestaan",
+      "wachtend": "Nog {{aantal}} vraag(en) wachten."
+    },
+    "niveau": {
+      "titel": "Hoeveel mag de AI zelf doen met je gegevens?",
+      "uitleg": "Kies wat de AI in je Supabase-project zelf mag doen. Kosten vragen altijd jouw toestemming, op elk niveau.",
+      "huidig": "Nu: {{niveau}}",
+      "voorzichtig": {
+        "naam": "Voorzichtig",
+        "uitleg": "De AI mag alles bekijken. Voor elke wijziging vraagt Studio eerst jouw toestemming.",
+        "voorbeeld": "Voorbeeld: de AI wil een tabel ‘bestellingen’ maken. Jij beslist eerst."
+      },
+      "zelfstandig": {
+        "naam": "Zelfstandig",
+        "uitleg": "De AI mag zelf iets toevoegen, zoals een tabel, een kolom of een toegangsregel. Dingen weghalen of aanpassen vraagt nog steeds jouw toestemming.",
+        "voorbeeld": "Voorbeeld: de AI maakt zelf een tabel. Een tabel weghalen vraagt toestemming."
+      },
+      "volledig": {
+        "naam": "Volledige controle",
+        "uitleg": "De AI mag ook dingen weghalen en aanpassen zonder te vragen. Je gegevens kunnen verloren gaan. Alleen voor even, en alleen als je zeker weet wat je doet.",
+        "voorbeeld": "Voorbeeld: de AI ruimt oude gegevens op, zonder te vragen."
+      },
+      "volledigWaarschuwing": {
+        "titel": "Volledige controle aanzetten?",
+        "tekst": "Met volledige controle kan de AI gegevens van je app weghalen en aanpassen zonder te vragen. Dat kan niet altijd ongedaan worden gemaakt. Studio maakt wel een back-up waar dat kan, en vraagt nog steeds toestemming bij veel rijen en bij kosten.",
+        "duurLabel": "Hoe lang?",
+        "typ": "Typ het woord ‘volledig’ om te bevestigen",
+        "aan": "Zet volledige controle aan",
+        "fout": "Typ precies het woord ‘volledig’."
+      },
+      "duur": {
+        "uur1": "1 uur",
+        "uur2": "2 uur",
+        "minuten15": "15 minuten",
+        "uur4": "4 uur"
+      },
+      "balk": {
+        "tekst": "Volledige controle staat aan: de AI mag gegevens weghalen zonder te vragen. Nog {{tijd}}.",
+        "terug": "Terug naar Zelfstandig"
+      },
+      "noodknop": "Stop de AI direct",
+      "noodknopUitleg": "Stopt alles wat de AI nu doet en zet het niveau terug naar Voorzichtig.",
+      "noodknopKlaar": "Gestopt. Het niveau is weer Voorzichtig.",
+      "balkKort": "Database: {{niveau}}",
+      "nietGekoppeld": "Dit geldt zodra je bij ‘Wat je app onthoudt’ een Supabase-project hebt gekoppeld. Tot die tijd kan de AI niets in een online database doen."
+    },
+    "koppeling": {
+      "titel": "Online bewaren met Supabase",
+      "uitleg": "Supabase bewaart de gegevens van je app online, met inloggen en delen tussen apparaten. Je gebruikt je eigen Supabase-account; Studio host niets.",
+      "privacy": "Je gegevens lopen alleen tussen deze computer en je eigen Supabase-account.",
+      "gekoppeld": "Gekoppeld aan project ‘{{naam}}’ ({{regio}})",
+      "ontkoppel": "Project ontkoppelen",
+      "ontkoppelUitleg": "Studio vergeet alleen de koppeling met dit project. Er verandert niets bij Supabase en je gegevens blijven staan.",
+      "gepauzeerd": "Dit Supabase-project is gepauzeerd. Gratis projecten worden na een week zonder gebruik gepauzeerd.",
+      "wakker": "Project weer wakker maken",
+      "wakkerKlaar": "Het project wordt wakker gemaakt. Dit kan een paar minuten duren.",
+      "opstarten": "Het project wordt gemaakt. Dit duurt ongeveer twee minuten.",
+      "klaarVoor": "Wat de AI nu kan doen: tabellen bekijken, voorstellen doen voor wijzigingen en (met jouw toestemming) die uitvoeren. Sleutels ziet de AI nooit."
+    },
+    "wizard": {
+      "titel": "Kies waar je app zijn gegevens bewaart",
+      "uitleg": "Kies een bestaand Supabase-project, of maak een nieuw project.",
+      "bestaand": "Kies een bestaand project",
+      "nieuw": "Maak een nieuw project",
+      "naamLabel": "Naam van het nieuwe project",
+      "naamPlaats": "Bijvoorbeeld: Mijn webwinkel",
+      "regio": "Regio: Europa (standaard)",
+      "wachtwoord": "Studio maakt zelf een sterk wachtwoord voor de database en bewaart dat veilig op deze computer. Je hoeft het niet te onthouden.",
+      "wachttijd": "Het maken duurt ongeveer twee minuten. Je kunt intussen gewoon doorwerken.",
+      "maak": "Project maken",
+      "kies": "Dit project gebruiken",
+      "geenProjecten": "Je hebt nog geen Supabase-projecten. Maak hieronder een nieuw project.",
+      "laden": "Je projecten ophalen…",
+      "limiet": "Je Supabase-account zit aan de grens van het gratis plan (twee gratis projecten). Kies een bestaand project, of haal in Supabase een project weg.",
+      "klaar": "Klaar! Dit project bewaart nu de gegevens van je app."
+    },
+    "opslag": {
+      "titel": "Waar moet je app zijn gegevens bewaren?",
+      "uitleg": "Je app moet iets onthouden. Kies hoe.",
+      "lokaal": {
+        "naam": "Alleen op dit apparaat",
+        "uitleg": "Geen account nodig. De gegevens staan alleen op deze computer."
+      },
+      "online": {
+        "naam": "Online, met inloggen en delen tussen apparaten",
+        "uitleg": "Je gebruikt je eigen Supabase-account. Handig als anderen moeten inloggen of als je app op meer apparaten werkt."
+      },
+      "advies": "Advies: ‘Alleen op dit apparaat’ is het eenvoudigst en past bij een app die alleen jij gebruikt. Kies ‘Online’ als mensen moeten kunnen inloggen of gegevens moeten delen.",
+      "gekozen": "Gekozen: {{keuze}}",
+      "wijzig": "Kies opnieuw",
+      "opgeslagen": "Je keuze staat in PROJECT.md."
+    },
+    "gebruikers": {
+      "titel": "Gebruikers van je app",
+      "uitleg": "Mensen die zich hebben aangemeld bij je app.",
+      "geen": "Er zijn nog geen gebruikers.",
+      "email": "E-mail",
+      "sinds": "Aangemeld",
+      "laatst": "Laatst ingelogd"
+    },
+    "log": {
+      "titel": "Wat heeft de AI gedaan?",
+      "uitleg": "Alles wat de AI (of jij) in je database deed, met de mogelijkheid om het ongedaan te maken.",
+      "leeg": "De AI heeft nog niets in je database gedaan.",
+      "status": {
+        "uitgevoerd": "Uitgevoerd",
+        "geweigerd": "Niet uitgevoerd",
+        "mislukt": "Mislukt",
+        "afgebroken": "Afgebroken"
+      },
+      "ongedaan": "Maak ongedaan",
+      "ongedaanKlaar": "Ongedaan gemaakt.",
+      "isOngedaan": "Ongedaan gemaakt",
+      "nietOngedaan": "Dit kan niet worden teruggedraaid.",
+      "redenen": {
+        "niveau": "Je hebt het niet toegestaan.",
+        "niet_toegestaan": "Je hebt het niet toegestaan.",
+        "rls_uit": "Geweigerd door een veiligheidsregel: de beveiliging per rij mag niet uit.",
+        "beleid_alles_schrijfbaar": "Geweigerd door een veiligheidsregel: een regel die iedereen laat schrijven.",
+        "limiet_minuut": "Geweigerd: te veel wijzigingen per minuut.",
+        "limiet_sessie": "Geweigerd: te veel wijzigingen in deze sessie.",
+        "noodknop": "Afgebroken door de noodknop."
+      },
+      "niveauBij": "Niveau: {{niveau}}",
+      "backup": "Back-up gemaakt",
+      "klasse": {
+        "1": "Bekijken",
+        "2": "Toevoegen",
+        "3": "Gevaarlijk",
+        "4": "Kosten"
+      }
+    },
+    "leegOnline": {
+      "titel": "Je app onthoudt nog niets",
+      "uitleg": "Laat de AI voorstellen welke gegevens je app moet bewaren. Hij maakt een voorstel; jij beslist.",
+      "knop": "Laat de AI iets voorstellen",
+      "prompt": "Welke gegevens moet mijn app onthouden? Doe een voorstel voor tabellen in Supabase met `db_propose_migration` en leg het uit in gewone woorden. Voer nog niets uit."
+    },
+    "veiligheid": {
+      "titel": "Controle van je database",
+      "rls_uit": "Tabel ‘{{tabel}}’ is niet beveiligd per rij: iedereen met de publieke sleutel kan er bij.",
+      "geen_beleid": "Tabel ‘{{tabel}}’ is beveiligd maar heeft nog geen toegangsregel, dus de app kan er niets mee.",
+      "beleid_alles_schrijfbaar": "Op ‘{{tabel}}’ mag iedereen schrijven.",
+      "beleid_alles_leesbaar": "Op ‘{{tabel}}’ mag iedereen lezen.",
+      "alleGoed": "Je database lijkt veilig ingesteld.",
+      "herstel": "Laat de AI dit herstellen",
+      "herstelPrompt": "Controleer de beveiliging van mijn Supabase-database (`db_list_tables`, `db_get_advisors`) en los dit op: {{lijst}}. Doe een voorstel met `db_propose_migration`; gebruik beleid per rol met een voorwaarde en zet RLS nooit uit. Voer niets uit zonder mijn toestemming.",
+      "laden": "Je database controleren…"
+    },
+    "sql": {
+      "titel": "Database-opdrachten (SQL)",
+      "uitleg": "Voor mensen die SQL kennen. Opdrachten die iets veranderen vragen altijd eerst jouw bevestiging.",
+      "plaats": "Bijvoorbeeld: select * from klanten limit 10",
+      "voer": "Uitvoeren",
+      "resultaat": "Resultaat"
+    },
+    "inloggen": {
+      "titel": "Inloggen voor de gebruikers van je app",
+      "uitleg": "Moeten mensen kunnen inloggen in je app? De AI kan e-mail-inloggen met Supabase toevoegen. Dat is optioneel; zonder jouw keuze gebeurt er niets.",
+      "uitlegMail": "Let op: de ingebouwde e-mail van Supabase stuurt alleen naar jou en je teamleden. Voor echte gebruikers heb je een eigen e-mailaccount nodig; de AI legt je stap voor stap uit hoe dat gaat.",
+      "knop": "Laat de AI e-mail-inloggen toevoegen",
+      "prompt": "Voeg e-mail-inloggen toe aan mijn app met Supabase, volgens de skill ‘supabase-inloggen’. Begin met een voorstel in gewone woorden en leg de e-mailinstellingen en de omleidings-adressen uit. Voer niets uit zonder mijn toestemming.",
+      "verstuurd": "De AI gaat aan de slag."
+    }
+  },
+  "logs": {
+    "titel": "Logs",
+    "uitleg": "Meldingen van het voorbeeld en van de AI-koppeling. Alleen handig als er iets misgaat.",
+    "voorbeeld": "Voorbeeld",
+    "koppeling": "AI-koppeling",
+    "leeg": "Nog geen meldingen."
+  },
+  "technisch": {
+    "titel": "Technische status",
+    "uitleg": "De technische toestand van het voorbeeld en de AI-koppeling.",
+    "koppeling": {
+      "titel": "AI-koppeling",
+      "toestand": "Toestand",
+      "poort": "Poort",
+      "fout": "Laatste fout"
+    },
+    "voorbeeld": {
+      "titel": "Voorbeeld",
+      "toestand": "Toestand",
+      "soort": "Soort",
+      "adres": "Adres",
+      "probleem": "Probleem"
+    },
+    "opnieuwKoppeling": "AI-koppeling opnieuw proberen",
+    "opnieuwVoorbeeld": "Voorbeeld opnieuw starten",
+    "geen": "geen"
+  },
+  "code": {
+    "titel": "Code en bestanden",
+    "uitleg": "Alle bestanden van je project, alleen om te bekijken. Geheime bestanden worden niet getoond.",
+    "kies": "Kies een bestand om te lezen.",
+    "ingekort": "Dit bestand is ingekort getoond.",
+    "leeg": "Er zijn nog geen bestanden.",
+    "fout": "Dit bestand kan niet worden getoond.",
+    "grootte": "{{kb}} kB"
+  },
+  "uiterlijkExtra": {
+    "titel": "Logo en icoon",
+    "badge": "Komt binnenkort",
+    "uitleg": "Hier kies je straks het logo en het icoon van je app. Tot die tijd kun je de AI vragen om een logo te plaatsen: voeg eerst je logo toe bij Foto’s en bestanden."
+  },
+  "online": {
+    "titel": "Online zetten",
+    "uitleg": "Zo zorg je dat anderen je website of app kunnen bekijken.",
+    "checklist": {
+      "titel": "Checklist",
+      "voorbeeld": "Je hebt het voorbeeld bekeken en het ziet er goed uit.",
+      "veilig": "Je hebt de veiligheid laten controleren.",
+      "kopie": "Je hebt een kopie van je project gemaakt.",
+      "plek": "Je hebt een plek op internet gekozen.",
+      "klaar": "Ik heb mijn project online gezet.",
+      "backup": "Een back-up op GitHub gemaakt (niet verplicht, wel verstandig)"
+    },
+    "klaarMelding": "Je project staat als ‘online’ gemarkeerd.",
+    "nogNiet": "Studio kan je project nog niet zelf online zetten. Maak een kopie, kies een bedrijf waar je website mag staan (een ‘hostingbedrijf’) en zet de kopie daar neer. Je kunt de AI vragen om je daarbij te helpen.",
+    "terugdraaien": "Gaat er iets mis? Via ‘Eerdere versies’ ga je altijd terug naar een opgeslagen versie van je project.",
+    "sleutels": {
+      "titel": "Inlogsleutel voor een hostingbedrijf",
+      "uitleg": "Voor sommige bedrijven heb je straks een inlogsleutel nodig. Dat is een lange code waarmee Studio namens jou iets mag doen. Studio bewaart nooit zelf een inlogsleutel in je project.",
+      "binnenkort": "Een koppeling met een hostingbedrijf komt binnenkort. Daar kun je dan stap voor stap je inlogsleutel invullen en testen.",
+      "test": "Koppeling testen",
+      "later": "Je vindt inlogsleutels later terug onder Instellingen > Mijn programma."
+    }
+  },
+  "inst": {
+    "titel": "Instellingen",
+    "uitleg": "Hier bepaal je hoe Studio werkt. Bij elke instelling staat of hij voor alle projecten geldt of alleen voor dit project.",
+    "groep": {
+      "project": "Mijn project",
+      "ai": "Mijn AI",
+      "programma": "Mijn programma",
+      "gevorderd": "Voor gevorderden"
+    },
+    "bereik": {
+      "alle": "Voor alle projecten",
+      "dit": "Alleen dit project"
+    },
+    "herstel": "Standaard herstellen",
+    "herstelKlaar": "De standaard is hersteld.",
+    "opgeslagen": "Opgeslagen",
+    "project": {
+      "naam": {
+        "label": "Naam van het project",
+        "uitleg": "Alleen de naam in Studio verandert. De map op je computer houdt haar naam.",
+        "opslaan": "Naam opslaan",
+        "klaar": "De naam is gewijzigd."
+      },
+      "icoon": {
+        "label": "Icoon van de app",
+        "uitleg": "Het icoon van je app kies je straks hier.",
+        "binnenkort": "Komt binnenkort"
+      },
+      "beschrijving": {
+        "label": "Korte beschrijving",
+        "uitleg": "Een paar zinnen over wat je maakt. De AI leest dit en Studio bewaart het in PROJECT.md.",
+        "plaats": "Bijvoorbeeld: een website voor mijn tuinbedrijf",
+        "opslaan": "Beschrijving opslaan",
+        "klaar": "De beschrijving is opgeslagen.",
+        "fout": "De beschrijving kon niet worden opgeslagen: {{reden}}"
+      },
+      "stack": {
+        "label": "Soort project",
+        "uitleg": "Dit kun je hier niet veranderen.",
+        "leeg": "Leeg project",
+        "web-react-vite": "Website of app met voorbeeldpagina’s",
+        "voorbeeld": "Een startproject (voorbeeld)"
+      },
+      "map": {
+        "label": "Map op je computer"
+      },
+      "gevaar": {
+        "titel": "Gevarenzone",
+        "uitleg": "Je kunt het project uit de lijst van Studio halen. De bestanden op je computer blijven altijd staan; Studio wist niets.",
+        "knop": "Uit lijst verwijderen"
+      }
+    },
+    "ai": {
+      "account": {
+        "label": "Welk AI-account gebruikt dit project?",
+        "uitleg": "Studio gebruikt dit account als je iets aan de AI vraagt.",
+        "standaard": "Het account waarmee je al bent ingelogd"
+      },
+      "accounts": {
+        "titel": "AI-accounts toevoegen en wisselen",
+        "uitleg": "Hier voeg je een account toe, log je in of haal je een account weg. Studio bewaart nooit je wachtwoord."
+      },
+      "toestemming": {
+        "label": "Hoeveel mag de AI zelf doen?",
+        "uitleg": "Bepaalt wanneer de AI eerst om toestemming vraagt.",
+        "uitlegCli": "Dit geldt voor het gesprek met Claude. In de technische weergave bepaalt het AI-programma zelf wat het vraagt.",
+        "waarschuwing": "Let op: bij ‘Werk zelfstandig’ werkt de AI door zonder te vragen. Online zetten, verwijderen en schrijven buiten je project vragen altijd om toestemming."
+      },
+      "taal": {
+        "label": "Hoe praat de AI tegen je?",
+        "uitleg": "In gewone woorden, of met vaktaal en technische details."
+      },
+      "plan": {
+        "label": "Eerst overleggen is standaard",
+        "uitleg": "Als dit aan staat, bespreekt de AI eerst een plan en past hij niets aan tot jij ‘Bouwen’ kiest."
+      },
+      "lus": {
+        "label": "Waarschuw als dezelfde fout steeds terugkomt",
+        "uitleg": "Na zoveel keer dezelfde mislukte controle onderbreekt Studio de AI en krijg je keuzes. Standaard: 3.",
+        "fout": "Kies een heel getal van 2 tot 10."
+      },
+      "beleid": {
+        "label": "Hoeveel mag de AI nadenken?",
+        "uitleg": "Meer nadenken geeft vaak een beter resultaat, maar kost meer van je AI-gebruik. Automatisch kiest Studio per klus.",
+        "auto": "Automatisch (aanbevolen)",
+        "autoUitleg": "Kleine aanpassingen gaan zuinig. Plannen, inloggen, gegevens en online zetten krijgen de meeste denkkracht.",
+        "zuinig": "Zuinig",
+        "zuinigUitleg": "Snel en met weinig gebruik. Handig voor kleine aanpassingen.",
+        "gebalanceerd": "Gebalanceerd",
+        "gebalanceerdUitleg": "Een goede middenweg voor de meeste klussen.",
+        "best": "Zo goed mogelijk",
+        "bestUitleg": "De meeste denkkracht. Kost meer gebruik en duurt langer."
+      }
+    },
+    "programma": {
+      "thema": {
+        "label": "Licht of donker",
+        "uitleg": "Hoe Studio eruitziet.",
+        "system": "Volgens mijn computer",
+        "light": "Licht",
+        "dark": "Donker"
+      },
+      "tekst": {
+        "label": "Tekstgrootte",
+        "uitleg": "Maak alles in Studio groter of kleiner.",
+        "90": "Kleiner",
+        "100": "Normaal",
+        "115": "Groter",
+        "130": "Heel groot"
+      },
+      "taal": {
+        "label": "Taal van Studio",
+        "uitleg": "Studio is nu alleen in het Nederlands.",
+        "nl": "Nederlands"
+      },
+      "map": {
+        "label": "Standaardmap voor nieuwe projecten",
+        "uitleg": "Hier komt een nieuw project standaard te staan.",
+        "kies": "Map kiezen",
+        "geen": "Nog geen map gekozen"
+      },
+      "autoVoorbeeld": {
+        "label": "Het voorbeeld vanzelf tonen",
+        "uitleg": "Als er voor het eerst iets te zien is, springt Studio naar het voorbeeld."
+      },
+      "backup": {
+        "label": "Back-up en kopie maken",
+        "uitleg": "Een kopie van een project maak je bij ‘Online zetten’. Studio bewaart elke keer dat de AI klaar is een eerdere versie.",
+        "knop": "Naar Online zetten"
+      },
+      "versie": {
+        "label": "Versie en updates",
+        "uitleg": "Studio werkt nog niet vanzelf bij. Nieuwe versies haal je zelf op.",
+        "nu": "Je gebruikt Studio {{versie}}."
+      },
+      "licentie": {
+        "label": "Licentie",
+        "uitleg": "Studio is voor eigen gebruik op je computer. Je projecten zijn en blijven van jou.",
+        "gratis": "Studio is gratis. Je hebt geen licentie nodig en er is geen account of internet voor nodig.",
+        "betaald": "Licentie van {{naam}} is geldig.",
+        "melding": "Er staat een licentiebestand, maar dat klopt niet ({{reden}}). Studio werkt gewoon verder, net als gratis.",
+        "reden": {
+          "onleesbaar": "het bestand is onleesbaar",
+          "handtekening_klopt_niet": "de handtekening klopt niet",
+          "verlopen": "de licentie is verlopen",
+          "onbekende_versie": "onbekende versie"
+        }
+      },
+      "privacy": {
+        "label": "Privacy",
+        "uitleg": "Studio verstuurt zelf niets over jou of je projecten. Alleen de AI waar je mee werkt krijgt wat je hem vraagt.",
+        "punten": [
+          "Je projecten blijven op je eigen computer. Studio heeft geen eigen server en geen account.",
+          "Studio verstuurt geen gebruiksgegevens en heeft geen statistieken of verborgen metingen. Er is dus ook niets om uit te zetten.",
+          "De AI waar je mee werkt (Claude, Gemini) krijgt wat jij of de AI uit je project opvraagt, via je eigen AI-account. Dat gaat via dat bedrijf en valt onder hun voorwaarden.",
+          "Studio kijkt bij het openen of er een nieuwe versie van Studio is, bij de publieke releases op GitHub. Dat kun je uitzetten bij ‘Mijn programma’. Er gaat dan geen gegevens over jou mee.",
+          "Koppelingen (GitHub, Vercel, Supabase, de winkels) zijn er alleen als jij ze verbindt. Je toegang bewaart Studio alleen in de beveiligde kluis van je computer, nooit in je project of in een bericht aan de AI."
+        ]
+      },
+      "sleutels": {
+        "label": "Koppelingen",
+        "uitleg": "Verbind je eigen accounts, zoals GitHub, Vercel en Supabase. Studio bewaart je toegang alleen op deze computer, in de beveiligde kluis.",
+        "binnenkort": "Komt binnenkort"
+      },
+      "update": {
+        "label": "Controleer bij het openen op een nieuwe versie",
+        "uitleg": "Studio kijkt bij het starten of er een nieuwere versie is op GitHub. Er wordt niets geïnstalleerd zonder dat jij het goedvindt. Er gaat geen gegeven van jou mee.",
+        "knop": "Nu zoeken naar een nieuwe versie"
+      },
+      "eerste": {
+        "label": "Eerste start",
+        "uitleg": "Loop het welkomstscherm met AI en bedieningsniveau nog een keer door.",
+        "knop": "Eerste start opnieuw tonen"
+      }
+    },
+    "gevorderd": {
+      "waarschuwing": "Dit is bedoeld voor mensen met technische kennis. Verander hier alleen iets als je zeker weet wat het doet. Beginners hebben dit niet nodig.",
+      "paden": {
+        "label": "Paden naar AI-programma’s",
+        "uitleg": "Waar Studio de AI-programma’s op je computer vond.",
+        "niet": "niet gevonden",
+        "node": "Node.js wordt automatisch gezocht. Staat het op een ongebruikelijke plek, zet dan de omgevingsvariabele STUDIO_NODE_PATH."
+      },
+      "poorten": {
+        "label": "Poorten",
+        "uitleg": "De poort van de AI-koppeling van dit project. Die kiest Studio zelf, alleen op je eigen computer.",
+        "geen": "Geen (de koppeling draait niet)"
+      },
+      "debug": {
+        "label": "Debug-logs",
+        "uitleg": "Uitgebreide technische meldingen. Staan nu altijd uit.",
+        "binnenkort": "Komt binnenkort"
+      },
+      "opdrachten": {
+        "label": "Opdrachten van het project (studio.json)",
+        "uitleg": "De opdrachten die Studio na jouw goedkeuring mag uitvoeren.",
+        "geen": "Dit project heeft geen studio.json.",
+        "goedgekeurd": "goedgekeurd",
+        "nietGoedgekeurd": "nog niet goedgekeurd"
+      },
+      "omgeving": {
+        "label": "Omgevingsvariabelen",
+        "uitleg": "Waarden voor verschillende omgevingen. De waarden komen straks in een veilige kluis, nooit in je project.",
+        "binnenkort": "Komt binnenkort"
+      },
+      "model": {
+        "label": "Eigen modelnaam",
+        "uitleg": "Laat leeg als je dat niet weet. Studio gebruikt dan de keuze hierboven. Een eigen naam gaat voor die keuze. Alleen letters, cijfers en . - _ [ ] :",
+        "opslaan": "Opslaan",
+        "placeholder": "Bijvoorbeeld: sonnet"
+      },
+      "kaart": {
+        "label": "Projectkaart",
+        "uitleg": "Een overzicht van je project dat Studio zelf maakt (zonder AI). De AI vindt zo sneller het goede bestand en hoeft minder te lezen.",
+        "aan": "Projectkaart gebruiken",
+        "vernieuw": "Kaart vernieuwen",
+        "bekijk": "Kaart bekijken",
+        "sluit": "Sluiten",
+        "status": "{{bestanden}} bestanden, ongeveer {{tokens}} woorddelen.",
+        "terugval": "{{aantal}} bestanden konden niet gelezen worden; daarvan staat alleen de naam in de kaart.",
+        "uit": "De projectkaart staat uit. De AI leest dan zelf je bestanden.",
+        "bezig": "Bezig met bijwerken…",
+        "fout": "De kaart kon niet worden bijgewerkt.",
+        "geenProject": "Open eerst een project."
+      },
+      "context": {
+        "label": "Wat gaat er naar de AI?",
+        "uitleg": "Dit gaat bij elke klus mee, plus je bericht. Hoe kleiner, hoe zuiniger. Het zijn schattingen.",
+        "instructies": "Werkafspraken voor de AI (CLAUDE.md)",
+        "notities": "Projectnotities (PROJECT.md)",
+        "kaart": "Projectkaart",
+        "tokens": "± {{tokens}} woorddelen",
+        "teGroot": "Dit is vrij groot. Laat de AI het inkorten, bijvoorbeeld: ‘Maak PROJECT.md korter en bewaar de details in een apart bestand.’"
+      }
+    },
+    "versie": {
+      "titel": "Welke versie draait er?",
+      "versie": "Versie",
+      "commit": "Codeversie",
+      "tijd": "Gebouwd op",
+      "dev": "Dit is de ontwikkelversie (npm run tauri dev). De bouwtijd is het moment waarop de server startte.",
+      "release": "Dit is een gebouwde versie van Studio."
+    }
+  },
+  "woordenlijst": {
+    "uitleg": "Vaste woorden in Studio. Gebruik altijd deze woorden in de gewone weergave; vaktaal staat alleen onder ‘Voor gevorderden’ of in een uitklapbare uitleg.",
+    "voorbeeld": "Voorbeeld",
+    "onlineZetten": "Online zetten",
+    "watJeAppOnthoudt": "Wat je app onthoudt",
+    "opgeslagenVersie": "Opgeslagen versie",
+    "terugNaarEerdereVersie": "Terug naar een eerdere versie",
+    "inlogsleutel": "Inlogsleutel",
+    "technischeWeergave": "Technische weergave"
+  },
+  "koppelingen": {
+    "titel": "Koppelingen",
+    "uitleg": "Hier verbind je je eigen accounts, zoals GitHub, Vercel en Supabase. Alles is optioneel. Studio bewaart je toegang alleen op deze computer, in de beveiligde kluis van je computer.",
+    "privacy": "De toegang blijft op dit apparaat. Studio stuurt niets naar anderen en heeft geen eigen server.",
+    "status": {
+      "niet_gekoppeld": "Niet gekoppeld",
+      "bezig": "Bezig met verbinden",
+      "werkt": "Werkt",
+      "verlopen": "Verlopen",
+      "fout": "Er is iets mis"
+    },
+    "knop": {
+      "verbind": "Verbind met {{dienst}}",
+      "bezig": "Bezig…",
+      "opnieuw": "Opnieuw verbinden",
+      "ontkoppel": "Ontkoppelen",
+      "test": "Testen",
+      "menu": "Opties voor {{dienst}}",
+      "gekoppeldAls": "{{dienst}}: {{account}}",
+      "allesTesten": "Alles testen",
+      "allesVerbinden": "Alles verbinden",
+      "overslaan": "Overslaan",
+      "klaar": "Klaar",
+      "annuleer": "Annuleren",
+      "open": "Open de pagina",
+      "kopieerLink": "Kopieer de link",
+      "kopieerCode": "Kopieer de code",
+      "gekopieerd": "Gekopieerd",
+      "toon": "Toon",
+      "verberg": "Verberg",
+      "verbinden": "Verbinden",
+      "volgende": "Volgende",
+      "verder": "Ga verder"
+    },
+    "dialoog": {
+      "titel": "Verbind met {{dienst}}",
+      "intro": "Studio opent {{dienst}}. Daar kies je wat je toestaat. Je wachtwoord blijft bij {{dienst}}.",
+      "rechtenTitel": "Dit mag Studio straks doen (klik om te lezen)",
+      "functiesTitel": "Hiervoor heb je het nodig:",
+      "wachtOpBrowser": "Wacht even… Kies in {{dienst}} wat je toestaat. Daarna kom je vanzelf terug in Studio.",
+      "browserNiet": "Opent je browser niet? Kopieer dan de link en plak hem zelf in je browser.",
+      "codeTitel": "Typ deze code op de pagina van {{dienst}}:",
+      "codeUitleg": "Klik op ‘Open de pagina’, log in en typ de code. Studio merkt vanzelf dat het gelukt is.",
+      "codeGeldig": "De code werkt ongeveer {{minuten}} minuten.",
+      "gelukt": "Gelukt! Je bent verbonden met {{dienst}}",
+      "geluktAccount": "Ingelogd als {{account}}",
+      "plakIntro": "Je plakt hier een toegangssleutel van {{dienst}}. Studio bewaart die veilig op deze computer en laat hem nooit aan de AI zien.",
+      "stap1": "Heb je een account bij {{dienst}}?",
+      "stap1Knop": "Account maken (opent {{dienst}})",
+      "stap2": "Maak een toegangssleutel",
+      "stap3": "Plak je sleutel hier",
+      "veldLabel": "Toegangssleutel",
+      "veldPlaats": "Plak hier je sleutel",
+      "sleutelPaginaKnop": "Open de pagina voor sleutels"
+    },
+    "ontkoppel": {
+      "titel": "{{dienst}} ontkoppelen?",
+      "uitleg": "Studio verwijdert je sleutel van deze computer. Functies die {{dienst}} nodig hebben, werken dan niet meer tot je opnieuw verbindt.",
+      "zelfIntrekken": "Wil je de sleutel ook bij {{dienst}} zelf intrekken? Dat doe je op de pagina hieronder. Dat is slim als je niet zeker weet dat niemand anders erbij kan.",
+      "link": "Open de pagina van {{dienst}} om toegang in te trekken",
+      "klaar": "{{dienst}} is ontkoppeld."
+    },
+    "fout": {
+      "geannuleerd": "Je hebt het verbinden geannuleerd. Je kunt het opnieuw proberen.",
+      "geweigerd": "Je hebt geen toestemming gegeven. Klik op ‘Opnieuw verbinden’ en kies ‘toestaan’.",
+      "verlopen": "De toegang is verlopen. Klik op ‘Opnieuw verbinden’.",
+      "geen_internet": "Er is geen internetverbinding. Controleer je verbinding en probeer het opnieuw.",
+      "time_out": "Het duurde te lang. Probeer het zo nog eens.",
+      "poort_bezet": "Studio kon het terugkeeradres niet openen omdat een ander programma het gebruikt. Sluit andere programma’s en probeer het opnieuw.",
+      "te_weinig_rechten": "Je sleutel heeft te weinig rechten. Maak een nieuwe sleutel met meer rechten, of kies bij het verbinden alle gevraagde rechten.",
+      "ongeldig_token": "Deze sleutel werkt niet. Controleer of je hem helemaal hebt gekopieerd, of maak een nieuwe.",
+      "te_veel_verzoeken": "Er zijn te veel verzoeken gedaan. Wacht een minuutje en probeer het opnieuw.",
+      "geblokkeerd": "Studio mag deze pagina niet openen. Dat is een veiligheidsregel.",
+      "niet_gekoppeld": "Deze dienst is nog niet gekoppeld.",
+      "kluis": "De beveiligde kluis van je computer is niet beschikbaar. Zonder kluis bewaart Studio geen sleutels. Controleer of je computer een wachtwoordbeheer (sleutelhanger) heeft.",
+      "onbekende_dienst": "Deze dienst kent Studio niet.",
+      "onverwacht": "Er ging iets mis bij het verbinden. Probeer het opnieuw. Lukt het weer niet, kies dan de andere manier (sleutel plakken).",
+      "niet_gevonden": "De dienst gaf een antwoord dat Studio niet begrijpt."
+    },
+    "overzicht": {
+      "titel": "Mijn koppelingen",
+      "alleVerbonden": "Alles is verbonden.",
+      "laatsteTest": "Testresultaat",
+      "voortgang": "Dienst {{nu}} van {{totaal}}",
+      "leeg": "Geen koppelingen beschikbaar."
+    },
+    "plek": {
+      "gegevens": "Om je app gegevens online te laten bewaren heb je een Supabase-account nodig.",
+      "onlinezetten": "Om je app online te zetten heb je een Vercel-account nodig.",
+      "backup": "Om een kopie van je project in je eigen GitHub te bewaren heb je een GitHub-account nodig. Het maken van de kopie zelf komt binnenkort.",
+      "backupTitel": "Kopie in GitHub"
+    },
+    "kaart": {
+      "titel": "De AI vraagt om verbinding met {{dienst}}",
+      "verbonden": "Je bent verbonden met {{dienst}}. Je kunt de AI laten doorgaan.",
+      "doorgaan": "Ik heb {{dienst}} verbonden. Ga maar verder.",
+      "redenVoorloop": "Waarom:"
+    },
+    "github": {
+      "naam": "GitHub",
+      "uitleg": "Een plek om een kopie van je project veilig online te bewaren.",
+      "rechten": {
+        "repo": "Projecten van jou maken en bijwerken, ook privé-projecten. Dit is veel; Studio gebruikt het alleen voor je kopie."
+      },
+      "functies": {
+        "backup": "Een kopie van je project bewaren in je eigen GitHub"
+      },
+      "stap2": "Klik op ‘Generate new token’ en kies ‘Generate new token (classic)’. Geef hem de naam ‘Studio’, kies een geldigheid en zet een vinkje bij ‘repo’. Klik onderaan op ‘Generate token’ en kopieer de sleutel; je ziet hem maar één keer."
+    },
+    "vercel": {
+      "naam": "Vercel",
+      "uitleg": "Een plek om je website of app online te zetten.",
+      "rechten": {
+        "projecten": "Projecten maken en je app online zetten."
+      },
+      "functies": {
+        "onlinezetten": "Je app online zetten"
+      },
+      "stap2": "Klik op ‘Create Token’ en geef hem de naam ‘Studio’. Kies bij voorkeur een korte geldigheid. Kopieer daarna de sleutel; je ziet hem maar één keer."
+    },
+    "supabase": {
+      "naam": "Supabase",
+      "uitleg": "Een plek om de gegevens van je app online te bewaren, met inloggen en delen tussen apparaten.",
+      "rechten": {
+        "account": "Je Supabase-projecten bekijken en beheren. Een gewone sleutel geeft toegang tot je hele account; kies je een beperkte sleutel (als Supabase die aanbiedt), dan is dat veiliger."
+      },
+      "functies": {
+        "gegevens": "De gegevens van je app online bewaren en beheren"
+      },
+      "stap2": "Klik op ‘Generate new token’ en geef hem de naam ‘Studio’. Kopieer daarna de sleutel; je ziet hem maar één keer. Let op: een gewone sleutel geeft toegang tot je hele Supabase-account."
+    }
+  },
+  "github": {
+    "titel": "Back-up op GitHub",
+    "nietGekoppeld": "Bewaar een kopie van je project op je eigen GitHub-account. Dan is je werk veilig als er iets met je computer gebeurt. Eerst verbind je GitHub.",
+    "privacy": "Er gaat niets naar GitHub zonder dat jij erom vraagt. Het blijft in jouw account.",
+    "privaat": "privé",
+    "openbaar": "openbaar",
+    "laatste": "Laatste back-up: {{wanneer}}",
+    "nogNiet": "Er is nog geen back-up gemaakt.",
+    "nieuwGeen": "Alles staat al in de back-up.",
+    "nieuwEen": "1 nieuwe versie sinds de laatste back-up.",
+    "nieuwMeer": "{{aantal}} nieuwe versies sinds de laatste back-up.",
+    "bijwerken": "Back-up bijwerken",
+    "openRepo": "Open op GitHub",
+    "voortgang": "Voortgang van de back-up",
+    "klaarMelding": "De back-up is bijgewerkt.",
+    "auto": "Maak automatisch een back-up na elke opgeslagen versie",
+    "aiVraagt": "De AI vraagt eerst of hij een back-up mag maken",
+    "alleenVooruit": "Studio stuurt alleen nieuwe versies erbij. Er wordt nooit iets op GitHub overschreven of verwijderd.",
+    "ontkoppel": "Back-up loskoppelen (de kopie op GitHub blijft staan)",
+    "tijd": {
+      "zojuist": "zojuist",
+      "minuten": "{{aantal}} minuten geleden",
+      "uren": "{{aantal}} uur geleden",
+      "dagen": "{{aantal}} dagen geleden"
+    },
+    "stap": {
+      "vergelijken": "Kijken wat er al online staat…",
+      "versturen": "Versies worden verstuurd…",
+      "bezig": "Bezig…"
+    },
+    "eerste": {
+      "uitleg": "Maak een kopie van dit project op GitHub. Zo blijft je werk bewaard, ook als je computer kapotgaat.",
+      "punt1": "Wat online komt: je bestanden en alle opgeslagen versies.",
+      "punt2": "Wachtwoorden, sleutels en gegevensbestanden gaan niet mee; Studio controleert dat vooraf.",
+      "punt3": "Alles blijft in je eigen GitHub-account.",
+      "naam": "Naam van de kopie",
+      "naamHulp": "Alleen kleine letters, cijfers en streepjes.",
+      "naamVrij": "Deze naam is nog vrij.",
+      "naamBezet": "Deze naam is al in gebruik op jouw GitHub. Kies een andere naam.",
+      "naamOngeldig": "Gebruik alleen kleine letters, cijfers en streepjes.",
+      "zichtbaarheid": "Wie mag de kopie zien?",
+      "privaat": "Privé (aanbevolen)",
+      "privaatUitleg": "alleen jij kunt het zien.",
+      "openbaar": "Openbaar",
+      "openbaarUitleg": "iedereen op internet kan het zien en kopiëren.",
+      "openbaarWaarschuwing": "Bij een openbare kopie kan iedereen je bestanden lezen, ook wat er in eerdere versies stond. Studio controleert strenger op geheimen, maar kan niet alles zien.",
+      "openbaarSnap": "Ik snap dat iedereen dit kan zien",
+      "knop": "Back-up op GitHub maken"
+    },
+    "uiteen": {
+      "uiteengelopen": {
+        "titel": "De versies zijn uiteengelopen",
+        "uitleg": "Er staan op GitHub versies die jij hier niet hebt, en jij hebt versies die daar nog niet staan. Studio doet daarom niets, zodat er niets kwijtraakt."
+      },
+      "online_nieuwer": {
+        "titel": "Op GitHub staat iets nieuwers",
+        "uitleg": "Er staan op GitHub nieuwere versies dan op deze computer. Studio doet daarom niets, zodat er niets kwijtraakt."
+      },
+      "opties": "Dit kun je doen:",
+      "optieNiets": "Niets doen. Je werk blijft veilig op deze computer.",
+      "optieAi": "De AI de verschillen laten samenvoegen (jij kijkt het na).",
+      "optieNieuw": "Een nieuwe back-up maken onder een andere naam (eerst loskoppelen).",
+      "vraagAi": "Vraag de AI om de verschillen samen te voegen",
+      "prompt": "De versies van mijn project op GitHub en op mijn computer zijn uiteengelopen. Haal de nieuwe versies van GitHub op en voeg ze voorzichtig samen met mijn werk. Gebruik nooit een geforceerde push en herschrijf geen geschiedenis. Leg in gewone woorden uit wat je doet en vraag mij bij twijfel."
+    },
+    "uitkomst": {
+      "back_up_klaar": "Back-up bijgewerkt: {{aantal}} nieuwe versies.",
+      "back_up_klaar_een": "Back-up bijgewerkt: 1 nieuwe versie.",
+      "al_bijgewerkt": "De back-up was al bijgewerkt. Er was niets nieuws.",
+      "niet_ingesteld": "De back-up is nog niet ingesteld.",
+      "niet_bevestigd": "Je hebt de back-up niet toegestaan. Er is niets verstuurd.",
+      "uiteengelopen": "De versies zijn uiteengelopen. Er is niets verstuurd.",
+      "online_nieuwer": "Op GitHub staat iets nieuwers. Er is niets verstuurd.",
+      "geheimen": "Er staan geheimen in je bestanden. Er is niets verstuurd.",
+      "te_groot": "Sommige bestanden zijn te groot voor GitHub. Er is niets verstuurd.",
+      "geen_versies": "Er is nog geen opgeslagen versie. Sla eerst een versie op.",
+      "bezig": "Er loopt al een back-up. Even geduld.",
+      "al_gekoppeld": "Dit project heeft al een back-up.",
+      "naam_ongeldig": "Deze naam kan niet. Gebruik kleine letters, cijfers en streepjes.",
+      "openbaar_bevestig": "Bevestig eerst dat je de kopie openbaar wilt maken.",
+      "andere_tak": "Je werkt nu op een andere tak dan de back-up. Er is niets verstuurd.",
+      "naam_bezet": "Deze naam is al in gebruik op jouw GitHub. Kies een andere naam.",
+      "geen_rechten": "GitHub geeft Studio hier geen toestemming voor. Maak de koppeling opnieuw en geef toegang tot je repositories.",
+      "ongeldig_token": "De koppeling met GitHub werkt niet meer. Verbind opnieuw.",
+      "geen_internet": "Geen verbinding met GitHub. Controleer je internet en probeer het opnieuw.",
+      "time_out": "GitHub reageerde niet op tijd. Probeer het later opnieuw.",
+      "te_veel_verzoeken": "GitHub vraagt om even te wachten. Probeer het over een paar minuten opnieuw.",
+      "afgewezen": "GitHub heeft de versies niet aangenomen. Er is niets overschreven.",
+      "onverwacht": "Er ging iets mis. Er is niets overschreven. Probeer het later opnieuw.",
+      "onbekend": "Er ging iets mis. Er is niets overschreven."
+    },
+    "scan": {
+      "regel": "regel {{regel}}",
+      "groot": "{{mb}} MB, te groot",
+      "historie": "(staat in een eerdere versie)",
+      "uitleg": "Studio heeft niets verstuurd. In deze bestanden staat iets wat geheim hoort te blijven, zoals een sleutel of wachtwoord. Staat het online, dan kan een ander het gebruiken.",
+      "uitlegGroot": "Studio heeft niets verstuurd. Deze bestanden zijn groter dan GitHub toestaat (100 MB). Verplaats of verwijder ze en probeer het opnieuw.",
+      "openbaarStrenger": "Bij een openbare kopie controleert Studio strenger.",
+      "herstel": "Laat de AI dit herstellen",
+      "historieUitleg": "De back-up is gemaakt, maar in eerdere versies stond iets wat geheim hoort te zijn. Dat wordt niet automatisch verwijderd. Vervang de sleutel of het wachtwoord door een nieuwe, want de oude kan nu ook in je GitHub-kopie staan.",
+      "grootUitleg": "Deze bestanden zijn erg groot (meer dan 50 MB). GitHub wordt er traag van. Overweeg ze buiten het project te bewaren.",
+      "gitignore": "Studio heeft {{aantal}} regels toegevoegd aan .gitignore, zodat geheimen en tijdelijke bestanden niet meegaan.",
+      "prompt": "Studio wil een back-up naar GitHub sturen, maar vond geheimen of te grote bestanden in: {{lijst}}. Haal de geheimen uit die bestanden en bewaar ze veilig buiten het project (bijvoorbeeld als omgevingsvariabele). Zorg dat zulke bestanden in .gitignore staan en sla een nieuwe versie op zonder geheimen. Vertel mij ook welke sleutels of wachtwoorden ik moet vervangen, want die kunnen al in eerdere versies staan. Gebruik nooit een geforceerde push en herschrijf geen geschiedenis. Leg alles in gewone woorden uit.",
+      "soort": {
+        "onbekend": "Mogelijk een geheim",
+        "privesleutel": "Een privésleutel",
+        "github_token": "Een GitHub-token",
+        "aws_sleutel": "Een AWS-sleutel",
+        "anthropic_sleutel": "Een sleutel van Anthropic",
+        "api_sleutel": "Een API-sleutel",
+        "stripe_sleutel": "Een Stripe-sleutel",
+        "slack_token": "Een Slack-token",
+        "google_sleutel": "Een Google-sleutel",
+        "supabase_sleutel": "Een geheime Supabase-sleutel",
+        "supabase_token": "Een Supabase-toegangstoken",
+        "vercel_token": "Een Vercel-token",
+        "jwt_token": "Een geheime inlogsleutel (token)",
+        "npm_token": "Een npm-token",
+        "geheim_in_code": "Een geheim in de code",
+        "wachtwoord_in_code": "Een vast wachtwoord in de code",
+        "wachtwoord_in_adres": "Een wachtwoord in een internetadres",
+        "env_bestand": "Een .env-bestand met instellingen en geheimen",
+        "sleutelbestand": "Een sleutelbestand",
+        "certificaat": "Een certificaat of ondertekeningsbestand",
+        "inloggegevens": "Een bestand met inloggegevens",
+        "database_bestand": "Een lokaal gegevensbestand"
+      }
+    },
+    "ophalen": {
+      "knopHome": "Ophalen van GitHub",
+      "titel": "Project ophalen van GitHub",
+      "uitleg": "Kies een project uit je eigen GitHub. Studio zet een kopie in een nieuwe map op je computer. Er wordt niets op GitHub gewijzigd.",
+      "eerstVerbinden": "Verbind eerst je GitHub-account om je projecten te zien.",
+      "zoek": "Zoek in je projecten",
+      "laden": "Je projecten worden opgehaald…",
+      "geen": "Geen projecten gevonden.",
+      "knop": "Project ophalen",
+      "bezig": "Bezig met ophalen…",
+      "klaar": "‘{{naam}}’ staat nu op je computer en in Studio.",
+      "open": "Project openen",
+      "nietTitel": "Dit herkent Studio nog niet:",
+      "soort": {
+        "static": "Dit is een gewone website. Studio kan er meteen een voorbeeld van tonen.",
+        "node": "Dit is een webproject met een eigen startcommando. Studio kan er een voorbeeld van tonen zodra je het startcommando goedkeurt.",
+        "config": "Dit project heeft een eigen instellingenbestand (studio.json). Studio vraagt eerst jouw goedkeuring voordat er iets wordt gestart.",
+        "flutter": "Dit is een Flutter-app. Een voorbeeld in Studio is hier nog niet mogelijk.",
+        "unsupported": "Studio herkent dit soort project nog niet helemaal. Je kunt er wel mee werken met de AI.",
+        "empty": "Deze map bevat nog niets wat Studio kan tonen."
+      },
+      "niet": {
+        "geen_studio_json": "Er is geen studio.json. Studio weet daarom niet hoe het project gestart en gecontroleerd wordt. De AI kan dat voor je instellen.",
+        "studio_json_onleesbaar": "Het bestand studio.json is niet leesbaar. Laat de AI het herstellen.",
+        "geen_voorbeeld": "Studio kan hier nog geen voorbeeld van tonen.",
+        "geen_project_md": "Er was geen PROJECT.md. Studio heeft een leeg exemplaar gemaakt dat je samen met de AI kunt invullen."
+      },
+      "fout": {
+        "naam_ongeldig": "Deze naam kan niet als mapnaam worden gebruikt.",
+        "locatie_bestaat_niet": "De gekozen locatie bestaat niet.",
+        "map_bestaat": "Er staat al een map met deze naam op die plek. Kies een andere locatie.",
+        "niet_gevonden": "Dit project is niet gevonden of je hebt er geen toegang toe.",
+        "geen_rechten": "GitHub geeft Studio hier geen toegang toe. Maak de koppeling opnieuw.",
+        "geen_internet": "Geen verbinding met GitHub. Controleer je internet.",
+        "time_out": "GitHub reageerde niet op tijd. Probeer het later opnieuw.",
+        "te_veel_verzoeken": "GitHub vraagt om even te wachten. Probeer het later opnieuw.",
+        "onverwacht": "Het ophalen is niet gelukt. Er is niets gewijzigd op GitHub."
+      }
+    }
+  },
+  "bevestig": {
+    "knopJa": "Toestaan",
+    "knopNee": "Niet toestaan",
+    "github_backup": {
+      "titel": "Mag de AI een back-up maken?",
+      "uitleg": "De AI wil nieuwe versies van je project naar je GitHub-kopie {{repo}} sturen. Er wordt niets overschreven of verwijderd."
+    },
+    "vercel_live": {
+      "titel": "Mag de AI de echte site online zetten?",
+      "uitleg": "De AI wil ‘{{naam}}’ echt online zetten: iedereen op internet ziet dan de nieuwe versie. Dit vraagt Studio altijd, ook als de AI veel mag."
+    },
+    "vercel_terugzetten": {
+      "titel": "Mag de AI de echte site terugzetten?",
+      "uitleg": "De AI wil de echte site van ‘{{naam}}’ terugzetten naar een eerdere versie. Bezoekers zien dan die oudere versie."
+    },
+    "vercel_variabele": {
+      "titel": "Mag de AI een instelling voor de echte site doorsturen?",
+      "uitleg": "De AI wil de instelling {{naam}} doorsturen naar je echte site. De waarde blijft geheim; de AI ziet haar niet."
+    },
+    "winkel_teksten": {
+      "titel": "Mag de AI teksten voor de winkel voorstellen?",
+      "uitleg": "De AI wil {{aantal}} tekst(en) voor {{winkel}} als concept opslaan. Een concept verandert niets aan wat je al hebt goedgekeurd; jij keurt zelf goed."
+    }
+  },
+  "vercel": {
+    "titel": "Online zetten met Vercel",
+    "uitleg": "Zet je website op internet met je eigen Vercel-account. Je kunt eerst een voorbeeld online zetten om te kijken. De echte site gaat pas online als jij dat bevestigt.",
+    "stap": {
+      "controles": "De controles zijn groen",
+      "gekoppeld": "Vercel is gekoppeld",
+      "variabelen": "De instellingen (variabelen) zijn compleet",
+      "voorbeeld": "Een voorbeeld staat online",
+      "live": "De echte site staat online"
+    },
+    "volgende": {
+      "controles": "Laat de AI de controles herstellen",
+      "variabelen": "Instellingen invullen",
+      "voorbeeld": "Voorbeeld online zetten",
+      "live": "Echt online zetten",
+      "klaar": "Alles is klaar: je site staat online."
+    },
+    "controlesPrompt": "Draai de controles van mijn project en herstel wat niet groen is, zodat ik de site online kan zetten. Leg in gewone woorden uit wat je doet.",
+    "voorbeeld": "Voorbeeld online zetten",
+    "live": "Echt online zetten",
+    "stop": "Stoppen",
+    "voortgang": "Voortgang van het online zetten",
+    "fase": {
+      "controleren": "Controles draaien…",
+      "uploaden": "Bestanden worden verstuurd…",
+      "bouwen": "Vercel bouwt je site…",
+      "bezig": "Bezig…"
+    },
+    "kopieer": "Kopieer adres",
+    "gekopieerd": "Het adres is gekopieerd.",
+    "openBrowser": "Open in de browser",
+    "liveAdres": "Je echte site staat op:",
+    "flutter": "Een Flutter-app kan hier nog niet online worden gezet. Vercel is voor websites en web-apps. Voor een app in de winkel komt later een eigen onderdeel.",
+    "herstel": "Laat de AI dit herstellen",
+    "voorwaarden": "Het gratis plan van Vercel heeft eigen voorwaarden, onder andere over commercieel gebruik en limieten. Lees ze op vercel.com voordat je een bedrijfswebsite online zet.",
+    "voorwaardenLink": "Bekijk de voorwaarden en prijzen",
+    "waarschuwingVariabelen": "Let op: de code gebruikt instellingen die nog niet zijn ingevuld: {{namen}}. Het voorbeeld werkt daardoor misschien niet helemaal.",
+    "liveVraag": {
+      "titel": "Echt online zetten?",
+      "uitleg": "Je zet ‘{{naam}}’ nu echt online: iedereen op internet kan de nieuwe versie zien.",
+      "adresBestaand": "De bezoekers van {{adres}} krijgen vanaf nu deze versie te zien.",
+      "adresNieuw": "Je krijgt een eigen internetadres van Vercel.",
+      "terug": "Je kunt later terug naar een eerdere versie. Studio bewaart eerst een lokale versie van je werk.",
+      "nee": "Niet doen",
+      "ja": "Ja, echt online zetten"
+    },
+    "terugVraag": {
+      "titel": "Terug naar deze versie?",
+      "uitleg": "De echte site laat vanaf nu weer deze eerdere versie zien. Er wordt niets verwijderd; je kunt daarna weer naar een nieuwere versie.",
+      "ja": "Ja, terug naar deze versie"
+    },
+    "eerder": {
+      "titel": "Eerder online gezet",
+      "echt": "Echte site",
+      "voorbeeld": "Voorbeeld",
+      "klaar": "gelukt",
+      "mislukt": "mislukt",
+      "terug": "Terug naar deze versie"
+    },
+    "uitkomst": {
+      "voorbeeld_online": "Het voorbeeld staat online. Dit is nog niet je echte site.",
+      "live_online": "Je site staat online.",
+      "niet_ingesteld": "Vercel is nog niet ingesteld voor dit project.",
+      "niet_bevestigd": "Je hebt het niet toegestaan. Er staat niets nieuws online.",
+      "bevestiging_nodig": "Bevestig eerst dat je dit echt wilt. Er is niets veranderd.",
+      "controles": "Er is niets online gezet, want de controles zijn niet groen:",
+      "bouw_mislukt": "Vercel kon je site niet bouwen. Er is niets online gezet.",
+      "geannuleerd": "Het online zetten is gestopt. Er staat niets nieuws online.",
+      "time_out": "Het duurde te lang. Het online zetten is gestopt; er staat niets nieuws online.",
+      "lus": "Dezelfde fout kwam steeds terug. De AI is gestopt. Bekijk de fout en kies zelf hoe je verder gaat.",
+      "bezig": "Er loopt al iets. Even geduld.",
+      "flutter": "Een Flutter-app kan hier niet online worden gezet.",
+      "niets_om_te_zetten": "Er is nog niets om online te zetten. Maak eerst een pagina.",
+      "teruggezet": "De echte site laat weer de gekozen versie zien.",
+      "rollback_pro": "Met het gratis plan van Vercel kun je alleen terug naar de vorige versie, niet verder.",
+      "niet_gevonden": "Deze versie is niet gevonden bij Vercel.",
+      "naam_bezet": "De naam van het project is al in gebruik bij Vercel.",
+      "ongeldig_token": "De koppeling met Vercel werkt niet meer. Verbind opnieuw.",
+      "geen_rechten": "Vercel geeft Studio hier geen toestemming voor. Maak de koppeling opnieuw.",
+      "geen_internet": "Geen verbinding met Vercel. Controleer je internet.",
+      "te_veel_verzoeken": "Vercel vraagt om even te wachten. Probeer het over een paar minuten opnieuw.",
+      "onverwacht": "Er ging iets mis. Er is niets online gezet.",
+      "onbekend": "Er ging iets mis. Er is niets online gezet."
+    },
+    "probleem": {
+      "controles_falen": "De controles (bouwen, testen) slagen niet.",
+      "controles_niet_gedraaid": "De controles konden niet draaien.",
+      "kit": "De uiterlijk-controle blokkeert het online zetten.",
+      "beveiliging": "De beveiligingscontrole vindt ernstige problemen.",
+      "geheimen": "Er staan geheimen (sleutels of wachtwoorden) in je bestanden:",
+      "te_groot": "Sommige bestanden zijn te groot:",
+      "variabelen_ontbreken": "Er ontbreken instellingen (variabelen):",
+      "prompt": "Ik wil mijn site online zetten, maar Studio houdt dat tegen: {{lijst}}. Herstel dit. Haal geheimen uit de bestanden en bewaar ze buiten het project. Leg in gewone woorden uit wat je doet."
+    },
+    "bouw": {
+      "module_ontbreekt": "Een onderdeel dat je code nodig heeft, ontbreekt.",
+      "typefout": "Er zit een fout in de code.",
+      "installatie": "Het installeren van de onderdelen is mislukt.",
+      "geheugen": "Het bouwen had te weinig geheugen.",
+      "geen_uitvoermap": "Na het bouwen vond Vercel geen map met de website.",
+      "bouw_script": "Het bouwcommando gaf een fout.",
+      "onbekend": "De bouw is mislukt.",
+      "details": "Laat de laatste regels zien",
+      "prompt": "Mijn site kon niet online worden gezet: {{soort}} De laatste regels van het logboek: {{regels}}. Zoek de oorzaak, herstel hem en controleer het daarna. Leg in gewone woorden uit wat je doet."
+    },
+    "env": {
+      "titel": "Instellingen voor online (variabelen)",
+      "uitleg": "Sommige sites hebben instellingen nodig, bijvoorbeeld een naam of een sleutel. Je vult ze hier in. De waarde gaat naar de beveiligde kluis van je computer en wordt nergens meer getoond, ook niet aan de AI.",
+      "ontbreekt": "Je code gebruikt deze instellingen, maar ze zijn nog niet ingevuld:",
+      "supabase": "Je hebt Supabase gekoppeld. Studio kan het adres en de publieke sleutel daarvan voor je invullen. Een geheime sleutel gaat nooit mee.",
+      "supabaseKnop": "Supabase-gegevens overnemen",
+      "naam": "Naam van de instelling",
+      "waarde": "Waarde",
+      "waardeHulp": "De waarde wordt niet getoond en niet bewaard in je project.",
+      "soort": "Wie mag de waarde zien?",
+      "openbaar": "Openbaar",
+      "openbaarUitleg": "de waarde is niet geheim (bijvoorbeeld een naam of een publiek adres).",
+      "server": "Geheim (server)",
+      "serverUitleg": "alleen voor het deel van je site dat op een server draait, bijvoorbeeld een betaalsleutel.",
+      "serverUit": "alleen mogelijk als je project een serverdeel heeft; dit project heeft dat niet.",
+      "serverWaarschuwing": "Een geheime sleutel mag nooit in de pagina zelf komen, want dan kan iedereen hem lezen. Gebruik hem alleen op de server en kies een naam zonder VITE_, NEXT_PUBLIC_ of PUBLIC_ aan het begin.",
+      "omgevingen": "Waar moet de instelling gelden?",
+      "omg": {
+        "production": "Echte site",
+        "preview": "Voorbeelden",
+        "development": "Ontwikkeling"
+      },
+      "opslaan": "Instelling opslaan",
+      "verwijder": "Verwijderen",
+      "bewaard": "Waarde bewaard in de kluis",
+      "doorgestuurd": "Doorgestuurd naar Vercel",
+      "nogNiet": "Nog niet doorgestuurd",
+      "vraagTitel": "Instelling voor de echte site wijzigen?",
+      "vraagUitleg": "Dit verandert de instellingen van je echte site. De wijziging werkt bij de volgende keer dat je de site online zet.",
+      "vraagJa": "Ja, opslaan",
+      "uitkomst": {
+        "env_gezet": "De instelling is opgeslagen en doorgestuurd naar Vercel. De waarde is nergens meer te lezen.",
+        "env_bewaard": "De instelling is veilig bewaard. Ze gaat mee zodra Vercel gekoppeld is."
+      },
+      "fout": {
+        "ongeldige_naam": "Gebruik alleen hoofdletters, cijfers en een liggend streepje (bijvoorbeeld SITE_NAAM).",
+        "lege_waarde": "Vul een waarde in.",
+        "te_lang": "De waarde is te lang.",
+        "ongeldige_omgeving": "Kies minstens één plek waar de instelling moet gelden.",
+        "ongeldige_soort": "Kies of de waarde openbaar of geheim is.",
+        "geheim_als_openbaar": "Dit lijkt een geheime sleutel. Die mag niet als ‘openbaar’ worden opgeslagen, want dan kan iedereen hem lezen. Kies ‘Geheim (server)’ of gebruik de publieke sleutel.",
+        "server_met_openbare_naam": "Een geheime sleutel mag geen naam hebben die met VITE_, NEXT_PUBLIC_ of PUBLIC_ begint; die komen in de pagina zelf terecht.",
+        "geen_servergedeelte": "Dit project heeft geen serverdeel, dus een geheime sleutel kan hier niet worden gebruikt.",
+        "onbekend": "Deze instelling kan niet worden opgeslagen."
+      }
+    },
+    "domein": {
+      "titel": "Eigen domeinnaam",
+      "uitleg": "Heb je al een domeinnaam, zoals mijnwinkel.nl? Dan kun je hem koppelen aan je site. Vercel zegt welke gegevens je bij je domeinhouder moet invullen.",
+      "kosten": "Een domeinnaam kopen kan hier niet; dat doe je bij een domeinhouder en kost geld.",
+      "naam": "Je domeinnaam",
+      "koppel": "Domein koppelen",
+      "controleer": "Controleer of het werkt",
+      "klaar": "Het domein is gekoppeld en gecontroleerd.",
+      "nogNiet": "Het domein is nog niet klaar. Voer bij je domeinhouder de volgende gegevens in:",
+      "wachten": "Het kan een tijd duren (soms uren) voordat een wijziging bij je domeinhouder werkt. Controleer later opnieuw."
+    },
+    "fout": {
+      "naam_bezet": "Dit domein is al gekoppeld.",
+      "niet_gevonden": "Dit domein is niet gevonden.",
+      "geen_rechten": "Vercel geeft hier geen toestemming voor.",
+      "ongeldig_token": "De koppeling met Vercel werkt niet meer.",
+      "niet_gekoppeld": "Vercel is nog niet gekoppeld.",
+      "onverwacht": "Dit domein kan niet worden gekoppeld. Controleer de naam."
+    }
+  },
+  "update": {
+    "zoeken": "Even zoeken…",
+    "actueel": "Je hebt de nieuwste versie ({{versie}}).",
+    "beschikbaar": "Er is een nieuwe versie: {{nieuw}} (jij hebt {{versie}}).",
+    "niet_ingesteld": "Bijwerken is nog niet ingesteld voor deze versie van Studio.",
+    "dev": "Bijwerken werkt alleen in de gebouwde app, niet in de ontwikkelversie.",
+    "fout": "Zoeken naar een nieuwe versie lukte niet. Controleer je internet en probeer het later opnieuw.",
+    "dialoog": {
+      "titel": "Er is een nieuwe versie van Studio",
+      "uitleg": "Versie {{nieuw}} is klaar. Jij hebt nu versie {{versie}}. Studio sluit je projecten netjes af, installeert de nieuwe versie en start opnieuw op. Je projecten en instellingen blijven bewaard.",
+      "notities": "Wat is er nieuw?",
+      "nu": "Nu bijwerken",
+      "later": "Later",
+      "bezig": "Bezig met downloaden…",
+      "installeren": "Bezig met installeren…",
+      "fout": "Het bijwerken is niet gelukt. Er is niets veranderd. Probeer het later opnieuw."
+    }
+  },
+  "winkels": {
+    "winkel": {
+      "play": "Google Play (Android)",
+      "appstore": "App Store (iPhone)"
+    },
+    "taal": {
+      "nl": "Nederlands",
+      "en": "Engels"
+    },
+    "eenheid": {
+      "tekens": "tekens",
+      "bytes": "bytes"
+    },
+    "tab": {
+      "overzicht": "Overzicht",
+      "pakket": "Winkelpakket"
+    },
+    "status": {
+      "klaar": "Klaar",
+      "let_op": "Let op",
+      "ontbreekt": "Ontbreekt",
+      "handmatig": "Doe je zelf bij de winkel"
+    },
+    "klaarVan": "{{klaar}} van {{totaal}} klaar",
+    "voortgang": "Voortgang voor deze winkel",
+    "ikHebDitGedaan": "Ik heb dit gedaan",
+    "kopieer": "Kopieer",
+    "gekopieerd": "Gekopieerd.",
+    "specInfo": "De regels en limieten van de winkels staan in één bestand met bron en datum ({{datum}}). Bij regels met ‘nog niet gecontroleerd’ komt de waarde niet uit de officiële tekst van de winkel; controleer die voor je erop vertrouwt.",
+    "nodig": {
+      "titel": "Wat heb je nodig?",
+      "uitleg": "Per winkel: wat het kost, hoe lang het duurt en wie wat doet. ‘Studio’ betekent dat Studio het (straks) voor je doet; ‘Jij’ betekent dat je het zelf bij de winkel doet.",
+      "kosten": "Kosten van het ontwikkelaarsaccount",
+      "kostenControleer": "Dit bedrag komt niet uit de officiële tekst; controleer het bij de winkel.",
+      "open": "Open {{winkel}}",
+      "wie": {
+        "zelf": "Jij",
+        "studio": "Studio",
+        "play": {
+          "account": {
+            "wie": "Jij",
+            "uitleg": "Je maakt zelf een account en betaalt zelf."
+          },
+          "app": {
+            "wie": "Studio",
+            "uitleg": "Je vult de gegevens hier in en Studio controleert ze."
+          },
+          "teksten": {
+            "wie": "Studio",
+            "uitleg": "De AI stelt voor; jij keurt goed."
+          },
+          "afbeeldingen": {
+            "wie": "Jij",
+            "uitleg": "Studio controleert of ze er zijn en de juiste maat hebben. Maken gaat in een volgende stap."
+          },
+          "privacy": {
+            "wie": "Jij",
+            "uitleg": "Je zet een privacyverklaring online; hier vul je de link in."
+          },
+          "formulieren": {
+            "wie": "Jij",
+            "uitleg": "Gegevensveiligheid, leeftijd en doelgroep vul je zelf in bij Google. Studio geeft een voorstel."
+          },
+          "bouwen": {
+            "wie": "Studio",
+            "uitleg": "Nog niet gebouwd. Komt in een volgende stap."
+          },
+          "uploaden": {
+            "wie": "Studio",
+            "uitleg": "Nog niet gebouwd. De eerste keer uploaden moet bij Google vaak met de hand."
+          },
+          "beoordeling": {
+            "wie": "Jij",
+            "uitleg": "Uitbrengen bevestig je altijd zelf."
+          }
+        },
+        "appstore": {
+          "account": {
+            "wie": "Jij",
+            "uitleg": "Je meldt je zelf aan en betaalt zelf."
+          },
+          "app": {
+            "wie": "Studio",
+            "uitleg": "Je vult de gegevens hier in en Studio controleert ze."
+          },
+          "teksten": {
+            "wie": "Studio",
+            "uitleg": "De AI stelt voor; jij keurt goed."
+          },
+          "afbeeldingen": {
+            "wie": "Jij",
+            "uitleg": "Studio controleert of ze er zijn. Maken gaat in een volgende stap."
+          },
+          "privacy": {
+            "wie": "Jij",
+            "uitleg": "De link is verplicht, ook in de app zelf."
+          },
+          "formulieren": {
+            "wie": "Jij",
+            "uitleg": "Privacy-gegevens en exportregels vul je zelf in. Studio geeft een voorstel."
+          },
+          "bouwen": {
+            "wie": "Studio",
+            "uitleg": "Nog niet gebouwd. Een iPhone-app bouwen vraagt een Mac of een bouwdienst."
+          },
+          "uploaden": {
+            "wie": "Studio",
+            "uitleg": "Nog niet gebouwd."
+          },
+          "beoordeling": {
+            "wie": "Jij",
+            "uitleg": "Indienen bevestig je altijd zelf."
+          }
+        }
+      },
+      "wacht": {
+        "play": "Een nieuw account wordt eerst gecontroleerd door Google en moet vaak eerst een proefperiode (gesloten test) doorlopen voordat je echt mag uitbrengen. Dat kan weken duren. Controleer de actuele regels bij Google.",
+        "appstore": "Je meldt je aan bij het Apple Developer Program. De beoordeling van een nieuwe app duurt meestal enkele dagen. Voor een iPhone-app is een Mac met Xcode of een bouwdienst nodig."
+      },
+      "stap": {
+        "account": "Een ontwikkelaarsaccount",
+        "app": "De gegevens van je app",
+        "teksten": "Teksten",
+        "afbeeldingen": "Pictogram en schermafbeeldingen",
+        "privacy": "Een privacyverklaring",
+        "formulieren": "De formulieren van de winkel",
+        "bouwen": "De app bouwen",
+        "uploaden": "De app uploaden",
+        "beoordeling": "Beoordeling en uitbrengen"
+      }
+    },
+    "gegevens": {
+      "titel": "De gegevens van je app",
+      "uitleg": "Deze gegevens gelden voor beide winkels. Er komen geen sleutels of wachtwoorden in te staan.",
+      "naam": "Naam van je app",
+      "androidId": "Unieke app-naam voor Android",
+      "iosId": "Unieke app-naam voor iPhone",
+      "email": "Contact-e-mailadres",
+      "emailHulp": "Dit adres kan voor iedereen zichtbaar zijn in de winkel.",
+      "website": "Website",
+      "support": "Link naar hulp en contact",
+      "privacy": "Link naar je privacyverklaring",
+      "privacyHulp": "Verplicht bij beide winkels. De pagina moet echt bestaan en uitleggen welke gegevens je app gebruikt.",
+      "categoriePlay": "Categorie bij Google Play",
+      "categorieApple": "Categorie bij de App Store",
+      "talen": "In welke talen zet je je app in de winkel?",
+      "heeftLogin": "Mijn app heeft een inlog (dan is een demo-account voor de beoordelaar nodig)",
+      "bewaar": "Gegevens opslaan",
+      "bewaard": "De gegevens zijn opgeslagen.",
+      "fout": "Het opslaan lukte niet. Controleer de velden."
+    },
+    "appid": {
+      "titel": "Je unieke app-naam (app-ID)",
+      "uitleg": "Elke app heeft een unieke naam, bijvoorbeeld nl.mijnwinkel.app. Na de eerste keer uploaden kun je die nooit meer wijzigen.",
+      "domein": "Je domeinnaam (bijvoorbeeld mijnwinkel.nl)",
+      "voorstel": "Doe een voorstel",
+      "voorstelTekst": "Voorstel",
+      "gebruik": "Gebruik dit",
+      "hulpAndroid": "Minstens twee delen met punten ertussen; elk deel begint met een letter; alleen letters, cijfers en liggende streepjes.",
+      "hulpIos": "Letters, cijfers, streepjes en punten, minstens twee delen.",
+      "leeg": "Vul een unieke app-naam in.",
+      "te_lang": "Deze naam is te lang.",
+      "een_deel": "Gebruik minstens twee delen met een punt ertussen.",
+      "leeg_deel": "Er staat een leeg deel tussen twee punten.",
+      "begint_niet_met_letter": "Elk deel moet met een letter beginnen.",
+      "tekens": "Gebruik alleen letters, cijfers en streepjes (Android: liggende streepjes).",
+      "gereserveerd_woord": "Een van de delen is een gereserveerd woord.",
+      "streepje_rand": "Een deel mag niet met een streepje beginnen of eindigen.",
+      "voorbeeld": "Dit is een voorbeeldnaam (com.example). Winkels weigeren die meestal; kies je eigen naam.",
+      "gereserveerd": "Deze naam hoort bij Google of Apple zelf. Kies je eigen naam.",
+      "hoofdletters": "Hoofdletters kunnen, maar kleine letters zijn gebruikelijker."
+    },
+    "versie": {
+      "titel": "Versienummer",
+      "nu": "Nu",
+      "uitleg": "Elke keer dat je een nieuwe versie uploadt, moet het buildnummer (het getal achter het plusteken) hoger zijn dan de vorige. Studio verhoogt dat voor je.",
+      "geen": "Studio kan het versienummer alleen lezen en ophogen in een Flutter-app (bestand pubspec.yaml). Bij dit project is dat niet te vinden.",
+      "build": "Alleen het buildnummer ophogen",
+      "patch": "Kleine nieuwe versie (1.0.0 → 1.0.1)",
+      "minor": "Nieuwe versie met nieuwe dingen (1.0.0 → 1.1.0)",
+      "nieuw": "Het versienummer is nu {{versie}}.",
+      "fout": {
+        "geen_versie": "Er is geen versienummer gevonden.",
+        "geen_pubspec": "Er is geen pubspec.yaml.",
+        "geen_versieregel": "In pubspec.yaml staat geen versieregel.",
+        "schrijven_mislukt": "Het opslaan lukte niet.",
+        "onbekend": "Het ophogen lukte niet."
+      }
+    },
+    "punt": {
+      "account": {
+        "titel": "Ontwikkelaarsaccount",
+        "uitleg": "Maak zelf een account bij de winkel en vink dit af als het klaar is.",
+        "klaar": "Je account staat klaar."
+      },
+      "app_id": {
+        "titel": "Unieke app-naam",
+        "uitleg": "Vul hierboven een geldige unieke app-naam in.",
+        "klaar": "De unieke app-naam is geldig."
+      },
+      "versie": {
+        "titel": "Versienummer",
+        "uitleg": "Studio kan het versienummer van een Flutter-app lezen en ophogen.",
+        "klaar": "Het versienummer staat goed."
+      },
+      "teksten": {
+        "titel": "Teksten",
+        "uitleg": "Schrijf of laat schrijven en keur goed, in elke taal, onder Winkelpakket.",
+        "klaar": "Alle teksten zijn goedgekeurd."
+      },
+      "icoon": {
+        "titel": "Pictogram",
+        "uitleg": "Zet een vierkante afbeelding in store/icoon.png in je project. Het maken van alle maten komt in een volgende stap.",
+        "klaar": "Het pictogram is er."
+      },
+      "feature_graphic": {
+        "titel": "Brede afbeelding voor Google Play",
+        "uitleg": "Zet de afbeelding in store/play/feature-graphic.png. Maken komt in een volgende stap.",
+        "klaar": "De brede afbeelding is er."
+      },
+      "screenshots": {
+        "titel": "Schermafbeeldingen",
+        "uitleg": "Zet de afbeeldingen in store/screenshots/<winkel>/<taal>/. Maken komt in een volgende stap.",
+        "klaar": "Er zijn genoeg schermafbeeldingen."
+      },
+      "privacy": {
+        "titel": "Privacyverklaring",
+        "uitleg": "Vul een echte link in naar je privacyverklaring.",
+        "klaar": "De link naar je privacyverklaring ziet er goed uit."
+      },
+      "contact": {
+        "titel": "Contact-e-mailadres",
+        "uitleg": "Vul een e-mailadres in.",
+        "klaar": "Er is een e-mailadres."
+      },
+      "support": {
+        "titel": "Link naar hulp en contact",
+        "uitleg": "Vul een link in waar mensen hulp krijgen.",
+        "klaar": "De link is ingevuld."
+      },
+      "categorie": {
+        "titel": "Categorie",
+        "uitleg": "Kies een categorie voor je app.",
+        "klaar": "De categorie is ingevuld."
+      },
+      "leeftijd": {
+        "titel": "Leeftijdsindeling",
+        "uitleg": "Beantwoord de vragen bij de winkel zelf en vink dit af.",
+        "klaar": "De leeftijdsindeling is ingevuld."
+      },
+      "data_safety": {
+        "titel": "Gegevensveiligheid (Data safety)",
+        "uitleg": "Een formulier bij Google over welke gegevens je app gebruikt. Zie de antwoordkaarten hieronder.",
+        "klaar": "Dit formulier is ingevuld."
+      },
+      "doelgroep": {
+        "titel": "Doelgroep en inhoud",
+        "uitleg": "Geef bij Google aan voor wie je app is (kinderen of niet).",
+        "klaar": "Dit is ingevuld."
+      },
+      "advertenties": {
+        "titel": "Advertenties",
+        "uitleg": "Geef bij Google aan of je app advertenties toont.",
+        "klaar": "Dit is ingevuld."
+      },
+      "apple_privacy": {
+        "titel": "Privacy-gegevens (App Privacy)",
+        "uitleg": "Een formulier bij Apple over welke gegevens je app verzamelt. Zie de antwoordkaarten hieronder.",
+        "klaar": "Dit formulier is ingevuld."
+      },
+      "export_regels": {
+        "titel": "Regels over versleuteling (export)",
+        "uitleg": "Apple vraagt of je app versleuteling gebruikt. Zie de antwoordkaart hieronder.",
+        "klaar": "Dit is ingevuld."
+      },
+      "demo_account": {
+        "titel": "Demo-account voor de beoordelaar",
+        "uitleg": "Heeft je app een inlog, dan heeft Apple een werkend demo-account nodig. De inloggegevens komen later veilig in de kluis van Studio, nooit in je project.",
+        "klaar": "Het demo-account is klaar."
+      },
+      "inhoud": {
+        "titel": "Controle op inhoud",
+        "uitleg": "Kijk bij ‘Controle voor de beoordeling’ wat er nog moet.",
+        "klaar": "Er zijn geen problemen gevonden."
+      }
+    },
+    "detail": {
+      "teksten": "{{klaar}} van {{totaal}}",
+      "screenshots": "{{aantal}} van minstens {{minimaal}}"
+    },
+    "invul": {
+      "titel": "Hulp bij de formulieren",
+      "uitleg": "Studio kijkt in je project en stelt per vraag een antwoord voor, met de reden. Jij vult de formulieren zelf in bij de winkel.",
+      "verantwoordelijk": "Dit is hulp, geen juridisch advies. Jij blijft verantwoordelijk voor de antwoorden die je bij de winkel invult. Twijfel je? Kies dan voorzichtig of vraag advies.",
+      "studioDenkt": "Studio denkt",
+      "voor": "Voor",
+      "antwoord": {
+        "ja": "Ja",
+        "nee": "Nee",
+        "controleer": "Controleer dit zelf"
+      },
+      "reden": {
+        "pakket": "Je app gebruikt iets voor: {{onderwerp}}.",
+        "geen_signalen": "Studio vond geen aanwijzing in je project. Controleer zelf of je app gegevens gebruikt.",
+        "geen_inlog": "Er is geen inlog gevonden.",
+        "geen_advertentiepakket": "Er is geen advertentiepakket gevonden.",
+        "geen_betaalpakket": "Er is geen betaalpakket gevonden.",
+        "jij_beslist": "Dit kan alleen jij beslissen.",
+        "https_gebruiken": "Normaal gebruikt je app een beveiligde verbinding (https). Controleer dat.",
+        "alleen_https": "Gebruikt je app alleen de gewone beveiligde verbinding van het toestel? Dan is het meestal een vrijstelling. Controleer het bij Apple.",
+        "gebruikers_kunnen_inloggen": "Gebruikers kunnen inloggen: houd daar rekening mee bij de leeftijd."
+      },
+      "onderwerp": {
+        "advertenties": "advertenties",
+        "analyse": "statistieken",
+        "inloggen": "inloggen",
+        "betalen": "betalen",
+        "locatie": "locatie",
+        "camera": "camera",
+        "foto": "foto’s",
+        "contacten": "contacten",
+        "microfoon": "microfoon",
+        "meldingen": "meldingen",
+        "online_opslag": "online opslag"
+      },
+      "kaart": {
+        "gegevens_verzamelen": {
+          "titel": "Verzamelt je app gegevens?",
+          "vraag": "Worden er gegevens van gebruikers verzameld, zoals e-mailadres, locatie of gebruik van de app?"
+        },
+        "gegevens_delen": {
+          "titel": "Deelt je app gegevens met anderen?",
+          "vraag": "Worden gegevens gedeeld met andere bedrijven, bijvoorbeeld voor advertenties of statistieken?"
+        },
+        "versleuteld_onderweg": {
+          "titel": "Beveiligde verbinding",
+          "vraag": "Worden gegevens beveiligd verstuurd (https)?"
+        },
+        "account_verwijderen": {
+          "titel": "Account verwijderen",
+          "vraag": "Kunnen gebruikers hun account en gegevens laten verwijderen? Dat moet als je app een inlog heeft."
+        },
+        "advertenties": {
+          "titel": "Advertenties",
+          "vraag": "Toont je app advertenties?"
+        },
+        "betalingen": {
+          "titel": "Betalingen",
+          "vraag": "Kunnen gebruikers in de app iets kopen?"
+        },
+        "doelgroep_kinderen": {
+          "titel": "Kinderen als doelgroep",
+          "vraag": "Is je app (ook) bedoeld voor kinderen? Dan gelden strengere regels."
+        },
+        "export_versleuteling": {
+          "titel": "Versleuteling (export)",
+          "vraag": "Gebruikt je app versleuteling die niet standaard in het toestel zit?"
+        },
+        "leeftijd": {
+          "titel": "Leeftijdsindeling",
+          "vraag": "Welke leeftijdsklasse past bij je app? Je beantwoordt vragen over geweld, taal, gokken en dergelijke."
+        }
+      }
+    },
+    "veilig": {
+      "titel": "Controle voor de beoordeling",
+      "uitleg": "Dingen die een beoordelaar kan afkeuren. Studio kijkt in je project en je winkelteksten.",
+      "niets": "Studio vond niets verdachts.",
+      "fout": "Houdt je app waarschijnlijk tegen",
+      "letOp": "Let op",
+      "linksOpmerking": "Links worden alleen op uiterlijk gecontroleerd. Of een pagina echt bestaat en werkt, moet je zelf bekijken.",
+      "herstel": "Laat de AI dit herstellen",
+      "prompt": "Studio vond dingen die de beoordeling van mijn app in de winkel kunnen laten mislukken: {{lijst}}. Herstel wat in mijn project te herstellen is en vertel me wat ik zelf moet doen. Verander niets zonder het uit te leggen.",
+      "privacy_ontbreekt": {
+        "titel": "Je privacyverklaring ontbreekt",
+        "uitleg": "Beide winkels vragen een link naar een privacyverklaring."
+      },
+      "privacy_link": {
+        "titel": "De link naar je privacyverklaring ziet er niet goed uit",
+        "uitleg": "Gebruik een echte https-link naar een pagina die bestaat."
+      },
+      "link": {
+        "titel": "Een link ziet er niet goed uit",
+        "uitleg": "Gebruik een echte https-link."
+      },
+      "contact_email": {
+        "titel": "Het e-mailadres ziet er niet goed uit",
+        "uitleg": "Gebruik een echt e-mailadres."
+      },
+      "gevoelig_recht": {
+        "titel": "Je app vraagt een gevoelig recht",
+        "uitleg": "Winkels vragen om uitleg en weigeren dit vaak. Haal het weg als je het niet echt nodig hebt."
+      },
+      "testtekst": {
+        "titel": "Er staat een testtekst",
+        "uitleg": "Teksten zoals ‘lorem ipsum’ of de standaardtekst van een voorbeeldapp worden afgekeurd."
+      },
+      "sleutel_in_project": {
+        "titel": "Een sleutelbestand staat in je project",
+        "uitleg": "Sleutels horen veilig buiten je project te staan. Zet het bestand niet online en bewaar het op een veilige plek."
+      }
+    },
+    "pakket": {
+      "nu": "Teksten",
+      "nogNiet": "Schermafbeeldingen, pictogrammen, hulp bij formulieren per winkel en exporteren komen in volgende stappen."
+    },
+    "veld": {
+      "app_naam": "Naam van je app",
+      "korte_beschrijving": "Korte beschrijving",
+      "volledige_beschrijving": "Volledige beschrijving",
+      "wat_is_nieuw": "Wat is nieuw",
+      "subtitel": "Ondertitel",
+      "trefwoorden": "Zoekwoorden",
+      "beschrijving": "Beschrijving",
+      "promotietekst": "Korte aanbeveling"
+    },
+    "teksten": {
+      "titel": "Teksten",
+      "uitleg": "Per winkel en taal de teksten voor je pagina. De teller toont hoeveel je mag gebruiken. Een goedgekeurde tekst is vergrendeld: de AI kan hem niet wijzigen. De AI schrijft alleen concepten.",
+      "kiesWinkel": "Winkel",
+      "kiesTaal": "Taal",
+      "teller": "{{aantal}} van {{max}} {{eenheid}}",
+      "nietGeverifieerd": "Deze limiet komt niet uit de officiële tekst van de winkel; controleer hem bij de winkel.",
+      "concept": "Opslaan als concept",
+      "keurGoed": "Goedkeuren",
+      "bewerk": "Bewerken",
+      "goedgekeurd": "Goedgekeurd en vergrendeld",
+      "laatAiSchrijven": "Laat de AI een voorstel schrijven",
+      "geschiedenis": "Eerdere versies",
+      "fout": "Opslaan lukte niet.",
+      "goedkeurFout": {
+        "te_lang": "De tekst is te lang voor deze winkel.",
+        "te_kort": "De tekst is te kort voor deze winkel.",
+        "niet_gevonden": "Deze versie bestaat niet meer."
+      },
+      "status": {
+        "concept": "Concept",
+        "goedgekeurd": "Goedgekeurd",
+        "vervangen": "Vervangen"
+      },
+      "bron": {
+        "ai": "AI",
+        "gebruiker": "Jij"
+      },
+      "aiPrompt": "Schrijf een voorstel voor het veld ‘{{officieel}}’ ({{veld}}) van mijn app voor {{winkel}} in het {{taal}}. De limiet is {{max}} {{eenheid}}: blijf daaronder. Lees eerst PROJECT.md en kijk naar de schermen van mijn app. Gebruik het hulpmiddel winkel_schrijf_teksten; dat slaat alleen een concept op en vraagt mijn toestemming. Verzin geen functies die de app niet heeft en gebruik geen overdreven beloftes."
+    }
+  },
+  "systeem": {
+    "titel": "Is alles klaar op je computer?",
+    "uitleg": "Studio kijkt zelf wat het nodig heeft. Wat ontbreekt, krijgt hieronder een uitleg.",
+    "opnieuw": "Opnieuw controleren",
+    "bezig": "Even kijken…",
+    "alles": "Alles is klaar.",
+    "let_op": "Er is iets om op te letten, maar je kunt gewoon verder.",
+    "fout": "Er ontbreekt iets. Los het hieronder op; daarna werkt alles.",
+    "status": {
+      "ok": "Gelukt",
+      "let_op": "Let op",
+      "fout": "Ontbreekt"
+    },
+    "punt": {
+      "node": {
+        "titel": "Een hulpprogramma voor Studio (Node.js)",
+        "ok": "Gevonden (versie {{detail}}).",
+        "fout": "Dit programma ontbreekt of is te oud. Studio heeft het nodig om je app te controleren en te tonen.",
+        "oplossing": "Installeer het eenmalig: open de downloadpagina, kies de ‘LTS’-versie en installeer die. Start Studio daarna opnieuw."
+      },
+      "git": {
+        "titel": "Een programma dat je versies bewaart (Git)",
+        "ok": "Gevonden.",
+        "fout": "Dit programma ontbreekt. Zonder dit kan Studio je eerdere versies niet bewaren.",
+        "oplossing": "Installeer het eenmalig: open de downloadpagina en installeer met de standaardkeuzes. Start Studio daarna opnieuw."
+      },
+      "ai": {
+        "titel": "Een AI om mee te werken",
+        "ok": "Gevonden: {{detail}}.",
+        "fout": "Er is nog geen AI-programma op je computer. Studio gebruikt jouw eigen AI-account.",
+        "oplossing": "Kies hieronder een AI en volg de uitleg om hem te installeren en in te loggen."
+      },
+      "internet": {
+        "titel": "Internet",
+        "ok": "Je bent online.",
+        "let_op": "Geen verbinding gevonden. De AI heeft internet nodig; je projecten en versies werken ook zonder.",
+        "oplossing": "Controleer je wifi of kabel en kies ‘Opnieuw controleren’."
+      },
+      "schijf": {
+        "titel": "Ruimte op je computer",
+        "ok": "Genoeg ruimte ({{detail}} GB vrij).",
+        "let_op": "Er is nog maar {{detail}} MB vrij. Maak ruimte vrij voor je projecten.",
+        "fout": "Er is bijna geen ruimte meer ({{detail}} MB). Maak ruimte vrij, anders kan Studio niets meer opslaan.",
+        "oplossing": "Verwijder bestanden die je niet meer nodig hebt en kies ‘Opnieuw controleren’."
+      },
+      "rechten": {
+        "titel": "Mag Studio bestanden opslaan?",
+        "ok": "Ja.",
+        "fout": "Studio mag hier geen bestanden maken.",
+        "oplossing": "Kies bij Instellingen een andere map voor je projecten, bijvoorbeeld in Documenten."
+      }
+    },
+    "open": {
+      "node": "Open de downloadpagina van Node.js",
+      "git": "Open de downloadpagina van Git"
+    }
+  },
+  "eerstestart": {
+    "titel": "Welkom bij Studio",
+    "stap": "Stap {{nu}} van {{totaal}}",
+    "overslaan": "Later doen",
+    "volgende": "Volgende",
+    "terug": "Terug",
+    "klaar": "Aan de slag",
+    "welkom": {
+      "titel": "Maak je eigen app, zonder te programmeren",
+      "een": "Je vertelt in gewone woorden wat je wilt. Een AI bouwt het en je ziet meteen het resultaat.",
+      "twee": "Je projecten blijven op jouw computer. Studio gebruikt jouw eigen AI-account en verstuurt zelf niets over jou of je projecten.",
+      "drie": "Alles is optioneel: je hebt geen account nodig om te beginnen, alleen een AI."
+    },
+    "ai": {
+      "titel": "Kies je AI",
+      "uitleg": "Studio werkt met de AI-programma’s Claude en Gemini. Je logt in met je eigen account; Studio kent je wachtwoord niet. Je kunt dit later veranderen bij ‘AI-accounts’.",
+      "claude": "Claude (van Anthropic)",
+      "gemini": "Gemini (van Google)",
+      "codex": "Codex komt later.",
+      "inloggen": "Inloggen",
+      "gevonden": "Gevonden op je computer",
+      "nietGevonden": "Nog niet geïnstalleerd: ‘Inloggen’ legt uit hoe.",
+      "kostenAi": "Let op: de AI die je kiest rekent soms zelf kosten. Dat loopt via je eigen account; Studio rekent niets.",
+      "fout": "Het inloggen kon niet worden gestart. Probeer het opnieuw."
+    },
+    "niveau": {
+      "titel": "Hoeveel mag de AI zelf doen?",
+      "uitleg": "Dit bepaalt hoe vaak Studio eerst vraagt. Je kunt het altijd veranderen bij Instellingen. Echt online zetten en insturen naar een winkel vraagt altijd eerst jouw ja.",
+      "always": {
+        "titel": "Ik wil het zelf bepalen",
+        "uitleg": "Studio vraagt bij bijna alles eerst of het mag. Rustig en veilig, maar je klikt vaker."
+      },
+      "important": {
+        "titel": "Vraag me bij belangrijke dingen",
+        "uitleg": "De AI werkt door en vraagt alleen bij dingen die iets groots veranderen. Dit is de aanrader voor de meeste mensen."
+      },
+      "autonomous": {
+        "titel": "Laat de AI zijn gang gaan",
+        "uitleg": "De AI doet bijna alles zelf. Handig als je hem vertrouwt, maar let goed op wat hij maakt.",
+        "waarschuwing": "Bij deze keuze vraagt de AI veel minder. Je kunt altijd terug naar een eerder moment."
+      }
+    },
+    "accountNaam": "Mijn account"
+  },
+  "route": {
+    "titel": "Van idee tot app",
+    "stappen": "De stappen",
+    "stapNummer": "Stap {{nummer}}",
+    "stapVan": "Stap {{nummer}} van {{totaal}}",
+    "nvt": "niet nodig voor jouw app",
+    "overslaan": "Overslaan",
+    "verstuurd": "Ik heb het naar de AI gestuurd. Kijk in het gesprek.",
+    "klaar": "Je app staat klaar. Je kunt altijd verder aanpassen of een nieuwe versie delen.",
+    "status": {
+      "klaar": "klaar",
+      "overgeslagen": "overgeslagen",
+      "huidig": "nu aan de beurt",
+      "open": "nog te doen"
+    },
+    "stap": {
+      "idee": {
+        "titel": "Je idee",
+        "uitleg": "Vertel in eigen woorden wat je wilt maken.",
+        "duur": "ongeveer 2 minuten",
+        "knop": "Beschrijf je idee"
+      },
+      "plan": {
+        "titel": "Het plan",
+        "uitleg": "Je ziet in gewone woorden wat er komt en wat er in de eerste versie nog niet in zit.",
+        "duur": "ongeveer 2 minuten",
+        "knop": "Bekijk het plan"
+      },
+      "uiterlijk": {
+        "titel": "Uiterlijk",
+        "uitleg": "Kies hoe je app eruitziet, met voorbeelden en kleuren.",
+        "duur": "ongeveer 1 minuut",
+        "knop": "Kies het uiterlijk"
+      },
+      "bouwen": {
+        "titel": "Bouwen",
+        "uitleg": "De AI bouwt je app. Je ziet het voorbeeld meteen verschijnen.",
+        "duur": "5 tot 15 minuten",
+        "knop": "Laat de AI bouwen"
+      },
+      "aanpassen": {
+        "titel": "Aanpassen",
+        "uitleg": "Wijs iets aan in het voorbeeld of typ wat anders moet. Elke wijziging is ongedaan te maken.",
+        "duur": "zo lang je wilt",
+        "knop": "Pas iets aan"
+      },
+      "gegevens": {
+        "titel": "Gegevens",
+        "uitleg": "Je app moet iets onthouden. Hier kies je waar dat veilig gebeurt.",
+        "duur": "ongeveer 3 minuten",
+        "knop": "Regel de gegevens"
+      },
+      "testen": {
+        "titel": "Testen",
+        "uitleg": "Studio laat de AI de belangrijkste handelingen proberen en toont een eenvoudig rapport.",
+        "duur": "ongeveer 3 minuten",
+        "knop": "Test mijn app"
+      },
+      "delen": {
+        "titel": "Opslaan en delen",
+        "uitleg": "Bewaar een kopie, zet je app online of maak hem klaar voor de winkel. Online zetten vraagt altijd eerst jouw ja.",
+        "duur": "ongeveer 5 minuten",
+        "knop": "Opslaan en delen"
+      }
+    },
+    "idee": {
+      "titel": "Wat wil je maken?",
+      "uitleg": "Schrijf in je eigen woorden wat je wilt. De AI stelt daarna maximaal drie korte vragen, zoals voor wie het is en wat het belangrijkste is.",
+      "plaats": "Bijvoorbeeld: een app waarmee mijn klanten een afspraak kunnen maken.",
+      "of": "Of kies een voorbeeld:",
+      "stuur": "Naar de AI sturen",
+      "voorbeeldNaam": {
+        "afspraken": "Afsprakenapp",
+        "taken": "Takenlijst",
+        "webshop": "Kleine webshop",
+        "portfolio": "Portfolio",
+        "kassa": "Kassa-app"
+      },
+      "voorbeeld": {
+        "afspraken": "Een afsprakenapp waarmee klanten een tijd kunnen kiezen en ik alle afspraken kan zien.",
+        "taken": "Een takenlijst waarin ik taken kan toevoegen, afvinken en weer verwijderen.",
+        "webshop": "Een kleine webshop met een paar producten, een winkelmandje en een bestelformulier.",
+        "portfolio": "Een website waarop ik mijn werk laat zien, met een over-mij-pagina en een contactformulier.",
+        "kassa": "Een eenvoudige kassa-app waarmee ik producten kan aanslaan en een bon kan maken."
+      }
+    },
+    "plan": {
+      "titel": "Klopt dit plan?",
+      "uitleg": "Dit is het plan voor de eerste versie, in gewone woorden. Controleer of het klopt met wat jij in gedachten hebt.",
+      "leeg": "Er is nog geen plan. De AI kan het voor je maken op basis van je idee.",
+      "laden": "Het plan wordt geladen…",
+      "klopt": "Ja, dit klopt",
+      "aanpassen": "Pas het plan aan",
+      "wens": "Wat moet anders?",
+      "wensPlaats": "Bijvoorbeeld: ik wil ook een pagina met mijn openingstijden.",
+      "stuur": "Naar de AI sturen",
+      "terug": "Terug",
+      "maak": "Laat de AI het plan maken",
+      "goedgekeurd": "Het plan is goedgekeurd."
+    },
+    "prompt": {
+      "idee": "Ik wil een app maken. Mijn idee: {{idee}}. Stel me maximaal drie korte vragen, één voor één, in gewone taal: voor wie is het, wat is de belangrijkste functie en wordt het een website of een mobiele app. Geef bij elke vraag twee tot vier korte antwoorden waaruit ik kan kiezen. Schrijf daarna een eenvoudig plan in PROJECT.md in mensentaal: de schermen, de functies en wat er in versie 1 nog niet in zit. Gebruik geen technische woorden en bouw nog niets.",
+      "maakPlan": "Schrijf op basis van ons gesprek een eenvoudig plan in PROJECT.md, in mensentaal: de schermen, de functies en wat er in versie 1 nog niet in zit. Geen technische woorden. Bouw nog niets.",
+      "planAanpassen": "Pas het plan in PROJECT.md aan: {{wens}}. Houd het eenvoudig, in mensentaal, en bouw nog niets.",
+      "bouwen": "Bouw versie 1 van mijn app volgens het plan in PROJECT.md. Vertel in het gesprek per stap in gewone taal wat je doet (bijvoorbeeld ‘Ik maak het inlogscherm’) en laat geen ruwe uitvoer zien. Controleer je werk met de controles en een schermafbeelding, en sla na elke stap een leesbaar moment op.",
+      "testen": "Test de belangrijkste handelingen van mijn app zelf, bijvoorbeeld: kan ik iets toevoegen, opslaan en terugvinden? Gebruik het voorbeeld en de controles. Geef daarna een eenvoudig rapport met per onderdeel groen (werkt), oranje (let op) of rood (werkt niet), in gewone taal. Herstel rode punten pas als ik daarom vraag."
+    }
+  },
+  "fouten": {
+    "toonDetails": "Toon details",
+    "verberg": "Verberg details",
+    "detailsUitleg": "Dit is de technische tekst. Je hebt hem alleen nodig als je hulp vraagt.",
+    "meld": "Meld een probleem",
+    "schijf_vol": {
+      "titel": "Je computer zit vol.",
+      "oplossing": "Maak ruimte vrij door bestanden te verwijderen die je niet meer nodig hebt, en probeer het daarna opnieuw."
+    },
+    "niet_gevonden": {
+      "titel": "Studio kan een bestand of map niet vinden.",
+      "oplossing": "Is het verplaatst of verwijderd? Zet het terug op de oude plek, of kies een andere map, en probeer het opnieuw."
+    },
+    "geen_toestemming": {
+      "titel": "Je computer geeft Studio hier geen toestemming voor.",
+      "oplossing": "Kies een andere map, bijvoorbeeld in Documenten, of sluit het programma dat het bestand gebruikt, en probeer het opnieuw."
+    },
+    "in_gebruik": {
+      "titel": "Een ander programma gebruikt dit bestand.",
+      "oplossing": "Sluit het andere programma (bijvoorbeeld Word of Verkenner) en probeer het opnieuw."
+    },
+    "time_out": {
+      "titel": "Het duurde te lang.",
+      "oplossing": "Probeer het over een paar minuten opnieuw. Je werk is niet verloren gegaan."
+    },
+    "geen_internet": {
+      "titel": "Er is geen verbinding met internet.",
+      "oplossing": "Controleer je wifi of kabel en probeer het opnieuw. Je projecten en versies werken ook zonder internet."
+    },
+    "inloggen": {
+      "titel": "Je bent niet meer ingelogd.",
+      "oplossing": "Log opnieuw in bij ‘AI-accounts’ of bij de Verbinden-knop van de dienst."
+    },
+    "database_bezig": {
+      "titel": "Studio is nog even bezig met iets anders.",
+      "oplossing": "Wacht een paar seconden en probeer het opnieuw."
+    },
+    "bestaat_al": {
+      "titel": "Dit bestaat al.",
+      "oplossing": "Kies een andere naam of een andere plek."
+    },
+    "geen_programma": {
+      "titel": "Een programma dat Studio nodig heeft, is niet gevonden.",
+      "oplossing": "Open Hulp en kijk bij ‘Is alles klaar op je computer?’. Daar staat wat er ontbreekt en hoe je het installeert."
+    },
+    "onbekend": {
+      "titel": "Er ging iets mis.",
+      "oplossing": "Probeer het opnieuw. Lukt het weer niet, open dan ‘Toon details’ of kies ‘Meld een probleem’ om hulp te vragen."
+    }
+  },
+  "rapport": {
+    "titel": "Meld een probleem",
+    "uitleg": "Studio maakt een rapport dat je kunt meesturen als je hulp vraagt. Er staan geen wachtwoorden, sleutels, namen of stukken van je project in. Je kunt het hieronder eerst lezen. Er wordt niets automatisch verstuurd.",
+    "maak": "Rapport maken",
+    "bezig": "Even bezig…",
+    "kopieer": "Kopieer het rapport",
+    "gekopieerd": "Het rapport is gekopieerd. Plak het in een e-mail of bericht.",
+    "fout": "Het rapport kon niet worden gemaakt.",
+    "sluit": "Sluiten"
+  },
+  "herstel": {
+    "titel": "Je werk is bewaard",
+    "uitleg": "Studio is de vorige keer niet netjes afgesloten, bijvoorbeeld door een storing. Al je projecten en eerdere versies staan gewoon nog op je computer. Wil je verdergaan met ‘{{naam}}’?",
+    "uitlegZonder": "Studio is de vorige keer niet netjes afgesloten, bijvoorbeeld door een storing. Al je projecten en eerdere versies staan gewoon nog op je computer.",
+    "verder": "Ja, verdergaan",
+    "later": "Later"
   }
 }

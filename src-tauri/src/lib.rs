@@ -1,42 +1,215 @@
 mod accounts;
+mod assets;
+mod chat;
 mod claude_approval;
 mod cli;
 mod commands;
+mod confirm;
+mod connect;
 mod db;
 mod error;
+mod export;
+mod github;
+mod host;
+mod improve;
+mod herstel;
 mod instructions;
+mod kaart;
+mod layouts;
+mod licentie;
 mod mcp;
 mod mcp_config;
 mod node;
+mod preview;
+mod projectinfo;
 mod projects;
 mod provider;
+mod rapport;
+mod route;
+mod systeemcheck;
+mod templates;
+mod updates;
+mod supa;
 mod terminal;
+mod vercel;
+mod winkels;
+mod winpath;
 
+use chat::{ChatManager, ChatOut};
 use mcp::{McpEvent, McpManager};
+use preview::{Bridge, PreviewEvent, PreviewManager};
 use std::path::PathBuf;
 use std::sync::{Arc, Mutex};
 use tauri::{Emitter, Manager};
 use terminal::{PtyEvent, TerminalManager};
 
-fn mcp_scripts(app: &tauri::App) -> Vec<PathBuf> {
-    let mut v = Vec::new();
-    if let Ok(d) = app.path().resource_dir() {
-        v.push(d.join("mcp-server").join("index.mjs"));
+/// Git-acties voor automatische versies, via de Node-runtime van het project.
+struct AppGit {
+    handle: tauri::AppHandle,
+}
+
+impl AppGit {
+    fn call(&self, project: i64, cmd: &str, args: serde_json::Value) -> Option<serde_json::Value> {
+        self.handle
+            .state::<McpManager>()
+            .call(project, cmd, args, std::time::Duration::from_secs(30))
+            .ok()
     }
-    v.push(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../mcp-server/dist/index.mjs"));
-    v
+}
+
+impl chat::Git for AppGit {
+    fn head(&self, project: i64) -> Option<chat::Version> {
+        let list = self.call(project, "git.list", serde_json::json!({ "limit": 1 }))?;
+        let c = list.as_array()?.first()?;
+        Some(chat::Version {
+            hash: c["hash"].as_str()?.to_string(),
+            title: c["message"].as_str()?.to_string(),
+        })
+    }
+    fn dirty(&self, project: i64) -> bool {
+        self.call(project, "git.status", serde_json::json!({}))
+            .map(|v| v["dirty"] == true)
+            .unwrap_or(false)
+    }
+    fn checkpoint(&self, project: i64, title: &str) -> Option<chat::Version> {
+        let r = self.call(
+            project,
+            "git.checkpoint",
+            serde_json::json!({ "message": title }),
+        )?;
+        (r["created"] == true).then(|| chat::Version {
+            hash: r["hash"].as_str().unwrap_or("").to_string(),
+            title: title.to_string(),
+        })
+    }
+}
+
+/// Chatgeschiedenis en instellingen in de app-database.
+struct AppStore {
+    handle: tauri::AppHandle,
+}
+
+impl AppStore {
+    fn with<T>(
+        &self,
+        f: impl FnOnce(&rusqlite::Connection) -> error::Result<T>,
+    ) -> error::Result<T> {
+        let db = self.handle.state::<commands::Db>();
+        let guard = db.conn()?;
+        f(&guard)
+    }
+}
+
+impl chat::Store for AppStore {
+    fn insert(
+        &self,
+        project: i64,
+        kind: &str,
+        payload: serde_json::Value,
+    ) -> error::Result<chat::store::StoredMessage> {
+        self.with(|c| chat::store::insert(c, project, kind, &payload))
+    }
+    fn update(
+        &self,
+        id: i64,
+        payload: serde_json::Value,
+    ) -> error::Result<chat::store::StoredMessage> {
+        self.with(|c| chat::store::update(c, id, &payload))
+    }
+    fn session(&self, project: i64) -> Option<chat::store::SessionRow> {
+        self.with(|c| chat::store::session(c, project))
+            .ok()
+            .flatten()
+    }
+    fn set_session(
+        &self,
+        project: i64,
+        provider: &str,
+        account: Option<i64>,
+        session: Option<&str>,
+    ) {
+        let _ = self.with(|c| chat::store::set_session(c, project, provider, account, session));
+    }
+    fn setting(&self, key: &str) -> Option<String> {
+        self.with(|c| db::get_setting(c, key)).ok().flatten()
+    }
+    fn set_setting(&self, key: &str, value: &str) {
+        let _ = self.with(|c| db::set_setting(c, key, value));
+    }
+    fn last_working(&self, project: i64) -> Option<(String, String)> {
+        self.with(|c| chat::store::last_working_version(c, project))
+            .ok()
+            .flatten()
+    }
+}
+
+/// Verbindt de preview met de rest van de app (runtime, instellingen).
+struct AppBridge {
+    handle: tauri::AppHandle,
+}
+
+impl Bridge for AppBridge {
+    fn call(
+        &self,
+        id: i64,
+        cmd: &str,
+        args: serde_json::Value,
+        timeout: std::time::Duration,
+    ) -> error::Result<serde_json::Value> {
+        self.handle
+            .state::<McpManager>()
+            .call(id, cmd, args, timeout)
+    }
+    fn runtime_info(&self, id: i64) -> Option<mcp::McpInfo> {
+        self.handle.state::<McpManager>().info(id)
+    }
+    fn get_setting(&self, key: &str) -> Option<String> {
+        let db = self.handle.state::<commands::Db>();
+        let conn = db.conn().ok()?;
+        db::get_setting(&conn, key).ok().flatten()
+    }
+    fn set_setting(&self, key: &str, value: &str) {
+        let db = self.handle.state::<commands::Db>();
+        let conn = db.conn();
+        if let Ok(conn) = conn {
+            let _ = db::set_setting(&conn, key, value);
+        }
+    }
+}
+
+/// Mogelijke plekken van het MCP-serverbestand. Debug (tauri dev): de verse build in de repo gaat voor op de
+/// kopie in target/debug (die kan verouderd zijn). Release: het meegeleverde resource-bestand.
+fn mcp_scripts(app: &tauri::App) -> Vec<PathBuf> {
+    let dev = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../mcp-server/dist/index.mjs");
+    let bundled = app
+        .path()
+        .resource_dir()
+        .ok()
+        .map(|d| d.join("mcp-server").join("index.mjs"));
+    if cfg!(debug_assertions) {
+        std::iter::once(dev).chain(bundled).collect()
+    } else {
+        bundled.into_iter().chain(std::iter::once(dev)).collect()
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .manage(updates::Pending::default())
         .setup(|app| {
             let dir = app.path().app_data_dir()?;
             std::fs::create_dir_all(&dir)?;
             let profiles = dir.join("profiles");
             std::fs::create_dir_all(&profiles)?;
-            app.manage(commands::Db(Mutex::new(db::open(&dir.join("studio.db"))?)));
+            let conn = db::open(&dir.join("studio.db"))?;
+            // Was de vorige sessie niet netjes afgesloten? Dan vraagt het scherm bij het opstarten of je wilt verdergaan.
+            let onderbroken = herstel::begin(&conn);
+            app.manage(herstel::Start { onderbroken });
+            app.manage(commands::Db(Mutex::new(conn)));
             app.manage(commands::Profiles(profiles));
 
             let handle = app.handle().clone();
@@ -48,6 +221,87 @@ pub fn run() {
                     let _ = handle.emit("pty-exit", e);
                 }
             })));
+
+            // Koppelingen met diensten: kluis (OS-keychain), vaste lijst hosts, status in SQLite.
+            {
+                use connect::{config::Config, http::UreqHttp, manager::Manager as ConnManager, providers, store, vault};
+                struct DbSource(tauri::AppHandle);
+                impl store::ConnSource for DbSource {
+                    fn with(&self, f: &mut dyn FnMut(&rusqlite::Connection)) {
+                        if let Ok(c) = self.0.state::<commands::Db>().conn() {
+                            f(&c);
+                        }
+                    }
+                }
+                // Alleen in een ontwikkelbouw en alleen met opzet: een kluis in het geheugen (voor machines zonder keychain).
+                let secrets: Arc<dyn vault::SecretStore> = if cfg!(debug_assertions) && std::env::var("STUDIO_VAULT").as_deref() == Ok("memory") {
+                    Arc::new(vault::MemoryStore::default())
+                } else {
+                    Arc::new(vault::KeyringStore)
+                };
+                let secrets_for_engine = secrets.clone();
+                let secrets_for_vercel = secrets.clone();
+                let notify = app.handle().clone();
+                let manager = ConnManager::new(
+                    providers::all(),
+                    secrets,
+                    Arc::new(UreqHttp::new(providers::allowed_hosts())),
+                    Arc::new(store::SqliteMeta(Box::new(DbSource(app.handle().clone())))),
+                    Config::embedded(),
+                    Arc::new(move || {
+                        let _ = notify.emit("connect-changed", ());
+                        host::push_toolgroepen_alle(&notify);
+                    }),
+                );
+                app.manage(manager.clone());
+                // De Supabase-motor: dezelfde kluis, bevestigingen in de app, checkpoint en noodknop via de bestaande onderdelen.
+                let confirmer = supa::app::UiConfirmer::new(app.handle().clone());
+                app.manage(confirmer.clone());
+                let engine = supa::engine::Engine::new(
+                    manager.clone(),
+                    secrets_for_engine,
+                    Box::new(DbSource(app.handle().clone())),
+                    confirmer,
+                    Arc::new(supa::app::AppHooks { app: app.handle().clone() }),
+                    dir.join("backups"),
+                    Arc::new(connect::manager::real_now),
+                );
+                app.manage(engine);
+                // De GitHub-motor: dezelfde koppelingen, dezelfde kluis; bevestigingen via de algemene dialoog.
+                let action_confirmer = confirm::UiActionConfirmer::new(app.handle().clone());
+                app.manage(action_confirmer.clone());
+                let progress_app = app.handle().clone();
+                let gh = github::engine::Engine::new(
+                    manager.clone(),
+                    Box::new(DbSource(app.handle().clone())),
+                    action_confirmer,
+                    Arc::new(supa::app::AppHooks { app: app.handle().clone() }),
+                    Arc::new(connect::manager::real_now),
+                    Arc::new(move |project_id, stap, klaar, totaal| {
+                        let _ = progress_app.emit("github-voortgang", serde_json::json!({ "project_id": project_id, "stap": stap, "klaar": klaar, "totaal": totaal }));
+                    }),
+                );
+                app.manage(gh);
+                let vercel_progress = app.handle().clone();
+                let vercel_engine = vercel::engine::Engine::new(
+                    manager.clone(),
+                    secrets_for_vercel,
+                    Box::new(DbSource(app.handle().clone())),
+                    app.state::<Arc<confirm::UiActionConfirmer>>().inner().clone(),
+                    Arc::new(vercel::app::AppHooks { app: app.handle().clone() }),
+                    Arc::new(connect::manager::real_now),
+                    Arc::new(std::thread::sleep),
+                    Arc::new(move |project_id, stap, klaar, totaal| {
+                        let _ = vercel_progress.emit("vercel-voortgang", serde_json::json!({ "project_id": project_id, "stap": stap, "klaar": klaar, "totaal": totaal }));
+                    }),
+                );
+                app.manage(vercel_engine);
+                // Verversen op de achtergrond: elke minuut kijken of een token bijna verloopt.
+                std::thread::spawn(move || loop {
+                    std::thread::sleep(std::time::Duration::from_secs(60));
+                    manager.refresh_due();
+                });
+            }
 
             let handle = app.handle().clone();
             let sink: mcp::McpSink = Arc::new(move |ev| match ev {
@@ -74,6 +328,50 @@ pub fn run() {
                     project_id,
                     payload,
                 } => {
+                    match payload["event"].as_str() {
+                        Some("permission_request") => {
+                            let (h, p) = (handle.clone(), payload.clone());
+                            std::thread::spawn(move || {
+                                let dir = h
+                                    .state::<commands::Db>()
+                                    .conn()
+                                    .ok()
+                                    .and_then(|c| projects::get(&c, project_id).ok())
+                                    .map(|p| std::path::PathBuf::from(p.pad));
+                                if let Some(dir) = dir {
+                                    h.state::<ChatManager>()
+                                        .on_permission_request(project_id, &dir, &p);
+                                }
+                            });
+                        }
+                        Some("host_request") => {
+                            let (h, p) = (handle.clone(), payload.clone());
+                            std::thread::spawn(move || {
+                                let res = host::handle(&h, project_id, p["cmd"].as_str().unwrap_or(""), &p["args"]);
+                                let answer = match res {
+                                    Ok(v) => serde_json::json!({ "id": p["id"], "ok": true, "result": v }),
+                                    Err(e) => serde_json::json!({ "id": p["id"], "ok": false, "error": e }),
+                                };
+                                let _ = h.state::<McpManager>().call(project_id, "host.answer", answer, std::time::Duration::from_secs(5));
+                            });
+                        }
+                        Some("git") => github::app::auto_backup(&handle, project_id),
+                        Some("permission_expired") => {
+                            if let Some(id) = payload["id"].as_str() {
+                                handle
+                                    .state::<ChatManager>()
+                                    .expire_permission(project_id, id);
+                            }
+                        }
+                        _ => {}
+                    }
+                    if payload["event"] == "dev" {
+                        // Op een eigen thread: de verwerking kan de runtime zelf bevragen, en die antwoorden komen via deze lezer binnen.
+                        let (h, p) = (handle.clone(), payload.clone());
+                        std::thread::spawn(move || {
+                            h.state::<PreviewManager>().on_dev_event(project_id, &p)
+                        });
+                    }
                     if payload["event"] == "checks" {
                         let db = handle.state::<commands::Db>();
                         let conn = db.conn();
@@ -93,12 +391,160 @@ pub fn run() {
                 }
             });
             app.manage(McpManager::new(mcp::new_token(), mcp_scripts(app), sink));
+
+            let (h_out, h_ans, h_store) = (
+                app.handle().clone(),
+                app.handle().clone(),
+                app.handle().clone(),
+            );
+            let git_handle = app.handle().clone();
+            let chat_mgr = ChatManager::new(
+                Arc::new(AppStore { handle: h_store }),
+                Arc::new(move |out: ChatOut| {
+                    let _ = h_out.emit("chat-out", out);
+                }),
+                Arc::new(
+                    move |project: i64, id: &str, allow: bool, message: Option<&str>| {
+                        h_ans
+                            .state::<McpManager>()
+                            .call(
+                                project,
+                                "permission.answer",
+                                serde_json::json!({ "id": id, "allow": allow, "message": message }),
+                                std::time::Duration::from_secs(5),
+                            )
+                            .map(|_| ())
+                    },
+                ),
+            );
+            chat_mgr.set_git(Arc::new(AppGit { handle: git_handle }));
+            app.manage(chat_mgr);
+
+            let handle = app.handle().clone();
+            let bridge = Arc::new(AppBridge {
+                handle: app.handle().clone(),
+            });
+            app.manage(PreviewManager::new(
+                bridge,
+                Arc::new(move |ev| match ev {
+                    PreviewEvent::State { project_id, info } => {
+                        let _ = handle.emit(
+                            "preview-state",
+                            serde_json::json!({ "project_id": project_id, "info": info }),
+                        );
+                    }
+                    PreviewEvent::Available { project_id } => {
+                        let _ = handle.emit(
+                            "preview-available",
+                            serde_json::json!({ "project_id": project_id }),
+                        );
+                    }
+                    PreviewEvent::Reload { project_id } => {
+                        let _ = handle.emit(
+                            "preview-reload",
+                            serde_json::json!({ "project_id": project_id }),
+                        );
+                    }
+                }),
+            ));
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            winkels::app::winkels_overzicht,
+            winkels::app::winkels_bewaar,
+            winkels::app::winkels_app_id_voorstel,
+            winkels::app::winkels_versie_ophogen,
+            winkels::app::winkels_teksten,
+            winkels::app::winkels_tekst_concept,
+            winkels::app::winkels_tekst_goedkeuren,
+            winkels::app::winkels_tekst_ontgrendel,
+            winkels::app::winkels_tekst_geschiedenis,
+            systeemcheck::system_check,
+            route::route_feiten,
+            herstel::start_info,
+            rapport::maak_probleemrapport,
+            kaart::app::kaart_vernieuw,
+            kaart::app::kaart_tekst,
+            kaart::app::kaart_context,
+            licentie::licentie_status,
+            updates::update_check,
+            updates::update_install,
+            confirm::actie_confirm_answer,
+            github::app::github_state,
+            github::app::github_suggest_name,
+            github::app::github_first_backup,
+            github::app::github_backup,
+            github::app::github_unlink,
+            github::app::github_set_auto,
+            github::app::github_set_ai_ask,
+            github::app::github_list_repos,
+            github::app::github_scan,
+            github::app::github_import,
+            vercel::app::vercel_state,
+            vercel::app::vercel_deploy,
+            vercel::app::vercel_cancel,
+            vercel::app::vercel_deployments,
+            vercel::app::vercel_rollback,
+            vercel::app::vercel_build_summary,
+            vercel::app::vercel_env_list,
+            vercel::app::vercel_env_set,
+            vercel::app::vercel_env_remove,
+            vercel::app::vercel_env_supabase,
+            vercel::app::vercel_domain_add,
+            vercel::app::vercel_domain_check,
+            vercel::app::vercel_unlink,
+            supa::app::supa_status,
+            supa::app::supa_security_check,
+            supa::app::supa_users,
+            supa::app::supa_row_save,
+            supa::app::supa_rows,
+            supa::app::supa_tables,
+            supa::app::supa_confirm_answer,
+            supa::app::supa_undo,
+            supa::app::supa_actions,
+            supa::app::supa_emergency,
+            supa::app::supa_set_duration,
+            supa::app::supa_set_level,
+            supa::app::supa_wake,
+            supa::app::supa_unlink,
+            supa::app::supa_create,
+            supa::app::supa_link,
+            supa::app::supa_projects,
+            supa::app::supa_state,
+            supa::app::supa_write_config,
+            supa::app::supa_sql,
+            supa::app::supa_auth_skill,
+            connect::commands::connect_list,
+            connect::commands::connect_start,
+            connect::commands::connect_paste,
+            connect::commands::connect_cancel,
+            connect::commands::connect_test,
+            connect::commands::connect_test_all,
+            connect::commands::connect_disconnect,
+            connect::commands::connect_open,
             commands::list_projects,
             commands::create_project,
             commands::delete_project,
+            commands::rename_project,
+            commands::project_pages,
+            commands::project_files,
+            commands::project_file_read,
+            commands::project_signals,
+            commands::assets_list,
+            commands::assets_delete,
+            commands::data_overview,
+            commands::data_rows,
+            commands::project_description_get,
+            commands::project_description_set,
+            commands::project_storage_get,
+            commands::project_storage_set,
+            commands::project_flags,
+            commands::project_flag_set,
+            commands::layout_get,
+            commands::layout_set,
+            commands::layout_reset,
+            commands::project_thumbnail_get,
+            commands::project_thumbnail_set,
             commands::set_default_account,
             commands::list_accounts,
             commands::create_account,
@@ -111,6 +557,35 @@ pub fn run() {
             commands::trust_studio_config,
             commands::last_checks,
             commands::verify_claude_mcp,
+            commands::preview_info,
+            commands::preview_start,
+            commands::preview_stop,
+            commands::preview_restart,
+            commands::preview_trust_scripts,
+            commands::preview_install,
+            commands::chat_target,
+            commands::chat_history,
+            commands::export_project,
+            commands::improve_prompt,
+            commands::kit_list,
+            commands::kit_current,
+            commands::kit_apply,
+            commands::kit_scripts,
+            commands::kit_tailor,
+            commands::kit_check,
+            commands::kit_strictness,
+            commands::chat_send,
+            commands::chat_attach,
+            commands::chat_asset_data,
+            commands::chat_retry,
+            commands::chat_busy,
+            commands::chat_mode_set,
+            commands::chat_stop,
+            commands::chat_switch,
+            commands::permission_answer,
+            commands::get_ui_setting,
+            commands::set_ui_setting,
+            commands::reset_ui_setting,
             commands::start_shell,
             commands::start_ai,
             commands::start_login,
@@ -123,8 +598,18 @@ pub fn run() {
         .expect("Studio kon niet starten")
         .run(|app, event| {
             if let tauri::RunEvent::Exit = event {
-                app.state::<TerminalManager>().close_all();
-                app.state::<McpManager>().stop_all();
+                shutdown(app);
             }
         });
+}
+
+/// Alles netjes afsluiten: chat, previews, terminals en MCP-servers (en daarmee hun processen). Geen proces mag achterblijven.
+pub(crate) fn shutdown(app: &tauri::AppHandle) {
+    app.state::<ChatManager>().close_all();
+    app.state::<PreviewManager>().close_all();
+    app.state::<TerminalManager>().close_all();
+    app.state::<McpManager>().stop_all();
+    if let Ok(c) = app.state::<commands::Db>().conn() {
+        herstel::einde(&c);
+    }
 }

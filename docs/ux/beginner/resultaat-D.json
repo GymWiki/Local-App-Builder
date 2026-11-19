@@ -1,0 +1,114 @@
+[
+ {
+  "scenario": "D geen internet",
+  "klikken": 1,
+  "seconden": 2,
+  "stappen": [
+   {
+    "naam": "open en stuur een bericht",
+    "ok": true,
+    "ms": 1916
+   },
+   {
+    "naam": "foutmelding begrijpelijk en met een herstelroute",
+    "ok": true,
+    "ms": 36
+   }
+  ],
+  "blokkades": [],
+  "twijfel": [
+   "geen internet: afgekapt: Hovenier Joke | nog te doen | Gesprek met de AI",
+   "geen internet: buitenBeeld: Technische weergave",
+   "geen internet: dubbeleScroll: div[scroll-area-viewport] 256x438 | div 260x574 | div[scroll-area-viewport] 260x574"
+  ],
+  "scriptfouten": []
+ },
+ {
+  "scenario": "D AI niet ingelogd",
+  "klikken": 1,
+  "seconden": 2,
+  "stappen": [
+   {
+    "naam": "open en stuur een bericht",
+    "ok": true,
+    "ms": 1921
+   },
+   {
+    "naam": "foutmelding begrijpelijk en met een herstelroute",
+    "ok": true,
+    "ms": 34
+   }
+  ],
+  "blokkades": [],
+  "twijfel": [
+   "AI niet ingelogd: afgekapt: Hovenier Joke | nog te doen | Gesprek met de AI",
+   "AI niet ingelogd: buitenBeeld: Technische weergave",
+   "AI niet ingelogd: dubbeleScroll: div[scroll-area-viewport] 256x438 | div 260x574 | div[scroll-area-viewport] 260x574"
+  ],
+  "scriptfouten": []
+ },
+ {
+  "scenario": "D volle schijf",
+  "klikken": 4,
+  "seconden": 0.7,
+  "stappen": [
+   {
+    "naam": "project aanmaken geeft een begrijpelijke melding",
+    "ok": true,
+    "ms": 682
+   }
+  ],
+  "blokkades": [],
+  "twijfel": [],
+  "scriptfouten": []
+ },
+ {
+  "scenario": "D AI loopt vast",
+  "klikken": 1,
+  "seconden": 0.5,
+  "stappen": [
+   {
+    "naam": "pauzekaart met keuzes",
+    "ok": true,
+    "ms": 487
+   }
+  ],
+  "blokkades": [],
+  "twijfel": [
+   "AI loopt vast: afgekapt: Hovenier Joke | nog te doen | Gesprek met de AI",
+   "AI loopt vast: buitenBeeld: Technische weergave",
+   "AI loopt vast: dubbeleScroll: div[scroll-area-viewport] 256x438 | div 260x574 | div[scroll-area-viewport] 260x574"
+  ],
+  "scriptfouten": []
+ },
+ {
+  "scenario": "D sluiten tijdens bouwen",
+  "klikken": 3,
+  "seconden": 2.1,
+  "stappen": [
+   {
+    "naam": "sluiten midden in een bouwactie en weer openen",
+    "ok": true,
+    "ms": 2093
+   }
+  ],
+  "blokkades": [],
+  "twijfel": [],
+  "scriptfouten": []
+ },
+ {
+  "scenario": "D tweede project tegelijk",
+  "klikken": 3,
+  "seconden": 0.8,
+  "stappen": [
+   {
+    "naam": "twee projecten achter elkaar openen",
+    "ok": true,
+    "ms": 765
+   }
+  ],
+  "blokkades": [],
+  "twijfel": [],
+  "scriptfouten": []
+ }
+]

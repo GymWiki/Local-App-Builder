@@ -1,0 +1,211 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Studio tokens.json",
+  "type": "object",
+  "properties": {
+    "kleuren": {
+      "type": "object",
+      "properties": {
+        "licht": {
+          "type": "object",
+          "properties": {
+            "primair": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "achtergrond": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "tekst": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "rand": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "succes": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "gevaar": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "waarschuwing": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            }
+          },
+          "required": [
+            "primair",
+            "achtergrond",
+            "tekst",
+            "rand",
+            "succes",
+            "gevaar",
+            "waarschuwing"
+          ],
+          "additionalProperties": false
+        },
+        "donker": {
+          "type": "object",
+          "properties": {
+            "primair": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "achtergrond": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "tekst": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "rand": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "succes": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "gevaar": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            },
+            "waarschuwing": {
+              "type": "string",
+              "pattern": "^#[0-9a-fA-F]{6}$"
+            }
+          },
+          "required": [
+            "primair",
+            "achtergrond",
+            "tekst",
+            "rand",
+            "succes",
+            "gevaar",
+            "waarschuwing"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "licht",
+        "donker"
+      ],
+      "additionalProperties": false
+    },
+    "rondingen": {
+      "type": "object",
+      "properties": {
+        "klein": {
+          "type": "string"
+        },
+        "midden": {
+          "type": "string"
+        },
+        "groot": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "klein",
+        "midden",
+        "groot"
+      ],
+      "additionalProperties": false
+    },
+    "spacing": {
+      "type": "object",
+      "properties": {
+        "schaal": {
+          "type": "number",
+          "minimum": 0.5,
+          "maximum": 2
+        },
+        "eenheid": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "schaal",
+        "eenheid"
+      ],
+      "additionalProperties": false
+    },
+    "schaduw": {
+      "type": "object",
+      "properties": {
+        "klein": {
+          "type": "string"
+        },
+        "midden": {
+          "type": "string"
+        },
+        "groot": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "klein",
+        "midden",
+        "groot"
+      ],
+      "additionalProperties": false
+    },
+    "typografie": {
+      "type": "object",
+      "properties": {
+        "lettertype": {
+          "type": "string",
+          "minLength": 1
+        },
+        "koplettertype": {
+          "type": "string"
+        },
+        "basisgrootte": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "lettertype",
+        "basisgrootte"
+      ],
+      "additionalProperties": false
+    },
+    "instellingen": {
+      "type": "object",
+      "properties": {
+        "afronding": {
+          "type": "string",
+          "enum": [
+            "scherp",
+            "gemiddeld",
+            "rond"
+          ]
+        },
+        "ruimte": {
+          "type": "string",
+          "enum": [
+            "compact",
+            "normaal",
+            "ruim"
+          ]
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "kleuren",
+    "rondingen",
+    "spacing",
+    "schaduw",
+    "typografie"
+  ],
+  "additionalProperties": false
+}

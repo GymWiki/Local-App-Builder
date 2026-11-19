@@ -1,0 +1,76 @@
+[
+ {
+  "scenario": "C 1366x768 licht",
+  "klikken": 3,
+  "seconden": 2,
+  "stappen": [
+   {
+    "naam": "project openen",
+    "ok": true,
+    "ms": 452
+   },
+   {
+    "naam": "In de appwinkel openen",
+    "ok": true,
+    "ms": 889
+   },
+   {
+    "naam": "winkelstappen zichtbaar en niets wordt ingediend",
+    "ok": true,
+    "ms": 4
+   },
+   {
+    "naam": "exporteren als zip",
+    "ok": true,
+    "ms": 678
+   }
+  ],
+  "blokkades": [],
+  "twijfel": [
+   "appwinkel: afgekapt: nog te doen | Gesprek met de AI | Wat wil je maken of veranderen?",
+   "appwinkel: buitenBeeld: Technische weergave",
+   "appwinkel: dubbeleScroll: div[scroll-area-viewport] 256x438 | div 260x574 | div[scroll-area-viewport] 260x574",
+   "bestanden: afgekapt: Gesprek met de AI | Wat wil je maken of veranderen? | Enter verstuurt je bericht. Shift + Ente",
+   "bestanden: buitenBeeld: Technische weergave",
+   "bestanden: dubbeleScroll: div[scroll-area-viewport] 256x438 | div[scroll-area-viewport] 404x110 | div[scroll-area-viewport] 425x574"
+  ],
+  "scriptfouten": []
+ },
+ {
+  "scenario": "C 1366x768 donker",
+  "klikken": 3,
+  "seconden": 1.9,
+  "stappen": [
+   {
+    "naam": "project openen",
+    "ok": true,
+    "ms": 456
+   },
+   {
+    "naam": "In de appwinkel openen",
+    "ok": true,
+    "ms": 786
+   },
+   {
+    "naam": "winkelstappen zichtbaar en niets wordt ingediend",
+    "ok": true,
+    "ms": 5
+   },
+   {
+    "naam": "exporteren als zip",
+    "ok": true,
+    "ms": 695
+   }
+  ],
+  "blokkades": [],
+  "twijfel": [
+   "appwinkel: afgekapt: nog te doen | Gesprek met de AI | Wat wil je maken of veranderen?",
+   "appwinkel: buitenBeeld: Technische weergave",
+   "appwinkel: dubbeleScroll: div[scroll-area-viewport] 256x438 | div 260x574 | div[scroll-area-viewport] 260x574",
+   "bestanden: afgekapt: Gesprek met de AI | Wat wil je maken of veranderen? | Enter verstuurt je bericht. Shift + Ente",
+   "bestanden: buitenBeeld: Technische weergave",
+   "bestanden: dubbeleScroll: div[scroll-area-viewport] 256x438 | div[scroll-area-viewport] 404x110 | div[scroll-area-viewport] 425x574"
+  ],
+  "scriptfouten": []
+ }
+]

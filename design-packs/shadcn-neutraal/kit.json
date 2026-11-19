@@ -1,0 +1,133 @@
+{
+  "id": "shadcn-neutraal",
+  "naam": "Neutraal",
+  "beschrijving": "Een rustige, neutrale look in grijs en wit, met zachte hoeken. Past bij bijna alles en laat jouw inhoud de hoofdrol spelen.",
+  "label": "Rustig en tijdloos",
+  "type": "bestanden",
+  "extraPakketten": [
+    {
+      "naam": "radix-ui",
+      "versie": "1.8.1"
+    },
+    {
+      "naam": "lucide-react",
+      "versie": "1.74.0"
+    },
+    {
+      "naam": "class-variance-authority",
+      "versie": "0.7.1"
+    },
+    {
+      "naam": "cn",
+      "versie": "0.5.2"
+    },
+    {
+      "naam": "tailwindcss",
+      "versie": "4.3.5"
+    },
+    {
+      "naam": "@tailwindcss/vite",
+      "versie": "4.3.5"
+    },
+    {
+      "naam": "tw-animate-css",
+      "versie": "1.4.0"
+    }
+  ],
+  "bron": "https://github.com/shadcn-ui/ui",
+  "licentie": "MIT",
+  "attributie": {
+    "verplicht": false,
+    "tekst": ""
+  },
+  "stacks": [
+    "react-vite"
+  ],
+  "installatiestappen": [
+    "Zeven pakketten worden toegevoegd: radix-ui, lucide-react, class-variance-authority, cn, tailwindcss, @tailwindcss/vite en tw-animate-css (allemaal MIT, ISC of Apache-2.0).",
+    "16 onderdelen komen in src/kit/components/ (dezelfde als bij ‘shadcn/ui’, met een eigen kleurenthema). Dat is gewone code in je project; jij mag die aanpassen.",
+    "vite.config.ts krijgt de Tailwind-plugin en de importalias @, en tsconfig.json krijgt dezelfde alias."
+  ],
+  "installatiescripts": false,
+  "setup": {
+    "uitvoer": "css",
+    "stijlImports": [
+      "./components/shadcn.css"
+    ],
+    "provider": null,
+    "tokenMap": {
+      "--primary": "kleuren.licht.primair",
+      "--primary-foreground": "kleuren.licht.achtergrond",
+      "--background": "kleuren.licht.achtergrond",
+      "--foreground": "kleuren.licht.tekst",
+      "--border": "kleuren.licht.rand",
+      "--destructive": "kleuren.licht.gevaar",
+      "--radius": "rondingen.groot",
+      "--kit-font": "typografie.lettertype"
+    },
+    "tokenMapDonker": {
+      "--primary": "kleuren.donker.primair",
+      "--primary-foreground": "kleuren.donker.achtergrond",
+      "--background": "kleuren.donker.achtergrond",
+      "--foreground": "kleuren.donker.tekst",
+      "--border": "kleuren.donker.rand",
+      "--destructive": "kleuren.donker.gevaar"
+    },
+    "rootAttributen": {},
+    "vitePlugins": [
+      {
+        "pakket": "@tailwindcss/vite",
+        "naam": "tailwindcss",
+        "aanroep": "tailwindcss()"
+      }
+    ],
+    "alias": {
+      "@": "./src"
+    }
+  },
+  "tokens": "tokens.json",
+  "kitcontext": {
+    "catalogus": "bestanden",
+    "maxTokens": 6000,
+    "importPad": "@/kit/components",
+    "kern": [
+      "Button",
+      "Card",
+      "Input",
+      "Textarea",
+      "Label",
+      "Select",
+      "Checkbox",
+      "Switch",
+      "Dialog",
+      "Tabs",
+      "Alert",
+      "Badge"
+    ]
+  },
+  "componenten": "_shared/shadcn/components",
+  "regels": "rules.md",
+  "preview": "preview.png",
+  "voorbeeld": "voorbeeld.tsx",
+  "kitCheck": {
+    "vervangNative": {
+      "button": "Button",
+      "input": "Input",
+      "select": "Select",
+      "textarea": "Textarea",
+      "dialog": "Dialog"
+    },
+    "verbodenImports": [
+      "@mui/",
+      "@chakra-ui/",
+      "antd",
+      "@mantine/",
+      "react-bootstrap",
+      "@headlessui/",
+      "@nextui-org/",
+      "@ark-ui/",
+      "@heroui/",
+      "@usefragments/"
+    ]
+  }
+}

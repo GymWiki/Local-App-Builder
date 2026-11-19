@@ -1,0 +1,4 @@
+{
+  "_uitleg": "Plek voor de publieke sleutel waarmee een licentiebestand OFFLINE wordt gecontroleerd (minisign/Ed25519). Leeg = er is nog geen licentiesysteem en Studio is overal gratis. Vul hier alleen een echte publieke sleutel in die de eigenaar zelf heeft gemaakt (zie docs/uitrollen.md); nooit een privésleutel.",
+  "publieke_sleutel": ""
+}

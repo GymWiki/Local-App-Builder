@@ -1,0 +1,105 @@
+# Bouwt Studio voor Windows, macOS en Linux en zet de installers op GitHub Releases.
+# Starten: maak een tag (bijvoorbeeld `npm run release -- 0.2.0` en daarna `git push --follow-tags`) of kies "Run workflow".
+# De app controleert bij het openen zelf of er een nieuwere release is (zie docs/updates.md).
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  controle:
+    name: Controle voor het bouwen
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Is het ondertekenen ingesteld?
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+        run: |
+          if [ -z "$TAURI_SIGNING_PRIVATE_KEY" ]; then
+            echo "::error::Het geheim TAURI_SIGNING_PRIVATE_KEY ontbreekt. Draai eenmalig 'npm run setup:updates' en zet de privésleutel als geheim in GitHub (zie docs/updates.md)."
+            exit 1
+          fi
+          if grep -q "NOG-NIET-INGESTELD" src-tauri/tauri.conf.json; then
+            echo "::error::De publieke sleutel in src-tauri/tauri.conf.json is nog de plaatshouder. Draai eenmalig 'npm run setup:updates' en commit het resultaat (zie docs/updates.md)."
+            exit 1
+          fi
+      - name: Klopt de tag met het versienummer?
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          versie=$(node -p "require('./src-tauri/tauri.conf.json').version")
+          for f in package.json; do
+            [ "$(node -p "require('./$f').version")" = "$versie" ] || { echo "::error::$f heeft een ander versienummer dan tauri.conf.json"; exit 1; }
+          done
+          [ "${GITHUB_REF_NAME}" = "v${versie}" ] || { echo "::error::De tag ${GITHUB_REF_NAME} hoort niet bij versie ${versie}. Gebruik 'npm run release -- <versie>'."; exit 1; }
+
+  bouwen:
+    needs: controle
+    name: Bouwen (${{ matrix.naam }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - naam: Windows
+            platform: windows-latest
+            args: ""
+          - naam: macOS (Apple Silicon)
+            platform: macos-latest
+            args: "--target aarch64-apple-darwin"
+          - naam: macOS (Intel)
+            platform: macos-latest
+            args: "--target x86_64-apple-darwin"
+          - naam: Linux
+            platform: ubuntu-22.04
+            args: ""
+    runs-on: ${{ matrix.platform }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: "Linux: systeemonderdelen"
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev libayatana-appindicator3-dev librsvg2-dev libssl-dev patchelf cmake build-essential
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          check-latest: true
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            mcp-server/package-lock.json
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Onderdelen installeren
+        run: |
+          npm ci
+          npm --prefix mcp-server ci
+
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          # Alleen nodig als je bij 'npm run setup:updates' een wachtwoord hebt gekozen; zonder wachtwoord mag dit geheim ontbreken.
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          tagName: v__VERSION__
+          releaseName: "Studio v__VERSION__"
+          releaseBody: "Download de installer voor jouw systeem hieronder bij Assets. Studio controleert bij het openen zelf of er een nieuwere versie is."
+          releaseDraft: false
+          prerelease: false
+          includeUpdaterJson: true
+          args: ${{ matrix.args }} --config src-tauri/tauri.release.conf.json

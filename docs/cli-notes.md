@@ -71,3 +71,71 @@ Claude Code leest `CLAUDE.md`, Gemini CLI `GEMINI.md` en Codex `AGENTS.md` als p
 - Profiel per account: Claude → `CLAUDE_CONFIG_DIR`, Gemini → `GEMINI_CLI_HOME`.
 - "Wissel van AI" hervat **niet** (sessies zijn per account/CLI en onderling niet uitwisselbaar): de nieuwe AI start vers en krijgt PROJECT.md als overdracht.
 - Op Windows zijn npm-CLI's `.cmd`-shims: die starten we via `cmd.exe /D /C`. Niet op Windows getest.
+
+---
+
+# Gestructureerde uitvoer voor de chat-weergave (fase 5)
+
+Gecontroleerd op 2026-11-17 tegen de actuele documentatie. Bronnen: code.claude.com/docs/en/{headless,cli-reference,errors,permissions,memory,skills}.md,
+code.claude.com/docs/en/agent-sdk/{typescript,streaming-vs-single-mode}.md, github.com/google-gemini/gemini-cli `docs/cli/{headless,gemini-md,cli-reference}.md`.
+
+## Claude Code — wél gestructureerd (gebouwd)
+- **Uitvoer**: `claude -p --output-format stream-json --verbose` geeft per regel één JSON-gebeurtenis (headless.md). `--include-partial-messages` voegt `stream_event`-delta's toe (woord-voor-woord); wij gebruiken die **niet** (zie "niet gedaan").
+- **Invoer (meerdere beurten in één proces)**: `--input-format stream-json` met per regel `{"type":"user","message":{"role":"user","content":"…"}}` (streaming-vs-single-mode.md; `content` mag ook een lijst blokken zijn). Het proces blijft draaien tussen beurten; extra berichten die tijdens een beurt binnenkomen worden in de wachtrij gezet (cli-reference `--max-turns`).
+- **Gebeurtenissen** (SDK-typen, agent-sdk/typescript.md):
+  - `system` met `subtype: "init"`: eerste gebeurtenis, bevat `session_id`, model, tools, `mcp_servers` en `mcp_server_errors`. Ook `system/api_retry` (met `error`: `authentication_failed`, `rate_limit`, `overloaded`, `billing_error`, …).
+  - `assistant`: `message.content` is een lijst blokken (`text`, `thinking`, `tool_use` met `id`/`name`/`input`); optioneel `error` (dezelfde foutcategorieën) en `parent_tool_use_id` (≠ null = subagent).
+  - `user`: bevat `tool_result`-blokken (`tool_use_id`, `content`, `is_error`).
+  - `result`: laatste regel van een beurt; `subtype: "success"` of `error_max_turns` / `error_during_execution` / …, met `is_error`, `result`, `session_id`, `duration_ms`, `total_cost_usd`, `permission_denials`.
+- **Hervatten**: `--resume <session_id>` (cli-reference; het id komt uit `system/init` of `result`). `--session-id <uuid>` kiest zelf een id. Sessies staan onder de configmap, dus hervatten werkt per account (zie fase 2).
+- **Toestemmingen**: `--permission-prompt-tool mcp__<server>__<tool>` (cli-reference). Sinds v2.1.302 start `claude -p` in *Manual mode*: een aanroep die toestemming nodig heeft wordt geweigerd tenzij de prompt-tool (of een hook) hem goedkeurt (headless.md). De tool moet **één tekstblok** teruggeven met JSON `{"behavior":"allow"}` (optioneel `updatedInput`) of `{"behavior":"deny","message":"…"}`, zonder `structuredContent` en dus zonder `outputSchema` (errors.md). Claude wacht tot de MCP-server verbonden is (MCP_TIMEOUT, standaard 30 s). Een `allow` voor een MCP-tool die ‘user interaction’ vereist wordt een deny.
+- **Niet gedocumenteerd, maar nu in een echte run geverifieerd** (2026-11-17, Claude Code uit npm, zie `src-tauri/tests/fixtures/claude/real_*.jsonl`): Claude geeft de prompt-tool de argumenten `tool_name`, `tool_use_id` en `input` (dat is wat onze `permission_prompt`-tool verwacht). Een antwoord `{"behavior":"allow","updatedInput":{…}}` als enkel tekstblok werd geaccepteerd: Claude schreef daarna het bestand (`tool_result`: ‘File created successfully’). Onze tool laat de drie velden optioneel en weigert bij onleesbare invoer.
+- **Echte uitvoer wijkt iets af van de documentatie**: naast `system/init`, `assistant`, `user` en `result` komen ook `active_goal`, `autocompact_state`, `rate_limit_event`, `system/status`, `system/post_turn_summary`, `system/task_summary`, hook-gebeurtenissen en `stream_event` voorbij, **ook zonder** `--include-partial-messages`. De parser negeert alles wat hij niet kent. `system/init` bevat `mcp_servers` met per server `status` (`connected`/`failed`); bij `studio: failed` meldt de chat meteen dat de koppeling ontbreekt.
+- **Aangeroepen vlaggen** (allemaal door de echte CLI geaccepteerd): `-p --input-format stream-json --output-format stream-json --verbose --permission-prompt-tool mcp__studio__permission_prompt --allowedTools mcp__studio --mcp-config <bestand> [--resume <id>]`.
+- **MCP bij `-p`**: `--mcp-config` laadt servers uit een bestand/string; `${VAR}`-uitbreiding geldt volgens mcp.md voor `.mcp.json`, `~/.claude.json` en `--mcp-config`-bestanden (zelfde aanpak als fase 2: geen token op de commandoregel of in het bestand). Entries zonder `type` worden overgeslagen (`mcp_server_errors`).
+- **Instructiebestanden**: `./CLAUDE.md` of `./.claude/CLAUDE.md` (memory.md). `AGENTS.md` leest Claude **alleen als er géén** `CLAUDE.md` is; bestaan beide, dan telt alleen `CLAUDE.md` (memory.md, tabel). Onze identieke blokken in beide bestanden worden dus nooit dubbel geladen.
+- **Skills**: `.claude/skills/<naam>/SKILL.md` met YAML-frontmatter (`name`, `description`); de beschrijving bepaalt wanneer Claude de skill inzet; projectskills horen in de repo te staan (skills.md).
+
+## Gemini CLI — gestructureerde uitvoer bestaat, niet gebouwd (adapter volgt)
+- `gemini -p "…" --output-format stream-json` geeft JSONL met typen `init` (sessie-id, model), `message` (gebruiker/assistent), `tool_use`, `tool_result`, `error` en `result` (headless.md). Exitcodes: 0, 1, 42 (invoerfout), 53 (beurtlimiet).
+- Er is **geen gedocumenteerde invoer via stdin voor meerdere beurten**; een chat zou per beurt een proces starten met `--resume` (zie fase 2). Toestemmingen via een MCP-tool zijn voor Gemini niet gedocumenteerd.
+- Instructiebestand: `GEMINI.md` in de werkmap en bovenliggende mappen, plus `~/.gemini/GEMINI.md` (gemini-md.md); de bestanden worden samengevoegd.
+- Besluit voor nu: **terugval op de terminal-weergave** tot de adapter er is.
+
+## Codex CLI — NIET GEVERIFIEERD
+`developers.openai.com`/`learn.chatgpt.com` zijn niet bereikbaar (zie eerder); de GitHub-README noemt geen structuur-uitvoer. We nemen dus niets aan over `codex exec --json`, toestemmingen of hervatten. Codex blijft uitgeschakeld en valt terug op de terminal. `AGENTS.md` als instructiebestand voor Codex is **niet** uit de Codex-docs bevestigd; Claude leest het wel (zie boven), en we schrijven het omdat de gebruiker erom vroeg.
+
+## Beslissingen
+- Adapter-interface in Rust (`chat::ChatAdapter`): `command`, `encode_user`, `parse_line`. Alleen `ClaudeAdapter` is ingevuld; voor andere providers geeft het register `None` en toont de UI de terminal-weergave.
+- Terugval ook tijdens het draaien: komt er van Claude geen geldige JSON (oude versie, onbekende vlag), dan meldt de chat dat en opent de technische weergave.
+- Fixtures voor de parser (`src-tauri/tests/fixtures/claude/`): `real_hello_mcp_failed.jsonl` en `real_write_page.jsonl` zijn **opnames van een echte run** (opgeschoond: paden, hook-uitvoer en toollijst ingekort). De overige bestanden (`build_page`, `bash_commands`, `auth_error`, `max_turns`, `subagent`, `retry_and_unknown`, `garbage`) zijn **handgeschreven naar het gedocumenteerde schema** voor situaties die lastig live op te nemen zijn.
+
+---
+
+# Tien kleine functies (fase 6): CLI-opties
+
+## Plan-modus ("Eerst overleggen") — Claude Code (gebouwd)
+Bronnen: code.claude.com/docs/en/permission-modes.md, cli-reference.md; geverifieerd met een echte run (2026-11-17).
+- `claude --permission-mode plan` start in planmodus: Claude onderzoekt en schrijft een plan, maar **wijzigt je bestanden niet** ("blocks edits until you approve a plan"). Andere waarden: `default`, `acceptEdits`, `auto`, `dontAsk`, `bypassPermissions`, `manual`. De vlag werkt ook met `-p --input-format stream-json`; `system/init` meldt dan `permissionMode: "plan"`.
+- **Echte run** (Studio-MCP als `--permission-prompt-tool`): in de projectmap kwam niets te staan. Claude schreef zijn planbestand zelf naar `<CLAUDE_CONFIG_DIR>/plans/*.md` (zonder om toestemming te vragen) en riep daarna de tool **`ExitPlanMode`** aan met `input.plan` (de plantekst). Die aanroep loopt via onze toestemming-tool; weigeren gaf `tool_result … is_error` en Claude bleef overleggen ("Wat wil je anders hebben?"). Goedkeuren verlaat de planmodus (permission-modes.md: "Approving a plan exits plan mode").
+- Wisselen van modus midden in een sessie kan niet met een CLI-vlag: Studio stopt het proces en start het bij het volgende bericht opnieuw met `--resume <sessie-id>` en de andere modus. Het gesprek blijft dus doorlopen.
+- Aanvullende veiligheid: ook in overleg-modus weigert Studio zelf alle schrijf-/uitvoeracties die via de toestemming-tool binnenkomen (behalve het plan zelf).
+- **CLI zonder planmodus** (nu: geen enkele gebouwde adapter; Gemini/Codex vallen terug op de terminal): de adapter meldt `supports_plan_mode() == false` en Studio zet dan een instructie voor de eerste regel van elk bericht ("[Overleg-modus] Je mag … GEEN bestanden …").
+- Ook relevant: `--append-system-prompt` (cli-reference.md) hadden we kunnen gebruiken, maar de instructie in het bericht werkt voor elke CLI en niet alleen voor Claude.
+
+## Eenmalige AI-aanroep zonder tools (opdracht-verbeteraar) — Claude Code
+Bron: cli-reference.md. `--tools ""` schakelt alle ingebouwde tools uit; `-p` werkt met `--output-format text`. Geverifieerd met een echte run (functie 7): `claude -p --tools "" --output-format text -- "<opdracht>" </dev/null` in een lege tijdelijke map geeft in ±9 s een tekstantwoord zonder tools. De tekst van de gebruiker staat tussen `<<<`/`>>>` als gegevens; stdin is null; time-out 120 s (Rust: `improve.rs`). Alleen Claude (Gemini/Codex hebben hier nog geen geverifieerde variant).
+
+## Bestanden in de chat (functie 4) — Claude Code
+- Geverifieerd met een echte run (`claude -p --allowedTools Read -- "<vraag> … - assets/rood.png"`): een relatief pad in de opdracht is genoeg; Claude leest de afbeelding met zijn eigen leestool en beschrijft de kleur correct. Er is dus geen speciale CLI-optie voor bijlagen nodig (geen `--image` o.i.d.).
+- Studio zet daarom alleen een lijstje "Bijgevoegde bestanden … - assets/…" achter de opdracht (`assets::prompt_suffix`). Alleen relatieve paden binnen het project gaan mee.
+- Tauri 2 vangt bestanden slepen standaard zelf af; `dragDropEnabled: false` in `tauri.conf.json` laat de gewone HTML5-sleepgebeurtenissen van de webview door (nodig voor Windows).
+- Niet geverifieerd voor Gemini/Codex (nog geen chatadapter); dezelfde padaanpak is daar niet getest.
+
+## Wat is er veranderd? (functie 9)
+- Geen CLI-optie nodig: de knop stuurt een gewone opdracht naar de AI, die de MCP-tool `get_last_change` aanroept (nieuw; `mcp-server/src/tools.ts`, `git.ts#lastChange`). De tool geeft niet-opgeslagen werk of anders de laatste versie ten opzichte van de vorige, ingekort tot 24.000 tekens en zonder gevoelige bestanden (.env, sleutels, .npmrc, …). De opdracht vraagt om ten hoogste vijf korte zinnen zonder vakjargon.
+
+## Klik-en-beschrijf (functie 5)
+- Geen CLI-optie nodig. De wens gaat als gewone opdracht naar de chat; de schermafbeelding van het onderdeel gaat mee als bijlage (functie 4: pad in de opdracht, Claude leest hem met zijn leestool; geverifieerd bij functie 4).
+- Techniek: de preview laadt (alleen als de picker is aangezet) via een tussenserver in de Node-runtime (`mcp-server/src/picker.ts`, alleen 127.0.0.1, bestemming moet loopback zijn) die in HTML-pagina's één `<script>` toevoegt en WebSocket (hot reload) doorgeeft. Het script (`picker-script.ts`) doet niets totdat Studio het aanzet via `postMessage`; Studio controleert dat berichten uit de eigen iframe komen. Het project wordt nooit aangepast. Werkt voor statische previews en dev-servers.
+- Schermafbeeldingen staan in `<project>/.studio/picks/` (max. 30, via `.git/info/exclude` uit git gehouden en niet in de export). `assets::resolve_asset` staat dit pad toe voor bijlagen.

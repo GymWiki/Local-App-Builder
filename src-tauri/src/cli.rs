@@ -149,7 +149,7 @@ pub fn launch(path: &Path, args: Vec<String>) -> (String, Vec<String>) {
     }
 }
 
-pub const HANDOVER_PROMPT: &str = "Je neemt het werk over van een andere AI-assistent. Lees eerst PROJECT.md in deze map (of gebruik de MCP-tool read_project_notes), vat kort samen waar het project nu staat en ga daarna verder. Werk PROJECT.md bij met update_project_notes wanneer je beslissingen neemt of de status verandert.";
+pub const HANDOVER_PROMPT: &str = "Je neemt het werk over van een andere AI-assistent. Lees eerst PROJECT.md in deze map (of gebruik de MCP-tool read_project_notes) en .studio/kaart.md, kijk met git_list_checkpoints wat de laatste versies waren, vat kort samen waar het project nu staat en ga daarna verder. Werk PROJECT.md bij met update_project_notes wanneer je beslissingen neemt of de status verandert.";
 
 /// Argumenten voor een interactieve sessie. `resume` wint van `prompt`. Bron: docs/cli-notes.md.
 pub fn ai_args(provider: Provider, prompt: Option<&str>, resume: bool) -> Vec<String> {

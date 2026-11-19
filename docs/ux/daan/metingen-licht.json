@@ -1,0 +1,283 @@
+[
+ {
+  "stap": "1-start-eerste-scherm",
+  "file": "01-1-start-eerste-scherm-licht.png",
+  "notitie": "",
+  "vw": 1366,
+  "vh": 768,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [],
+  "klein": [],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "2-nieuw-project-dialoog",
+  "file": "02-2-nieuw-project-dialoog-licht.png",
+  "notitie": "",
+  "vw": 1366,
+  "vh": 768,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Nieuw project",
+   "Sluiten"
+  ],
+  "klein": [
+   "BUTTON (23x23)",
+   "INPUT (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": []
+ },
+ {
+  "stap": "2b-leeg-versturen",
+  "file": "03-2b-leeg-versturen-licht.png",
+  "notitie": "",
+  "vw": 1366,
+  "vh": 768,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Nieuw project",
+   "Sluiten"
+  ],
+  "klein": [
+   "BUTTON (23x23)",
+   "INPUT (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[dialog-content] 408x734"
+  ]
+ },
+ {
+  "stap": "2d-naam-en-map-ingevuld",
+  "file": "04-2d-naam-en-map-ingevuld-licht.png",
+  "notitie": "",
+  "vw": 1366,
+  "vh": 768,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Nieuw project",
+   "Sluiten"
+  ],
+  "klein": [
+   "BUTTON (23x23)",
+   "INPUT (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[dialog-content] 408x734"
+  ]
+ },
+ {
+  "stap": "2e-project-aangemaakt",
+  "file": "05-2e-project-aangemaakt-licht.png",
+  "notitie": "",
+  "vw": 1366,
+  "vh": 768,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 589x265"
+  ]
+ },
+ {
+  "stap": "3-voorbeelden",
+  "file": "06-3-voorbeelden-licht.png",
+  "notitie": "",
+  "vw": 1366,
+  "vh": 768,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 589x265"
+  ]
+ },
+ {
+  "stap": "3b-ai-denkt",
+  "file": "07-3b-ai-denkt-licht.png",
+  "notitie": "",
+  "vw": 1366,
+  "vh": 768,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 589x194"
+  ]
+ },
+ {
+  "stap": "3d-ai-klaar",
+  "file": "08-3d-ai-klaar-licht.png",
+  "notitie": "",
+  "vw": 1366,
+  "vh": 768,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "— Klaar",
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "section 589x626",
+   "div[scroll-area-viewport] 589x184"
+  ]
+ },
+ {
+  "stap": "4-onderdeel-kiezen",
+  "file": "09-4-onderdeel-kiezen-licht.png",
+  "notitie": "",
+  "vw": 1366,
+  "vh": 768,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "— Klaar",
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "section 589x626",
+   "div[scroll-area-viewport] 589x184"
+  ]
+ },
+ {
+  "stap": "4b-telefoon-weergave",
+  "file": "10-4b-telefoon-weergave-licht.png",
+  "notitie": "",
+  "vw": 1366,
+  "vh": 768,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "— Klaar",
+   "Wat wil je maken of veranderen?"
+  ],
+  "klein": [
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "section 589x626",
+   "div[scroll-area-viewport] 589x184"
+  ]
+ },
+ {
+  "stap": "4c-uiterlijk",
+  "file": "11-4c-uiterlijk-licht.png",
+  "notitie": "",
+  "vw": 1366,
+  "vh": 768,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [],
+  "klein": [
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 407x626",
+   "div[scroll-area-viewport] 329x768"
+  ]
+ },
+ {
+  "stap": "7-thema-wisselen",
+  "file": "12-7-thema-wisselen-licht.png",
+  "notitie": "",
+  "vw": 1366,
+  "vh": 768,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [
+   "Sluiten"
+  ],
+  "klein": [
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 407x626",
+   "div[scroll-area-viewport] 329x768",
+   "div[scroll-area-viewport] 407x673"
+  ]
+ },
+ {
+  "stap": "7b-wissel-van-ai",
+  "file": "13-7b-wissel-van-ai-licht.png",
+  "notitie": "",
+  "vw": 1366,
+  "vh": 768,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [],
+  "klein": [
+   "BUTTON (23x23)"
+  ],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 407x626",
+   "div[scroll-area-viewport] 329x768"
+  ]
+ },
+ {
+  "stap": "8-publiceren",
+  "file": "14-8-publiceren-licht.png",
+  "notitie": "",
+  "vw": 1366,
+  "vh": 768,
+  "paginaScroltHorizontaal": false,
+  "paginaScroltVerticaal": false,
+  "afgekapt": [],
+  "klein": [],
+  "buitenBeeld": [],
+  "engels": [],
+  "dubbeleScroll": [
+   "div[scroll-area-viewport] 742x626",
+   "div[scroll-area-viewport] 329x768"
+  ]
+ }
+]

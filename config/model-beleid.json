@@ -1,0 +1,22 @@
+{
+  "_uitleg": "Welk model en welke inspanning Studio per niveau vraagt, per AI. Niets hiervan staat in de code. Alleen invullen wat uit de officiële bron of de echte CLI is nagekeken.",
+  "claude": {
+    "geverifieerd": true,
+    "bron": "`claude --help` van Claude Code 2.1.327 (lokaal gelezen op 18 november 2026): --model met aliassen (o.a. 'fable', 'opus', 'sonnet') en --effort met low, medium, high, xhigh, max; docs: code.claude.com/docs/en/model-config",
+    "niveaus": {
+      "zuinig": { "model": "sonnet", "effort": "low" },
+      "gebalanceerd": { "model": "sonnet", "effort": "medium" },
+      "best": { "model": "opus", "effort": "high" }
+    }
+  },
+  "gemini": {
+    "geverifieerd": false,
+    "bron": "docs/cli/cli-reference.md van Gemini CLI noemt -m/--model met auto, pro, flash, flash-lite; een inspanning-instelling is niet gevonden. Gemini heeft in Studio nog geen chatweergave, dus dit wordt niet toegepast.",
+    "niveaus": {}
+  },
+  "codex": {
+    "geverifieerd": false,
+    "bron": "Niet nagekeken: developers.openai.com was niet bereikbaar. Niet toegepast.",
+    "niveaus": {}
+  }
+}

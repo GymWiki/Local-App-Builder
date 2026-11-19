@@ -1,223 +1,410 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type MutableRefObject } from "react";
 import { useTranslation } from "react-i18next";
-import McpProblem from "./McpProblem";
 import {
+  chatSend,
+  previewInstall,
+  previewRestart,
+  previewStart,
+  previewStop,
+  previewTrustScripts,
   runtime,
   trustStudioConfig,
   type ConfigInfo,
-  type DevStatus,
   type McpInfo,
+  type PreviewInfo,
   type Project,
-} from "../lib/api";
+} from "@/lib/api";
+import { ChevronDownIcon, MousePointerClickIcon, RotateCwIcon } from "lucide-react";
+import { parsePage, parsePick, type PageInfo, type PickedElement, type PreviewControl } from "@/components/app/workspace/pick";
+import { toast } from "sonner";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+
+/** Breedte van het voorbeeld per schermgrootte (alleen de breedte verandert; `null` = de hele breedte). */
+export const VIEWPORTS = { telefoon: 390, tablet: 768, computer: null } as const;
+export type ViewportKey = keyof typeof VIEWPORTS;
 
 interface Props {
   project: Project;
   mcp: McpInfo | null;
-  dev: DevStatus | null;
+  preview: PreviewInfo | null;
   visible: boolean;
+  /** Verhoogt als een dev-server zonder eigen hot reload de pagina moet herladen. */
+  reloadNonce?: number;
+  autoSwitch?: boolean;
+  onAutoSwitch?: (v: boolean) => void;
   onError: (msg: string) => void;
   onRetryMcp?: () => Promise<void> | void;
+  /** Als dit er is, meldt een klik in de preview het onderdeel hier (paneel Eigenschappen) in plaats van een eigen venster te openen. */
+  onSelect?: (el: PickedElement) => void;
+  onPage?: (info: PageInfo) => void;
+  /** Geeft het paneel Eigenschappen de knoppen om een onderdeel te kiezen of de keuze te verplaatsen. */
+  controlRef?: MutableRefObject<PreviewControl | null>;
+}
+
+/** Het adres van het voorbeeld met de gekozen pagina erachter; alleen op dezelfde server, nooit ergens anders. */
+export function frameSrc(base: string, pad: string): string {
+  if (pad === "/") return base;
+  try {
+    const u = new URL(pad, base);
+    return u.origin === new URL(base).origin ? u.toString() : base;
+  } catch {
+    return base;
+  }
 }
 
 const BADGE: Record<string, string> = {
-  running: "bg-emerald-900 text-emerald-200",
-  starting: "bg-sky-900 text-sky-200",
-  stopping: "bg-amber-900 text-amber-200",
-  error: "bg-red-900 text-red-200",
-  stopped: "bg-zinc-800 text-zinc-300",
+  running: "border-transparent bg-success/15 text-success",
+  starting: "border-transparent bg-accent text-accent-foreground",
+  stopping: "border-transparent bg-warning/20 text-warning",
+  error: "border-transparent bg-destructive/15 text-destructive",
+  idle: "border-transparent bg-muted text-muted-foreground",
 };
 
-export default function PreviewPanel({ project, mcp, dev, visible, onError, onRetryMcp }: Props) {
+export default function PreviewPanel({ project, mcp, preview, visible, reloadNonce = 0, autoSwitch = false, onAutoSwitch, onError, onRetryMcp, onSelect, onPage, controlRef }: Props) {
   const { t } = useTranslation();
-  const [info, setInfo] = useState<ConfigInfo | null>(null);
-  const [logs, setLogs] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
-  const [reloadKey, setReloadKey] = useState(0);
-  const [tick, setTick] = useState(0);
-  const [retrying, setRetrying] = useState(false);
-  const up = mcp?.state === "running" || mcp?.state === "connected";
-  const state = dev?.state ?? "stopped";
-  const active = state === "starting" || state === "running" || state === "stopping";
+  const [manualReload, setManualReload] = useState(0);
+  const [viewport, setViewport] = useState<ViewportKey>("computer");
+  // Klik-en-beschrijf: de preview laadt via een tussenserver die alleen in de preview een pickerscript toevoegt.
+  const frame = useRef<HTMLIFrameElement>(null);
+  const [picking, setPicking] = useState(false);
+  const [proxyUrl, setProxyUrl] = useState<string | null>(null);
+  const [pagePath, setPagePath] = useState("/");
+  const [pick, setPick] = useState<{ selector: string; tag: string; text: string; path: string } | null>(null);
+  const [wish, setWish] = useState("");
+  const [logs, setLogs] = useState<string[]>([]);
+  const [config, setConfig] = useState<ConfigInfo | null>(null);
+  const status = preview?.status ?? "idle";
+  const mode = preview?.mode ?? "empty";
+  const problem = preview?.problem ?? null;
+  const usesRuntime = mode === "node" || mode === "config";
+  const runtimeUp = mcp?.state === "running" || mcp?.state === "connected";
+  const id = project.id;
 
-  const fail = useCallback((e: unknown) => onError(t("fout.algemeen", { bericht: String(e) })), [onError, t]);
+  const run = async (fn: () => Promise<unknown>) => {
+    setBusy(true);
+    try {
+      await fn();
+    } catch (e) {
+      onError(t("fout.algemeen", { bericht: String(e) }));
+    } finally {
+      setBusy(false);
+    }
+  };
 
-  // Configuratie opnieuw lezen bij een andere projectstatus, na een actie of als de dev-status verandert.
+  // studio.json-goedkeuring: de commando's tonen die de runtime kent.
   useEffect(() => {
-    if (!up) return;
+    if (problem?.kind !== "untrusted_config" || !runtimeUp) return;
     let cancelled = false;
-    runtime<ConfigInfo>(project.id, "config.get")
-      .then((c) => !cancelled && setInfo(c))
-      .catch((e) => !cancelled && fail(e));
+    runtime<ConfigInfo>(id, "config.get")
+      .then((c) => !cancelled && setConfig(c))
+      .catch(() => undefined);
     return () => {
       cancelled = true;
     };
-  }, [project.id, up, tick, state, fail]);
+  }, [id, problem?.kind, runtimeUp]);
 
-  // Logs ophalen zolang de preview-tab zichtbaar is en er iets draait.
+  // Logs van het dev-proces (alleen dev-server-modus) zolang de tab zichtbaar is.
   useEffect(() => {
-    if (!up || !visible) return;
+    if (!usesRuntime || !runtimeUp || !visible) return;
     let cancelled = false;
     const load = () =>
-      runtime<string[]>(project.id, "dev.logs", { lines: 200 })
+      runtime<string[]>(id, "dev.logs", { lines: 200 })
         .then((l) => !cancelled && setLogs(l))
         .catch(() => undefined);
     void load();
-    const timer = active || state === "error" ? setInterval(load, 2000) : undefined;
+    const timer = status === "idle" ? undefined : setInterval(load, 2000);
     return () => {
       cancelled = true;
       if (timer) clearInterval(timer);
     };
-  }, [project.id, up, visible, active, state]);
+  }, [id, usesRuntime, runtimeUp, visible, status]);
 
-  async function act(cmd: "dev.start" | "dev.stop" | "dev.restart") {
-    setBusy(true);
-    try {
-      await runtime(project.id, cmd);
-    } catch (e) {
-      fail(e);
-    } finally {
-      setBusy(false);
+  const tellFrame = useCallback((on: boolean) => frame.current?.contentWindow?.postMessage({ type: "studio-picker", on }, "*"), []);
+
+  const post = useCallback((msg: object) => frame.current?.contentWindow?.postMessage(msg, "*"), []);
+
+  useEffect(() => {
+    const onMessage = (e: MessageEvent) => {
+      if (!frame.current || e.source !== frame.current.contentWindow) return;
+      const d = e.data as { type?: string } | null;
+      if (d?.type === "studio-picker-ready") {
+        tellFrame(picking);
+        if (onPage) post({ type: "studio-picker-page" });
+      } else if (d?.type === "studio-pick") {
+        const el = parsePick(d);
+        if (!el) return;
+        setPicking(false);
+        if (onSelect) onSelect(el);
+        else {
+          setWish("");
+          setPick({ selector: el.selector, tag: el.tag, text: el.text, path: el.path });
+        }
+      } else if (d?.type === "studio-page") {
+        const info = parsePage(d);
+        if (info && onPage) onPage(info);
+      } else if (d?.type === "studio-pick-cancel") setPicking(false);
+    };
+    window.addEventListener("message", onMessage);
+    return () => window.removeEventListener("message", onMessage);
+  }, [picking, tellFrame, onSelect, onPage, post]);
+
+  async function togglePick() {
+    if (picking) {
+      setPicking(false);
+      tellFrame(false);
+      return;
     }
+    await run(async () => {
+      if (!proxyUrl) setProxyUrl((await runtime<{ url: string }>(id, "picker.url")).url);
+      setPicking(true);
+      tellFrame(true);
+    });
   }
 
-  async function trustAndStart() {
-    setBusy(true);
-    try {
-      await trustStudioConfig(project.id);
-      setTick((n) => n + 1);
-      await runtime(project.id, "dev.start");
-    } catch (e) {
-      fail(e);
-    } finally {
-      setBusy(false);
-    }
+  // Het paneel Eigenschappen bedient de preview via deze knoppen.
+  const toggleRef = useRef(togglePick);
+  useEffect(() => {
+    toggleRef.current = togglePick;
+  });
+  useEffect(() => {
+    if (!controlRef) return;
+    controlRef.current = {
+      startPick: async () => {
+        if (!picking) await toggleRef.current();
+      },
+      select: (selector) => post({ type: "studio-picker-select", selector }),
+      clear: () => post({ type: "studio-picker-clear" }),
+      askPage: () => post({ type: "studio-picker-page" }),
+      navigate: (pad) => setPagePath(/^\/[^\s]*$/.test(pad) && !pad.startsWith("//") ? pad : "/"),
+    };
+    return () => {
+      controlRef.current = null;
+    };
+  }, [controlRef, picking, post]);
+
+  async function sendPick() {
+    if (!pick || !wish.trim()) return;
+    const p = pick;
+    setPick(null);
+    await run(async () => {
+      // Zonder schermafbeelding (bijvoorbeeld geen browser) sturen we de wens toch.
+      const path = await runtime<{ path: string }>(id, "picker.shot", { selector: p.selector, path: p.path }).then((r) => r.path).catch(() => null);
+      const text = p.text ? ` (met de tekst ‘${p.text}’)` : "";
+      const prompt = t("preview.kies.prompt", { tag: p.tag, selector: p.selector, pad: p.path, tekst: text, wens: wish.trim(), beeld: path ? t("preview.kies.beeld") : "" });
+      await (path ? chatSend(id, prompt, [path]) : chatSend(id, prompt));
+      toast.success(t("preview.kies.verstuurd"));
+    });
   }
 
-  async function init() {
-    try {
-      await runtime(project.id, "config.init");
-      setTick((n) => n + 1);
-    } catch (e) {
-      fail(e);
-    }
-  }
+  const active = status === "starting" || status === "running" || status === "stopping";
+  const canStart = !active && !problem?.kind.match(/^(empty|flutter|unsupported|config_invalid|node_|runtime_|deps_missing|untrusted)/) && (mode === "static" || usesRuntime);
+  const frameKey = `${manualReload}-${preview?.hmr ? 0 : reloadNonce}`;
 
-  if (!up) {
+  const body = () => {
+    if (!problem) return null;
+    const k = problem.kind;
+    const logOpenByDefault = k === "dev_crashed";
     return (
-      <div className="flex-1">
-        {mcp?.state === "unavailable" && (
-          <McpProblem
-            info={mcp}
-            busy={retrying}
-            onRetry={() => {
-              setRetrying(true);
-              void Promise.resolve(onRetryMcp?.()).finally(() => setRetrying(false));
-            }}
-          />
-        )}
-        <p className="p-6 text-sm text-zinc-400">{t("preview.geenRuntime")}</p>
-      </div>
+      <Alert role="alert" data-testid="preview-problem" className="rounded-none border-0 border-b border-border bg-card px-5 py-4 text-base">
+        <AlertTitle className="font-semibold text-warning">{t(`preview.probleem.${k}`, { defaultValue: t("preview.probleem.unsupported") })}</AlertTitle>
+        <AlertDescription className="space-y-3 text-base">
+          <div className="break-words text-muted-foreground">{problem.message}</div>
+          {t(`preview.uitleg.${k}`, { defaultValue: "" }) && <div className="text-muted-foreground">{t(`preview.uitleg.${k}`)}</div>}
+          {k === "untrusted_scripts" && (
+            <ul className="space-y-0.5 font-mono text-sm text-muted-foreground">
+              {problem.log.filter((l) => !l.endsWith("=")).map((l) => (
+                <li key={l}>{l}</li>
+              ))}
+            </ul>
+          )}
+          {k === "untrusted_config" && config?.config && (
+            <ul className="space-y-0.5 font-mono text-sm text-muted-foreground" data-testid="config-commands">
+              {(["dev", "build", "lint", "test"] as const).map((c) => (config.config?.[c] ? <li key={c}>{c}: {config.config[c]}</li> : null))}
+            </ul>
+          )}
+          {(k === "dev_crashed" || k === "node_missing" || k === "node_old" || k === "node_broken" || k === "runtime_unavailable") && problem.log.length > 0 && (
+            <Collapsible defaultOpen={logOpenByDefault}>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="sm" className="px-0">
+                  {t("preview.laatsteRegels")}
+                  <ChevronDownIcon aria-hidden="true" />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent forceMount>
+                <pre data-testid="problem-log" className="mt-1 max-h-48 overflow-auto rounded-lg bg-muted p-3 font-mono text-sm whitespace-pre-wrap text-muted-foreground">
+                  {problem.log.join("\n")}
+                </pre>
+              </CollapsibleContent>
+            </Collapsible>
+          )}
+          <div className="flex gap-2">
+            {k === "deps_missing" && (
+              <Button disabled={busy} onClick={() => void run(() => previewInstall(id))}>
+                {busy ? t("preview.installeren") : t("preview.installeer")}
+              </Button>
+            )}
+            {k === "untrusted_scripts" && (
+              <Button disabled={busy} onClick={() => void run(() => previewTrustScripts(id))} className="bg-warning text-warning-foreground hover:bg-warning/90">
+                {t("preview.vertrouwScripts")}
+              </Button>
+            )}
+            {k === "untrusted_config" && (
+              <Button
+                disabled={busy}
+                onClick={() => void run(async () => { await trustStudioConfig(id); await previewStart(id); })}
+                className="bg-warning text-warning-foreground hover:bg-warning/90"
+              >
+                {t("preview.vertrouwStart")}
+              </Button>
+            )}
+            {(k === "node_missing" || k === "node_old" || k === "node_broken" || k === "runtime_unavailable") && (
+              <Button disabled={busy} onClick={() => void run(async () => { await onRetryMcp?.(); })}>
+                {t("preview.opnieuwProberen")}
+              </Button>
+            )}
+            {k === "static_failed" && (
+              <Button disabled={busy} onClick={() => void run(() => previewStart(id))}>
+                {t("preview.opnieuwProberen")}
+              </Button>
+            )}
+          </div>
+        </AlertDescription>
+      </Alert>
     );
-  }
-
-  const cfg = info?.config;
-  const needsTrust = info?.exists && cfg && !info.trusted;
-  const url = dev?.url ?? cfg?.previewUrl ?? null;
+  };
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex flex-wrap items-center gap-2 border-b border-zinc-800 px-3 py-2 text-sm">
-        <span data-testid="dev-badge" className={`rounded px-2 py-1 text-xs ${BADGE[state]}`}>
-          {t(`preview.status.${state}`)}
-        </span>
-        {url && <span className="truncate text-xs text-zinc-500">{url}</span>}
-        <div className="ml-auto flex gap-2">
-          {!active && cfg?.dev && !needsTrust && (
-            <button disabled={busy} onClick={() => void act("dev.start")} className="rounded bg-indigo-600 px-3 py-1 hover:bg-indigo-500 disabled:opacity-50">
+      <div className="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2 text-sm">
+        <Badge data-testid="dev-badge" className={BADGE[status]}>
+          {t(`preview.status.${status}`)}
+        </Badge>
+        {t(`preview.modus.${mode}`, { defaultValue: "" }) && <span className="text-sm text-muted-foreground">{t(`preview.modus.${mode}`)}</span>}
+        {preview?.url && <span className="truncate text-sm text-muted-foreground">{preview.url}</span>}
+        <div className="ml-auto flex flex-wrap gap-2">
+          {canStart && (
+            <Button size="sm" disabled={busy} onClick={() => void run(() => previewStart(id))}>
               {t("preview.start")}
-            </button>
+            </Button>
           )}
           {active && (
-            <button disabled={busy} onClick={() => void act("dev.stop")} className="rounded border border-zinc-700 px-3 py-1 hover:bg-zinc-800 disabled:opacity-50">
+            <Button size="sm" variant="outline" disabled={busy} onClick={() => void run(() => previewStop(id))}>
               {t("preview.stop")}
-            </button>
+            </Button>
           )}
-          {(active || state === "error") && (
-            <button disabled={busy} onClick={() => void act("dev.restart")} className="rounded border border-zinc-700 px-3 py-1 hover:bg-zinc-800 disabled:opacity-50">
+          {(active || status === "error") && (
+            <Button size="sm" variant="outline" disabled={busy} onClick={() => void run(() => previewRestart(id))}>
               {t("preview.herstart")}
-            </button>
+            </Button>
           )}
-          {state === "running" && (
-            <button onClick={() => setReloadKey((n) => n + 1)} className="rounded border border-zinc-700 px-3 py-1 hover:bg-zinc-800">
+          {status === "running" && runtimeUp && (
+            <Button size="sm" variant={picking ? "default" : "outline"} aria-pressed={picking} title={t("preview.kies.uitleg")} disabled={busy} onClick={() => void togglePick()}>
+              <MousePointerClickIcon aria-hidden="true" />
+              {t("preview.kies.knop")}
+            </Button>
+          )}
+          {status === "running" && (
+            <ToggleGroup type="single" variant="outline" size="sm" role="radiogroup" aria-label={t("preview.weergave.titel")} value={viewport} onValueChange={(v) => v && setViewport(v as ViewportKey)} spacing={0}>
+              {(Object.keys(VIEWPORTS) as ViewportKey[]).map((k) => (
+                <ToggleGroupItem key={k} value={k} title={t("preview.weergave.uitleg")} className="px-3 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground">
+                  {t(`preview.weergave.${k}`)}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          )}
+          {status === "running" && (
+            <Button size="sm" variant="outline" onClick={() => setManualReload((n) => n + 1)}>
+              <RotateCwIcon aria-hidden="true" />
               {t("preview.ververs")}
-            </button>
+            </Button>
           )}
         </div>
       </div>
 
-      {dev?.error && (
-        <div role="alert" className="bg-red-950 px-4 py-2 text-sm text-red-200">
-          {dev.error}
-        </div>
-      )}
+      {usesRuntime && !runtimeUp && !problem && <div className="border-b border-border px-5 py-2 text-sm text-muted-foreground">{t("preview.geenRuntime")}</div>}
+      {body()}
 
-      {info && !info.exists && (
-        <div className="space-y-3 p-6 text-sm" data-testid="no-config">
-          <p>{t("preview.geenConfig")}</p>
-          <pre className="rounded bg-zinc-900 p-3 text-xs">{`{\n  "dev": "npm run dev",\n  "build": "npm run build",\n  "lint": "npm run lint",\n  "test": "npm test",\n  "previewUrl": "http://localhost:5173"\n}`}</pre>
-          <button onClick={() => void init()} className="rounded bg-indigo-600 px-3 py-2 font-medium hover:bg-indigo-500">
-            {t("preview.maakConfig")}
-          </button>
-        </div>
-      )}
-
-      {info?.error && (
-        <div role="alert" className="p-6 text-sm text-red-300">
-          {t("preview.configFout", { fout: info.error })}
-        </div>
-      )}
-
-      {needsTrust && (
-        <div className="m-4 space-y-3 rounded border border-amber-700 bg-amber-950/40 p-4 text-sm" data-testid="trust-box">
-          <p className="font-medium">{t("preview.vertrouwTitel")}</p>
-          <p className="text-zinc-300">{t("preview.vertrouwUitleg")}</p>
-          <ul className="space-y-1 font-mono text-xs">
-            {(["dev", "build", "lint", "test"] as const).map((k) =>
-              cfg?.[k] ? (
-                <li key={k}>
-                  <span className="text-zinc-500">{k}:</span> {cfg[k]}
-                </li>
-              ) : null,
-            )}
-          </ul>
-          <button disabled={busy} onClick={() => void trustAndStart()} className="rounded bg-amber-600 px-3 py-2 font-medium hover:bg-amber-500 disabled:opacity-50">
-            {cfg?.dev ? t("preview.vertrouwStart") : t("preview.vertrouw")}
-          </button>
-        </div>
-      )}
-
-      <div className="relative min-h-0 flex-1 bg-zinc-950">
-        {state === "running" && url ? (
+      <div className={`relative min-h-0 flex-1 ${viewport === "computer" ? "bg-background" : "flex justify-center overflow-auto bg-muted"}`}>
+        {status === "running" && preview?.url ? (
           <iframe
-            key={reloadKey}
+            ref={frame}
+            key={frameKey}
             title={t("tabs.preview")}
-            src={url}
+            src={frameSrc(proxyUrl ?? preview.url, pagePath)}
             sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-modals"
-            className="h-full w-full bg-white"
+            data-viewport={viewport}
+            style={VIEWPORTS[viewport] ? { width: VIEWPORTS[viewport] } : undefined}
+            className={`h-full bg-background ${viewport === "computer" ? "w-full" : "max-w-full shrink-0 border-x border-border"}`}
           />
-        ) : (
-          <div className="flex h-full items-center justify-center text-sm text-zinc-500">
-            {state === "starting" ? t("preview.wachten") : t("preview.nietActief")}
+        ) : status === "starting" ? (
+          <div role="status" className="flex h-full flex-col items-center justify-center gap-4 p-8 text-base text-muted-foreground">
+            <Skeleton className="h-40 w-full max-w-md" />
+            <span>{t("preview.wachten")}</span>
           </div>
+        ) : (
+          <div className="flex h-full items-center justify-center text-base text-muted-foreground">{t("preview.nietActief")}</div>
         )}
       </div>
 
-      <details className="max-h-56 overflow-auto border-t border-zinc-800 text-xs">
-        <summary className="cursor-pointer px-3 py-2 text-zinc-400">{t("preview.logs")}</summary>
-        <pre data-testid="dev-logs" className="whitespace-pre-wrap px-3 pb-3 font-mono text-zinc-300">
-          {logs.length ? logs.join("\n") : t("preview.geenLogs")}
-        </pre>
-      </details>
+      {picking && (
+        <p role="status" className="border-t border-border bg-accent px-3 py-2 text-sm text-accent-foreground">
+          {t("preview.kies.bezig")}
+        </p>
+      )}
+      <Dialog open={pick !== null} onOpenChange={(o) => !o && setPick(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("preview.kies.titel")}</DialogTitle>
+            <DialogDescription>{pick ? t("preview.kies.gekozen", { tag: pick.tag, tekst: pick.text ? ` — ‘${pick.text}’` : "" }) : ""}</DialogDescription>
+          </DialogHeader>
+          <label htmlFor="pick-wens" className="text-base font-medium">
+            {t("preview.kies.label")}
+          </label>
+          <Input id="pick-wens" autoFocus value={wish} placeholder={t("preview.kies.plek")} onChange={(e) => setWish(e.target.value)} onKeyDown={(e) => e.key === "Enter" && void sendPick()} />
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setPick(null)}>
+              {t("preview.kies.annuleer")}
+            </Button>
+            <Button disabled={!wish.trim()} onClick={() => void sendPick()}>
+              {t("preview.kies.versturen")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {usesRuntime && (
+        <Collapsible className="max-h-56 overflow-auto border-t border-border text-sm">
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" size="sm" className="m-1">
+              {t("preview.logs")}
+              <ChevronDownIcon aria-hidden="true" />
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent forceMount>
+            <pre data-testid="dev-logs" className="px-3 pb-3 font-mono whitespace-pre-wrap text-muted-foreground">
+              {logs.length ? logs.join("\n") : t("preview.geenLogs")}
+            </pre>
+          </CollapsibleContent>
+        </Collapsible>
+      )}
+      {onAutoSwitch && (
+        <div className="flex items-center gap-3 border-t border-border px-3 py-2 text-sm text-muted-foreground">
+          <Checkbox id="auto-wissel" checked={autoSwitch} onCheckedChange={(c) => onAutoSwitch(c === true)} />
+          <Label htmlFor="auto-wissel" className="min-h-9 flex-1 text-sm font-normal text-muted-foreground">
+            {t("preview.autoWissel")}
+          </Label>
+        </div>
+      )}
     </div>
   );
 }

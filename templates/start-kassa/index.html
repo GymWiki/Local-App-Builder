@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mijn kassa</title>
+  <link rel="icon" href="data:," />
+  <link rel="stylesheet" href="stijl.css" />
+  <style>
+    main { max-width: 30rem; }
+    .knoppen { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+    .knoppen button { min-height: 4.5rem; font-size: 1.1rem; display: grid; gap: 0.1rem; }
+    .totaal { font-size: 2rem; font-weight: 800; text-align: center; margin: 1rem 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Mijn kassa</h1>
+    <p>Tik op een product om het aan te slaan. Gemaakt voor een telefoon.</p>
+    <div class="knoppen" id="knoppen"></div>
+    <div class="totaal" aria-live="polite" id="totaal">€ 0,00</div>
+    <ul id="bon" class="lijst"></ul>
+    <div class="rij" style="gap:.75rem">
+      <button type="button" id="wis" style="flex:1">Wissen</button>
+      <button type="button" id="betaal" class="hoofd" style="flex:2">Afrekenen</button>
+    </div>
+    <h2>Vandaag verkocht</h2>
+    <p id="vandaag" aria-live="polite"></p>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
