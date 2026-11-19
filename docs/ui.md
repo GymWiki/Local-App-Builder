@@ -235,3 +235,6 @@ Gelezen: `SectionRail.tsx`, `sections.ts`, `ProjectWorkspace.tsx`, `modelActions
 - Controle: `npm run ux:a11y` (axe in licht en donker, drie schermformaten, klikdoelen, horizontaal scrollen).
 - `src/components/ui/checkbox.tsx`: het vakje is `size-6` (24px, WCAG 2.2 minimum klikdoel).
 - `src/components/ui/switch.tsx` (24px hoog) en `radio-group.tsx` (24px): minimale klikdoelen volgens WCAG 2.2.
+
+### Basisgrootte
+- De basisgrootte van de interface is **16px** (`html` in `src/index.css`), keuze van de gebruiker via Instellingen → Mijn programma → Tekstgrootte (90–130%). Vroeger stond hij op 17px en sprong hij vanaf 2200px schermbreedte naar 21px; dat maakte alles op grote of sterk geschaalde schermen veel te groot en is teruggedraaid. Voeg geen automatische vergroting per schermbreedte meer toe.
