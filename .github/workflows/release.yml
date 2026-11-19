@@ -99,7 +99,24 @@ jobs:
           tagName: v__VERSION__
           releaseName: "Studio v__VERSION__"
           releaseBody: "Download de installer voor jouw systeem hieronder bij Assets. Studio controleert bij het openen zelf of er een nieuwere versie is."
-          releaseDraft: false
+          # Concept: pas als ALLE doelen geslaagd zijn publiceert de laatste taak de release (een mislukt doel blokkeert de andere bouwen niet,
+          # maar er komt dan geen onvolledige release online).
+          releaseDraft: true
           prerelease: false
           includeUpdaterJson: true
           args: ${{ matrix.args }} --config src-tauri/tauri.release.conf.json
+
+  publiceren:
+    name: Release publiceren (alleen als alles gelukt is)
+    needs: bouwen
+    # Standaard draait deze taak alleen als ALLE bouwen geslaagd zijn.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Concept-release publiceren
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          versie=$(node -p "require('./src-tauri/tauri.conf.json').version")
+          gh release edit "v${versie}" --draft=false --latest --repo "${GITHUB_REPOSITORY}"
+          echo "Release v${versie} is gepubliceerd."

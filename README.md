@@ -22,7 +22,7 @@ npm run lint && npm test && npm run build
 cd src-tauri && cargo clippy --all-targets -- -D warnings && cargo test
 ```
 
-De database (`studio.db`) staat in de app-datamap van het besturingssysteem (`nl.studio.app`).
+De database (`studio.db`) staat in de app-datamap van het besturingssysteem (`nl.studio.desktop`).
 
 ## Hoe fase 2 werkt
 - **Terminal**: PTY in Rust (`portable-pty`), xterm.js in de UI, meerdere tabs, laatste 512 KiB uitvoer per sessie.
